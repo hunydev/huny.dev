@@ -1,1 +1,1 @@
-# huny.dev
+# huny.dev [![Netlify Status](https://api.netlify.com/api/v1/badges/65065b28-26df-44ff-84bd-398dcbed5c93/deploy-status)](https://app.netlify.com/sites/huny/deploys)
