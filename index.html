@@ -11,9 +11,9 @@
 
   <!-- Site Properties -->
   <title>HunyDev</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.css">
   <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.js"></script>
-
   <style type="text/css">
     body {
       background-color: #FFFFFF;
@@ -42,36 +42,55 @@
 <body>
   <div class="ui fixed inverted menu">
     <div class="ui container">
-      <a href="#" class="header item">
+      <a href="/" class="header item">
         <img class="logo" src="assets/images/logo.png">
         HunyDev
       </a>
-      <a href="https://blog.huny.dev" class="item">Blog</a>
-      <div class="ui simple dropdown item">
-        Dropdown <i class="dropdown icon"></i>
+      <div class="ui simple dropdown item" onclick='location.href="/tools"'>
+        Tools <i class="dropdown icon"></i>
         <div class="menu">
-          <a class="item" href="#">Link Item</a>
-          <a class="item" href="#">Link Item</a>
+          <a class="item" href="/tools/a">Link Item</a>
+          <a class="item" href="/tools/b">Link Item</a>
           <div class="divider"></div>
           <div class="header">Header Item</div>
           <div class="item">
             <i class="dropdown icon"></i>
             Sub Menu
             <div class="menu">
-              <a class="item" href="#">Link Item</a>
-              <a class="item" href="#">Link Item</a>
+              <a class="item" href="/tools/c/a">Link Item</a>
+              <a class="item" href="/tools/c/b">Link Item</a>
             </div>
           </div>
-          <a class="item" href="#">Link Item</a>
+          <a class="item" href="/tools/d">Link Item</a>
         </div>
       </div>
+      <a href="https://huny.dev/forum" class="item">Forum</a>
+      <a href="https://blog.huny.dev" class="item">Blog<i style="margin-left: 2px;" class="floating small external alternate icon"></i></a>
     </div>
   </div>
 
   <div class="ui main text container">
     <h1 class="ui header">Huny's Development</h1>
-    <p>This is a basic fixed menu template using fixed size containers.</p>
-    <p>A text container is used for the main container, which is useful for single column layouts</p>
+    <div class="ui unstackable items">
+      <div class="item">
+        <div class="image">
+          <img src="/assets/images/avatar.png">
+        </div>
+        <div class="content">
+          <a class="header">Hun Jang</a>
+          <div class="meta">
+            <span>Description</span>
+          </div>
+          <div class="description">
+            <p></p>
+          </div>
+          <div class="extra">
+            AI 음성합성 개발자
+          </div>
+        </div>
+      </div>
+    </div>
+    <p></p>
     <img class="wireframe" src="assets/images/wireframe/media-paragraph.png">
     <img class="wireframe" src="assets/images/wireframe/paragraph.png">
     <img class="wireframe" src="assets/images/wireframe/paragraph.png">
