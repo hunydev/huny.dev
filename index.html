@@ -198,7 +198,7 @@
               let html = "";
               value.rich_text.forEach((text) => {
                 if(text.type == "text"){
-                  if(text.text.link.url){
+                  if(text.text.link && text.text.link.url){
                     html += (`<a href="${text.text.link.url}>${text.text.content}</a>`)
                   }else{
                     html += (text.text.content);
