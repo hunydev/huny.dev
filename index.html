@@ -97,6 +97,11 @@
     <div class="ui items users">
       
     </div>
+    <h3 class="ui header">Feed</h3>
+    <p></p>
+    <div class="ui feed comments">
+      
+    </div>
   </div>
 
   <div class="ui inverted vertical footer segment">
@@ -144,29 +149,90 @@
 
 
   <script defer>
-    $(document).ready(function(){
+    function users(next){
       fetch("/.netlify/functions/users")
-      .then(response => {
-        // 응답을 JSON으로 파싱
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        // 파싱된 데이터 처리
-        console.log(data);
-        if(data.object == "list" && data.results && data.results.length > 0){
-          data.results.forEach((value, index, array) =>{
-            let $user = $(`<div class="item"><a href="${value.avatar_url}" class="ui tiny image"><img src="${value.avatar_url}"></a><div class="content"><span class="header">${value.name}</span><div class="description"><p>${value.type}</p></div></div></div>`);
-            $(".ui.items.users").append($user);
-          })
-        }
-      })
-      .catch(error => {
-        // 에러 처리
-        console.error('There was a problem with the fetch operation:', error);
-      });
+        .then(response => {
+          // 응답을 JSON으로 파싱
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // 파싱된 데이터 처리
+          console.log(data);
+          if(data.object == "list" && data.results && data.results.length > 0){
+            data.results.forEach((value, index, array) =>{
+              let $user = $(`<div class="item"><a href="${value.avatar_url}" class="ui tiny image"><img src="${value.avatar_url}"></a><div class="content"><span class="header">${value.name}</span><div class="description"><p>${value.type}</p></div></div></div>`);
+              $(".ui.items.users").append($user);
+            });
+            next(data.results);
+          }
+        })
+        .catch(error => {
+          // 에러 처리
+          console.error('There was a problem with the fetch operation:', error);
+        });
+    }
+
+    function comments(users){
+      fetch("/.netlify/functions/comments")
+        .then(response => {
+          // 응답을 JSON으로 파싱
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // 파싱된 데이터 처리
+          console.log(data);
+          if(data.object == "list" && data.results && data.results.length > 0){
+            data.results.forEach((value, index, array) =>{
+              let user = null;
+              users.forEach((u) => {
+                if(value.created_by.id == u.id){
+                  user = u
+                }
+              });
+              let html = "";
+              value.rich_text.forEach((text) => {
+                if(text.type == "text"){
+                  if(text.text.link.url){
+                    html += (`<a href="${text.text.link.url}>${text.text.content}</a>`)
+                  }else{
+                    html += (text.text.content);
+                  }
+                }
+              });
+              
+              if(user){
+                let $comments = $(`
+                <div class="event">
+                  <div class="label">
+                    <img src="${user.avatar_url}">
+                  </div>
+                  <div class="content">
+                    <div class="date">${value.last_edited_time}</div>
+                    <div class="summary">${user.name} created a comment</div>
+                    <div class="extra text">
+                      <p>${html}</p>
+                    </div>
+                  </div>
+                </div>`);
+                $(".ui.feed.comments").append($comments);
+              }
+            });
+          }
+        })
+        .catch(error => {
+          // 에러 처리
+          console.error('There was a problem with the fetch operation:', error);
+        });
+    }
+
+    $(document).ready(function(){
+      users(comments);
     });
   </script>
 </body>
