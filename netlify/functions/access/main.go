@@ -1,8 +1,6 @@
 package main
 
 import (
-	"embed"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -15,19 +13,19 @@ import (
 )
 
 //go:embed db/IP2LOCATION-LITE-DB1.BIN
-var ip2locationdb embed.FS
+var ip2locationdb []byte
 
 func getCountry(ip string) (string, error) {
-	f, err := ip2locationdb.Open("db/IP2LOCATION-LITE-DB1.BIN")
+	os.WriteFile("db.bin", ip2locationdb, 0755)
+
+	// f, err := ip2locationdb.Open("db/IP2LOCATION-LITE-DB1.BIN")
+	f, err := os.Open("db.bin")
 	if err != nil {
 		return "", err
 	}
 	defer f.Close()
-	ra, ok := f.(ip2location.DBReader)
-	if !ok {
-		return "", errors.New("invalid reader")
-	}
-	db, err := ip2location.OpenDBWithReader(ra)
+	// db, err := ip2location.OpenDBWithReader(f)
+	db, err := ip2location.OpenDB("db.bin")
 	if err != nil {
 		return "", err
 	}
@@ -40,36 +38,6 @@ func getCountry(ip string) (string, error) {
 }
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-	if request.QueryStringParameters["flag"] != "" {
-		f, err := ip2locationdb.Open("db/IP2LOCATION-LITE-DB1.BIN")
-		if err != nil {
-			return &events.APIGatewayProxyResponse{
-				StatusCode: http.StatusInternalServerError,
-				Body:       fmt.Sprintf(`{"message": "%s"}`, err.Error()),
-			}, nil
-		}
-		defer f.Close()
-
-		// fi, err := f.Stat()
-		// if err != nil {
-		// 	return &events.APIGatewayProxyResponse{
-		// 		StatusCode: http.StatusInternalServerError,
-		// 		Body:       fmt.Sprintf(`{"message": "%s"}`, err.Error()),
-		// 	}, nil
-		// }
-
-		// ra, ok := f.(ip2location.DBReader)
-		// if !ok {
-		// 	return &events.APIGatewayProxyResponse{
-		// 		StatusCode: http.StatusInternalServerError,
-		// 		Body:       fmt.Sprint(ra),
-		// 	}, nil
-		// }
-		return &events.APIGatewayProxyResponse{
-			StatusCode: http.StatusInternalServerError,
-			Body:       fmt.Sprintln(fmt.Sprintln(f.(io.ReadCloser)), fmt.Sprintln(f.(io.ReaderAt))),
-		}, nil
-	}
 
 	country, err := getCountry(request.RequestContext.Identity.SourceIP)
 	if err != nil {
