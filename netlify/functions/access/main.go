@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	_ "embed"
 	"fmt"
 	"io"
@@ -16,17 +17,20 @@ import (
 //go:embed db/IP2LOCATION-LITE-DB1.BIN
 var ip2locationdb []byte
 
-func getCountry(ip string) (string, error) {
-	os.WriteFile("db.bin", ip2locationdb, 0755)
+type DBReader struct {
+	*bytes.Reader
+}
 
-	// f, err := ip2locationdb.Open("db/IP2LOCATION-LITE-DB1.BIN")
-	f, err := os.Open("db.bin")
-	if err != nil {
-		return "", err
+func (r *DBReader) Close() error {
+	return nil
+}
+
+func getCountry(ip string) (string, error) {
+	r := &DBReader{
+		bytes.NewReader(ip2locationdb),
 	}
-	defer f.Close()
-	// db, err := ip2location.OpenDBWithReader(f)
-	db, err := ip2location.OpenDB("db.bin")
+
+	db, err := ip2location.OpenDBWithReader(r)
 	if err != nil {
 		return "", err
 	}
