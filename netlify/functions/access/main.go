@@ -27,6 +27,7 @@ func getCountry(ip string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer f.Close()
 	ra, ok := f.(RandomAccess)
 	if !ok {
 		return "", errors.New("invalid reader")
