@@ -14,7 +14,7 @@ import (
 	"github.com/ip2location/ip2location-go/v9"
 )
 
-//go:embed db/*
+//go:embed db/IP2LOCATION-LITE-DB1.BIN
 var ip2locationdb embed.FS
 
 func getCountry(ip string) (string, error) {
