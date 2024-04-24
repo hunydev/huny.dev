@@ -45,6 +45,28 @@ func getCountry(ip string) (string, error) {
 }
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
+	if request.QueryStringParameters["flag"] != "" {
+		f, err := ip2locationdb.Open("db/IP2LOCATION-LITE-DB1.BIN")
+		if err != nil {
+			return &events.APIGatewayProxyResponse{
+				StatusCode: http.StatusInternalServerError,
+				Body:       fmt.Sprintf(`{"message": "%s"}`, err.Error()),
+			}, nil
+		}
+		defer f.Close()
+
+		fi, err := f.Stat()
+		if err != nil {
+			return &events.APIGatewayProxyResponse{
+				StatusCode: http.StatusInternalServerError,
+				Body:       fmt.Sprintf(`{"message": "%s"}`, err.Error()),
+			}, nil
+		}
+		return &events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       fmt.Sprint(fi.Size()),
+		}, nil
+	}
 
 	country, err := getCountry(request.RequestContext.Identity.SourceIP)
 	if err != nil {
