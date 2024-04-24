@@ -62,6 +62,14 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 				Body:       fmt.Sprintf(`{"message": "%s"}`, err.Error()),
 			}, nil
 		}
+
+		ra, ok := f.(RandomAccess)
+		if !ok {
+			return &events.APIGatewayProxyResponse{
+				StatusCode: http.StatusInternalServerError,
+				Body:       fmt.Sprint(ra),
+			}, nil
+		}
 		return &events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       fmt.Sprint(fi.Size()),
