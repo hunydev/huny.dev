@@ -128,7 +128,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	return &events.APIGatewayProxyResponse{
 		StatusCode: 200,
 		// Body:       string(buf),
-		Body: request.RequestContext.Identity.SourceIP,
+		Body: fmt.Sprint(request.Headers),
 		Headers: map[string]string{
 			"X-length": fmt.Sprint(len(buf)),
 		},
