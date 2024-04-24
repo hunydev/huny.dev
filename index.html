@@ -164,12 +164,14 @@
           if(data.object == "list" && data.results && data.results.length > 0){
             data.results.forEach((value, index, array) =>{
               let $user = $(`
-              <div class="content">
-                <div class="center aligned header">${value.name}</div>
-              </div>
-              <div class="extra content">
-                <div class="center aligned author">
-                  <img class="ui avatar image" src="${value.avatar_url}">${value.type}
+              <div class="ui card">
+                <div class="content">
+                  <div class="center aligned header">${value.name}</div>
+                </div>
+                <div class="extra content">
+                  <div class="center aligned author">
+                    <img class="ui avatar image" src="${value.avatar_url}">${value.type}
+                  </div>
                 </div>
               </div>
               `)
