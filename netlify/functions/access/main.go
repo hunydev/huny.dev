@@ -14,11 +14,6 @@ import (
 	"github.com/ip2location/ip2location-go/v9"
 )
 
-type RandomAccess interface {
-	io.ReadCloser
-	io.ReaderAt
-}
-
 //go:embed db/*
 var ip2locationdb embed.FS
 
@@ -28,7 +23,7 @@ func getCountry(ip string) (string, error) {
 		return "", err
 	}
 	defer f.Close()
-	ra, ok := f.(RandomAccess)
+	ra, ok := f.(ip2location.DBReader)
 	if !ok {
 		return "", errors.New("invalid reader")
 	}
@@ -63,7 +58,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 			}, nil
 		}
 
-		ra, ok := f.(RandomAccess)
+		ra, ok := f.(ip2location.DBReader)
 		if !ok {
 			return &events.APIGatewayProxyResponse{
 				StatusCode: http.StatusInternalServerError,
