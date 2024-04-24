@@ -67,7 +67,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 		// }
 		return &events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Body:       fmt.Sprintln(fi.Size(), fi.IsDir()),
+			Body:       fmt.Sprintln(fmt.Sprintln(f.(io.ReadCloser)), fmt.Sprintln(f.(io.ReaderAt))),
 		}, nil
 	}
 
