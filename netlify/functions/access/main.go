@@ -50,13 +50,13 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 		}
 		defer f.Close()
 
-		fi, err := f.Stat()
-		if err != nil {
-			return &events.APIGatewayProxyResponse{
-				StatusCode: http.StatusInternalServerError,
-				Body:       fmt.Sprintf(`{"message": "%s"}`, err.Error()),
-			}, nil
-		}
+		// fi, err := f.Stat()
+		// if err != nil {
+		// 	return &events.APIGatewayProxyResponse{
+		// 		StatusCode: http.StatusInternalServerError,
+		// 		Body:       fmt.Sprintf(`{"message": "%s"}`, err.Error()),
+		// 	}, nil
+		// }
 
 		// ra, ok := f.(ip2location.DBReader)
 		// if !ok {
