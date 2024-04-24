@@ -43,15 +43,19 @@ func getCountry(ip string) (string, error) {
 }
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-
-	country, err := getCountry(request.RequestContext.Identity.SourceIP)
-	if err != nil {
-		return &events.APIGatewayProxyResponse{
-			StatusCode: http.StatusInternalServerError,
-			Body:       fmt.Sprintf(`{"message": "%s"}`, err.Error()),
-		}, nil
-	}
-	country = strings.ToUpper(country)
+	//cf-connecting-ip:223.39.181.245 cf-ipcountry:KR
+	ip := request.Headers["cf-connecting-ip"]
+	country := request.Headers["cf-ipcountry"]
+	userAgent := request.Headers["user-agent"]
+	referrer := request.Headers["referrer"]
+	// country, err := getCountry(request.RequestContext.Identity.SourceIP)
+	// if err != nil {
+	// 	return &events.APIGatewayProxyResponse{
+	// 		StatusCode: http.StatusInternalServerError,
+	// 		Body:       fmt.Sprintf(`{"message": "%s"}`, err.Error()),
+	// 	}, nil
+	// }
+	// country = strings.ToUpper(country)
 
 	notionAPIEndpoint := "https://api.notion.com/v1/pages/"
 	notionVersion := "2022-06-28"
@@ -103,7 +107,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 				"url": "%s"
 			}
 		}
-	}`, FLAGS[country], request.RequestContext.Identity.SourceIP, request.Path, request.RequestContext.Identity.UserAgent, request.RequestContext.Identity.UserAgent, request.Headers["referrer"])
+	}`, FLAGS[country], ip, request.Path, userAgent, userAgent, referrer)
 
 	req, err := http.NewRequest("POST", notionAPIEndpoint, strings.NewReader(body))
 	if err != nil {
@@ -127,8 +131,8 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 
 	return &events.APIGatewayProxyResponse{
 		StatusCode: 200,
-		// Body:       string(buf),
-		Body: fmt.Sprint(request.Headers),
+		Body:       string(buf),
+		// Body: fmt.Sprint(request.Headers),
 		Headers: map[string]string{
 			"X-length": fmt.Sprint(len(buf)),
 		},
