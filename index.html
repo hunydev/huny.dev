@@ -93,8 +93,8 @@
     </div>
     <p></p>
     <h3 class="ui header">Users</h3>
-    <p>huny.dev 사용자 목록</p>
-    <div class="ui items users">
+    <p></p>
+    <div class="ui four cards users">
       
     </div>
     <h3 class="ui header">Feed</h3>
@@ -163,8 +163,17 @@
           console.log(data);
           if(data.object == "list" && data.results && data.results.length > 0){
             data.results.forEach((value, index, array) =>{
-              let $user = $(`<div class="item"><a href="${value.avatar_url}" class="ui tiny image"><img src="${value.avatar_url}"></a><div class="content"><span class="header">${value.name}</span><div class="description"><p>${value.type}</p></div></div></div>`);
-              $(".ui.items.users").append($user);
+              let $user = $(`
+              <div class="content">
+                <div class="center aligned header">${value.name}</div>
+              </div>
+              <div class="extra content">
+                <div class="center aligned author">
+                  <img class="ui avatar image" src="${value.avatar_url}">${value.type}
+                </div>
+              </div>
+              `)
+              $(".ui.cards.users").append($user);
             });
             next(data.results);
           }
