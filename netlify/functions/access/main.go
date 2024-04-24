@@ -58,16 +58,16 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 			}, nil
 		}
 
-		ra, ok := f.(ip2location.DBReader)
-		if !ok {
-			return &events.APIGatewayProxyResponse{
-				StatusCode: http.StatusInternalServerError,
-				Body:       fmt.Sprint(ra),
-			}, nil
-		}
+		// ra, ok := f.(ip2location.DBReader)
+		// if !ok {
+		// 	return &events.APIGatewayProxyResponse{
+		// 		StatusCode: http.StatusInternalServerError,
+		// 		Body:       fmt.Sprint(ra),
+		// 	}, nil
+		// }
 		return &events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
-			Body:       fmt.Sprint(fi.Size()),
+			Body:       fmt.Sprintln(fi.Size(), fi.IsDir()),
 		}, nil
 	}
 
