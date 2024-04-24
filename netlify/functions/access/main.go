@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -48,6 +47,9 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	country := request.Headers["cf-ipcountry"]
 	userAgent := request.Headers["user-agent"]
 	referrer := request.Headers["referrer"]
+	if referrer == "" {
+		referrer = "Direct"
+	}
 	// country, err := getCountry(request.RequestContext.Identity.SourceIP)
 	// if err != nil {
 	// 	return &events.APIGatewayProxyResponse{
@@ -109,7 +111,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 		}
 	}`, FLAGS[country], ip, request.Path, userAgent, userAgent, referrer)
 
-	req, err := http.NewRequest("POST", notionAPIEndpoint, strings.NewReader(body))
+	req, err := http.NewRequest("POST", notionAPIEndpoint, bytes.NewReader([]byte(body)))
 	if err != nil {
 		return nil, err
 	}
@@ -131,8 +133,8 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 
 	return &events.APIGatewayProxyResponse{
 		StatusCode: 200,
-		// Body:       string(buf),
-		Body: body,
+		Body:       string(buf),
+		// Body: body,
 		// Body: fmt.Sprint(request.Headers),
 		Headers: map[string]string{
 			"X-length": fmt.Sprint(len(buf)),
