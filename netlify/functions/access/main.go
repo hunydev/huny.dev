@@ -118,6 +118,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 
 	req.Header.Set("Notion-Version", notionVersion)
 	req.Header.Set("Authorization", "Bearer "+notionAPIKey)
+	req.Header.Set("Content-Type", "application/json")
 
 	client := http.Client{}
 	resp, err := client.Do(req)
