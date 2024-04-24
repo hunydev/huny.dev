@@ -59,7 +59,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	// }
 	// country = strings.ToUpper(country)
 
-	notionAPIEndpoint := "https://api.notion.com/v1/pages/"
+	notionAPIEndpoint := "https://api.notion.com/v1/pages"
 	notionVersion := "2022-06-28"
 	notionAPIKey := os.Getenv("NOTION_API_KEY")
 
