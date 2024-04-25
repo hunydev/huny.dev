@@ -109,7 +109,7 @@
         <div class="three wide column">
           <h4 class="ui inverted header">Draft</h4>
           <div class="ui inverted link list">
-            <a href="/blog" class="item">Blog</a>
+            <a href="/draft/blog" class="item">Blog</a>
             <a href="/tool" class="item">Tool</a>
           </div>
         </div>
@@ -220,7 +220,7 @@
               
               let $draft = $(`
                 <tr>
-                  <td class="center aligned">${value.icon.emoji}<input type="hidden" value="${value.id}"></td>
+                  <td class="center aligned">${value.icon?.emoji}<input type="hidden" value="${value.id}"></td>
                   <td>${concatPlainText(value.properties.Name.title)}</td>
                   <td>${concatPlainText(value.properties.Description.rich_text)}</td>
                   <td class="collapsing">${tags}</td>
