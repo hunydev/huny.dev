@@ -118,6 +118,48 @@
           </div>
         </div>
       </div>
+      <div class="ui card">
+        <div class="ui raise segment">
+          <div class="ui placeholder">
+            <div class="paragraph">
+              <div class="medium line"></div>
+              <div class="short line"></div>
+            </div>
+            <div class="image header">
+              <div class="line"></div>
+              <div class="line"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ui card">
+        <div class="ui raise segment">
+          <div class="ui placeholder">
+            <div class="paragraph">
+              <div class="medium line"></div>
+              <div class="short line"></div>
+            </div>
+            <div class="image header">
+              <div class="line"></div>
+              <div class="line"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ui card">
+        <div class="ui raise segment">
+          <div class="ui placeholder">
+            <div class="paragraph">
+              <div class="medium line"></div>
+              <div class="short line"></div>
+            </div>
+            <div class="image header">
+              <div class="line"></div>
+              <div class="line"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <h3 class="ui header">Feed</h3>
     <p></p>
@@ -237,7 +279,7 @@
           console.log(data);
           if(data.object == "list" && data.results && data.results.length > 0){
             $(".ui.feed.comments").html("");
-            
+
             data.results.forEach((value, index, array) =>{
               let user = null;
               users.forEach((u) => {

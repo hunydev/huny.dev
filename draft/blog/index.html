@@ -295,6 +295,8 @@
               `);
               $("table tbody").append($draft);
             });
+
+            $("table tbody tr td.ellipsis").popup({on: 'hover'});
           }
         })
         .catch(error => {
