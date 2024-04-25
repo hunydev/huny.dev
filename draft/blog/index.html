@@ -216,6 +216,7 @@
 
     function loadLike(){
       let like = JSON.parse(localStorage.getItem("like"));
+      if(!like){return;}
       $("table tbody tr i.thumbs.up.icon").removeClass("red").addClass("outline");
       $("table tbody tr").each(function(){
         let $e = $(this);
