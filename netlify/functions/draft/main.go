@@ -30,7 +30,7 @@ var query string = `{
 
 type PropertyNumber struct {
 	Object    string `json:"object"`
-	Type      string `json:"number"`
+	Type      string `json:"type"`
 	ID        string `json:"id"`
 	Number    int    `json:"number"`
 	RequestID string `json:"request_id"`
