@@ -4,3 +4,9 @@
 i.thumbs.up.icon{
     cursor: pointer;
 }
+table.tbody.tr.td{
+    max-width: 200px; /* 최대 너비 설정 */
+    white-space: nowrap; /* 텍스트를 한 줄로 표시 */
+    overflow: hidden; /* 내용이 넘칠 경우 숨김 */
+    text-overflow: ellipsis; /* 넘치는 텍스트를 '...'로 표시 */
+}

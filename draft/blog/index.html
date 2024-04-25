@@ -152,7 +152,7 @@
     $(document).ready(function(){
       $('table').tablesort(); 
 
-      $("tbody tr").on("click", "i.thumbs.up.icon", function(){
+      $("tbody").on("click", "tr i.thumbs.up.icon", function(){
         if($(this).hasClass("red")){
           $(this).removeClass("red");
           $(this).addClass("outline");
@@ -221,8 +221,8 @@
               let $draft = $(`
                 <tr>
                   <td class="center aligned">${value.icon?.emoji}<input type="hidden" value="${value.id}"></td>
-                  <td>${concatPlainText(value.properties.Name.title)}</td>
-                  <td>${concatPlainText(value.properties.Description.rich_text)}</td>
+                  <td class="collapsing">${concatPlainText(value.properties.Name.title)}</td>
+                  <td class="ellipsis">${concatPlainText(value.properties.Description.rich_text)}</td>
                   <td class="collapsing">${tags}</td>
                   <td class="collapsing">${authors}</td>
                   <td class="center aligned"><i class="thumbs up outline icon"></i></td>
