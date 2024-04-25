@@ -231,7 +231,7 @@
       let like = {};
       $("table tbody tr i.thumbs.up.icon.red").each(function(){
         let $e = $(this);
-        like[$e.closest("td").find("input.object_id").val()] = true;
+        like[$e.closest("tr").find("input.object_id").val()] = true;
       });
       localStorage.setItem("like", JSON.stringify(like));
     }
