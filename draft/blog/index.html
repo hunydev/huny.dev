@@ -218,8 +218,7 @@
                 tags += (`<a href="https://blog.huny.dev/tag/${tag}" target="_blank" class="ui ${select.color} label">${select.name}</a>`);
               });
               
-              if(user){
-                let $draft = $(`
+              let $draft = $(`
                 <tr>
                   <td class="center aligned">${value.icon.emoji}<input type="hidden" value="${value.id}"></td>
                   <td>${concatPlainText(value.Name.title)}</td>
@@ -228,9 +227,8 @@
                   <td class="collapsing">${authors}</td>
                   <td class="center aligned"><i class="thumbs up outline icon"></i></td>
                 </tr>
-                `);
-                $("table tbody").append($draft);
-              }
+              `);
+              $("table tbody").append($draft);
             });
           }
         })
