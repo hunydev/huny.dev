@@ -1,0 +1,6 @@
+.ui.main.text.container {
+    max-width: 1200px !important;
+}
+i.thumbs.up.icon{
+    cursor: pointer;
+}

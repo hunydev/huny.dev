@@ -14,6 +14,8 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.css">
   <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.js"></script>
+  <link rel="stylesheet" href="/assets/css/common.css">
+  <script src="/assets/js/common.js"></script>
   <style type="text/css">
     body {
       background-color: #FFFFFF;
@@ -43,9 +45,16 @@
   <div class="ui fixed inverted menu">
     <div class="ui container">
       <a href="/" class="header item">
-        <img class="logo" src="assets/images/logo.png">
+        <img class="logo" src="/assets/images/logo.png">
         HunyDev
       </a>
+      <div class="ui simple dropdown item">
+        Draft <i class="dropdown icon"></i>
+        <div class="menu">
+          <a class="item" href="/blog">Link Item</a>
+          <a class="item" href="/tool">Link Item</a>
+        </div>
+      </div>
       <div class="ui simple dropdown item" onclick='location.href="/tools"'>
         Tools <i class="dropdown icon"></i>
         <div class="menu">
@@ -137,7 +146,7 @@
         </div>
       </div>
       <div class="ui inverted section divider"></div>
-      <img src="assets/images/logo.png" class="ui centered mini image">
+      <img src="/assets/images/logo.png" class="ui centered mini image">
       <div class="ui horizontal inverted small divided link list">
         <a class="item" href="#">Site Map</a>
         <a class="item" href="#">Contact Us</a>

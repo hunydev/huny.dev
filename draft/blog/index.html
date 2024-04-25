@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <style data-merge-styles="true"></style>
+  <!-- Standard Meta -->
+  <style data-merge-styles="true"></style>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <!-- Site Properties -->
+  <title>HunyDev</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.js"></script>
+  <script src="https://semantic-ui.com/javascript/library/tablesort.min.js"></script>
+  <link rel="stylesheet" href="/assets/css/common.css">
+  <script src="/assets/js/common.js"></script>
+  <style type="text/css">
+    body {
+      background-color: #FFFFFF;
+    }
+
+    .ui.menu .item img.logo {
+      margin-right: 1.5em;
+    }
+
+    .main.container {
+      margin-top: 7em;
+    }
+
+    .wireframe {
+      margin-top: 2em;
+    }
+
+    .ui.footer.segment {
+      margin: 5em 0em 0em;
+      padding: 5em 0em;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="ui fixed inverted menu">
+    <div class="ui container">
+      <a href="/" class="header item">
+        <img class="logo" src="/assets/images/logo.png">
+        HunyDev
+      </a>
+      <div class="ui simple dropdown item">
+        Draft <i class="dropdown icon"></i>
+        <div class="menu">
+          <a class="item" href="/draft/blog">Blog</a>
+          <a class="item" href="/draft/tool">Tool</a>
+        </div>
+      </div>
+      <div class="ui simple dropdown item" onclick='location.href="/tools"'>
+        Tools <i class="dropdown icon"></i>
+        <div class="menu">
+          <a class="item" href="/tools/a">Link Item</a>
+          <a class="item" href="/tools/b">Link Item</a>
+          <div class="divider"></div>
+          <div class="header">Header Item</div>
+          <div class="item">
+            <i class="dropdown icon"></i>
+            Sub Menu
+            <div class="menu">
+              <a class="item" href="/tools/c/a">Link Item</a>
+              <a class="item" href="/tools/c/b">Link Item</a>
+            </div>
+          </div>
+          <a class="item" href="/tools/d">Link Item</a>
+        </div>
+      </div>
+      <a href="/forum" class="item">Forum</a>
+      <a href="https://blog.huny.dev" class="item">Blog<i style="margin-left: 2px;" class="floating small external alternate icon"></i></a>
+    </div>
+  </div>
+
+  <div class="ui main text container">
+    <h1 class="ui header">Blog draft</h1>
+    <table class="ui selectable celled very compact sortable table">
+      <thead>
+        <tr>
+          <th class="collapsing">Lang</th>
+          <th>Title</th>
+          <th>Description</th>
+          <th>Tags</th>
+          <th>Author</th>
+          <th class="collapsing">Like</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ui inverted vertical footer segment">
+    <div class="ui center aligned container">
+      <div class="ui stackable inverted divided grid">
+        <div class="three wide column">
+          <h4 class="ui inverted header">HunyDev</h4>
+          <div class="ui inverted link list">
+            <a href="/" class="item">Home</a>
+          </div>
+        </div>
+        <div class="three wide column">
+          <h4 class="ui inverted header">Tools</h4>
+          <div class="ui inverted link list">
+            <a href="#" class="item">Link One</a>
+            <a href="#" class="item">Link Two</a>
+            <a href="#" class="item">Link Three</a>
+            <a href="#" class="item">Link Four</a>
+          </div>
+        </div>
+        <div class="three wide column">
+          <h4 class="ui inverted header">Contact Me</h4>
+          <div class="ui inverted link list">
+            <a href="mailto:jang@huny.dev" class="item">Email</a>
+            <a href="https://twitter.com/janghun2722" class="item">X</a>
+            <a href="http://qr.kakao.com/talk/vPFzMTvD7rGaf9m2hrRZNZPkE3E-" class="item">KakaoTalk</a>
+          </div>
+        </div>
+        <div class="seven wide column">
+          <h4 class="ui inverted header">About</h4>
+          <p>This website is a space for personal development projects.</p>
+          <p>If you have any questions, please feel free to email me at any time.</p>
+        </div>
+      </div>
+      <div class="ui inverted section divider"></div>
+      <img src="/assets/images/logo.png" class="ui centered mini image">
+      <div class="ui horizontal inverted small divided link list">
+        <a class="item" href="#">Site Map</a>
+        <a class="item" href="#">Contact Us</a>
+        <a class="item" href="#">Terms and Conditions</a>
+        <a class="item" href="#">Privacy Policy</a>
+      </div>
+    </div>
+  </div>
+
+
+  <script defer>
+    function concatPlainText(arr){
+      let text = "";
+
+      arr.forEach((obj) => {
+        text += obj.plain_text;
+      });
+
+      return text
+    }
+    $(document).ready(function(){
+      $('table').tablesort(); 
+
+      $("tbody tr").on("click", "i.thumbs.up.icon", function(){
+        if($(this).hasClass("red")){
+          $(this).removeClass("red");
+          $(this).addClass("outline");
+        }else{
+          $(this).addClass("red");
+          $(this).removeClass("outline");
+        }
+      });
+    });
+
+    function users(next){
+      fetch("/.netlify/functions/users")
+        .then(response => {
+          // 응답을 JSON으로 파싱
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // 파싱된 데이터 처리
+          console.log(data);
+          if(data.object == "list" && data.results && data.results.length > 0){
+            next(data.results);
+          }
+        })
+        .catch(error => {
+          // 에러 처리
+          console.error('There was a problem with the fetch operation:', error);
+        });
+    }
+
+    function draft(users){
+      fetch("/.netlify/functions/draft")
+        .then(response => {
+          // 응답을 JSON으로 파싱
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // 파싱된 데이터 처리
+          console.log(data);
+          if(data.object == "list" && data.results && data.results.length > 0){
+            data.results.forEach((value, index, array) =>{
+              let authors = "";
+              let tags = "";
+
+              value.properties.Authors.people.forEach((people) =>{
+                users.forEach((user) => {
+                  if(people.id == user.id){
+                    let authorPath = user.name.toLocaleLowerCase().replace(/\s+/g, '-');
+                    authors += (`<a href="https://blog.huny.dev/author/${authorPath}" target="_blank" class="ui basic image label"><img src="${user.avatar_url}">${user.name}</a>`);
+                  }
+                });
+              });
+              value.properties.Tags.multi_select.forEach((select) => {
+                let tag = select.name;
+                if(tag.length <= 5){
+                  tag += ("-" + select.id);
+                }
+                tags += (`<a href="https://blog.huny.dev/tag/${tag}" target="_blank" class="ui ${select.color} label">${select.name}</a>`);
+              });
+              
+              if(user){
+                let $draft = $(`
+                <tr>
+                  <td class="center aligned">${value.icon.emoji}<input type="hidden" value="${value.id}"></td>
+                  <td>${concatPlainText(value.Name.title)}</td>
+                  <td>${concatPlainText(value.Description.rich_text)}</td>
+                  <td class="collapsing">${tags}</td>
+                  <td class="collapsing">${authors}</td>
+                  <td class="center aligned"><i class="thumbs up outline icon"></i></td>
+                </tr>
+                `);
+                $("table tbody").append($draft);
+              }
+            });
+          }
+        })
+        .catch(error => {
+          // 에러 처리
+          console.error('There was a problem with the fetch operation:', error);
+        });
+    }
+
+    $(document).ready(function(){
+      users(draft);
+    });
+  </script>
+</body>
+</html>
