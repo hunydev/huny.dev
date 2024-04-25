@@ -213,6 +213,28 @@
 
       return text
     }
+
+    function loadLike(){
+      let like = JSON.parse(localStorage.getItem("like"));
+      $("table tbody tr i.thumbs.up.icon").removeClass("red").addClass("outline");
+      $("table tbody tr").each(function(){
+        let $e = $(this);
+        let id = $e.find("input.object_id").val();
+        if(like[id]){
+          $e.find("i.thumbs.up.icon").addClass("red").removeClass("outline");
+        }
+      });
+    }
+
+    function updateLike(){
+      let like = {};
+      $("table tbody tr i.thumbs.up.icon.red").each(function(){
+        let $e = $(this);
+        like[$e.closest("td").find("input.object_id").val()] = true;
+      });
+      localStorage.setItem("like", JSON.stringify(like));
+    }
+
     $(document).ready(function(){
       $('table').tablesort(); 
 
@@ -224,6 +246,7 @@
           $(this).addClass("red");
           $(this).removeClass("outline");
         }
+        updateLike();
       });
     });
 
@@ -285,9 +308,9 @@
               
               let $draft = $(`
                 <tr>
-                  <td class="center aligned">${value.icon?.emoji}<input type="hidden" value="${value.id}"></td>
+                  <td class="center aligned">${value.icon?.emoji}<input class="object_id" type="hidden" value="${value.id}"></td>
                   <td class="collapsing">${concatPlainText(value.properties.Name.title)}</td>
-                  <td class="ellipsis" data-title="Description" data-content="${concatPlainText(value.properties.Description.rich_text)}">${concatPlainText(value.properties.Description.rich_text)}</td>
+                  <td class="ellipsis" data-title="Description" data-content="${concatPlainText(value.properties.Description.rich_text)}" data-variation="very wide">${concatPlainText(value.properties.Description.rich_text)}</td>
                   <td class="collapsing">${tags}</td>
                   <td class="collapsing">${authors}</td>
                   <td class="center aligned"><i class="thumbs up outline icon"></i></td>
@@ -297,6 +320,7 @@
             });
 
             $("table tbody tr td.ellipsis").popup({on: 'hover'});
+            loadLike();
           }
         })
         .catch(error => {
