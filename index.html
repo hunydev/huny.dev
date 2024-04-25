@@ -104,12 +104,42 @@
     <h3 class="ui header">Users</h3>
     <p></p>
     <div class="ui four cards users">
-      
+      <div class="ui card">
+        <div class="ui raise segment">
+          <div class="ui placeholder">
+            <div class="paragraph">
+              <div class="medium line"></div>
+              <div class="short line"></div>
+            </div>
+            <div class="image header">
+              <div class="line"></div>
+              <div class="line"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <h3 class="ui header">Feed</h3>
     <p></p>
     <div class="ui feed comments">
-      
+      <div class="ui placeholder">
+        <div class="image header">
+          <div class="line"></div>
+          <div class="line"></div>
+        </div>
+      </div>
+      <div class="ui placeholder">
+        <div class="image header">
+          <div class="line"></div>
+          <div class="line"></div>
+        </div>
+      </div>
+      <div class="ui placeholder">
+        <div class="image header">
+          <div class="line"></div>
+          <div class="line"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -165,6 +195,7 @@
           return response.json();
         })
         .then(data => {
+          $(".ui.cards.users").html("");
           // 파싱된 데이터 처리
           console.log(data);
           if(data.object == "list" && data.results && data.results.length > 0){
@@ -205,6 +236,8 @@
           // 파싱된 데이터 처리
           console.log(data);
           if(data.object == "list" && data.results && data.results.length > 0){
+            $(".ui.feed.comments").html("");
+            
             data.results.forEach((value, index, array) =>{
               let user = null;
               users.forEach((u) => {

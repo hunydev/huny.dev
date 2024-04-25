@@ -93,6 +93,70 @@
         </tr>
       </thead>
       <tbody>
+        <tr>
+          <td colspan="6">
+            <div class="ui fluid placeholder">
+              <div class="paragraph">
+                <div class="line"></div>
+                <div class="line"></div>
+              </div>
+            </div>
+            <div class="ui fluid placeholder">
+              <div class="paragraph">
+                <div class="line"></div>
+                <div class="line"></div>
+              </div>
+            </div>
+            <div class="ui fluid placeholder">
+              <div class="paragraph">
+                <div class="line"></div>
+                <div class="line"></div>
+              </div>
+            </div>
+            <div class="ui fluid placeholder">
+              <div class="paragraph">
+                <div class="line"></div>
+                <div class="line"></div>
+              </div>
+            </div>
+            <div class="ui fluid placeholder">
+              <div class="paragraph">
+                <div class="line"></div>
+                <div class="line"></div>
+              </div>
+            </div>
+            <div class="ui fluid placeholder">
+              <div class="paragraph">
+                <div class="line"></div>
+                <div class="line"></div>
+              </div>
+            </div>
+            <div class="ui fluid placeholder">
+              <div class="paragraph">
+                <div class="line"></div>
+                <div class="line"></div>
+              </div>
+            </div>
+            <div class="ui fluid placeholder">
+              <div class="paragraph">
+                <div class="line"></div>
+                <div class="line"></div>
+              </div>
+            </div>
+            <div class="ui fluid placeholder">
+              <div class="paragraph">
+                <div class="line"></div>
+                <div class="line"></div>
+              </div>
+            </div>
+            <div class="ui fluid placeholder">
+              <div class="paragraph">
+                <div class="line"></div>
+                <div class="line"></div>
+              </div>
+            </div>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -195,6 +259,7 @@
           return response.json();
         })
         .then(data => {
+          $("table tbody").html("");
           // 파싱된 데이터 처리
           console.log(data);
           if(data.object == "list" && data.results && data.results.length > 0){
@@ -222,7 +287,7 @@
                 <tr>
                   <td class="center aligned">${value.icon?.emoji}<input type="hidden" value="${value.id}"></td>
                   <td class="collapsing">${concatPlainText(value.properties.Name.title)}</td>
-                  <td class="ellipsis">${concatPlainText(value.properties.Description.rich_text)}</td>
+                  <td class="ellipsis" data-tooltip="${concatPlainText(value.properties.Description.rich_text)}">${concatPlainText(value.properties.Description.rich_text)}</td>
                   <td class="collapsing">${tags}</td>
                   <td class="collapsing">${authors}</td>
                   <td class="center aligned"><i class="thumbs up outline icon"></i></td>
