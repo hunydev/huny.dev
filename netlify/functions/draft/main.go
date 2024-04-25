@@ -30,13 +30,14 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	notionVersion := "2022-06-28"
 	notionAPIKey := os.Getenv("NOTION_API_KEY")
 
-	req, err := http.NewRequest("GET", notionAPIEndpoint, strings.NewReader(query))
+	req, err := http.NewRequest("POST", notionAPIEndpoint, strings.NewReader(query))
 	if err != nil {
 		return nil, err
 	}
 
 	req.Header.Set("Notion-Version", notionVersion)
 	req.Header.Set("Authorization", "Bearer "+notionAPIKey)
+	req.Header.Set("Content-Type", "application/json")
 
 	client := http.Client{}
 	resp, err := client.Do(req)
