@@ -240,14 +240,24 @@
       $('table').tablesort(); 
 
       $("tbody").on("click", "tr i.thumbs.up.icon", function(){
+        let id = $(this).closest("tr").find("input.object_id").val();
         if($(this).hasClass("red")){
-          $(this).removeClass("red");
-          $(this).addClass("outline");
+          fetch("/.netlify/functions/draft?id=" + id + "&action=unlike", {method: "PATCH"}).then((response) => {
+            if(response.ok){
+              $(this).removeClass("red");
+              $(this).addClass("outline");
+              updateLike();
+            }
+          } );
         }else{
-          $(this).addClass("red");
-          $(this).removeClass("outline");
+          fetch("/.netlify/functions/draft?id=" + id + "&action=like", {method: "PATCH"}).then((response) => {
+            if(response.ok){
+              $(this).addClass("red");
+              $(this).removeClass("outline");
+              updateLike();
+            }
+          } );
         }
-        updateLike();
       });
     });
 
