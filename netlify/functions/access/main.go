@@ -43,10 +43,12 @@ func getCountry(ip string) (string, error) {
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 	//cf-connecting-ip:223.39.181.245 cf-ipcountry:KR
-	ip := request.Headers["cf-connecting-ip"]
-	country := request.Headers["cf-ipcountry"]
-	userAgent := request.Headers["user-agent"]
-	referer := request.Headers["referer"]
+	headers := http.Header(request.MultiValueHeaders)
+
+	ip := headers.Get("cf-connecting-ip")
+	country := headers.Get("cf-ipcountry")
+	userAgent := headers.Get("user-agent")
+	referer := headers.Get("referer")
 	if referer == "" {
 		referer = "Direct"
 	}
@@ -105,7 +107,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 					}
 				]
 			},
-			"referer": {
+			"Referer": {
 				"url": "%s"
 			}
 		}
