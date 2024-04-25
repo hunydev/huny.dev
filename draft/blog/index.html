@@ -84,7 +84,7 @@
     <table class="ui selectable celled very compact sortable table">
       <thead>
         <tr>
-          <th class="collapsing">Lang</th>
+          <th class="collapsing">i</th>
           <th>Title</th>
           <th>Description</th>
           <th>Tags</th>
@@ -238,9 +238,14 @@
 
     $(document).ready(function(){
       $('table').tablesort(); 
-
+      let mutex = {};
       $("tbody").on("click", "tr i.thumbs.up.icon", function(){
         let id = $(this).closest("tr").find("input.object_id").val();
+        if(mutex[id]){ //지속적인 클릭 방지
+          return;
+        }
+
+        mutex[id] = true;
         if($(this).hasClass("red")){
           fetch("/.netlify/functions/draft?id=" + id + "&action=unlike", {method: "PATCH"}).then((response) => {
             if(response.ok){
@@ -248,6 +253,7 @@
               $(this).addClass("outline");
               updateLike();
             }
+            delete mutex[id];
           } );
         }else{
           fetch("/.netlify/functions/draft?id=" + id + "&action=like", {method: "PATCH"}).then((response) => {
@@ -256,6 +262,7 @@
               $(this).removeClass("outline");
               updateLike();
             }
+            delete mutex[id];
           } );
         }
       });
