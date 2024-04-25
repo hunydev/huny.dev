@@ -7,14 +7,12 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/ip2location/ip2location-go/v9"
+	"github.com/mileusna/useragent"
 )
-
-//go:embed db/IP2LOCATION-LITE-DB1.BIN
-var ip2locationdb []byte
 
 type DBReader struct {
 	*bytes.Reader
@@ -24,42 +22,46 @@ func (r *DBReader) Close() error {
 	return nil
 }
 
-func getCountry(ip string) (string, error) {
-	r := &DBReader{
-		bytes.NewReader(ip2locationdb),
-	}
+// func getCountry(ip string) (string, error) {
+// 	r := &DBReader{
+// 		bytes.NewReader(ip2locationdb),
+// 	}
 
-	db, err := ip2location.OpenDBWithReader(r)
-	if err != nil {
-		return "", err
-	}
-	record, err := db.Get_country_short(ip)
-	if err != nil {
-		return "", err
-	}
+// 	db, err := ip2location.OpenDBWithReader(r)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	record, err := db.Get_country_short(ip)
+// 	if err != nil {
+// 		return "", err
+// 	}
 
-	return record.Country_short, nil
-}
+// 	return record.Country_short, nil
+// }
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 	//cf-connecting-ip:223.39.181.245 cf-ipcountry:KR
 	headers := http.Header(request.MultiValueHeaders)
 
+	method := request.HTTPMethod
+	var queryBuilder strings.Builder
+
+	for k, v := range request.QueryStringParameters {
+		if queryBuilder.Len() != 0 {
+			queryBuilder.WriteString("&")
+		}
+
+		queryBuilder.WriteString(fmt.Sprintf("%s=%s", k, v))
+	}
+	query := queryBuilder.String()
+
 	ip := headers.Get("cf-connecting-ip")
 	country := headers.Get("cf-ipcountry")
-	userAgent := headers.Get("user-agent")
+	agent := useragent.Parse(headers.Get("user-agent"))
 	referer := headers.Get("referer")
 	if referer == "" {
 		referer = "Direct"
 	}
-	// country, err := getCountry(request.RequestContext.Identity.SourceIP)
-	// if err != nil {
-	// 	return &events.APIGatewayProxyResponse{
-	// 		StatusCode: http.StatusInternalServerError,
-	// 		Body:       fmt.Sprintf(`{"message": "%s"}`, err.Error()),
-	// 	}, nil
-	// }
-	// country = strings.ToUpper(country)
 
 	notionAPIEndpoint := "https://api.notion.com/v1/pages"
 	notionVersion := "2022-06-28"
@@ -83,35 +85,47 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 					}
 				]
 			},
-			"URL": {
+			"Referer": {
 				"url": "%s"
 			},
-			"UserAgent": {
+			"Method": {
 				"rich_text": [
 					{
-						"type": "text",
 						"text": {
-							"content": "%s",
-							"link": null
-						},
-						"annotations": {
-							"bold": false,
-							"italic": false,
-							"strikethrough": false,
-							"underline": false,
-							"code": false,
-							"color": "default"
-						},
-						"plain_text": "%s",
-						"href": null
+							"content": "%s"
+						}
 					}
 				]
 			},
-			"Referer": {
-				"url": "%s"
+			"OS": {
+				"rich_text": [
+					{
+						"text": {
+							"content": "%s"
+						}
+					}
+				]
+			},
+			"Browser": {
+				"rich_text": [
+					{
+						"text": {
+							"content": "%s"
+						}
+					}
+				]
+			},
+			"Query": {
+				"rich_text": [
+					{
+						"text": {
+							"content": "%s"
+						}
+					}
+				]
 			}
 		}
-	}`, FLAGS[country], ip, request.Path, userAgent, userAgent, referer)
+	}`, FLAGS[country], ip, referer, method, agent.OS, agent.Name, query)
 
 	req, err := http.NewRequest("POST", notionAPIEndpoint, bytes.NewReader([]byte(body)))
 	if err != nil {
