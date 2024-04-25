@@ -221,8 +221,8 @@
               let $draft = $(`
                 <tr>
                   <td class="center aligned">${value.icon.emoji}<input type="hidden" value="${value.id}"></td>
-                  <td>${concatPlainText(value.Name.title)}</td>
-                  <td>${concatPlainText(value.Description.rich_text)}</td>
+                  <td>${concatPlainText(value.properties.Name.title)}</td>
+                  <td>${concatPlainText(value.properties.Description.rich_text)}</td>
                   <td class="collapsing">${tags}</td>
                   <td class="collapsing">${authors}</td>
                   <td class="center aligned"><i class="thumbs up outline icon"></i></td>
