@@ -25,6 +25,16 @@ var query string = `{
     ]
 }`
 
+func get(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
+
+	return nil, nil
+}
+
+func update(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
+
+	return nil, nil
+}
+
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 	notionAPIEndpoint := "https://api.notion.com/v1/databases/f1eee6b74999424fb7de5b6e2e5367a0/query"
 	notionVersion := "2022-06-28"
