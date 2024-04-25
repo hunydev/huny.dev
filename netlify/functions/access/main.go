@@ -46,9 +46,9 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	ip := request.Headers["cf-connecting-ip"]
 	country := request.Headers["cf-ipcountry"]
 	userAgent := request.Headers["user-agent"]
-	referrer := request.Headers["referrer"]
-	if referrer == "" {
-		referrer = "Direct"
+	referer := request.Headers["referer"]
+	if referer == "" {
+		referer = "Direct"
 	}
 	// country, err := getCountry(request.RequestContext.Identity.SourceIP)
 	// if err != nil {
@@ -105,11 +105,11 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 					}
 				]
 			},
-			"Referrer": {
+			"referer": {
 				"url": "%s"
 			}
 		}
-	}`, FLAGS[country], ip, request.Path, userAgent, userAgent, referrer)
+	}`, FLAGS[country], ip, request.Path, userAgent, userAgent, referer)
 
 	req, err := http.NewRequest("POST", notionAPIEndpoint, bytes.NewReader([]byte(body)))
 	if err != nil {
