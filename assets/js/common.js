@@ -13,47 +13,72 @@ fetch("/.netlify/functions/access").then((response) => {
 /*
 Layout
 */
-let footer = `
-<div class="ui center aligned container">
-  <div class="ui stackable inverted divided grid">
-    <div class="three wide column">
-      <h4 class="ui inverted header">HunyDev</h4>
-      <div class="ui inverted link list">
-        <a href="/" class="item">Home</a>
-      </div>
-    </div>
-    <div class="three wide column">
-      <h4 class="ui inverted header">Draft</h4>
-      <div class="ui inverted link list">
-        <a href="/draft/blog" class="item">Blog</a>
-        <a href="/tool" class="item">Tool</a>
-      </div>
-    </div>
-    <div class="three wide column">
-      <h4 class="ui inverted header">Tools</h4>
-      <div class="ui inverted link list">
-        <a href="#" class="item">Link One</a>
-        <a href="#" class="item">Link Two</a>
-        <a href="#" class="item">Link Three</a>
-        <a href="#" class="item">Link Four</a>
-      </div>
-    </div>
-    <div class="seven wide column">
-      <h4 class="ui inverted header">About</h4>
-      <p>This website is a space for personal development projects.</p>
-      <p>If you have any questions, please feel free to email me at any time.</p>
+let menu = `
+<div class="ui menu right overlay inverted vertical sidebar">
+  <div class="item">
+    <a class="ui logo icon image" href="/">
+      <img src="/assets/images/logo.png">
+    </a>
+    <a href="/">
+      <b>HunyDev</b>
+    </a>
+  </div>
+  <div class="item">
+    <div class="header">Draft</div>
+    <div class="menu">
+      <a class="item" href="/draft/blog">Blog</a>
+      <a class="item" href="/draft/tool">Tool</a>
     </div>
   </div>
-  <div class="ui inverted section divider"></div>
-  <img src="/assets/images/logo.png" class="ui centered mini image">
-  <div class="ui horizontal inverted small divided link list">
-    <a class="item" href="mailto:jang@huny.dev">Contact Us</a>
-    <a class="item credits">Credits</a>
-    <a class="item terms_and_conditions">Terms and Conditions</a>
-    <a class="item privacy_policy">Privacy Policy</a>
+  <div class="item">
+    <a class="header" href="/tools">Tools</a>
+    <div class="menu">
+      <a class="item" href="#">A</a>
+      <a class="item" href="#">B</a>
+    </div>
   </div>
+  <a href="https://blog.huny.dev" target="_blank" class="item">Blog<i style="margin-left: 2px;" class="floating small external alternate icon"></i></a>
+  <a href="/chat" target="_blank" class="item">Chat<i style="margin-left: 2px;" class="floating small external alternate icon"></i></a>
 </div>
-`;
+<div class="ui fixed inverted menu">
+  <div class="ui container">
+    <a href="/" class="header item">
+      <img class="logo" src="/assets/images/logo.png">
+      HunyDev
+    </a>
+    <div class="ui simple dropdown item">
+      Draft <i class="dropdown icon"></i>
+      <div class="menu">
+        <a class="item" href="/draft/blog">Blog</a>
+        <a class="item" href="/draft/tool">Tool</a>
+      </div>
+    </div>
+    <div class="ui simple dropdown item" onclick='location.href="/tools"'>
+      Tools <i class="dropdown icon"></i>
+      <div class="menu">
+        <a class="item" href="/tools/a">Link Item</a>
+        <a class="item" href="/tools/b">Link Item</a>
+        <div class="divider"></div>
+        <div class="header">Header Item</div>
+        <div class="item">
+          <i class="dropdown icon"></i>
+          Sub Menu
+          <div class="menu">
+            <a class="item" href="/tools/c/a">Link Item</a>
+            <a class="item" href="/tools/c/b">Link Item</a>
+          </div>
+        </div>
+        <a class="item" href="/tools/d">Link Item</a>
+      </div>
+    </div>
+    <a href="https://blog.huny.dev" target="_blank" class="item">Blog<i style="margin-left: 2px;" class="floating small external alternate icon"></i></a>
+    <a href="/chat" target="_blank" class="item">Chat<i style="margin-left: 2px;" class="floating small external alternate icon"></i></a>
+    <a class="right item">
+      <i class="sidebar icon"></i>
+    </a>
+  </div>
+</div>`;
+
 let modal = `
 <div class="ui modal credits">
   <div class="header">Credits</div>
@@ -131,14 +156,56 @@ let modal = `
   <div class="actions">
     <div class="ui cancel button">Close</div>
   </div>
-</div>
-`
+</div>`;
+
+let footer = `
+<div class="ui center aligned container">
+  <div class="ui stackable inverted divided grid">
+    <div class="three wide column">
+      <h4 class="ui inverted header">HunyDev</h4>
+      <div class="ui inverted link list">
+        <a href="/" class="item">Home</a>
+      </div>
+    </div>
+    <div class="three wide column">
+      <h4 class="ui inverted header">Draft</h4>
+      <div class="ui inverted link list">
+        <a href="/draft/blog" class="item">Blog</a>
+        <a href="/tool" class="item">Tool</a>
+      </div>
+    </div>
+    <div class="three wide column">
+      <h4 class="ui inverted header">Tools</h4>
+      <div class="ui inverted link list">
+        <a href="#" class="item">Link One</a>
+        <a href="#" class="item">Link Two</a>
+        <a href="#" class="item">Link Three</a>
+        <a href="#" class="item">Link Four</a>
+      </div>
+    </div>
+    <div class="seven wide column">
+      <h4 class="ui inverted header">About</h4>
+      <p>This website is a space for personal development projects.</p>
+      <p>If you have any questions, please feel free to email me at any time.</p>
+    </div>
+  </div>
+  <div class="ui inverted section divider"></div>
+  <img src="/assets/images/logo.png" class="ui centered mini image">
+  <div class="ui horizontal inverted small divided link list">
+    <a class="item" href="mailto:jang@huny.dev">Contact Us</a>
+    <a class="item credits">Credits</a>
+    <a class="item terms_and_conditions">Terms and Conditions</a>
+    <a class="item privacy_policy">Privacy Policy</a>
+  </div>
+</div>`;
 
 $(document).ready(function(){
-  let $footer = $(footer);
+  let $menu = $(menu);
   let $modal = $(modal);
-  $("div.footer.segment").html($footer);
+  let $footer = $(footer);
+  $("body").prepend($menu);
   $("body").append($modal);
+  $("div.footer.segment").html($footer);
 
   $(".ui.modal.credits").modal('attach events', 'a.item.credits');
   $(".ui.modal.terms_and_conditions").modal('attach events', 'a.item.terms_and_conditions');
