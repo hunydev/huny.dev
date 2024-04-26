@@ -15,14 +15,7 @@ Layout
 */
 let menu = `
 <div class="ui menu right overlay inverted vertical sidebar">
-  <div class="item">
-    <a class="ui logo icon image" href="/">
-      <img src="/assets/images/logo.png">
-    </a>
-    <a href="/">
-      <b>HunyDev</b>
-    </a>
-  </div>
+  <a href="javascript:void(0);" class="item sidebar close">Close<i style="margin-left: 2px;" class="floating close icon"></i></a>
   <div class="item">
     <div class="header">Draft</div>
     <div class="menu">
@@ -213,5 +206,5 @@ $(document).ready(function(){
 
   $("div.sidebar").sidebar({
     transition: 'overlay', 
-  }).sidebar('attach events', '.fixed.menu a.right.item');
+  }).sidebar('attach events', '.fixed.menu a.right.item').sidebar('attach events', 'a.item.sidebar.close');
 });
