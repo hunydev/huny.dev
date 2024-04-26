@@ -1,3 +1,11 @@
+.menu.sidebar {
+    z-index: 1000;
+}
+
+a.item{
+    cursor: pointer;
+}
+
 .ui.main.text.container {
     max-width: 1200px !important;
 }
@@ -9,4 +17,34 @@ table tbody tr td.ellipsis {
     white-space: nowrap; /* 텍스트를 한 줄로 표시 */
     overflow: hidden; /* 내용이 넘칠 경우 숨김 */
     text-overflow: ellipsis; /* 넘치는 텍스트를 '...'로 표시 */
+}
+
+@media only screen and (max-width: 767px) {
+    div.ui.four.cards{
+        margin-left: -1em;
+        margin-right: -1em;
+
+        .card{
+            width: calc(50% - 2em);
+            margin-left: 1em;
+            margin-right: 1em;
+        }
+    }
+}
+
+.ui.fixed.inverted.menu {
+    a.right.item{
+        display: none;
+    }
+}
+
+@media only screen and (max-width: 500px) {
+    .ui.fixed.inverted.menu {
+        div.item{
+            display: none;
+        }
+        a.right.item{
+            display: flex;
+        }
+    }
 }
