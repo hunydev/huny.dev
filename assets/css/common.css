@@ -37,7 +37,7 @@ table tbody tr td.ellipsis {
 }
 
 .ui.fixed.inverted.menu {
-    a.right.item{
+    a.right.item:has(i.sidebar.icon){
         display: none;
     }
 }
@@ -50,7 +50,7 @@ table tbody tr td.ellipsis {
         a.item[target=_blank]{
             display: none;
         }
-        a.right.item{
+        a.right.item:has(i.sidebar.icon){
             display: flex;
         }
     }

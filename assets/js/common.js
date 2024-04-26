@@ -71,8 +71,8 @@ let menu = `
         <a class="item" href="/tools/d">Link Item</a>
       </div>
     </div>
-    <a href="https://blog.huny.dev" target="_blank" class="item">Blog<i style="margin-left: 2px;" class="floating small external alternate icon"></i></a>
-    <a href="/chat" target="_blank" class="item">Chat<i style="margin-left: 2px;" class="floating small external alternate icon"></i></a>
+    <a href="https://blog.huny.dev" target="_blank" class="right item">Blog<i style="margin-left: 2px;" class="floating small external alternate icon"></i></a>
+    <a href="/chat" target="_blank" class="right item" style="margin-left: 0 !important">Chat<i style="margin-left: 2px;" class="floating small external alternate icon"></i></a>
     <a class="right item">
       <i class="sidebar icon"></i>
     </a>
