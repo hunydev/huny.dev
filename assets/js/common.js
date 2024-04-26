@@ -12,4 +12,6 @@ fetch("/.netlify/functions/access").then((response) => {
 
 $(document).ready(function(){
     $(".ui.modal.credits").modal('attach events', 'a.item.credits');
+    $(".ui.modal.terms_and_conditions").modal('attach events', 'a.item.terms_and_conditions');
+    $(".ui.modal.privacy_policy").modal('attach events', 'a.item.privacy_policy');
 });
