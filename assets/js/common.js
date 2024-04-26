@@ -144,7 +144,7 @@ $(document).ready(function(){
   $(".ui.modal.terms_and_conditions").modal('attach events', 'a.item.terms_and_conditions');
   $(".ui.modal.privacy_policy").modal('attach events', 'a.item.privacy_policy');
 
-  $(".fixed.menu a.right.item").on("click", function(){
-    $("div.sidebar").sidebar("toggle");
-  });
+  $("div.sidebar").sidebar({
+    transition: 'overlay', 
+  }).sidebar('attach events', '.fixed.menu a.right.item');
 });

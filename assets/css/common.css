@@ -1,5 +1,9 @@
 .menu.sidebar {
     z-index: 1000;
+    .logo.image{
+        width: 35px;
+        margin-right: 1em;
+    }
 }
 
 a.item{
