@@ -9,3 +9,7 @@ fetch("/.netlify/functions/access").then((response) => {
 (function() {
     
 })();
+
+$(document).ready(function(){
+    $(".ui.modal.credits").modal('attach events', 'a.item.credits');
+});
