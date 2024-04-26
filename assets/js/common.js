@@ -14,7 +14,7 @@ fetch("/.netlify/functions/access").then((response) => {
 Layout
 */
 let menu = `
-<div class="ui menu right overlay inverted vertical sidebar">
+<div class="ui menu right overlay inverted vertical thin sidebar">
   <a href="javascript:void(0);" class="item sidebar close">Close<i style="margin-left: 2px;" class="floating close icon"></i></a>
   <div class="item">
     <div class="header">Draft</div>
@@ -46,27 +46,30 @@ let menu = `
         <a class="item" href="/draft/tool">Tool</a>
       </div>
     </div>
-    <div class="ui simple dropdown item" onclick='location.href="/tools"'>
+    <div class="ui simple dropdown item">
       Tools <i class="dropdown icon"></i>
       <div class="menu">
-        <a class="item" href="/tools/a">Link Item</a>
-        <a class="item" href="/tools/b">Link Item</a>
+        <a class="item">Coming soon</a>
+        <!--
+        <a class="item" href="#">Link Item</a>
+        <a class="item" href="#">Link Item</a>
         <div class="divider"></div>
         <div class="header">Header Item</div>
         <div class="item">
           <i class="dropdown icon"></i>
           Sub Menu
           <div class="menu">
-            <a class="item" href="/tools/c/a">Link Item</a>
-            <a class="item" href="/tools/c/b">Link Item</a>
+            <a class="item" href="#">Link Item</a>
+            <a class="item" href="#">Link Item</a>
           </div>
         </div>
-        <a class="item" href="/tools/d">Link Item</a>
+        <a class="item" href="#">Link Item</a>
+        -->
       </div>
     </div>
     <a href="https://blog.huny.dev" target="_blank" class="right item">Blog<i style="margin-left: 2px;" class="floating small external alternate icon"></i></a>
     <a href="/chat" target="_blank" class="right item" style="margin-left: 0 !important">Chat<i style="margin-left: 2px;" class="floating small external alternate icon"></i></a>
-    <a class="right item">
+    <a class="right item sidebar open">
       <i class="sidebar icon"></i>
     </a>
   </div>
@@ -158,6 +161,8 @@ let footer = `
       <h4 class="ui inverted header">HunyDev</h4>
       <div class="ui inverted link list">
         <a href="/" class="item">Home</a>
+        <a href="https://blog.huny.dev" target="_blank" class="item">Blog</a>
+        <a href="https://huny.notion.site" target="_blank" class="item">Notion</a>
       </div>
     </div>
     <div class="three wide column">
@@ -170,10 +175,10 @@ let footer = `
     <div class="three wide column">
       <h4 class="ui inverted header">Tools</h4>
       <div class="ui inverted link list">
-        <a href="#" class="item">Link One</a>
-        <a href="#" class="item">Link Two</a>
-        <a href="#" class="item">Link Three</a>
-        <a href="#" class="item">Link Four</a>
+        <a href="#" class="item">String</a>
+        <a href="#" class="item">Audio</a>
+        <a href="#" class="item">Automatic</a>
+        <a href="#" class="item">Network</a>
       </div>
     </div>
     <div class="seven wide column">
@@ -206,5 +211,5 @@ $(document).ready(function(){
 
   $("div.sidebar").sidebar({
     transition: 'overlay', 
-  }).sidebar('attach events', '.fixed.menu a.right.item').sidebar('attach events', 'a.item.sidebar.close');
+  }).sidebar('attach events', 'a.item.sidebar');
 });
