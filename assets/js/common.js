@@ -205,6 +205,7 @@ function mainonly(){
 $(document).ready(function(){
   if(mainonly()){
     console.log("mainonly");
+    $("div.footer.segment").addClass("hide");
     return;
   }
   let $menu = $(menu);
