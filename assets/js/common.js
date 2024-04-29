@@ -197,7 +197,15 @@ let footer = `
   </div>
 </div>`;
 
+function mainonly(){
+  const params = new URLSearchParams(window.location.search);
+  return params.has('mainonly');
+}
+
 $(document).ready(function(){
+  if(mainonly()){
+    return;
+  }
   let $menu = $(menu);
   let $modal = $(modal);
   let $footer = $(footer);

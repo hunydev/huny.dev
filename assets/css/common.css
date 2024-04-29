@@ -2,6 +2,10 @@ body {
     background-color: #FFFFFF;
 }
 
+.hide{
+    display:none;
+}
+
 .ui.menu .item img.logo {
     margin-right: 1.5em;
 }
