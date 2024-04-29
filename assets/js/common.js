@@ -204,6 +204,7 @@ function mainonly(){
 
 $(document).ready(function(){
   if(mainonly()){
+    console.log("mainonly");
     return;
   }
   let $menu = $(menu);
