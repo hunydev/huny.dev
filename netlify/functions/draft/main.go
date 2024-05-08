@@ -15,7 +15,7 @@ import (
 
 var query string = `{
     "filter": {
-        "property": "hidden",
+        "property": "Hidden",
         "checkbox": {
             "equals": true
         }
