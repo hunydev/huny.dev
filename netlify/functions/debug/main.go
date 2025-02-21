@@ -18,7 +18,10 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 
 	return &events.APIGatewayProxyResponse{
 		StatusCode: 200,
-		Body:       sb.String(),
+		Headers: map[string]string{
+			"x-dev-test": "ok",
+		},
+		Body: sb.String(),
 	}, nil
 }
 
