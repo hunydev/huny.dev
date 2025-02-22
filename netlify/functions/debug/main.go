@@ -17,7 +17,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	sb.WriteString(fmt.Sprintln(request.PathParameters))
 
 	sb.WriteString("Path\n")
-	sb.WriteString(fmt.Sprintln(request.))
+	sb.WriteString(fmt.Sprintln(request.Path))
 
 	return &events.APIGatewayProxyResponse{
 		StatusCode: 200,
