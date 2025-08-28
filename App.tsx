@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import MainPanel from './components/MainPanel';
 import { ViewId, Tab, PageProps } from './types';
 import { PAGES } from './constants';
+import logo from './logo_128x128.png';
 
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState<ViewId>(ViewId.Explorer);
@@ -54,16 +55,32 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen w-screen bg-[#1e1e1e] text-gray-300 font-sans">
-      <ActivityBar activeView={activeView} setActiveView={setActiveView} />
-      <Sidebar activeView={activeView} onOpenFile={handleOpenFile} />
-      <MainPanel
-        openTabs={openTabs}
-        activeTabId={activeTabId}
-        onTabClick={setActiveTabId}
-        onCloseTab={handleCloseTab}
-        pageProps={pageProps}
-      />
+    <div className="flex h-screen w-screen flex-col bg-[#1e1e1e] text-gray-300 font-sans">
+      {/* Top title bar (VS Code style) */}
+      <div className="h-8 bg-[#2d2d2d] border-b border-black/30 flex items-center px-2">
+        <img src={logo} alt="HunyDev logo" className="h-5 w-5" />
+      </div>
+
+      {/* Main content area */}
+      <div className="flex flex-1">
+        <ActivityBar activeView={activeView} setActiveView={setActiveView} />
+        <Sidebar activeView={activeView} onOpenFile={handleOpenFile} />
+        <MainPanel
+          openTabs={openTabs}
+          activeTabId={activeTabId}
+          onTabClick={setActiveTabId}
+          onCloseTab={handleCloseTab}
+          pageProps={pageProps}
+        />
+      </div>
+
+      {/* Bottom status bar (VS Code style) */}
+      <div className="h-7 bg-[#252526] text-gray-300 text-[11px] border-t border-black/30 flex items-center px-3">
+        <div className="flex-1 min-w-0">
+          <span className="block truncate">This site is inspired by the Visual Studio Code UI. Not affiliated with or endorsed by Microsoft.</span>
+        </div>
+        <span>© 2025 HunyDev · All rights reserved.</span>
+      </div>
     </div>
   );
 };
