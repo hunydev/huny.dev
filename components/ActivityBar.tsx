@@ -9,10 +9,20 @@ type ActivityBarProps = {
 };
 
 const ActivityBar: React.FC<ActivityBarProps> = ({ activeView, setActiveView }) => {
+  const topItems = ACTIVITY_BAR_ITEMS.filter((i: any) => i.section === 'top');
+  const bottomItems = ACTIVITY_BAR_ITEMS.filter((i: any) => i.section === 'bottom');
+
+  const externalLinks: Partial<Record<ViewId, string>> = {
+    [ViewId.GitHub]: 'https://github.com',
+    [ViewId.Discord]: 'https://discord.com',
+    [ViewId.X]: 'https://x.com',
+    [ViewId.Email]: 'mailto:example@huny.dev',
+  };
+
   return (
     <div className="w-12 bg-[#333333] flex flex-col items-center justify-between py-2 border-r border-black/30">
         <div className="flex flex-col items-center gap-2">
-            {ACTIVITY_BAR_ITEMS.slice(0, 4).map(item => (
+            {topItems.map(item => (
                 <button
                     key={item.id}
                     onClick={() => setActiveView(item.id)}
@@ -28,16 +38,18 @@ const ActivityBar: React.FC<ActivityBarProps> = ({ activeView, setActiveView }) 
         </div>
 
         <div className="flex flex-col items-center gap-2">
-             {ACTIVITY_BAR_ITEMS.slice(4).map(item => (
+             {bottomItems.map(item => (
                 <button
                     key={item.id}
-                    onClick={() => setActiveView(item.id)}
+                    onClick={() => {
+                      const url = externalLinks[item.id as keyof typeof externalLinks];
+                      if (url) window.open(url, '_blank');
+                    }}
                     className={`p-2 rounded-md transition-colors duration-200 relative ${
-                        activeView === item.id ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/10'
+                        'text-gray-400 hover:text-white hover:bg-white/10'
                     }`}
                     title={item.title}
                 >
-                    {activeView === item.id && <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-500"></div>}
                     {item.icon}
                 </button>
             ))}
