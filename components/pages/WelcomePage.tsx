@@ -10,7 +10,7 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView }) => {
         <div className="text-gray-300 max-w-4xl mx-auto font-sans leading-relaxed">
             <header className="mb-12">
                 <h1 className="text-5xl font-thin mb-2">Huny<span className="font-light">Dev</span></h1>
-                <p className="text-xl text-gray-400">Portfolio & Digital Playground</p>
+                <p className="text-xl text-gray-400">Works & Digital Playground</p>
             </header>
 
             <main className="grid grid-cols-1 md:grid-cols-2 gap-12">

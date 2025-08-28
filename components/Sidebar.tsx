@@ -65,7 +65,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile }) => {
       case ViewId.Docs:
         return <GenericView title="Docs"><p className="text-sm text-gray-400">Documentation section coming soon.</p></GenericView>;
       case ViewId.Apps:
-        return <GenericView title="Apps"><p className="text-sm text-gray-400">Apps portfolio section coming soon.</p></GenericView>;
+        return <GenericView title="Apps"><p className="text-sm text-gray-400">Apps Works section coming soon.</p></GenericView>;
       default:
         return <ExplorerView onOpenFile={onOpenFile} />;
     }

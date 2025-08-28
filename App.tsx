@@ -11,29 +11,25 @@ const App: React.FC = () => {
   const [activeTabId, setActiveTabId] = useState<string>('');
 
   const handleOpenFile = useCallback((fileId: string) => {
-    const existingTab = openTabs.find(tab => tab.id === fileId);
-    if (existingTab) {
-      setActiveTabId(fileId);
-    } else {
-      const pageInfo = PAGES[fileId];
-      if (pageInfo) {
-        const newTab: Tab = {
-          id: fileId,
-          title: pageInfo.title,
-          icon: pageInfo.icon,
-        };
-        setOpenTabs(prevTabs => [...prevTabs, newTab]);
-        setActiveTabId(fileId);
-      }
-    }
-  }, [openTabs]);
+    const pageInfo = PAGES[fileId];
+    if (!pageInfo) return;
+    setOpenTabs(prevTabs => {
+      const exists = prevTabs.some(tab => tab.id === fileId);
+      if (exists) return prevTabs;
+      const newTab: Tab = {
+        id: fileId,
+        title: pageInfo.title,
+        icon: pageInfo.icon,
+      };
+      return [...prevTabs, newTab];
+    });
+    setActiveTabId(fileId);
+  }, []);
 
   useEffect(() => {
-    // Open welcome tab on initial load
-    if (openTabs.length === 0) {
-      handleOpenFile('welcome');
-    }
-  }, [handleOpenFile, openTabs.length]);
+    // Open welcome tab on initial load (deduped inside handleOpenFile)
+    handleOpenFile('welcome');
+  }, [handleOpenFile]);
 
 
   const handleCloseTab = (tabId: string) => {

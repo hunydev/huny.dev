@@ -19,8 +19,8 @@ const ProjectCard = ({ title, description, tags, link }: { title: string, descri
 const ProjectPage: React.FC<PageProps> = () => {
     const projects = [
         {
-            title: "Portfolio Website",
-            description: "This very website. A VSCode-themed portfolio built with React, TypeScript and TailwindCSS to showcase my skills in a creative way.",
+            title: "Works Website",
+            description: "This very website. A VSCode-themed Works site built with React, TypeScript and TailwindCSS to showcase my skills in a creative way.",
             tags: ["React", "TypeScript", "TailwindCSS", "Vite"],
             link: "#"
         },
