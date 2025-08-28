@@ -10,6 +10,8 @@ const App: React.FC = () => {
   const [activeView, setActiveView] = useState<ViewId>(ViewId.Explorer);
   const [openTabs, setOpenTabs] = useState<Tab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string>('');
+  const [sidebarWidth, setSidebarWidth] = useState<number>(256);
+  const [isResizing, setIsResizing] = useState<boolean>(false);
 
   const handleOpenFile = useCallback((fileId: string) => {
     const pageInfo = PAGES[fileId];
@@ -31,6 +33,32 @@ const App: React.FC = () => {
     // Open welcome tab on initial load (deduped inside handleOpenFile)
     handleOpenFile('welcome');
   }, [handleOpenFile]);
+
+  const handleSidebarResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+    const startX = e.clientX;
+    const startWidth = sidebarWidth;
+
+    const onMouseMove = (ev: MouseEvent) => {
+      const delta = ev.clientX - startX;
+      const newWidth = Math.min(480, Math.max(180, startWidth + delta));
+      setSidebarWidth(newWidth);
+    };
+
+    const onMouseUp = () => {
+      setIsResizing(false);
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }, [sidebarWidth]);
 
 
   const handleCloseTab = (tabId: string) => {
@@ -55,16 +83,20 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen w-screen flex-col bg-[#1e1e1e] text-gray-300 font-sans">
+    <div className="flex h-screen w-full flex-col bg-[#1e1e1e] text-gray-300 font-sans overflow-hidden">
       {/* Top title bar (VS Code style) */}
       <div className="h-8 bg-[#2d2d2d] border-b border-black/30 flex items-center px-2">
         <img src={logo} alt="HunyDev logo" className="h-5 w-5" />
       </div>
 
       {/* Main content area */}
-      <div className="flex flex-1">
+      <div className="flex flex-1 min-w-0">
         <ActivityBar activeView={activeView} setActiveView={setActiveView} />
-        <Sidebar activeView={activeView} onOpenFile={handleOpenFile} />
+        <Sidebar activeView={activeView} onOpenFile={handleOpenFile} width={sidebarWidth} />
+        <div
+          className={`w-1 cursor-col-resize bg-transparent hover:bg-white/10 ${isResizing ? 'bg-blue-500/40' : ''}`}
+          onMouseDown={handleSidebarResizeStart}
+        />
         <MainPanel
           openTabs={openTabs}
           activeTabId={activeTabId}

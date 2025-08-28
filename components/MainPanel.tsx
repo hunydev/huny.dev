@@ -11,7 +11,7 @@ type TabBarProps = {
 
 const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCloseTab }) => {
   return (
-    <div className="flex bg-[#252526]">
+    <div className="flex bg-[#252526] overflow-x-auto">
       {openTabs.map(tab => (
         <div
           key={tab.id}
@@ -63,14 +63,14 @@ const MainPanel: React.FC<MainPanelProps> = ({ openTabs, activeTabId, onTabClick
   }
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 min-w-0 flex flex-col">
       <TabBar
         openTabs={openTabs}
         activeTabId={activeTabId}
         onTabClick={onTabClick}
         onCloseTab={onCloseTab}
       />
-      <div className="flex-1 bg-[#1e1e1e] p-4 md:p-8 overflow-y-auto">
+      <div className="flex-1 min-w-0 bg-[#1e1e1e] p-4 md:p-8 overflow-y-auto overflow-x-hidden">
         {ActiveComponentContent ? ActiveComponentContent : 
             <div className="flex items-center justify-center h-full text-gray-500">
                 <p>Open a file to start editing.</p>

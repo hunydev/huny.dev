@@ -7,6 +7,7 @@ import logo128 from '../logo_128x128.png';
 type SidebarProps = {
   activeView: ViewId;
   onOpenFile: (fileId: string) => void;
+  width?: number;
 };
 
 const ExplorerView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => (
@@ -155,7 +156,7 @@ const MediaView: React.FC = () => {
 };
 
 
-const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile, width = 256 }) => {
 
   const renderView = () => {
     switch (activeView) {
@@ -182,7 +183,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile }) => {
     }
   };
 
-  return <div className="w-64 bg-[#252526] border-r border-black/30">{renderView()}</div>;
+  return <div className="bg-[#252526] border-r border-black/30 shrink-0" style={{ width }}>{renderView()}</div>;
 };
 
 export default Sidebar;
