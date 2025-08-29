@@ -90,7 +90,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Main content area */}
-      <div className="flex flex-1 min-w-0">
+      <div className="flex flex-1 min-w-0 min-h-0">
         <ActivityBar activeView={activeView} setActiveView={setActiveView} />
         <Sidebar activeView={activeView} onOpenFile={handleOpenFile} width={sidebarWidth} />
         <div

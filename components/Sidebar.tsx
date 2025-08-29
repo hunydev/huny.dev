@@ -183,7 +183,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile, width = 256 }
     }
   };
 
-  return <div className="bg-[#252526] border-r border-black/30 shrink-0" style={{ width }}>{renderView()}</div>;
+  return <div className="bg-[#252526] border-r border-black/30 shrink-0 min-h-0 overflow-y-auto" style={{ width }}>{renderView()}</div>;
 };
 
 export default Sidebar;
