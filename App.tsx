@@ -211,7 +211,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Main content area */}
-      <div className="flex flex-1 min-w-0 min-h-0 relative">
+      <div className="flex flex-1 min-w-0 min-h-0 relative overflow-hidden">
         <ActivityBar
           activeView={activeView}
           setActiveView={setActiveView}
@@ -248,7 +248,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Bottom status bar (VS Code style) */}
-      <div className="bg-[#252526] text-gray-300 text-[11px] border-t border-black/30 flex flex-col items-start px-3 py-1.5 gap-1 md:h-7 md:flex-row md:items-center md:py-0 md:gap-0">
+      <div className="bg-[#252526] text-gray-300 text-[11px] border-t border-black/30 flex flex-col items-start px-3 py-1.5 gap-1 md:h-7 md:flex-row md:items-center md:py-0 md:gap-0 relative z-50">
         <div className="flex-1 min-w-0">
           <span className="block truncate">This site is inspired by the Visual Studio Code UI. Not affiliated with or endorsed by Microsoft.</span>
         </div>
