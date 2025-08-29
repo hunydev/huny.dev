@@ -12,6 +12,9 @@ const App: React.FC = () => {
   const [activeTabId, setActiveTabId] = useState<string>('');
   const [sidebarWidth, setSidebarWidth] = useState<number>(256);
   const [isResizing, setIsResizing] = useState<boolean>(false);
+  const [isSidebarPinned, setIsSidebarPinned] = useState<boolean>(true);
+  const [overlayOpen, setOverlayOpen] = useState<boolean>(false);
+  const [overlayView, setOverlayView] = useState<ViewId | null>(null);
 
   const handleOpenFile = useCallback((fileId: string) => {
     const pageInfo = PAGES[fileId];
@@ -76,7 +79,37 @@ const App: React.FC = () => {
       }
     }
   };
-  
+
+  const handleActivityItemClick = (view: ViewId) => {
+    if (isSidebarPinned) {
+      setActiveView(view);
+      return;
+    }
+    // Overlay behavior when unpinned
+    if (overlayOpen && overlayView === view) {
+      setOverlayOpen(false);
+    } else {
+      setOverlayView(view);
+      setOverlayOpen(true);
+    }
+  };
+
+  const toggleSidebarPinned = () => {
+    setIsSidebarPinned(prev => {
+      const next = !prev;
+      if (next) {
+        // When pinning back, close overlay
+        setOverlayOpen(false);
+        setOverlayView(null);
+      } else {
+        // When unpinned, clear overlay state; Activity highlights are hidden via ActivityBar prop
+        setOverlayOpen(false);
+        setOverlayView(null);
+      }
+      return next;
+    });
+  };
+
   const pageProps: PageProps = {
     onOpenFile: handleOpenFile,
     setActiveView: setActiveView,
@@ -87,16 +120,48 @@ const App: React.FC = () => {
       {/* Top title bar (VS Code style) */}
       <div className="h-8 bg-[#2d2d2d] border-b border-black/30 flex items-center px-2">
         <img src={logo} alt="HunyDev logo" className="h-5 w-5" />
+        <div className="ml-auto flex items-center">
+          <button
+            type="button"
+            aria-pressed={isSidebarPinned}
+            onClick={toggleSidebarPinned}
+            className={`p-1.5 rounded hover:bg-white/10 text-gray-300 ${isSidebarPinned ? 'text-white' : 'text-gray-300'}`}
+            title={isSidebarPinned ? '기본 사이드바: 설정됨' : '기본 사이드바: 해제됨'}
+          >
+            {isSidebarPinned ? (
+              // Pinned: filled left panel icon
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                <rect x="3" y="4" width="6" height="16" rx="1" />
+                <rect x="10" y="4" width="11" height="16" rx="1" fill="currentColor" opacity="0.3" />
+              </svg>
+            ) : (
+              // Unpinned: outline left panel icon
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
+                <rect x="3" y="4" width="18" height="16" rx="1" />
+                <line x1="9" y1="4" x2="9" y2="20" />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Main content area */}
-      <div className="flex flex-1 min-w-0 min-h-0">
-        <ActivityBar activeView={activeView} setActiveView={setActiveView} />
-        <Sidebar activeView={activeView} onOpenFile={handleOpenFile} width={sidebarWidth} />
-        <div
-          className={`w-1 cursor-col-resize bg-transparent hover:bg-white/10 ${isResizing ? 'bg-blue-500/40' : ''}`}
-          onMouseDown={handleSidebarResizeStart}
+      <div className="flex flex-1 min-w-0 min-h-0 relative">
+        <ActivityBar
+          activeView={activeView}
+          setActiveView={setActiveView}
+          isSidebarPinned={isSidebarPinned}
+          onItemClick={handleActivityItemClick}
         />
+        {isSidebarPinned && (
+          <>
+            <Sidebar activeView={activeView} onOpenFile={handleOpenFile} width={sidebarWidth} />
+            <div
+              className={`w-1 cursor-col-resize bg-transparent hover:bg-white/10 ${isResizing ? 'bg-blue-500/40' : ''}`}
+              onMouseDown={handleSidebarResizeStart}
+            />
+          </>
+        )}
         <MainPanel
           openTabs={openTabs}
           activeTabId={activeTabId}
@@ -104,6 +169,17 @@ const App: React.FC = () => {
           onCloseTab={handleCloseTab}
           pageProps={pageProps}
         />
+        {/* Overlay sidebar when unpinned */}
+        {!isSidebarPinned && (
+          <div
+            className={`absolute inset-y-0 left-12 z-30 transform transition-transform duration-200 ${overlayOpen ? 'translate-x-0 pointer-events-auto' : '-translate-x-full pointer-events-none'}`}
+            style={{ width: sidebarWidth }}
+          >
+            {overlayView && (
+              <Sidebar activeView={overlayView} onOpenFile={handleOpenFile} width={sidebarWidth} />
+            )}
+          </div>
+        )}
       </div>
 
       {/* Bottom status bar (VS Code style) */}
