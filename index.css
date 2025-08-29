@@ -75,3 +75,14 @@ html, body {
 /* Remove glow to avoid any halos near edges */
 
 /* Ensure consistent layout without reserving gutter globally (handled by overlay scrollbars) */
+
+/* Hide scrollbars utility for specific containers */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;    /* Firefox */
+}
+.no-scrollbar::-webkit-scrollbar { /* Chrome, Safari, Edge (Chromium) */
+  display: none;
+  width: 0;
+  height: 0;
+}
