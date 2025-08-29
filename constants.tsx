@@ -175,3 +175,10 @@ export const ACTIVITY_BAR_ITEMS = [
     title: 'Email',
   },
 ];
+
+export const EXTERNAL_LINKS: Partial<Record<ViewId, { title: string; url: string }>> = {
+  [ViewId.GitHub]: { title: 'GitHub', url: 'https://github.com' },
+  [ViewId.Discord]: { title: 'Discord', url: 'https://discord.com' },
+  [ViewId.X]: { title: 'X / Twitter', url: 'https://x.com' },
+  [ViewId.Email]: { title: 'Email', url: 'mailto:example@huny.dev' },
+};

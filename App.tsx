@@ -1,9 +1,9 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import ActivityBar from './components/ActivityBar';
 import Sidebar from './components/Sidebar';
 import MainPanel from './components/MainPanel';
 import { ViewId, Tab, PageProps } from './types';
-import { PAGES } from './constants';
+import { PAGES, ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS } from './constants';
 import logo from './logo_128x128.png';
 
 const App: React.FC = () => {
@@ -15,6 +15,8 @@ const App: React.FC = () => {
   const [isSidebarPinned, setIsSidebarPinned] = useState<boolean>(true);
   const [overlayOpen, setOverlayOpen] = useState<boolean>(false);
   const [overlayView, setOverlayView] = useState<ViewId | null>(null);
+  const [socialOpen, setSocialOpen] = useState<boolean>(false);
+  const socialRef = useRef<HTMLDivElement | null>(null);
 
   const handleOpenFile = useCallback((fileId: string) => {
     const pageInfo = PAGES[fileId];
@@ -110,6 +112,26 @@ const App: React.FC = () => {
     });
   };
 
+  // Close social dropdown on outside click or ESC
+  useEffect(() => {
+    const onDocMouseDown = (e: MouseEvent) => {
+      if (!socialRef.current) return;
+      const target = e.target as Node | null;
+      if (target && !socialRef.current.contains(target)) {
+        setSocialOpen(false);
+      }
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSocialOpen(false);
+    };
+    document.addEventListener('mousedown', onDocMouseDown);
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onDocMouseDown);
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, []);
+
   const pageProps: PageProps = {
     onOpenFile: handleOpenFile,
     setActiveView: setActiveView,
@@ -120,7 +142,7 @@ const App: React.FC = () => {
       {/* Top title bar (VS Code style) */}
       <div className="h-8 bg-[#2d2d2d] border-b border-black/30 flex items-center px-2">
         <img src={logo} alt="HunyDev logo" className="h-5 w-5" />
-        <div className="ml-auto flex items-center">
+        <div className="ml-auto flex items-center gap-1">
           <button
             type="button"
             aria-pressed={isSidebarPinned}
@@ -142,6 +164,49 @@ const App: React.FC = () => {
               </svg>
             )}
           </button>
+
+          {/* SNS dropdown trigger */}
+          <div className="relative" ref={socialRef}>
+            <button
+              type="button"
+              onClick={() => setSocialOpen(v => !v)}
+              className="p-1.5 rounded hover:bg-white/10 text-gray-300"
+              title="연락처 · SNS"
+              aria-haspopup="menu"
+              aria-expanded={socialOpen}
+            >
+              {/* User icon */}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5s-5 2.239-5 5s2.239 5 5 5m0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5z" />
+              </svg>
+            </button>
+
+            {socialOpen && (
+              <div className="absolute right-0 top-full mt-1 w-44 bg-[#2d2d2d] border border-black/30 rounded shadow-lg z-50">
+                <ul className="py-1">
+                  {ACTIVITY_BAR_ITEMS.filter((i: any) => i.section === 'bottom').map(item => {
+                    const link = EXTERNAL_LINKS[item.id as keyof typeof EXTERNAL_LINKS];
+                    if (!link) return null;
+                    const href = link.url;
+                    const isMail = href.startsWith('mailto:');
+                    return (
+                      <li key={item.id} className="w-full">
+                        <a
+                          href={href}
+                          target={isMail ? undefined : '_blank'}
+                          rel={isMail ? undefined : 'noopener'}
+                          className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-white/10"
+                        >
+                          <span className="text-gray-300">{item.icon}</span>
+                          <span>{link.title}</span>
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
