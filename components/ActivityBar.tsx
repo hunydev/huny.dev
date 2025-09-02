@@ -22,6 +22,7 @@ const ActivityBar: React.FC<ActivityBarProps> = ({ activeView, setActiveView, is
   const lastYRef = React.useRef(0);
   const dragStartedRef = React.useRef(false);
   const [isDragging, setIsDragging] = React.useState(false);
+  const DRAG_THRESHOLD = 8; // px
   const topGroupRef = React.useRef<HTMLDivElement | null>(null);
   const bottomGroupRef = React.useRef<HTMLDivElement | null>(null);
   const bottomHeightRef = React.useRef<number>(0);
@@ -88,16 +89,17 @@ const ActivityBar: React.FC<ActivityBarProps> = ({ activeView, setActiveView, is
     dragStartedRef.current = false;
     isDraggingRef.current = true;
     lastYRef.current = e.clientY;
-    el.setPointerCapture?.(e.pointerId);
+    // Defer pointer capture until an actual drag is detected
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const el = scrollRef.current;
     if (!el || !isDraggingRef.current) return;
     const dy = e.clientY - lastYRef.current;
-    if (!dragStartedRef.current && Math.abs(dy) > 3) {
+    if (!dragStartedRef.current && Math.abs(dy) > DRAG_THRESHOLD) {
       dragStartedRef.current = true;
       setIsDragging(true);
+      el.setPointerCapture?.(e.pointerId);
     }
     if (dragStartedRef.current) {
       el.scrollTop -= dy;
@@ -110,7 +112,7 @@ const ActivityBar: React.FC<ActivityBarProps> = ({ activeView, setActiveView, is
 
   const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
     const el = scrollRef.current;
-    if (el && isDraggingRef.current) {
+    if (el && isDraggingRef.current && dragStartedRef.current) {
       el.releasePointerCapture?.(e.pointerId);
     }
     isDraggingRef.current = false;
@@ -138,7 +140,7 @@ const ActivityBar: React.FC<ActivityBarProps> = ({ activeView, setActiveView, is
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         onPointerLeave={onPointerLeave}
-        className={`flex-1 w-full overflow-y-auto no-scrollbar ${isDragging ? 'cursor-grabbing select-none' : 'cursor-default'}`}
+        className={`flex-1 w-full overflow-y-auto no-scrollbar ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
       >
         <div className="min-h-full flex flex-col justify-between">
           <div ref={topGroupRef} className="flex flex-col items-center gap-2 pb-2">
