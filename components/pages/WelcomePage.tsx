@@ -1,10 +1,146 @@
 import React from 'react';
 import { PageProps, ViewId } from '../../types';
+import { ACTIVITY_BAR_ITEMS, PAGES } from '../../constants';
 
-const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView }) => {
+const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivityClick }) => {
     const handleContactClick = () => {
         setActiveView(ViewId.Email);
     };
+
+    // Recent tabs: read from sessionStorage (exclude 'welcome')
+    const [recentIds, setRecentIds] = React.useState<string[]>([]);
+    React.useEffect(() => {
+        try {
+            const raw = sessionStorage.getItem('recentTabs');
+            const arr = raw ? JSON.parse(raw) : [];
+            if (Array.isArray(arr)) {
+                setRecentIds(arr.filter((id: string) => id !== 'welcome').slice(0, 5));
+            }
+        } catch {}
+    }, []);
+    
+    // Highlights data from provided about.json
+    const highlightGroups = React.useMemo(() => [
+        {
+            title: 'Domain',
+            items: ['TTS', 'AI'],
+            tile: 'bg-violet-500/10 border-violet-500/20',
+            heading: 'text-violet-300',
+            chip: 'bg-violet-500/10 border-violet-500/20',
+        },
+        {
+            title: 'Development',
+            items: ['Software Engineering', 'Backend Web Development', 'Desktop Application Development', 'Cloud Architecture & Deployment'],
+            tile: 'bg-blue-500/10 border-blue-500/20',
+            heading: 'text-blue-300',
+            chip: 'bg-blue-500/10 border-blue-500/20',
+        },
+        {
+            title: 'Languages — Primary',
+            items: ['Go', 'C'],
+            tile: 'bg-emerald-500/10 border-emerald-500/20',
+            heading: 'text-emerald-300',
+            chip: 'bg-emerald-500/10 border-emerald-500/20',
+        },
+        {
+            title: 'Languages — Extra',
+            items: ['Java', 'Python', 'C#'],
+            tile: 'bg-teal-500/10 border-teal-500/20',
+            heading: 'text-teal-300',
+            chip: 'bg-teal-500/10 border-teal-500/20',
+        },
+        {
+            title: 'OS',
+            items: ['Windows', 'Linux'],
+            tile: 'bg-slate-500/10 border-slate-500/20',
+            heading: 'text-slate-300',
+            chip: 'bg-slate-500/10 border-slate-500/20',
+        },
+        {
+            title: 'IDE',
+            items: ['Visual Studio Code', 'Visual Studio', 'Eclipse(STS)'],
+            tile: 'bg-sky-500/10 border-sky-500/20',
+            heading: 'text-sky-300',
+            chip: 'bg-sky-500/10 border-sky-500/20',
+        },
+        {
+            title: 'SCM',
+            items: ['Git (GitHub)', 'SVN'],
+            tile: 'bg-amber-500/10 border-amber-500/20',
+            heading: 'text-amber-300',
+            chip: 'bg-amber-500/10 border-amber-500/20',
+        },
+        {
+            title: 'CI/CD',
+            items: ['GitHub Actions', 'Jenkins'],
+            tile: 'bg-rose-500/10 border-rose-500/20',
+            heading: 'text-rose-300',
+            chip: 'bg-rose-500/10 border-rose-500/20',
+        },
+        {
+            title: 'Infra',
+            items: ['AWS'],
+            tile: 'bg-yellow-500/10 border-yellow-500/20',
+            heading: 'text-yellow-300',
+            chip: 'bg-yellow-500/10 border-yellow-500/20',
+        },
+        {
+            title: 'Platform',
+            items: ['Cloudflare', 'Netlify', 'YouWare', 'Google AI Studio'],
+            tile: 'bg-indigo-500/10 border-indigo-500/20',
+            heading: 'text-indigo-300',
+            chip: 'bg-indigo-500/10 border-indigo-500/20',
+        },
+        {
+            title: 'AI Tools',
+            items: ['ChatGPT', 'Copilot', 'Gemini', 'Windsurf'],
+            tile: 'bg-fuchsia-500/10 border-fuchsia-500/20',
+            heading: 'text-fuchsia-300',
+            chip: 'bg-fuchsia-500/10 border-fuchsia-500/20',
+        },
+        {
+            title: 'Docs',
+            items: ['Notion'],
+            tile: 'bg-cyan-500/10 border-cyan-500/20',
+            heading: 'text-cyan-300',
+            chip: 'bg-cyan-500/10 border-cyan-500/20',
+        },
+        {
+            title: 'Project',
+            items: ['Teams'],
+            tile: 'bg-violet-500/10 border-violet-500/20',
+            heading: 'text-violet-300',
+            chip: 'bg-violet-500/10 border-violet-500/20',
+        },
+        {
+            title: 'Work',
+            items: ['MS365'],
+            tile: 'bg-zinc-500/10 border-zinc-500/20',
+            heading: 'text-zinc-300',
+            chip: 'bg-zinc-500/10 border-zinc-500/20',
+        },
+        {
+            title: 'Chart',
+            items: ['Whimsical'],
+            tile: 'bg-pink-500/10 border-pink-500/20',
+            heading: 'text-pink-300',
+            chip: 'bg-pink-500/10 border-pink-500/20',
+        },
+        {
+            title: 'Web',
+            items: ['IIS', 'Nginx'],
+            tile: 'bg-orange-500/10 border-orange-500/20',
+            heading: 'text-orange-300',
+            chip: 'bg-orange-500/10 border-orange-500/20',
+        },
+        {
+            title: 'Blog',
+            items: ['BlogPro'],
+            tile: 'bg-emerald-500/10 border-emerald-500/20',
+            heading: 'text-emerald-300',
+            chip: 'bg-emerald-500/10 border-emerald-500/20',
+        },
+    ], []);
     
     return (
         <div className="text-gray-300 max-w-6xl mx-auto font-sans leading-relaxed px-6 md:px-8">
@@ -19,31 +155,44 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView }) => {
             <main className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 <section>
                     <h2 className="text-2xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Start</h2>
-                    <ul className="space-y-3">
-                        <li>
-                            <button onClick={() => onOpenFile('project')} className="flex items-center gap-3 text-blue-400 hover:text-blue-300 w-full text-left">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
-                                <span className="text-lg">Browse Works...</span>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                        {ACTIVITY_BAR_ITEMS.filter((i: any) => i.section === 'top').map(item => (
+                            <button
+                                key={String(item.id)}
+                                onClick={() => (onActivityClick ? onActivityClick(item.id as ViewId) : setActiveView(item.id as ViewId))}
+                                className="aspect-square rounded-md bg-white/[0.03] hover:bg-white/10 transition flex flex-col items-center justify-center gap-1 text-gray-300"
+                                title={item.title}
+                            >
+                                <span className="text-gray-200">{item.icon}</span>
+                                <span className="text-xs text-gray-400">{item.title}</span>
                             </button>
-                        </li>
-                        <li>
-                            <button onClick={() => onOpenFile('about')} className="flex items-center gap-3 text-blue-400 hover:text-blue-300 w-full text-left">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                                <span className="text-lg">About Me</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button onClick={handleContactClick} className="flex items-center gap-3 text-blue-400 hover:text-blue-300 w-full text-left">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                <span className="text-lg">Contact Me</span>
-                            </button>
-                        </li>
-                    </ul>
+                        ))}
+                    </div>
                 </section>
 
                 <section>
                     <h2 className="text-2xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Recent</h2>
-                    <p className="text-gray-500">No recent folders.</p>
+                    {recentIds.length === 0 ? (
+                        <p className="text-gray-500">No recent items.</p>
+                    ) : (
+                        <ul className="space-y-2">
+                            {recentIds.map((id) => {
+                                const meta = PAGES[id];
+                                if (!meta) return null;
+                                return (
+                                    <li key={id}>
+                                        <button
+                                            onClick={() => onOpenFile(id)}
+                                            className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-white/10 text-left"
+                                        >
+                                            <span>{meta.icon}</span>
+                                            <span className="text-sm">{meta.title}</span>
+                                        </button>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    )}
                 </section>
 
                 {/* Explore: richer cards to guide first-time visitors */}
@@ -67,16 +216,23 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView }) => {
                     </div>
                 </section>
 
-                {/* Highlights: compact skill tags */}
+                {/* Highlights: tiles per category with subtle color differentiation */}
                 <section>
                     <h2 className="text-2xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Highlights</h2>
-                    <ul className="flex flex-wrap gap-2">
-                        {['TypeScript','React','Vite','Tailwind CSS','Node.js','REST/GraphQL','UI/UX','Open Source'].map(k => (
-                            <li key={k}>
-                                <span className="px-2.5 py-1 rounded-md bg-white/[0.05] border border-white/10 text-sm text-gray-300">{k}</span>
-                            </li>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {highlightGroups.map((g) => (
+                            <div key={g.title} className={`rounded-md border ${g.tile} p-3`}>
+                                <h3 className={`text-sm font-semibold ${g.heading}`}>{g.title}</h3>
+                                <ul className="mt-2 flex flex-wrap gap-2">
+                                    {g.items.map((item) => (
+                                        <li key={item}>
+                                            <span className={`px-2.5 py-1 rounded-md border ${g.chip} text-xs text-gray-200`}>{item}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
                         ))}
-                    </ul>
+                    </div>
                 </section>
             </main>
 

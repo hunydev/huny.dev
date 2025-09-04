@@ -32,12 +32,32 @@ const App: React.FC = () => {
       return [...prevTabs, newTab];
     });
     setActiveTabId(fileId);
+    // Update session-based recent list (exclude 'welcome', max 5)
+    try {
+      const raw = sessionStorage.getItem('recentTabs');
+      const arr: string[] = raw ? (JSON.parse(raw) as string[]) : [];
+      const next = [fileId, ...arr.filter(id => id !== fileId)];
+      const trimmed = next.filter(id => id !== 'welcome').slice(0, 5);
+      sessionStorage.setItem('recentTabs', JSON.stringify(trimmed));
+    } catch {}
   }, []);
 
   useEffect(() => {
     // Open welcome tab on initial load (deduped inside handleOpenFile)
     handleOpenFile('welcome');
   }, [handleOpenFile]);
+
+  // Keep session-based recent list in sync with last visited tab
+  useEffect(() => {
+    if (!activeTabId) return;
+    try {
+      const raw = sessionStorage.getItem('recentTabs');
+      const arr: string[] = raw ? (JSON.parse(raw) as string[]) : [];
+      const next = [activeTabId, ...arr.filter(id => id !== activeTabId)];
+      const trimmed = next.filter(id => id !== 'welcome').slice(0, 5);
+      sessionStorage.setItem('recentTabs', JSON.stringify(trimmed));
+    } catch {}
+  }, [activeTabId]);
 
   const handleSidebarResizeStart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -135,6 +155,7 @@ const App: React.FC = () => {
   const pageProps: PageProps = {
     onOpenFile: handleOpenFile,
     setActiveView: setActiveView,
+    onActivityClick: handleActivityItemClick,
   };
 
   return (
