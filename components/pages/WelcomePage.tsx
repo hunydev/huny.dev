@@ -44,7 +44,7 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         },
         {
             title: 'Languages — Extra',
-            items: ['Java', 'Python', 'C#'],
+            items: ['Java', 'C#', 'Python', 'JavaScript'],
             tile: 'bg-teal-500/10 border-teal-500/20',
             heading: 'text-teal-300',
             chip: 'bg-teal-500/10 border-teal-500/20',
@@ -79,14 +79,14 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         },
         {
             title: 'Infra',
-            items: ['AWS'],
+            items: ['AWS', 'Cloudflare'],
             tile: 'bg-yellow-500/10 border-yellow-500/20',
             heading: 'text-yellow-300',
             chip: 'bg-yellow-500/10 border-yellow-500/20',
         },
         {
             title: 'Platform',
-            items: ['Cloudflare', 'Netlify', 'YouWare', 'Google AI Studio'],
+            items: ['Netlify', 'Pikapods', 'YouWare', 'Google AI Studio'],
             tile: 'bg-indigo-500/10 border-indigo-500/20',
             heading: 'text-indigo-300',
             chip: 'bg-indigo-500/10 border-indigo-500/20',
@@ -100,35 +100,35 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         },
         {
             title: 'Docs',
-            items: ['Notion'],
+            items: ['Notion', 'Confluence'],
             tile: 'bg-cyan-500/10 border-cyan-500/20',
             heading: 'text-cyan-300',
             chip: 'bg-cyan-500/10 border-cyan-500/20',
         },
         {
             title: 'Project',
-            items: ['Teams'],
+            items: ['Teams', 'JIRA'],
             tile: 'bg-violet-500/10 border-violet-500/20',
             heading: 'text-violet-300',
             chip: 'bg-violet-500/10 border-violet-500/20',
         },
         {
             title: 'Work',
-            items: ['MS365'],
+            items: ['Windows 11', 'Microsoft 365'],
             tile: 'bg-zinc-500/10 border-zinc-500/20',
             heading: 'text-zinc-300',
             chip: 'bg-zinc-500/10 border-zinc-500/20',
         },
         {
             title: 'Chart',
-            items: ['Whimsical'],
+            items: ['Whimsical', 'Draw.io'],
             tile: 'bg-pink-500/10 border-pink-500/20',
             heading: 'text-pink-300',
             chip: 'bg-pink-500/10 border-pink-500/20',
         },
         {
             title: 'Web',
-            items: ['IIS', 'Nginx'],
+            items: ['IIS', 'Nginx', 'Apache'],
             tile: 'bg-orange-500/10 border-orange-500/20',
             heading: 'text-orange-300',
             chip: 'bg-orange-500/10 border-orange-500/20',
@@ -195,8 +195,27 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
                     )}
                 </section>
 
-                {/* Explore: richer cards to guide first-time visitors */}
-                <section>
+                {/* Highlights: tiles per category with subtle color differentiation (full width) */}
+                <section className="md:col-span-2">
+                    <h2 className="text-2xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Highlights</h2>
+                    <div className="grid grid-cols-2 gap-3">
+                        {highlightGroups.map((g) => (
+                            <div key={g.title} className={`rounded-md border ${g.tile} p-3`}>
+                                <h3 className={`text-sm font-semibold ${g.heading}`}>{g.title}</h3>
+                                <ul className="mt-2 flex flex-wrap gap-2">
+                                    {g.items.map((item) => (
+                                        <li key={item}>
+                                            <span className={`px-2.5 py-1 rounded-md border ${g.chip} text-xs text-gray-200`}>{item}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Explore: richer cards to guide first-time visitors (full width, placed below Highlights) */}
+                <section className="md:col-span-2">
                     <h2 className="text-2xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Explore</h2>
                     <div className="space-y-3">
                         <button onClick={() => onOpenFile('project')} className="w-full text-left rounded-md p-4 bg-white/[0.03] hover:bg-white/10 transition">
@@ -213,25 +232,6 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
                             </div>
                             <p className="ml-9 mt-1 text-sm text-gray-400">Who I am, what I do, and how I work.</p>
                         </button>
-                    </div>
-                </section>
-
-                {/* Highlights: tiles per category with subtle color differentiation */}
-                <section>
-                    <h2 className="text-2xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Highlights</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {highlightGroups.map((g) => (
-                            <div key={g.title} className={`rounded-md border ${g.tile} p-3`}>
-                                <h3 className={`text-sm font-semibold ${g.heading}`}>{g.title}</h3>
-                                <ul className="mt-2 flex flex-wrap gap-2">
-                                    {g.items.map((item) => (
-                                        <li key={item}>
-                                            <span className={`px-2.5 py-1 rounded-md border ${g.chip} text-xs text-gray-200`}>{item}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        ))}
                     </div>
                 </section>
             </main>

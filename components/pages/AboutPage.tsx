@@ -80,7 +80,7 @@ const AboutPage: React.FC<PageProps> = () => {
         <span className="text-gray-500">: {`{`}</span>
 
         <JsonArray field="primary" items={["Go", "C"]} level={2} />
-        <JsonArray field="extra" items={["Java", "Python", "C#"]} level={2} comma={false} />
+        <JsonArray field="extra" items={["Java", "C#", "Python", "JavaScript"]} level={2} comma={false} />
 
         <span className="text-gray-500">{`}`}</span>
         <span className="text-gray-500">,</span>
@@ -95,14 +95,14 @@ const AboutPage: React.FC<PageProps> = () => {
         <JsonArray field="ide" items={["Visual Studio Code", "Visual Studio", "Eclipse(STS)"]} level={2} />
         <JsonArray field="scm" items={["Git (GitHub)", "SVN"]} level={2} />
         <JsonArray field="ci_cd" items={["GitHub Actions", "Jenkins"]} level={2} />
-        <JsonArray field="infra" items={["AWS"]} level={2} />
-        <JsonArray field="platform" items={["Cloudflare", "Netlify", "YouWare", "Google AI Studio"]} level={2} />
+        <JsonArray field="infra" items={["AWS", "Cloudflare"]} level={2} />
+        <JsonArray field="platform" items={["Netlify", "Pikapods", "YouWare", "Google AI Studio"]} level={2} />
         <JsonArray field="ai_tools" items={["ChatGPT", "Copilot", "Gemini", "Windsurf"]} level={2} />
-        <JsonArray field="docs" items={["Notion"]} level={2} />
-        <JsonArray field="project" items={["Teams"]} level={2} />
-        <JsonArray field="work" items={["MS365"]} level={2} />
-        <JsonArray field="chart" items={["Whimsical"]} level={2} />
-        <JsonArray field="web" items={["IIS", "Nginx"]} level={2} />
+        <JsonArray field="docs" items={["Notion", "Confluence"]} level={2} />
+        <JsonArray field="project" items={["Teams", "JIRA"]} level={2} />
+        <JsonArray field="work" items={["Windows 11", "Microsoft 365"]} level={2} />
+        <JsonArray field="chart" items={["Whimsical", "Draw.io"]} level={2} />
+        <JsonArray field="web" items={["IIS", "Nginx", "Apache"]} level={2} />
         <JsonArray field="blog" items={["BlogPro"]} level={2} comma={false} />
 
         <span className="text-gray-500">{`}`}</span>
