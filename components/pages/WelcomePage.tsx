@@ -1,6 +1,7 @@
 import React from 'react';
 import { PageProps, ViewId } from '../../types';
 import { ACTIVITY_BAR_ITEMS, PAGES } from '../../constants';
+import { getCategoryById } from './bookmarksData';
 
 const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivityClick }) => {
     const handleContactClick = () => {
@@ -177,16 +178,42 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
                     ) : (
                         <ul className="space-y-2">
                             {recentIds.map((id) => {
-                                const meta = PAGES[id];
-                                if (!meta) return null;
+                                // Support dynamic routes like 'bookmark:<categoryId>'
+                                const [baseId, arg] = id.split(':');
+                                const baseMeta = PAGES[baseId] || PAGES[id];
+                                if (!baseMeta) return null;
+
+                                let displayTitle: string = baseMeta.title;
+                                let displayIcon: React.ReactNode = baseMeta.icon;
+
+                                if (baseId === 'bookmark') {
+                                    const categoryId = arg || 'all';
+                                    const cat = categoryId === 'all' ? undefined : getCategoryById(categoryId);
+                                    const catName = categoryId === 'all' ? 'All' : (cat?.name ?? categoryId);
+                                    displayTitle = `bookmarks (${catName})`;
+                                    const color = categoryId === 'all' ? '#9ca3af' : (cat?.color ?? '#9ca3af');
+                                    displayIcon = (
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 24 24"
+                                            fill="currentColor"
+                                            className="w-4 h-4"
+                                            style={{ color }}
+                                        >
+                                            <path d="M6 3.5C6 2.67 6.67 2 7.5 2h9A1.5 1.5 0 0 1 18 3.5v16.77c0 .57-.63.92-1.11.6l-4.78-3.2a1.5 1.5 0 0 0-1.64 0l-4.78 3.2c-.48.32-1.11-.03-1.11-.6z" />
+                                        </svg>
+                                    );
+                                }
+
                                 return (
                                     <li key={id}>
                                         <button
                                             onClick={() => onOpenFile(id)}
                                             className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-white/10 text-left"
+                                            title={displayTitle}
                                         >
-                                            <span>{meta.icon}</span>
-                                            <span className="text-sm">{meta.title}</span>
+                                            <span>{displayIcon}</span>
+                                            <span className="text-sm truncate">{displayTitle}</span>
                                         </button>
                                     </li>
                                 );
