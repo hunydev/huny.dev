@@ -74,9 +74,8 @@ const MEDIA_TREE: MediaNode[] = [
   },
 ];
 
-const MediaView: React.FC = () => {
+const MediaView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ 'Images': true, 'Images/logos': true });
-  const [selected, setSelected] = useState<{ type: 'image' | 'video'; name: string; src: string } | null>(null);
 
   const toggle = (path: string) => setExpanded(prev => ({ ...prev, [path]: !prev[path] }));
 
@@ -110,12 +109,19 @@ const MediaView: React.FC = () => {
       );
     } else {
       const filePath = path ? `${path}/${node.name}` : node.name;
-      const isSelected = selected && selected.name === node.name && selected.src === node.src;
       return (
         <button
           key={filePath}
-          onClick={() => setSelected({ type: node.type, name: node.name, src: node.src })}
-          className={`flex items-center text-left w-full rounded px-2 py-1 ${isSelected ? 'bg-white/15' : 'hover:bg-white/10'}`}
+          onClick={() => {
+            try {
+              const payload = { type: node.type, name: node.name, src: node.src };
+              const encoded = btoa(JSON.stringify(payload));
+              onOpenFile(`media:${encoded}`);
+            } catch {
+              // noop
+            }
+          }}
+          className={`flex items-center text-left w-full rounded px-2 py-1 hover:bg-white/10`}
           style={{ paddingLeft: depth * 12 + 12 }}
         >
           <span className="mr-2">
@@ -141,17 +147,6 @@ const MediaView: React.FC = () => {
       <div className="flex flex-col gap-1">
         {MEDIA_TREE.map((node) => renderNode(node, ''))}
       </div>
-      {selected && (
-        <div className="mt-3 border-t border-white/10 pt-2">
-          <div className="text-xs uppercase text-gray-400 tracking-wider mb-2">Preview</div>
-          {selected.type === 'image' ? (
-            <img src={selected.src} alt={selected.name} className="w-full max-h-40 object-contain rounded" />
-          ) : (
-            <video src={selected.src} controls className="w-full max-h-40 rounded" />
-          )}
-          <div className="mt-1 text-xs text-gray-400">{selected.name}</div>
-        </div>
-      )}
     </div>
   );
 };
@@ -204,7 +199,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile, width = 256 }
       case ViewId.Apps:
         return <GenericView title="Apps"><p className="text-sm text-gray-400">Apps Works section coming soon.</p></GenericView>;
       case ViewId.Media:
-        return <MediaView />;
+        return <MediaView onOpenFile={onOpenFile} />;
       case ViewId.Library:
         return <GenericView title="Library"><p className="text-sm text-gray-400">Library section coming soon.</p></GenericView>;
       case ViewId.Bookmark:

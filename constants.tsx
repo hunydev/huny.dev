@@ -4,6 +4,7 @@ import WelcomePage from './components/pages/WelcomePage';
 import ProjectPage from './components/pages/ProjectPage';
 import AboutPage from './components/pages/AboutPage';
 import BookmarkPage from './components/pages/BookmarkPage';
+import MediaPreviewPage from './components/pages/MediaPreviewPage';
 
 export const FileIcon = () => (
   <svg
@@ -28,6 +29,20 @@ export const PAGES: {
     title: 'Welcome',
     component: WelcomePage,
     icon: <React.Fragment />,
+  },
+  media: {
+    title: 'media',
+    component: MediaPreviewPage,
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 16 16"
+        fill="currentColor"
+        className="w-4 h-4 mr-2 text-gray-400"
+      >
+        <path d="M1.5 3A1.5 1.5 0 0 0 0 4.5v7A1.5 1.5 0 0 0 1.5 13h13a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 14.5 3h-13Zm2 2 3 4 2-2 4 5h-11l2-7Z" />
+      </svg>
+    ),
   },
   project: {
     title: 'project.js',

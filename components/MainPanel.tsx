@@ -56,11 +56,20 @@ type MainPanelProps = {
   pageProps: PageProps;
 };
 
-// Helper to support dynamic tab ids, e.g. `bookmark:<categoryId>`
+// Helper to support dynamic tab ids, e.g. `bookmark:<categoryId>` or `media:<base64JSON>`
 const parseTabRoute = (tabId: string): { baseId: string; routeParams?: Record<string, string> } => {
   const [baseId, arg] = tabId.split(':');
   if (baseId === 'bookmark') {
     return { baseId, routeParams: { categoryId: arg || 'all' } };
+  }
+  if (baseId === 'media') {
+    try {
+      const payload = arg ? JSON.parse(atob(arg)) as { type?: string; name?: string; src?: string } : null;
+      if (payload && payload.src) {
+        return { baseId, routeParams: { type: payload.type || '', name: payload.name || '', src: payload.src || '' } };
+      }
+    } catch {}
+    return { baseId };
   }
   return { baseId };
 };
