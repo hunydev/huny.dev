@@ -5,6 +5,7 @@ import ProjectPage from './components/pages/ProjectPage';
 import AboutPage from './components/pages/AboutPage';
 import BookmarkPage from './components/pages/BookmarkPage';
 import MediaPreviewPage from './components/pages/MediaPreviewPage';
+import NotesBoardPage from './components/pages/NotesBoardPage';
 
 export const FileIcon = () => (
   <svg
@@ -65,6 +66,21 @@ export const PAGES: {
         className="w-4 h-4 mr-2 text-gray-400"
       >
         <path d="M6 3.5C6 2.67 6.67 2 7.5 2h9A1.5 1.5 0 0 1 18 3.5v16.77c0 .57-.63.92-1.11.6l-4.78-3.2a1.5 1.5 0 0 0-1.64 0l-4.78 3.2c-.48.32-1.11-.03-1.11-.6z" />
+      </svg>
+    ),
+  },
+  notes: {
+    title: 'notes',
+    component: NotesBoardPage,
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 16 16"
+        fill="currentColor"
+        className="w-4 h-4 mr-2 text-gray-400"
+      >
+        <path d="M2.5 2A1.5 1.5 0 0 0 1 3.5v9A1.5 1.5 0 0 0 2.5 14h7.793l3.354-3.354A.5.5 0 0 0 14 10.293V3.5A1.5 1.5 0 0 0 12.5 2h-10Z" />
+        <path d="M10.5 13.5V11a1 1 0 0 1 1-1h2.5" opacity="0.6" />
       </svg>
     ),
   },

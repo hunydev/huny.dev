@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ViewId } from '../types';
 import { FileIcon } from '../constants';
 import { BOOKMARK_CATEGORIES, getBookmarkCountByCategory } from './pages/bookmarksData';
+import { NOTE_GROUPS, getNoteCountByGroup } from './pages/notesData';
 import logoImg from '../logo.png';
 import logo128 from '../logo_128x128.png';
 
@@ -185,6 +186,33 @@ const BookmarkView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
   );
 };
 
+const NotesView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
+  const Item: React.FC<{ id: string; name: string; color: string; emoji?: string; count: number }>
+    = ({ id, name, color, emoji, count }) => (
+    <button
+      onClick={() => onOpenFile(`notes:${id}`)}
+      className="flex items-center justify-between text-left w-full hover:bg-white/10 rounded px-2 py-1.5"
+    >
+      <span className="flex items-center gap-2">
+        <span className="inline-flex items-center justify-center w-5 h-5 rounded-sm" style={{ background: color }} />
+        <span className="text-sm">{emoji ? `${emoji} ` : ''}{name}</span>
+      </span>
+      <span className="text-xs text-gray-400">{count}</span>
+    </button>
+  );
+
+  return (
+    <div className="p-2">
+      <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Notes</h2>
+      <div className="flex flex-col gap-1">
+        {NOTE_GROUPS.map(g => (
+          <Item key={g.id} id={g.id} name={g.name} color={g.color} emoji={g.emoji} count={getNoteCountByGroup(g.id)} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 
 const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile, width = 256 }) => {
 
@@ -207,7 +235,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile, width = 256 }
       case ViewId.Lab:
         return <GenericView title="Lab"><p className="text-sm text-gray-400">Lab section coming soon.</p></GenericView>;
       case ViewId.Notes:
-        return <GenericView title="Notes"><p className="text-sm text-gray-400">Notes section coming soon.</p></GenericView>;
+        return <NotesView onOpenFile={onOpenFile} />;
       default:
         return <ExplorerView onOpenFile={onOpenFile} />;
     }

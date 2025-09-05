@@ -62,6 +62,9 @@ const parseTabRoute = (tabId: string): { baseId: string; routeParams?: Record<st
   if (baseId === 'bookmark') {
     return { baseId, routeParams: { categoryId: arg || 'all' } };
   }
+  if (baseId === 'notes') {
+    return { baseId, routeParams: { groupId: arg || '' } };
+  }
   if (baseId === 'media') {
     try {
       const payload = arg ? JSON.parse(atob(arg)) as { type?: string; name?: string; src?: string } : null;

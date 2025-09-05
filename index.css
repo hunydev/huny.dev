@@ -20,6 +20,10 @@ html, body {
 /* Ensure app root always paints the dark background */
 #root { background: var(--color-bg); min-height: 100vh; }
 
+/* Make form controls inherit foreground color for caret and placeholder */
+input, textarea { caret-color: currentColor; }
+input::placeholder, textarea::placeholder { color: currentColor; opacity: 0.7; }
+
 /* Scrollable containers: Firefox-only properties + track color */
 .overflow-y-auto, .overflow-x-auto, .overflow-auto {
   scrollbar-width: thin;
