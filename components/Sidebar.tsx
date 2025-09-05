@@ -35,6 +35,10 @@ const ExplorerView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
                 <FileIcon />
                 <span>about.json</span>
             </button>
+            <button onClick={() => onOpenFile('domain')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
+                <FileIcon />
+                <span>tts-history.md</span>
+            </button>
         </div>
     </div>
   </div>

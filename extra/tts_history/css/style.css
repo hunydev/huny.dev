@@ -1,0 +1,412 @@
+/* 기본 스타일 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* 헤더 스타일 */
+.header {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 2rem 0;
+    text-align: center;
+    color: white;
+}
+
+.header-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.header-subtitle {
+    font-size: 1.2rem;
+    font-weight: 300;
+    opacity: 0.9;
+}
+
+/* 필터 네비게이션 */
+.filter-nav {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 1rem 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.filter-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #667eea;
+    background: white;
+    color: #667eea;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* 메인 콘텐츠 */
+.main-content {
+    padding: 3rem 0;
+    background: white;
+    min-height: 80vh;
+}
+
+/* 타임라인 컨테이너 */
+.timeline-container {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 0;
+}
+
+.timeline-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, #667eea, #764ba2);
+    transform: translateX(-50%);
+    border-radius: 2px;
+}
+
+/* 타임라인 아이템 */
+.timeline-item {
+    position: relative;
+    margin: 3rem 0;
+    opacity: 0;
+    transform: translateY(50px);
+    animation: fadeInUp 0.8s ease forwards;
+}
+
+.timeline-item:nth-child(even) .timeline-content {
+    margin-left: 50%;
+    padding-left: 3rem;
+}
+
+.timeline-item:nth-child(odd) .timeline-content {
+    margin-right: 50%;
+    padding-right: 3rem;
+    text-align: right;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 50%;
+    top: 1rem;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    border: 4px solid white;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.3);
+}
+
+.timeline-marker.early {
+    background: #ff6b6b;
+}
+
+.timeline-marker.digital {
+    background: #4ecdc4;
+}
+
+.timeline-marker.ai {
+    background: #45b7d1;
+}
+
+/* 타임라인 콘텐츠 */
+.timeline-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid #f0f0f0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.timeline-content:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.timeline-year {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+}
+
+.timeline-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.timeline-description {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 1.5rem;
+    line-height: 1.7;
+}
+
+.timeline-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.timeline-item:nth-child(odd) .timeline-features {
+    justify-content: flex-end;
+}
+
+.feature-tag {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.timeline-researchers,
+.timeline-companies {
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+/* 모달 스타일 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 15px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #999;
+    z-index: 10;
+}
+
+.modal-close:hover {
+    color: #333;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+/* 푸터 */
+.footer {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    color: white;
+    text-align: center;
+    padding: 2rem 0;
+}
+
+/* 애니메이션 */
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.timeline-item.animate {
+    animation-delay: calc(var(--index) * 0.2s);
+}
+
+/* 필터링 애니메이션 */
+.timeline-item.hidden {
+    opacity: 0;
+    transform: scale(0.8);
+    height: 0;
+    margin: 0;
+    overflow: hidden;
+    transition: all 0.5s ease;
+}
+
+.timeline-item.visible {
+    opacity: 1;
+    transform: scale(1);
+    transition: all 0.5s ease;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .header-title {
+        font-size: 2rem;
+    }
+    
+    .header-subtitle {
+        font-size: 1rem;
+    }
+    
+    .filter-buttons {
+        gap: 0.5rem;
+    }
+    
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+    
+    .timeline-line {
+        left: 30px;
+    }
+    
+    .timeline-item:nth-child(even) .timeline-content,
+    .timeline-item:nth-child(odd) .timeline-content {
+        margin-left: 60px;
+        margin-right: 0;
+        padding-left: 2rem;
+        padding-right: 1.5rem;
+        text-align: left;
+    }
+    
+    .timeline-marker {
+        left: 30px;
+    }
+    
+    .timeline-item:nth-child(odd) .timeline-features {
+        justify-content: flex-start;
+    }
+    
+    .timeline-content {
+        padding: 1.5rem;
+    }
+    
+    .timeline-title {
+        font-size: 1.2rem;
+    }
+    
+    .container {
+        padding: 0 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-title {
+        font-size: 1.5rem;
+    }
+    
+    .filter-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.7rem;
+    }
+    
+    .timeline-content {
+        padding: 1rem;
+    }
+    
+    .timeline-title {
+        font-size: 1.1rem;
+    }
+    
+    .timeline-description {
+        font-size: 0.9rem;
+    }
+    
+    .modal-content {
+        width: 95%;
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+}
+
+/* 스크롤 애니메이션을 위한 클래스 */
+.timeline-item.in-view {
+    animation: slideInFromSide 0.8s ease forwards;
+}
+
+@keyframes slideInFromSide {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.timeline-item:nth-child(even).in-view {
+    animation: slideInFromRight 0.8s ease forwards;
+}
+
+@keyframes slideInFromRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
