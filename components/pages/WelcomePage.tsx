@@ -136,6 +136,13 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
             chip: 'bg-orange-500/10 border-orange-500/20',
         },
         {
+            title: 'SSH',
+            items: ['SecureCRT', 'Filezilla Pro'],
+            tile: 'bg-lime-500/10 border-lime-500/20',
+            heading: 'text-lime-300',
+            chip: 'bg-lime-500/10 border-lime-500/20',
+        },
+        {
             title: 'Blog',
             items: ['BlogPro'],
             tile: 'bg-emerald-500/10 border-emerald-500/20',

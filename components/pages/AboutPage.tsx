@@ -103,6 +103,7 @@ const AboutPage: React.FC<PageProps> = () => {
         <JsonArray field="work" items={["Windows 11", "Microsoft 365"]} level={2} />
         <JsonArray field="chart" items={["Whimsical", "Draw.io"]} level={2} />
         <JsonArray field="web" items={["IIS", "Nginx", "Apache"]} level={2} />
+        <JsonArray field="ssh" items={["SecureCRT", "Filezilla Pro"]} level={2} />
         <JsonArray field="blog" items={["BlogPro"]} level={2} comma={false} />
 
         <span className="text-gray-500">{`}`}</span>
