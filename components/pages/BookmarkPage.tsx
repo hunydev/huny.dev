@@ -1,0 +1,171 @@
+import React, { useMemo, useState } from 'react';
+import type { PageProps } from '../../types';
+import { BOOKMARK_CATEGORIES, getBookmarksByCategoryId, getCategoryById, type Bookmark } from './bookmarksData';
+
+const formatDate = (iso?: string) => {
+  if (!iso) return '-';
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '-';
+    return d.toISOString().slice(0, 10);
+  } catch {
+    return '-';
+  }
+};
+
+const BookmarkPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
+  const categoryId = routeParams?.categoryId ?? 'all';
+  const [view, setView] = useState<'card' | 'list'>(() => {
+    const v = typeof window !== 'undefined' ? window.localStorage.getItem('bookmark.view') : null;
+    return v === 'list' ? 'list' : 'card';
+  });
+
+  const category = useMemo(() => (categoryId === 'all' ? undefined : getCategoryById(categoryId)), [categoryId]);
+  const bookmarks = useMemo(() => getBookmarksByCategoryId(categoryId), [categoryId]);
+
+  const onToggleView = (next: 'card' | 'list') => {
+    setView(next);
+    try { window.localStorage.setItem('bookmark.view', next); } catch {}
+  };
+
+  const headerTitle = useMemo(() => {
+    if (categoryId === 'all') return 'Bookmarks · All';
+    if (category) return `Bookmarks · ${category.name}`;
+    return 'Bookmarks · Unknown';
+  }, [categoryId, category]);
+
+  return (
+    <div className="max-w-[1400px] mx-auto">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-xl font-semibold text-white">{headerTitle}</h1>
+          <p className="text-sm text-gray-400">{bookmarks.length} items</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            className={`px-3 py-1.5 rounded text-sm border border-white/10 ${view === 'card' ? 'bg-white/10 text-white' : 'text-gray-300 hover:bg-white/10'}`}
+            onClick={() => onToggleView('card')}
+            aria-pressed={view === 'card'}
+            title="Card view"
+          >
+            <span className="inline-flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M3 4h8v7H3zM13 4h8v7h-8zM3 13h8v7H3zM13 13h8v7h-8z"/></svg>
+              Card
+            </span>
+          </button>
+          <button
+            className={`px-3 py-1.5 rounded text-sm border border-white/10 ${view === 'list' ? 'bg-white/10 text-white' : 'text-gray-300 hover:bg-white/10'}`}
+            onClick={() => onToggleView('list')}
+            aria-pressed={view === 'list'}
+            title="List view"
+          >
+            <span className="inline-flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+              List
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {view === 'card' ? (
+        bookmarks.length === 0 ? (
+          <EmptyState onReset={() => onOpenFile?.('bookmark:all')} />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {bookmarks.map((b) => (
+              <CardItem key={b.id} bm={b} />
+            ))}
+          </div>
+        )
+      ) : (
+        bookmarks.length === 0 ? (
+          <EmptyState onReset={() => onOpenFile?.('bookmark:all')} />
+        ) : (
+          <div className="divide-y divide-white/10 rounded border border-white/10">
+            {bookmarks.map((b) => (
+              <ListItem key={b.id} bm={b} />)
+            )}
+          </div>
+        )
+      )}
+    </div>
+  );
+};
+
+const Tag: React.FC<{ text: string }> = ({ text }) => (
+  <span className="inline-block text-[11px] px-2 py-0.5 rounded bg-white/5 text-gray-300 border border-white/10">{text}</span>
+);
+
+const EmptyState: React.FC<{ onReset?: () => void }> = ({ onReset }) => (
+  <div className="border border-white/10 rounded p-6 text-center text-gray-400 bg-[#1e1e1e]">
+    <p className="mb-3">No bookmarks to show in this category.</p>
+    {onReset && (
+      <button onClick={onReset} className="px-3 py-1.5 text-sm rounded bg-white/10 hover:bg-white/15 border border-white/10 text-gray-200">
+        View All
+      </button>
+    )}
+  </div>
+);
+
+const Thumb: React.FC<{ src?: string; alt: string }> = ({ src, alt }) => (
+  <div className="w-14 h-14 rounded overflow-hidden bg-[#2d2d2d] border border-white/10 shrink-0">
+    {src ? (
+      <img src={src} alt={alt} className="w-full h-full object-cover" />
+    ) : (
+      <div className="w-full h-full grid place-items-center text-gray-500">—</div>
+    )}
+  </div>
+);
+
+const CardItem: React.FC<{ bm: Bookmark }> = ({ bm }) => {
+  const cat = getCategoryById(bm.categoryId);
+  return (
+    <div className="p-4 rounded bg-[#252526] border border-black/30 hover:border-white/20 transition-colors">
+      <div className="flex items-start gap-3">
+        <Thumb src={bm.thumbnail} alt={bm.name} />
+        <div className="min-w-0">
+          <a href={bm.url} target="_blank" rel="noopener noreferrer" className="text-white font-medium hover:underline break-all">{bm.name}</a>
+          {bm.description && <p className="text-sm text-gray-400 mt-0.5">{bm.description}</p>}
+          <div className="flex items-center gap-2 mt-2">
+            <span className="inline-flex items-center gap-1 text-xs text-gray-400">
+              <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: cat?.color || '#6b7280' }} />
+              {cat?.name || 'Misc'}
+            </span>
+            <span className="text-xs text-gray-500">•</span>
+            <span className="text-xs text-gray-400">Created {formatDate(bm.createdAt)}</span>
+            {bm.updatedAt && <span className="text-xs text-gray-400">· Updated {formatDate(bm.updatedAt)}</span>}
+          </div>
+          {bm.tags?.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-3">
+              {bm.tags.map(t => <Tag key={t} text={t} />)}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ListItem: React.FC<{ bm: Bookmark }> = ({ bm }) => {
+  const cat = getCategoryById(bm.categoryId);
+  return (
+    <div className="px-3 py-2 flex items-center gap-3 bg-[#1e1e1e] hover:bg-white/5">
+      <div className="w-1.5 h-5 rounded" style={{ backgroundColor: cat?.color || '#6b7280' }} />
+      <div className="min-w-0 flex-1">
+        <a href={bm.url} target="_blank" rel="noopener noreferrer" className="text-white hover:underline break-all">{bm.name}</a>
+        {bm.description && <p className="text-xs text-gray-400 truncate">{bm.description}</p>}
+      </div>
+      {bm.tags?.length > 0 && (
+        <div className="hidden md:flex flex-wrap gap-1.5 max-w-[40%]">
+          {bm.tags.map(t => <Tag key={t} text={t} />)}
+        </div>
+      )}
+      <div className="text-[11px] text-gray-400 whitespace-nowrap">
+        {formatDate(bm.createdAt)}
+        {bm.updatedAt && <span className="text-gray-500"> · {formatDate(bm.updatedAt)}</span>}
+      </div>
+    </div>
+  );
+};
+
+export default BookmarkPage;

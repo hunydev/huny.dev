@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ViewId } from '../types';
 import { FileIcon } from '../constants';
+import { BOOKMARK_CATEGORIES, getBookmarkCountByCategory } from './pages/bookmarksData';
 import logoImg from '../logo.png';
 import logo128 from '../logo_128x128.png';
 
@@ -155,6 +156,40 @@ const MediaView: React.FC = () => {
   );
 };
 
+const BookmarkView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
+  const Item: React.FC<{ id: string; name: string; color: string; emoji?: string; count: number }>
+    = ({ id, name, color, emoji, count }) => (
+    <button
+      onClick={() => onOpenFile(`bookmark:${id}`)}
+      className="flex items-center justify-between text-left w-full hover:bg-white/10 rounded px-2 py-1.5"
+    >
+      <span className="flex items-center gap-2">
+        <span className="inline-flex items-center justify-center w-5 h-5">
+          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" style={{ color }} aria-hidden>
+            <path d="M4 2.5A1.5 1.5 0 0 1 5.5 1h5A1.5 1.5 0 0 1 12 2.5v11.086a.5.5 0 0 1-.777.416L8 11.972l-3.223 2.03A.5.5 0 0 1 4 13.586z" />
+          </svg>
+        </span>
+        <span className="text-sm">{emoji ? `${emoji} ` : ''}{name}</span>
+      </span>
+      <span className="text-xs text-gray-400">{count}</span>
+    </button>
+  );
+
+  const total = getBookmarkCountByCategory('all');
+
+  return (
+    <div className="p-2">
+      <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Bookmarks</h2>
+      <div className="flex flex-col gap-1">
+        <Item id="all" name="All" color="#9ca3af" emoji="⭐" count={total} />
+        {BOOKMARK_CATEGORIES.map(c => (
+          <Item key={c.id} id={c.id} name={c.name} color={c.color} emoji={c.emoji} count={getBookmarkCountByCategory(c.id)} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 
 const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile, width = 256 }) => {
 
@@ -173,7 +208,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile, width = 256 }
       case ViewId.Library:
         return <GenericView title="Library"><p className="text-sm text-gray-400">Library section coming soon.</p></GenericView>;
       case ViewId.Bookmark:
-        return <GenericView title="Bookmark"><p className="text-sm text-gray-400">Bookmarks section coming soon.</p></GenericView>;
+        return <BookmarkView onOpenFile={onOpenFile} />;
       case ViewId.Lab:
         return <GenericView title="Lab"><p className="text-sm text-gray-400">Lab section coming soon.</p></GenericView>;
       case ViewId.Notes:

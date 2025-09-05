@@ -26,4 +26,5 @@ export type PageProps = {
   onOpenFile: (fileId: string) => void;
   setActiveView: (viewId: ViewId) => void;
   onActivityClick?: (viewId: ViewId) => void;
+  routeParams?: Record<string, string>;
 };

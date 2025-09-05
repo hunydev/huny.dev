@@ -3,6 +3,7 @@ import { ViewId, PageProps } from './types';
 import WelcomePage from './components/pages/WelcomePage';
 import ProjectPage from './components/pages/ProjectPage';
 import AboutPage from './components/pages/AboutPage';
+import BookmarkPage from './components/pages/BookmarkPage';
 
 export const FileIcon = () => (
   <svg
@@ -37,6 +38,20 @@ export const PAGES: {
     title: 'about.json',
     component: AboutPage,
     icon: <FileIcon />,
+  },
+  bookmark: {
+    title: 'bookmarks.json',
+    component: BookmarkPage,
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className="w-4 h-4 mr-2 text-gray-400"
+      >
+        <path d="M6 3.5C6 2.67 6.67 2 7.5 2h9A1.5 1.5 0 0 1 18 3.5v16.77c0 .57-.63.92-1.11.6l-4.78-3.2a1.5 1.5 0 0 0-1.64 0l-4.78 3.2c-.48.32-1.11-.03-1.11-.6z" />
+      </svg>
+    ),
   },
 };
 

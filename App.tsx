@@ -5,6 +5,7 @@ import MainPanel from './components/MainPanel';
 import { ViewId, Tab, PageProps } from './types';
 import { PAGES, ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS } from './constants';
 import logo from './logo_128x128.png';
+import { getCategoryById } from './components/pages/bookmarksData';
 
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState<ViewId>(ViewId.Explorer);
@@ -19,24 +20,57 @@ const App: React.FC = () => {
   const socialRef = useRef<HTMLDivElement | null>(null);
 
   const handleOpenFile = useCallback((fileId: string) => {
-    const pageInfo = PAGES[fileId];
+    const originalId = fileId;
+    let baseId = fileId;
+    let arg: string | undefined;
+
+    // Parse dynamic routes, e.g. bookmark:<categoryId>
+    const idx = fileId.indexOf(':');
+    if (idx > -1) {
+      baseId = fileId.slice(0, idx);
+      arg = fileId.slice(idx + 1);
+    }
+
+    const pageInfo = PAGES[baseId] || PAGES[fileId];
     if (!pageInfo) return;
+
+    let tabTitle = pageInfo.title;
+    let tabIcon: React.ReactNode = pageInfo.icon;
+    if (baseId === 'bookmark') {
+      const categoryId = arg || 'all';
+      const cat = categoryId === 'all' ? undefined : getCategoryById(categoryId);
+      const catName = categoryId === 'all' ? 'All' : (cat?.name ?? categoryId);
+      tabTitle = `bookmarks (${catName})`;
+      const color = categoryId === 'all' ? '#9ca3af' : (cat?.color ?? '#9ca3af');
+      tabIcon = (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          className="w-4 h-4 mr-2"
+          style={{ color }}
+        >
+          <path d="M6 3.5C6 2.67 6.67 2 7.5 2h9A1.5 1.5 0 0 1 18 3.5v16.77c0 .57-.63.92-1.11.6l-4.78-3.2a1.5 1.5 0 0 0-1.64 0l-4.78 3.2c-.48.32-1.11-.03-1.11-.6z" />
+        </svg>
+      );
+    }
+
     setOpenTabs(prevTabs => {
-      const exists = prevTabs.some(tab => tab.id === fileId);
+      const exists = prevTabs.some(tab => tab.id === originalId);
       if (exists) return prevTabs;
       const newTab: Tab = {
-        id: fileId,
-        title: pageInfo.title,
-        icon: pageInfo.icon,
+        id: originalId,
+        title: tabTitle,
+        icon: tabIcon,
       };
       return [...prevTabs, newTab];
     });
-    setActiveTabId(fileId);
+    setActiveTabId(originalId);
     // Update session-based recent list (exclude 'welcome', max 5)
     try {
       const raw = sessionStorage.getItem('recentTabs');
       const arr: string[] = raw ? (JSON.parse(raw) as string[]) : [];
-      const next = [fileId, ...arr.filter(id => id !== fileId)];
+      const next = [originalId, ...arr.filter(id => id !== originalId)];
       const trimmed = next.filter(id => id !== 'welcome').slice(0, 5);
       sessionStorage.setItem('recentTabs', JSON.stringify(trimmed));
     } catch {}
