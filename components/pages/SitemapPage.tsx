@@ -5,6 +5,8 @@ import { DOCS } from './docsData';
 import { BOOKMARK_CATEGORIES, getBookmarkCountByCategory } from './bookmarksData';
 import { NOTE_GROUPS, getNoteCountByGroup } from './notesData';
 import { CATEGORIES } from './appsData';
+import logoImg from '../../logo.png';
+import logo128 from '../../logo_128x128.png';
 
 const Section: React.FC<{ title: string; children?: React.ReactNode }> = ({ title, children }) => (
   <section className="mb-6">
@@ -14,6 +16,12 @@ const Section: React.FC<{ title: string; children?: React.ReactNode }> = ({ titl
     </div>
   </section>
 );
+
+const MEDIA_ITEMS = [
+  { type: 'image' as const, name: 'logo.png', src: logoImg },
+  { type: 'image' as const, name: 'logo_128x128.png', src: logo128 },
+  { type: 'video' as const, name: 'flower.mp4', src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4' },
+];
 
 const SitemapPage: React.FC<PageProps> = ({ onOpenFile }) => {
   const openWelcome = () => onOpenFile('welcome');
@@ -31,6 +39,13 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile }) => {
     arr.push(...BOOKMARK_CATEGORIES.map(c => `bookmark:${c.id}`));
     // Notes
     arr.push(...NOTE_GROUPS.map(g => `notes:${g.id}`));
+    // Media
+    try {
+      MEDIA_ITEMS.forEach(item => {
+        const encoded = typeof btoa !== 'undefined' ? btoa(JSON.stringify(item)) : '';
+        if (encoded) arr.push(`media:${encoded}`);
+      });
+    } catch {}
     return arr;
   }, []);
 
@@ -87,6 +102,40 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile }) => {
                   <span>tts-history.md</span>
                 </button>
               </li>
+            </ul>
+          </div>
+
+          {/* Media */}
+          <div>
+            <h3 className="text-sm font-semibold text-white mb-2">Media <span className="text-xs text-gray-400">({MEDIA_ITEMS.length})</span></h3>
+            <ul className="space-y-1 text-sm">
+              {MEDIA_ITEMS.map(item => (
+                <li key={item.name}>
+                  <button
+                    onClick={() => {
+                      try {
+                        const encoded = btoa(JSON.stringify(item));
+                        onOpenFile(`media:${encoded}`);
+                      } catch {}
+                    }}
+                    className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left"
+                    title={item.name}
+                  >
+                    <span className="mr-1">
+                      {item.type === 'image' ? (
+                        <svg className="w-4 h-4 inline text-gray-400" viewBox="0 0 16 16" fill="currentColor">
+                          <path d="M1.5 3A1.5 1.5 0 0 0 0 4.5v7A1.5 1.5 0 0 0 1.5 13h13a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 14.5 3h-13Zm2 2 3 4 2-2 4 5h-11l2-7Z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4 inline text-gray-400" viewBox="0 0 16 16" fill="currentColor">
+                          <path d="M4 3.5a.5.5 0 0 1 .79-.407l6 4.5a.5.5 0 0 1 0 .814l-6 4.5A.5.5 0 0 1 4 12.5v-9Z" />
+                        </svg>
+                      )}
+                    </span>
+                    <span>{item.name}</span>
+                  </button>
+                </li>
+              ))}
             </ul>
           </div>
 

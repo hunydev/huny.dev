@@ -8,7 +8,6 @@ export enum ViewId {
   Media = 'MEDIA',
   Library = 'LIBRARY',
   Bookmark = 'BOOKMARK',
-  Lab = 'LAB',
   Notes = 'NOTES',
   GitHub = 'GITHUB',
   Discord = 'DISCORD',

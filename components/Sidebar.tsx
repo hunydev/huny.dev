@@ -382,8 +382,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile, width = 256 }
         return <GenericView title="Library"><p className="text-sm text-gray-400">Library section coming soon.</p></GenericView>;
       case ViewId.Bookmark:
         return <BookmarkView onOpenFile={onOpenFile} />;
-      case ViewId.Lab:
-        return <GenericView title="Lab"><p className="text-sm text-gray-400">Lab section coming soon.</p></GenericView>;
       case ViewId.Notes:
         return <NotesView onOpenFile={onOpenFile} />;
       default:
