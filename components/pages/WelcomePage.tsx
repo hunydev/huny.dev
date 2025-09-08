@@ -280,7 +280,7 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
                 {/* Highlights: tiles per category with subtle color differentiation (full width) */}
                 <section className="md:col-span-2">
                     <h2 className="text-2xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Highlights</h2>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                         {highlightGroups.map((g) => (
                             <div key={g.title} className={`rounded-md border ${g.tile} p-3`}>
                                 <h3 className={`text-sm font-semibold ${g.heading}`}>{g.title}</h3>
