@@ -13,12 +13,11 @@ import DocsPage from './components/pages/DocsPage';
 export const FileIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 16 16"
+    viewBox="0 0 24 24"
     fill="currentColor"
     className="w-4 h-4 mr-2 text-gray-400"
   >
-    <path d="M3.5 2A1.5 1.5 0 0 0 2 3.5v9A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 12.5 4H8.811a1.5 1.5 0 0 1-1.06-.44L6.793 2.5A.5.5 0 0 0 6.439 2H3.5Z" />
-    <path d="M4.54 5.093A.5.5 0 0 0 4 5.5v5a.5.5 0 0 0 .54.495.5.5 0 0 0 .46-.495V5.5a.5.5 0 0 0-.46-.407Z" />
+    <path d="M13 9V3.5L18.5 9M6 2c-1.11 0-2 .89-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
   </svg>
 );
 

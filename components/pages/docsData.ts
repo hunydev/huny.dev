@@ -21,8 +21,8 @@ function sanitize(html: string): string {
   return html.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
 }
 
-// Eagerly import all docs as raw strings at build time
-const modules = import.meta.glob('../../extra/docs/**/*.html', { as: 'raw', eager: true }) as Record<string, string>;
+// Eagerly import all docs as raw strings at build time (Vite: use query instead of deprecated `as`)
+const modules = import.meta.glob('../../extra/docs/**/*.html', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 
 const toSlug = (filePath: string) => {
   const name = filePath.split('/').pop() || filePath;

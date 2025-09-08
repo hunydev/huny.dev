@@ -15,6 +15,106 @@ type SidebarProps = {
 };
 
 const DocsView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
+  type Node = { type: 'folder'; name: string; children: Node[]; path: string } | { type: 'doc'; name: string; title: string; slug: string; path: string };
+
+  // Build a tree from DOCS path (relative to extra/docs)
+  const buildTree = React.useCallback(() => {
+    const root: Node = { type: 'folder', name: '', children: [], path: '' } as any;
+    const ensureFolder = (parent: Node, name: string, path: string): Node => {
+      if (parent.type !== 'folder') return parent;
+      const existing = parent.children.find(ch => ch.type === 'folder' && (ch as any).name === name) as Node | undefined;
+      if (existing) return existing;
+      const node: Node = { type: 'folder', name, children: [], path } as any;
+      parent.children.push(node);
+      return node;
+    };
+    DOCS.forEach(d => {
+      const idx = d.path.lastIndexOf('extra/docs/');
+      const rel = idx >= 0 ? d.path.substring(idx + 'extra/docs/'.length) : d.path;
+      const parts = rel.split('/');
+      const file = parts.pop() || d.slug + '.html';
+      let cursor = root;
+      let acc = '';
+      for (const dir of parts) {
+        acc = acc ? `${acc}/${dir}` : dir;
+        cursor = ensureFolder(cursor, dir, acc);
+      }
+      if ((cursor as any).type === 'folder') {
+        (cursor as any).children.push({ type: 'doc', name: file, title: d.title, slug: d.slug, path: rel });
+      }
+    });
+
+    const sortTree = (node: Node) => {
+      if (node.type === 'folder') {
+        node.children.sort((a, b) => {
+          if (a.type !== b.type) return a.type === 'folder' ? -1 : 1;
+          const an = a.type === 'folder' ? (a as any).name : (a as any).title;
+          const bn = b.type === 'folder' ? (b as any).name : (b as any).title;
+          return an.localeCompare(bn);
+        });
+        node.children.forEach(sortTree);
+      }
+    };
+    sortTree(root);
+    return root;
+  }, []);
+
+  const [expanded, setExpanded] = React.useState<Record<string, boolean>>({});
+  const toggle = (path: string) => setExpanded(prev => ({ ...prev, [path]: !prev[path] }));
+  const isOpen = (path: string, depth: number) => {
+    if (path === '' && depth === 0) return true; // root open
+    return !!expanded[path];
+  };
+
+  const tree = React.useMemo(buildTree, [buildTree]);
+
+  const renderNode = (node: Node, path: string, depth = 0): React.ReactNode => {
+    if (node.type === 'folder') {
+      const curr = path ? `${path}/${node.name}` : node.name;
+      const open = isOpen(curr, depth);
+      return (
+        <div key={`folder:${curr}`}>
+          {node.name !== '' && (
+            <button
+              onClick={() => toggle(curr)}
+              className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
+              style={{ paddingLeft: depth * 12 }}
+            >
+              <svg className={`w-3 h-3 mr-1 transition-transform ${open ? 'rotate-90' : ''}`} viewBox="0 0 16 16" fill="currentColor">
+                <path fillRule="evenodd" d="M6 3l5 5-5 5V3z" />
+              </svg>
+              <span className="mr-2">
+                <svg className="w-4 h-4 inline text-gray-400" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M2 4a2 2 0 0 1 2-2h3l2 2h3a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4z" />
+                </svg>
+              </span>
+              <span className="text-sm truncate">{node.name}</span>
+            </button>
+          )}
+          {open && (
+            <div>
+              {node.children.map((child) => renderNode(child, curr || node.name, depth + (node.name === '' ? 0 : 1)))}
+            </div>
+          )}
+        </div>
+      );
+    }
+    // doc
+    const filePath = path ? `${path}/${node.name}` : node.name;
+    return (
+      <button
+        key={`doc:${filePath}`}
+        onClick={() => onOpenFile(`docs:${node.slug}`)}
+        className={`flex items-center text-left w-full rounded px-2 py-1 hover:bg-white/10`}
+        style={{ paddingLeft: depth * 12 + 12 }}
+        title={node.name}
+      >
+        <FileIcon />
+        <span className="text-sm truncate" title={node.title}>{node.title}</span>
+      </button>
+    );
+  };
+
   return (
     <div className="p-2">
       <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Docs</h2>
@@ -22,17 +122,7 @@ const DocsView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFi
         <p className="text-sm text-gray-500">No docs yet. Put HTML files in <code className="bg-white/10 px-1 py-0.5 rounded">extra/docs/</code>.</p>
       ) : (
         <div className="flex flex-col gap-1">
-          {DOCS.map(d => (
-            <button
-              key={d.slug}
-              onClick={() => onOpenFile(`docs:${d.slug}`)}
-              className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-              title={d.slug + '.html'}
-            >
-              <FileIcon />
-              <span className="text-sm truncate" title={d.title}>{d.title}</span>
-            </button>
-          ))}
+          {renderNode(tree, '')}
         </div>
       )}
     </div>
