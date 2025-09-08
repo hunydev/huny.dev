@@ -8,9 +8,10 @@ type TabBarProps = {
   activeTabId: string;
   onTabClick: (id: string) => void;
   onCloseTab: (id: string) => void;
+  onTogglePin: (id: string) => void;
 };
 
-const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCloseTab }) => {
+const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCloseTab, onTogglePin }) => {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
 
   const onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
@@ -27,9 +28,15 @@ const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCl
     }
   };
 
+  const orderedTabs = React.useMemo(() => {
+    const pinned = openTabs.filter(t => t.pinned);
+    const others = openTabs.filter(t => !t.pinned);
+    return [...pinned, ...others];
+  }, [openTabs]);
+
   return (
     <div ref={containerRef} onWheel={onWheel} className="flex bg-[#252526] overflow-x-auto overflow-y-hidden shrink-0">
-      {openTabs.map(tab => (
+      {orderedTabs.map(tab => (
         <div
           key={tab.id}
           onClick={() => onTabClick(tab.id)}
@@ -41,7 +48,22 @@ const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCl
           title={tab.title}
         >
           <div className="flex items-center min-w-0 gap-2">
-            {tab.icon}
+            {/* Icon wrapper with pin overlay */}
+            <span className="relative inline-flex items-center justify-center group">
+              {/* original icon */}
+              <span className="pointer-events-none">{tab.icon}</span>
+              {/* pin overlay: always visible when pinned; otherwise visible on hover */}
+              <button
+                onClick={(e) => { e.stopPropagation(); onTogglePin(tab.id); }}
+                className={`${tab.pinned ? 'opacity-100 pointer-events-auto text-yellow-300' : 'opacity-0 pointer-events-none text-gray-300 group-hover:opacity-100 group-hover:pointer-events-auto'} absolute -top-1 -left-1 rotate-[-40deg] transition-opacity hover:text-yellow-200`}
+                aria-label={tab.pinned ? 'Unpin tab' : 'Pin tab'}
+                title={tab.pinned ? 'Unpin' : 'Pin'}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+                  <path d="M11 12h6v-1l-3-1V2l3-1V0H3v1l3 1v8l-3 1v1h6v7l1 1l1-1z"/>
+                </svg>
+              </button>
+            </span>
             <span className="text-sm overflow-hidden text-ellipsis whitespace-nowrap max-w-[180px] md:max-w-[240px]">
               {tab.title}
             </span>
@@ -71,6 +93,7 @@ type MainPanelProps = {
   onTabClick: (id: string) => void;
   onCloseTab: (id: string) => void;
   pageProps: PageProps;
+  onTogglePin: (id: string) => void;
 };
 
 // Helper to support dynamic tab ids, e.g. `bookmark:<categoryId>` or `media:<base64JSON>`
@@ -100,7 +123,7 @@ const parseTabRoute = (tabId: string): { baseId: string; routeParams?: Record<st
   return { baseId };
 };
 
-const MainPanel: React.FC<MainPanelProps> = ({ openTabs, activeTabId, onTabClick, onCloseTab, pageProps }) => {
+const MainPanel: React.FC<MainPanelProps> = ({ openTabs, activeTabId, onTabClick, onCloseTab, pageProps, onTogglePin }) => {
   const activeTab = openTabs.find(tab => tab.id === activeTabId);
   
   let ActiveComponentContent: React.ReactNode = null;
@@ -120,6 +143,7 @@ const MainPanel: React.FC<MainPanelProps> = ({ openTabs, activeTabId, onTabClick
         activeTabId={activeTabId}
         onTabClick={onTabClick}
         onCloseTab={onCloseTab}
+        onTogglePin={onTogglePin}
       />
       <div className="flex-1 min-w-0 min-h-0 bg-[#1e1e1e] p-4 md:p-8 overflow-y-auto overflow-x-hidden">
         {ActiveComponentContent ? (

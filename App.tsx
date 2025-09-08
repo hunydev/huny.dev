@@ -117,6 +117,7 @@ const App: React.FC = () => {
         id: originalId,
         title: tabTitle,
         icon: tabIcon,
+        pinned: false,
       };
       return [...prevTabs, newTab];
     });
@@ -192,8 +193,16 @@ const App: React.FC = () => {
   };
 
   const handleCloseAllTabs = useCallback(() => {
-    setOpenTabs([]);
-    setActiveTabId('');
+    setOpenTabs(prev => {
+      const remaining = prev.filter(t => t.pinned);
+      // If active tab was removed, pick first remaining as active
+      setActiveTabId(curr => {
+        if (remaining.length === 0) return '';
+        const stillExists = remaining.some(t => t.id === curr);
+        return stillExists ? curr : remaining[0].id;
+      });
+      return remaining;
+    });
   }, []);
 
   const handleActivityItemClick = (view: ViewId) => {
@@ -290,7 +299,7 @@ const App: React.FC = () => {
             className="p-1.5 rounded hover:bg-white/10 text-gray-300 disabled:opacity-40"
             aria-label="모든 탭 닫기"
             title="Close all tabs"
-            disabled={openTabs.length === 0}
+            disabled={!openTabs.some(t => !t.pinned)}
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" className="w-5 h-5"><g fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"><path d="m8.621 8.086l-.707-.707L6.5 8.793L5.086 7.379l-.707.707L5.793 9.5l-1.414 1.414l.707.707L6.5 10.207l1.414 1.414l.707-.707L7.207 9.5z" /><path d="m5 3l1-1h7l1 1v7l-1 1h-2v2l-1 1H3l-1-1V6l1-1h2zm1 2h4l1 1v4h2V3H6zm4 1H3v7h7z" /></g></svg>
           </button>
@@ -376,6 +385,21 @@ const App: React.FC = () => {
           onTabClick={setActiveTabId}
           onCloseTab={handleCloseTab}
           pageProps={pageProps}
+          onTogglePin={(id) => {
+            setOpenTabs(prev => {
+              const idx = prev.findIndex(t => t.id === id);
+              if (idx === -1) return prev;
+              const next = [...prev];
+              const target = { ...next[idx], pinned: !next[idx].pinned };
+              next[idx] = target;
+              if (target.pinned) {
+                // Move to left-most position
+                next.splice(idx, 1);
+                next.unshift(target);
+              }
+              return next;
+            });
+          }}
         />
         {/* Overlay sidebar when unpinned */}
         {!isSidebarPinned && (

@@ -19,6 +19,7 @@ export type Tab = {
   id: string;
   title: string;
   icon: React.ReactNode;
+  pinned: boolean;
 };
 
 export type PageProps = {

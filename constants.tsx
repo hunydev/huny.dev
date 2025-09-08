@@ -1,6 +1,7 @@
 import React from 'react';
 import { ViewId, PageProps } from './types';
 import WelcomePage from './components/pages/WelcomePage';
+import welcomeIcon from './icon_32x32.png';
 import ProjectPage from './components/pages/ProjectPage';
 import AboutPage from './components/pages/AboutPage';
 import BookmarkPage from './components/pages/BookmarkPage';
@@ -31,7 +32,7 @@ export const PAGES: {
   welcome: {
     title: 'Welcome',
     component: WelcomePage,
-    icon: <React.Fragment />,
+    icon: <img src={welcomeIcon} alt="Welcome" className="w-4 h-4 mr-2 rounded-sm" />,
   },
   docs: {
     title: 'docs',
