@@ -21,6 +21,8 @@ const App: React.FC = () => {
   const [overlayView, setOverlayView] = useState<ViewId | null>(null);
   const [socialOpen, setSocialOpen] = useState<boolean>(false);
   const socialRef = useRef<HTMLDivElement | null>(null);
+  const [ossOpen, setOssOpen] = useState<boolean>(false);
+  const ossModalRef = useRef<HTMLDivElement | null>(null);
 
   const handleOpenFile = useCallback((fileId: string) => {
     const originalId = fileId;
@@ -234,7 +236,10 @@ const App: React.FC = () => {
       }
     };
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSocialOpen(false);
+      if (e.key === 'Escape') {
+        setSocialOpen(false);
+        setOssOpen(false);
+      }
     };
     document.addEventListener('mousedown', onDocMouseDown);
     window.addEventListener('keydown', onKeyDown);
@@ -288,6 +293,19 @@ const App: React.FC = () => {
             disabled={openTabs.length === 0}
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" className="w-5 h-5"><g fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"><path d="m8.621 8.086l-.707-.707L6.5 8.793L5.086 7.379l-.707.707L5.793 9.5l-1.414 1.414l.707.707L6.5 10.207l1.414 1.414l.707-.707L7.207 9.5z" /><path d="m5 3l1-1h7l1 1v7l-1 1h-2v2l-1 1H3l-1-1V6l1-1h2zm1 2h4l1 1v4h2V3H6zm4 1H3v7h7z" /></g></svg>
+          </button>
+
+          {/* OSS info (Open Source Notices) */}
+          <button
+            type="button"
+            onClick={() => setOssOpen(true)}
+            className="p-1.5 rounded hover:bg-white/10 text-gray-300"
+            aria-label="Open Source Notices"
+            title="Open Source Notices"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+              <path d="M12 2a10 10 0 1 0 0 20a10 10 0 0 0 0-20m0 4a1.25 1.25 0 1 1 0 2.5A1.25 1.25 0 0 1 12 6m-1.5 4h3v8h-3z" />
+            </svg>
           </button>
 
           {/* SNS dropdown trigger */}
@@ -371,6 +389,74 @@ const App: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Open Source Notices Modal */}
+      {ossOpen && (
+        <div className="fixed inset-0 z-50" onClick={() => setOssOpen(false)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="oss-modal-title"
+            ref={ossModalRef}
+            className="relative mx-auto mt-24 w-[min(92vw,720px)] bg-[#252526] border border-white/10 rounded-lg shadow-xl p-4 text-gray-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-3 mb-2">
+              <div className="shrink-0 p-1.5 rounded bg-white/10">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                  <path d="M12 2a10 10 0 1 0 0 20a10 10 0 0 0 0-20m0 4a1.25 1.25 0 1 1 0 2.5A1.25 1.25 0 0 1 12 6m-1.5 4h3v8h-3z" />
+                </svg>
+              </div>
+              <div className="min-w-0 flex-1">
+                <h2 id="oss-modal-title" className="text-lg font-semibold text-white">Open Source Notices</h2>
+                <p className="text-sm text-gray-400">본 프로젝트에서 사용된 오픈소스 및 리소스의 라이선스를 안내합니다.</p>
+              </div>
+              <button onClick={() => setOssOpen(false)} className="ml-2 p-1.5 rounded hover:bg-white/10 text-gray-300" aria-label="닫기" title="닫기">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+                  <path d="M3.72 3.22a.75.75 0 0 1 1.06 0L8 6.44l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 7.5l3.22 3.22a.75.75 0 0 1-1.06 1.06L8 8.56l-3.22 3.22a.75.75 0 1 1-1.06-1.06L6.94 7.5L3.72 4.28a.75.75 0 0 1 0-1.06Z" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <div className="bg-white/[0.03] border border-white/10 rounded p-3">
+                <h3 className="font-medium text-white mb-1">Icons</h3>
+                <p className="text-gray-300">Icons provided by Iconify (<a href="https://iconify.design" target="_blank" rel="noopener" className="underline text-blue-300">https://iconify.design</a>).</p>
+                <p className="text-gray-400">Icon sets used are open source and licensed under terms such as Apache 2.0 and MIT.</p>
+              </div>
+
+              <div className="bg-white/[0.03] border border-white/10 rounded p-3">
+                <h3 className="font-medium text-white mb-1">Core dependencies</h3>
+                <ul className="list-disc ml-5 space-y-1">
+                  <li>
+                    React &amp; React DOM — MIT License — <a className="underline text-blue-300" href="https://react.dev/" target="_blank" rel="noopener">https://react.dev/</a>
+                  </li>
+                  <li>
+                    Vite — MIT License — <a className="underline text-blue-300" href="https://vitejs.dev/" target="_blank" rel="noopener">https://vitejs.dev/</a>
+                  </li>
+                  <li>
+                    TypeScript — Apache-2.0 — <a className="underline text-blue-300" href="https://www.typescriptlang.org/" target="_blank" rel="noopener">https://www.typescriptlang.org/</a>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-white/[0.03] border border-white/10 rounded p-3">
+                <h3 className="font-medium text-white mb-1">Media</h3>
+                <ul className="list-disc ml-5 space-y-1">
+                  <li>
+                    Sample video “flower.mp4” — CC0 (public domain) — from MDN Web Docs interactive examples — <a className="underline text-blue-300" href="https://developer.mozilla.org/" target="_blank" rel="noopener">https://developer.mozilla.org/</a>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="text-xs text-gray-500">
+                위 고지 사항은 프로젝트 사용 현황에 따라 업데이트됩니다. 추가된 서드파티 리소스가 있을 경우 해당 라이선스를 본 창에 계속 반영합니다.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bottom status bar (VS Code style) */}
       <div className="bg-[#252526] text-gray-300 text-[11px] border-t border-black/30 flex flex-col items-start px-3 py-1.5 gap-1 md:h-7 md:flex-row md:items-center md:py-0 md:gap-0 relative z-50">
