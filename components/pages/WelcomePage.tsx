@@ -1,9 +1,10 @@
 import React from 'react';
 import { PageProps, ViewId } from '../../types';
-import { ACTIVITY_BAR_ITEMS, PAGES } from '../../constants';
+import { ACTIVITY_BAR_ITEMS, PAGES, FileIcon } from '../../constants';
 import { getCategoryById } from './bookmarksData';
 import { getNoteGroupById } from './notesData';
 import { getAppCategoryById } from './appsData';
+import { getDocBySlug } from './docsData';
 
 const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivityClick }) => {
     const handleContactClick = () => {
@@ -251,6 +252,12 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
                                     ) : (
                                         baseMeta.icon
                                     );
+                                } else if (baseId === 'docs') {
+                                    const slug = arg || '';
+                                    const doc = getDocBySlug(slug);
+                                    const title = doc?.title || slug || 'docs';
+                                    displayTitle = `docs – ${title}`;
+                                    displayIcon = <FileIcon />;
                                 }
 
                                 return (

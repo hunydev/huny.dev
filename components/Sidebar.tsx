@@ -4,6 +4,7 @@ import { FileIcon } from '../constants';
 import { BOOKMARK_CATEGORIES, getBookmarkCountByCategory } from './pages/bookmarksData';
 import { NOTE_GROUPS, getNoteCountByGroup } from './pages/notesData';
 import { CATEGORIES } from './pages/appsData';
+import { DOCS } from './pages/docsData';
 import logoImg from '../logo.png';
 import logo128 from '../logo_128x128.png';
 
@@ -11,6 +12,31 @@ type SidebarProps = {
   activeView: ViewId;
   onOpenFile: (fileId: string) => void;
   width?: number;
+};
+
+const DocsView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
+  return (
+    <div className="p-2">
+      <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Docs</h2>
+      {DOCS.length === 0 ? (
+        <p className="text-sm text-gray-500">No docs yet. Put HTML files in <code className="bg-white/10 px-1 py-0.5 rounded">extra/docs/</code>.</p>
+      ) : (
+        <div className="flex flex-col gap-1">
+          {DOCS.map(d => (
+            <button
+              key={d.slug}
+              onClick={() => onOpenFile(`docs:${d.slug}`)}
+              className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
+              title={d.slug + '.html'}
+            >
+              <FileIcon />
+              <span className="text-sm truncate" title={d.title}>{d.title}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
 
 const AppsView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
@@ -257,7 +283,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile, width = 256 }
       case ViewId.Search:
         return <GenericView title="Search"><p className="text-sm text-gray-400">Search functionality coming soon.</p></GenericView>;
       case ViewId.Docs:
-        return <GenericView title="Docs"><p className="text-sm text-gray-400">Documentation section coming soon.</p></GenericView>;
+        return <DocsView onOpenFile={onOpenFile} />;
       case ViewId.Apps:
         return <AppsView onOpenFile={onOpenFile} />;
       case ViewId.Media:

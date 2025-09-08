@@ -8,6 +8,7 @@ import MediaPreviewPage from './components/pages/MediaPreviewPage';
 import NotesBoardPage from './components/pages/NotesBoardPage';
 import DomainPage from './components/pages/DomainPage';
 import AppsPage from './components/pages/AppsPage';
+import DocsPage from './components/pages/DocsPage';
 
 export const FileIcon = () => (
   <svg
@@ -32,6 +33,11 @@ export const PAGES: {
     title: 'Welcome',
     component: WelcomePage,
     icon: <React.Fragment />,
+  },
+  docs: {
+    title: 'docs',
+    component: DocsPage,
+    icon: <FileIcon />,
   },
   domain: {
     title: 'tts-history.md',

@@ -3,11 +3,12 @@ import ActivityBar from './components/ActivityBar';
 import Sidebar from './components/Sidebar';
 import MainPanel from './components/MainPanel';
 import { ViewId, Tab, PageProps } from './types';
-import { PAGES, ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS } from './constants';
+import { PAGES, ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS, FileIcon } from './constants';
 import logo from './logo_128x128.png';
 import { getCategoryById } from './components/pages/bookmarksData';
 import { getNoteGroupById } from './components/pages/notesData';
 import { getAppCategoryById } from './components/pages/appsData';
+import { getDocBySlug } from './components/pages/docsData';
 
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState<ViewId>(ViewId.Explorer);
@@ -99,6 +100,12 @@ const App: React.FC = () => {
       } else if (category?.emoji) {
         tabIcon = <span className="mr-2 text-sm" aria-hidden>{category.emoji}</span>;
       }
+    } else if (baseId === 'docs') {
+      const slug = arg || '';
+      const doc = getDocBySlug(slug);
+      const title = doc?.title || slug || 'docs';
+      tabTitle = `docs – ${title}`;
+      tabIcon = <FileIcon />;
     }
 
     setOpenTabs(prevTabs => {

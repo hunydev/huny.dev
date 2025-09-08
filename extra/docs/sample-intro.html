@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Docs 소개</title>
+</head>
+<body>
+  <h1>Docs 소개</h1>
+  <p>이 섹션은 <strong>HTML 소스</strong>만으로 문서를 추가할 수 있도록 설계되었습니다. <code>extra/docs/</code> 폴더에 HTML 파일을 두면 사이드바에 자동으로 노출됩니다. 탭과 Recent에도 문서의 <em>title</em>이 그대로 사용됩니다.</p>
+
+  <h2>문서 추가 방법</h2>
+  <ol>
+    <li><code>extra/docs/template.html</code> 파일을 복사합니다.</li>
+    <li>파일명을 적절한 슬러그로 변경합니다. 예: <code>my-guide.html</code></li>
+    <li><code>&lt;title&gt;</code> 요소에 사이드바와 탭에 표시할 문서명을 입력합니다.</li>
+    <li>본문을 자유롭게 HTML로 작성합니다.</li>
+  </ol>
+
+  <h2>스타일</h2>
+  <p>문서의 본문은 앱의 다크 테마에 맞춰 <code>.docs-content</code> 스타일로 감싸져 렌더링됩니다. 색상, 타이포그래피, 코드블록, 표, 인용문 등 기본 요소가 자연스럽게 보이도록 미리 정의되어 있습니다.</p>
+</body>
+</html>
