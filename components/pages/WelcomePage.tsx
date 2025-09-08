@@ -23,21 +23,35 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         } catch {}
     }, []);
     
-    // Highlights data from provided about.json
+    // Highlights data from provided about.json (ordered: Major, Core Work, Full-stack Development, Architecture Expertise, then others)
     const highlightGroups = React.useMemo(() => [
         {
-            title: 'Domain',
+            title: 'Major',
+            items: ['Software Engineering'],
+            tile: 'bg-blue-500/10 border-blue-500/20',
+            heading: 'text-blue-300',
+            chip: 'bg-blue-500/10 border-blue-500/20',
+        },
+        {
+            title: 'Core Work',
             items: ['TTS', 'AI'],
             tile: 'bg-violet-500/10 border-violet-500/20',
             heading: 'text-violet-300',
             chip: 'bg-violet-500/10 border-violet-500/20',
         },
         {
-            title: 'Development',
-            items: ['Software Engineering', 'Backend Web Development', 'Desktop Application Development', 'Cloud Architecture & Deployment'],
-            tile: 'bg-blue-500/10 border-blue-500/20',
-            heading: 'text-blue-300',
-            chip: 'bg-blue-500/10 border-blue-500/20',
+            title: 'Full-stack Development',
+            items: ['Backend API (Core, Primary)', 'Frontend (Secondary, Supporting)'],
+            tile: 'bg-teal-500/10 border-teal-500/20',
+            heading: 'text-teal-300',
+            chip: 'bg-teal-500/10 border-teal-500/20',
+        },
+        {
+            title: 'Architecture Expertise',
+            items: ['SDK Development', 'Cloud Architecture'],
+            tile: 'bg-amber-500/10 border-amber-500/20',
+            heading: 'text-amber-300',
+            chip: 'bg-amber-500/10 border-amber-500/20',
         },
         {
             title: 'Languages — Primary',

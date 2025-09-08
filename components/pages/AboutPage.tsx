@@ -59,13 +59,23 @@ const AboutPage: React.FC<PageProps> = () => {
         <span className="text-gray-500">: {`{`}</span>
 
         <JsonArray
-          field="domain"
+          field="major"
+          items={["Software Engineering"]}
+          level={2}
+        />
+        <JsonArray
+          field="core_work"
           items={["TTS", "AI"]}
           level={2}
         />
         <JsonArray
-          field="development"
-          items={["Software Engineering", "Backend Web Development", "Desktop Application Development", "Cloud Architecture & Deployment"]}
+          field="full_stack_development"
+          items={["Backend API (Core, Primary)", "Frontend (Secondary, Supporting)"]}
+          level={2}
+        />
+        <JsonArray
+          field="architecture_expertise"
+          items={["SDK Development", "Cloud Architecture"]}
           level={2}
           comma={false}
         />

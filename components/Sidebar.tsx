@@ -7,6 +7,7 @@ import { CATEGORIES } from './pages/appsData';
 import { DOCS } from './pages/docsData';
 import logoImg from '../logo.png';
 import logo128 from '../logo_128x128.png';
+import welcomeIcon from '../icon_32x32.png';
 
 type SidebarProps = {
   activeView: ViewId;
@@ -170,7 +171,7 @@ const ExplorerView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
         </div>
         <div className="mt-2 pl-4 flex flex-col gap-1">
             <button onClick={() => onOpenFile('welcome')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-                <span className="w-4 h-4 mr-2"></span>
+                <img src={welcomeIcon} alt="Welcome" className="w-4 h-4 mr-2 rounded-sm" />
                 <span>Welcome</span>
             </button>
             <button onClick={() => onOpenFile('project')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
