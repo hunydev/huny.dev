@@ -3,6 +3,7 @@ import { PageProps, ViewId } from '../../types';
 import { ACTIVITY_BAR_ITEMS, PAGES } from '../../constants';
 import { getCategoryById } from './bookmarksData';
 import { getNoteGroupById } from './notesData';
+import { getAppCategoryById } from './appsData';
 
 const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivityClick }) => {
     const handleContactClick = () => {
@@ -237,6 +238,18 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
                                             <path d="M2.5 2A1.5 1.5 0 0 0 1 3.5v9A1.5 1.5 0 0 0 2.5 14h7.793l3.354-3.354A.5.5 0 0 0 14 10.293V3.5A1.5 1.5 0 0 0 12.5 2h-10Z" />
                                             <path d="M10.5 13.5V11a1 1 0 0 1 1-1h2.5" opacity="0.6" />
                                         </svg>
+                                    );
+                                } else if (baseId === 'apps') {
+                                    const categoryId = arg || 'huny';
+                                    const cat = getAppCategoryById(categoryId);
+                                    const catName = cat?.name ?? categoryId;
+                                    displayTitle = `apps – ${catName}`;
+                                    displayIcon = cat?.iconUrl ? (
+                                        <img src={cat.iconUrl} alt="" className="w-4 h-4 rounded-sm" />
+                                    ) : cat?.emoji ? (
+                                        <span className="text-sm" aria-hidden>{cat.emoji}</span>
+                                    ) : (
+                                        baseMeta.icon
                                     );
                                 }
 

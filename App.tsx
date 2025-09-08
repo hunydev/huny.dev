@@ -7,6 +7,7 @@ import { PAGES, ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS } from './constants';
 import logo from './logo_128x128.png';
 import { getCategoryById } from './components/pages/bookmarksData';
 import { getNoteGroupById } from './components/pages/notesData';
+import { getAppCategoryById } from './components/pages/appsData';
 
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState<ViewId>(ViewId.Explorer);
@@ -88,6 +89,16 @@ const App: React.FC = () => {
           <path d="M10.5 13.5V11a1 1 0 0 1 1-1h2.5" opacity="0.6" />
         </svg>
       );
+    } else if (baseId === 'apps') {
+      const categoryId = arg || 'huny';
+      const category = getAppCategoryById(categoryId);
+      const catName = category?.name ?? categoryId;
+      tabTitle = `apps – ${catName}`;
+      if (category?.iconUrl) {
+        tabIcon = <img src={category.iconUrl} alt="" className="w-4 h-4 mr-2 rounded-sm" />;
+      } else if (category?.emoji) {
+        tabIcon = <span className="mr-2 text-sm" aria-hidden>{category.emoji}</span>;
+      }
     }
 
     setOpenTabs(prevTabs => {

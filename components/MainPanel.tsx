@@ -74,6 +74,9 @@ const parseTabRoute = (tabId: string): { baseId: string; routeParams?: Record<st
     } catch {}
     return { baseId };
   }
+  if (baseId === 'apps') {
+    return { baseId, routeParams: { categoryId: arg || 'huny' } };
+  }
   return { baseId };
 };
 

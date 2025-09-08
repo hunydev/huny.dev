@@ -7,6 +7,7 @@ import BookmarkPage from './components/pages/BookmarkPage';
 import MediaPreviewPage from './components/pages/MediaPreviewPage';
 import NotesBoardPage from './components/pages/NotesBoardPage';
 import DomainPage from './components/pages/DomainPage';
+import AppsPage from './components/pages/AppsPage';
 
 export const FileIcon = () => (
   <svg
@@ -36,6 +37,20 @@ export const PAGES: {
     title: 'tts-history.md',
     component: DomainPage,
     icon: <FileIcon />,
+  },
+  apps: {
+    title: 'apps',
+    component: AppsPage,
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className="w-4 h-4 mr-2 text-gray-400"
+      >
+        <path d="M3 5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm9 0a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2zM3 14a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm9 0a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2z" />
+      </svg>
+    ),
   },
   media: {
     title: 'media',

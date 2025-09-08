@@ -3,6 +3,7 @@ import { ViewId } from '../types';
 import { FileIcon } from '../constants';
 import { BOOKMARK_CATEGORIES, getBookmarkCountByCategory } from './pages/bookmarksData';
 import { NOTE_GROUPS, getNoteCountByGroup } from './pages/notesData';
+import { CATEGORIES } from './pages/appsData';
 import logoImg from '../logo.png';
 import logo128 from '../logo_128x128.png';
 
@@ -10,6 +11,35 @@ type SidebarProps = {
   activeView: ViewId;
   onOpenFile: (fileId: string) => void;
   width?: number;
+};
+
+const AppsView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
+  const ORDER: Array<'huny' | 'dev' | 'ai' | 'tools' | 'design'> = ['huny', 'dev', 'ai', 'tools', 'design'];
+  const items = ORDER.map(id => CATEGORIES.find(c => c.id === id)!).filter(Boolean);
+
+  return (
+    <div className="p-2">
+      <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Apps</h2>
+      <div className="flex flex-col gap-1">
+        {items.map(cat => (
+          <button
+            key={cat.id}
+            onClick={() => onOpenFile(`apps:${cat.id}`)}
+            className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
+          >
+            {cat.iconUrl ? (
+              <img src={cat.iconUrl} alt="" className="w-4 h-4 mr-2 rounded-sm" />
+            ) : cat.emoji ? (
+              <span className="w-4 h-4 mr-2 text-base leading-4" aria-hidden>{cat.emoji}</span>
+            ) : (
+              <span className="w-4 h-4 mr-2" />
+            )}
+            <span className="text-sm">{cat.name}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 const ExplorerView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => (
@@ -229,7 +259,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile, width = 256 }
       case ViewId.Docs:
         return <GenericView title="Docs"><p className="text-sm text-gray-400">Documentation section coming soon.</p></GenericView>;
       case ViewId.Apps:
-        return <GenericView title="Apps"><p className="text-sm text-gray-400">Apps Works section coming soon.</p></GenericView>;
+        return <AppsView onOpenFile={onOpenFile} />;
       case ViewId.Media:
         return <MediaView onOpenFile={onOpenFile} />;
       case ViewId.Library:
