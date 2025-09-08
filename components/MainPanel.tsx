@@ -1,6 +1,7 @@
 import React from 'react';
 import { Tab, PageProps } from '../types';
 import { PAGES } from '../constants';
+import SitemapPage from './pages/SitemapPage';
 
 type TabBarProps = {
   openTabs: Tab[];
@@ -121,11 +122,11 @@ const MainPanel: React.FC<MainPanelProps> = ({ openTabs, activeTabId, onTabClick
         onCloseTab={onCloseTab}
       />
       <div className="flex-1 min-w-0 min-h-0 bg-[#1e1e1e] p-4 md:p-8 overflow-y-auto overflow-x-hidden">
-        {ActiveComponentContent ? ActiveComponentContent : 
-            <div className="flex items-center justify-center h-full text-gray-500">
-                <p>Open a file to start editing.</p>
-            </div>
-        }
+        {ActiveComponentContent ? (
+          ActiveComponentContent
+        ) : (
+          <SitemapPage {...pageProps} />
+        )}
       </div>
     </div>
   );
