@@ -10,8 +10,24 @@ type TabBarProps = {
 };
 
 const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCloseTab }) => {
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+
+  const onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const el = containerRef.current;
+    if (!el) return;
+    // Only translate vertical wheel to horizontal when horizontal overflow exists
+    if (el.scrollWidth <= el.clientWidth) return;
+    const { deltaX, deltaY } = e;
+    // Choose the dominant axis; if user scrolls vertically, map it to horizontal
+    const delta = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY;
+    if (delta !== 0) {
+      el.scrollLeft += delta;
+      e.preventDefault();
+    }
+  };
+
   return (
-    <div className="flex bg-[#252526] overflow-x-auto shrink-0">
+    <div ref={containerRef} onWheel={onWheel} className="flex bg-[#252526] overflow-x-auto overflow-y-hidden shrink-0">
       {openTabs.map(tab => (
         <div
           key={tab.id}

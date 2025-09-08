@@ -70,7 +70,7 @@ const App: React.FC = () => {
             <path d="M4 3.5a.5.5 0 0 1 .79-.407l6 4.5a.5.5 0 0 1 0 .814l-6 4.5A.5.5 0 0 1 4 12.5v-9Z" />
           </svg>
         );
-      } catch {}
+      } catch { }
     }
     else if (baseId === 'notes' && arg) {
       const group = getNoteGroupById(arg);
@@ -119,7 +119,7 @@ const App: React.FC = () => {
       const next = [originalId, ...arr.filter(id => id !== originalId)];
       const trimmed = next.filter(id => id !== 'welcome').slice(0, 5);
       sessionStorage.setItem('recentTabs', JSON.stringify(trimmed));
-    } catch {}
+    } catch { }
   }, []);
 
   useEffect(() => {
@@ -136,7 +136,7 @@ const App: React.FC = () => {
       const next = [activeTabId, ...arr.filter(id => id !== activeTabId)];
       const trimmed = next.filter(id => id !== 'welcome').slice(0, 5);
       sessionStorage.setItem('recentTabs', JSON.stringify(trimmed));
-    } catch {}
+    } catch { }
   }, [activeTabId]);
 
   const handleSidebarResizeStart = useCallback((e: React.MouseEvent) => {
@@ -181,6 +181,11 @@ const App: React.FC = () => {
       }
     }
   };
+
+  const handleCloseAllTabs = useCallback(() => {
+    setOpenTabs([]);
+    setActiveTabId('');
+  }, []);
 
   const handleActivityItemClick = (view: ViewId) => {
     if (isSidebarPinned) {
@@ -264,6 +269,18 @@ const App: React.FC = () => {
                 <line x1="9" y1="4" x2="9" y2="20" />
               </svg>
             )}
+          </button>
+
+          {/* Close all tabs */}
+          <button
+            type="button"
+            onClick={handleCloseAllTabs}
+            className="p-1.5 rounded hover:bg-white/10 text-gray-300 disabled:opacity-40"
+            aria-label="모든 탭 닫기"
+            title="Close all tabs"
+            disabled={openTabs.length === 0}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" className="w-5 h-5"><g fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"><path d="m8.621 8.086l-.707-.707L6.5 8.793L5.086 7.379l-.707.707L5.793 9.5l-1.414 1.414l.707.707L6.5 10.207l1.414 1.414l.707-.707L7.207 9.5z" /><path d="m5 3l1-1h7l1 1v7l-1 1h-2v2l-1 1H3l-1-1V6l1-1h2zm1 2h4l1 1v4h2V3H6zm4 1H3v7h7z" /></g></svg>
           </button>
 
           {/* SNS dropdown trigger */}
