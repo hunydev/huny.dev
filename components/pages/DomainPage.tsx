@@ -14,6 +14,9 @@ type TtsItem = {
   features?: string[];
   researchers?: string[];
   companies?: string[];
+  // For modern era items, provide audio samples and reference links
+  samples?: Array<{ title: string; url: string }>;
+  links?: Array<{ title: string; url: string }>;
 };
 
 const DATA: TtsItem[] = [
@@ -87,6 +90,13 @@ const DATA: TtsItem[] = [
     description: 'Google DeepMind에서 개발한 WaveNet이 딥러닝 기반 TTS의 새로운 시대를 열었습니다.',
     features: ['WaveNet', '딥러닝', 'Google DeepMind'],
     companies: ['Google'],
+    samples: [
+      { title: 'WaveNet – DeepMind samples', url: 'https://deepmind.google/discover/blog/wavenet-a-generative-model-for-raw-audio/' },
+    ],
+    links: [
+      { title: 'WaveNet paper (arXiv)', url: 'https://arxiv.org/abs/1609.03499' },
+      { title: 'DeepMind blog', url: 'https://deepmind.google/discover/blog/wavenet-a-generative-model-for-raw-audio/' },
+    ],
   },
   {
     id: '2017-tacotron',
@@ -96,6 +106,12 @@ const DATA: TtsItem[] = [
     title: 'Tacotron 시리즈',
     description: 'End-to-end 음성 합성 모델인 Tacotron이 등장하여 텍스트에서 음성까지 직접 변환이 가능해졌습니다.',
     features: ['Tacotron', 'End-to-end', 'Attention 메커니즘'],
+    samples: [
+      { title: 'Tacotron samples', url: 'https://google.github.io/tacotron/' },
+    ],
+    links: [
+      { title: 'Tacotron paper (arXiv)', url: 'https://arxiv.org/abs/1703.10135' },
+    ],
   },
   {
     id: '2020-emotion',
@@ -105,6 +121,15 @@ const DATA: TtsItem[] = [
     title: '실시간 감정 표현 TTS',
     description: '감정과 억양을 실시간으로 조절할 수 있는 고도화된 TTS 기술이 개발되었습니다.',
     features: ['감정 표현', '실시간 처리', '억양 제어'],
+    samples: [
+      { title: 'Azure Neural TTS demo', url: 'https://azure.microsoft.com/en-us/products/cognitive-services/text-to-speech/#demo' },
+      { title: 'Google Cloud TTS demo', url: 'https://cloud.google.com/text-to-speech?hl=ko#section-tryit' },
+    ],
+    links: [
+      { title: 'Azure Neural TTS docs', url: 'https://learn.microsoft.com/azure/ai-services/speech-service/text-to-speech' },
+      { title: 'Google Cloud TTS docs', url: 'https://cloud.google.com/text-to-speech/docs?hl=ko' },
+      { title: 'Amazon Polly (Neural) overview', url: 'https://aws.amazon.com/polly/' },
+    ],
   },
   {
     id: '2024-modern',
@@ -115,6 +140,15 @@ const DATA: TtsItem[] = [
     description: 'ChatTTS, Mars5 TTS, MetaVoice, Parler TTS 등 다양한 특화 기능을 가진 최신 모델들이 등장했습니다.',
     features: ['ChatTTS', 'Mars5 TTS', 'MetaVoice', 'Parler TTS'],
     companies: ['Google', 'Apple', 'Amazon', 'Microsoft', 'iFlytek', 'Baidu'],
+    samples: [
+      { title: 'ChatTTS — Hugging Face Space', url: 'https://huggingface.co/spaces/2Noise/ChatTTS' },
+      { title: 'Parler-TTS — Hugging Face Space', url: 'https://huggingface.co/spaces/parler-tts/parler-tts' },
+      { title: 'MetaVoice — Demos', url: 'https://metavoice.ai' },
+    ],
+    links: [
+      { title: 'ChatTTS — GitHub', url: 'https://github.com/2noise/ChatTTS' },
+      { title: 'Parler-TTS — GitHub', url: 'https://github.com/huggingface/parler-tts' },
+    ],
   },
 ];
 
@@ -374,6 +408,30 @@ const DomainPage: React.FC<PageProps> = () => {
                 {selectedItem.companies && selectedItem.companies.length > 0 && (
                   <div className="mt-1 text-xs md:text-sm text-gray-300">
                     <strong className="text-gray-200">주요 기업:</strong> {selectedItem.companies.join(', ')}
+                  </div>
+                )}
+                {selectedItem.samples && selectedItem.samples.length > 0 && (
+                  <div className="mt-3 text-xs md:text-sm text-gray-300">
+                    <strong className="text-gray-200">음성 샘플:</strong>
+                    <ul className="mt-1 list-disc ml-5 space-y-0.5">
+                      {selectedItem.samples.map((s) => (
+                        <li key={s.url}>
+                          <a href={s.url} target="_blank" rel="noopener" className="text-blue-300 hover:underline">{s.title}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {selectedItem.links && selectedItem.links.length > 0 && (
+                  <div className="mt-2 text-xs md:text-sm text-gray-300">
+                    <strong className="text-gray-200">레퍼런스:</strong>
+                    <ul className="mt-1 list-disc ml-5 space-y-0.5">
+                      {selectedItem.links.map((l) => (
+                        <li key={l.url}>
+                          <a href={l.url} target="_blank" rel="noopener" className="text-blue-300 hover:underline">{l.title}</a>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 )}
               </div>
