@@ -240,8 +240,8 @@ export const ACTIVITY_BAR_ITEMS = [
 ];
 
 export const EXTERNAL_LINKS: Partial<Record<ViewId, { title: string; url: string }>> = {
-  [ViewId.GitHub]: { title: 'GitHub', url: 'https://github.com' },
-  [ViewId.Discord]: { title: 'Discord', url: 'https://discord.com' },
-  [ViewId.X]: { title: 'X / Twitter', url: 'https://x.com' },
-  [ViewId.Email]: { title: 'Email', url: 'mailto:example@huny.dev' },
+  [ViewId.GitHub]: { title: 'GitHub', url: 'https://github.com/hunydev' },
+  [ViewId.Discord]: { title: 'Discord', url: 'https://discord.gg/2NWa39bU' },
+  [ViewId.X]: { title: 'X / Twitter', url: 'https://x.com/janghun2722' },
+  [ViewId.Email]: { title: 'Email', url: 'mailto:jang@huny.dev' },
 };

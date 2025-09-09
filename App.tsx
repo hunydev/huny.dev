@@ -10,6 +10,8 @@ import { getNoteGroupById } from './components/pages/notesData';
 import { getAppCategoryById } from './components/pages/appsData';
 import { getDocBySlug } from './components/pages/docsData';
 
+const TABS_STORAGE_KEY = 'app.openTabs.v1';
+
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState<ViewId>(ViewId.Explorer);
   const [openTabs, setOpenTabs] = useState<Tab[]>([]);
@@ -23,6 +25,8 @@ const App: React.FC = () => {
   const socialRef = useRef<HTMLDivElement | null>(null);
   const [ossOpen, setOssOpen] = useState<boolean>(false);
   const ossModalRef = useRef<HTMLDivElement | null>(null);
+  const restoredRef = useRef<boolean>(false);
+  const restoringRef = useRef<boolean>(false);
 
   const handleOpenFile = useCallback((fileId: string) => {
     const originalId = fileId;
@@ -133,7 +137,36 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Open welcome tab on initial load (deduped inside handleOpenFile)
+    // Restore tabs from localStorage on initial load; fallback to Welcome
+    if (restoredRef.current) return;
+    restoredRef.current = true;
+    try {
+      const raw = localStorage.getItem(TABS_STORAGE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw) as { tabs?: Array<{ id: string; pinned?: boolean }>; activeTabId?: string };
+        const tabs = Array.isArray(saved?.tabs) ? saved.tabs : [];
+        if (tabs.length > 0) {
+          restoringRef.current = true;
+          // Open tabs in saved order
+          tabs.forEach(t => handleOpenFile(t.id));
+          // Apply pinned states and keep pinned tabs on the left
+          setOpenTabs(prev => {
+            const mapped = prev.map(tab => {
+              const s = tabs.find(tt => tt.id === tab.id);
+              return s ? { ...tab, pinned: !!s.pinned } : tab;
+            });
+            const pinned = mapped.filter(t => t.pinned);
+            const others = mapped.filter(t => !t.pinned);
+            return [...pinned, ...others];
+          });
+          if (saved.activeTabId) setActiveTabId(saved.activeTabId);
+          // Defer to end of task to avoid saving intermediate states
+          setTimeout(() => { restoringRef.current = false; }, 0);
+          return;
+        }
+      }
+    } catch {}
+    // Fallback: open Welcome if no saved state
     handleOpenFile('welcome');
   }, [handleOpenFile]);
 
@@ -148,6 +181,22 @@ const App: React.FC = () => {
       sessionStorage.setItem('recentTabs', JSON.stringify(trimmed));
     } catch { }
   }, [activeTabId]);
+
+  // Persist open tabs and active tab to localStorage for restoration on reload
+  useEffect(() => {
+    if (!restoredRef.current || restoringRef.current) return;
+    try {
+      if (openTabs.length === 0) {
+        localStorage.removeItem(TABS_STORAGE_KEY);
+        return;
+      }
+      const data = {
+        tabs: openTabs.map(t => ({ id: t.id, pinned: t.pinned })),
+        activeTabId: activeTabId || (openTabs[openTabs.length - 1]?.id ?? ''),
+      };
+      localStorage.setItem(TABS_STORAGE_KEY, JSON.stringify(data));
+    } catch {}
+  }, [openTabs, activeTabId]);
 
   const handleSidebarResizeStart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
