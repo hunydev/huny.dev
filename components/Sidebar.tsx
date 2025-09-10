@@ -179,12 +179,16 @@ const ExplorerView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
                 <span>project.js</span>
             </button>
             <button onClick={() => onOpenFile('about')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-                <FileIcon />
-                <span>about.json</span>
+              <FileIcon />
+              <span>about.json</span>
+            </button>
+            <button onClick={() => onOpenFile('digital-shelf')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
+              <FileIcon />
+              <span>digital-shelf.json</span>
             </button>
             <button onClick={() => onOpenFile('works')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-                <FileIcon />
-                <span>works.md</span>
+              <FileIcon />
+              <span>works.md</span>
             </button>
             <button onClick={() => onOpenFile('domain')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
                 <FileIcon />

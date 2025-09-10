@@ -11,6 +11,7 @@ import DomainPage from './components/pages/DomainPage';
 import AppsPage from './components/pages/AppsPage';
 import DocsPage from './components/pages/DocsPage';
 import WorksPage from './components/pages/WorksPage';
+import DigitalShelfPage from './components/pages/DigitalShelfPage';
 
 export const FileIcon = () => (
   <svg
@@ -48,6 +49,11 @@ export const PAGES: {
   works: {
     title: 'works.md',
     component: WorksPage,
+    icon: <FileIcon />,
+  },
+  'digital-shelf': {
+    title: 'digital-shelf.json',
+    component: DigitalShelfPage,
     icon: <FileIcon />,
   },
   apps: {
