@@ -64,18 +64,18 @@ const AboutPage: React.FC<PageProps> = () => {
           level={2}
         />
         <JsonArray
-          field="core_work"
+          field="core_expertise"
           items={["TTS", "AI"]}
           level={2}
         />
         <JsonArray
-          field="full_stack_development"
-          items={["Backend API (Core, Primary)", "Frontend (Secondary, Supporting)"]}
+          field="development_expertise"
+          items={["Backend (Core, Primary)", "Frontend (Secondary, Supporting)"]}
           level={2}
         />
         <JsonArray
           field="architecture_expertise"
-          items={["SDK Development", "Cloud Architecture"]}
+          items={["SDK", "Cloud"]}
           level={2}
           comma={false}
         />
@@ -105,15 +105,16 @@ const AboutPage: React.FC<PageProps> = () => {
         <JsonArray field="ide" items={["Visual Studio Code", "Visual Studio", "Eclipse(STS)"]} level={2} />
         <JsonArray field="scm" items={["Git (GitHub)", "SVN"]} level={2} />
         <JsonArray field="ci_cd" items={["GitHub Actions", "Jenkins"]} level={2} />
-        <JsonArray field="infra" items={["AWS", "Cloudflare"]} level={2} />
-        <JsonArray field="platform" items={["Netlify", "Pikapods", "YouWare", "Google AI Studio"]} level={2} />
+        <JsonArray field="infra" items={["AWS", "Cloudflare", "Docker"]} level={2} />
+        <JsonArray field="platform" items={["Cloudflare Worker", "Netlify", "PikaPods", "YouWare", "Google AI Studio"]} level={2} />
         <JsonArray field="ai_tools" items={["ChatGPT", "Copilot", "Gemini", "Windsurf"]} level={2} />
-        <JsonArray field="docs" items={["Notion", "Confluence"]} level={2} />
+        <JsonArray field="docs" items={["Notion", "Confluence", "MkDocs"]} level={2} />
         <JsonArray field="project" items={["Teams", "JIRA"]} level={2} />
-        <JsonArray field="work" items={["Windows 11", "Microsoft 365"]} level={2} />
+        <JsonArray field="work" items={["Windows 11", "Microsoft 365", "WSL2 (Ubuntu)", "Podman Desktop", "Hyper-V", "Windows Sandbox"]} level={2} />
         <JsonArray field="chart" items={["Whimsical", "Draw.io"]} level={2} />
-        <JsonArray field="web" items={["IIS", "Nginx", "Apache"]} level={2} />
-        <JsonArray field="ssh" items={["SecureCRT", "Filezilla Pro"]} level={2} />
+        <JsonArray field="web" items={["IIS", "Nginx", "Apache", "Echo (Go)", "Spring (Java)", "PocketBase (Go)"]} level={2} />
+        <JsonArray field="database" items={["MySQL", "SQLite", "MongoDB", "Redis", "Cassandra"]} level={2} />
+        <JsonArray field="ssh" items={["SecureCRT", "FileZilla Pro"]} level={2} />
         <JsonArray field="blog" items={["BlogPro"]} level={2} comma={false} />
 
         <span className="text-gray-500">{`}`}</span>

@@ -23,7 +23,7 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         } catch {}
     }, []);
     
-    // Highlights data from provided about.json (ordered: Major, Core Work, Full-stack Development, Architecture Expertise, then others)
+    // Highlights data from provided about.json (ordered: Major, Core Expertise, Development Expertise, Architecture Expertise, then others)
     const highlightGroups = React.useMemo(() => [
         {
             title: 'Major',
@@ -33,22 +33,22 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
             chip: 'bg-blue-500/10 border-blue-500/20',
         },
         {
-            title: 'Core Work',
+            title: 'Core Expertise',
             items: ['TTS', 'AI'],
             tile: 'bg-violet-500/10 border-violet-500/20',
             heading: 'text-violet-300',
             chip: 'bg-violet-500/10 border-violet-500/20',
         },
         {
-            title: 'Full-stack Development',
-            items: ['Backend API (Core, Primary)', 'Frontend (Secondary, Supporting)'],
+            title: 'Development Expertise',
+            items: ['Backend (Core, Primary)', 'Frontend (Secondary, Supporting)'],
             tile: 'bg-teal-500/10 border-teal-500/20',
             heading: 'text-teal-300',
             chip: 'bg-teal-500/10 border-teal-500/20',
         },
         {
             title: 'Architecture Expertise',
-            items: ['SDK Development', 'Cloud Architecture'],
+            items: ['SDK', 'Cloud'],
             tile: 'bg-amber-500/10 border-amber-500/20',
             heading: 'text-amber-300',
             chip: 'bg-amber-500/10 border-amber-500/20',
@@ -97,14 +97,14 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         },
         {
             title: 'Infra',
-            items: ['AWS', 'Cloudflare'],
+            items: ['AWS', 'Cloudflare', 'Docker'],
             tile: 'bg-yellow-500/10 border-yellow-500/20',
             heading: 'text-yellow-300',
             chip: 'bg-yellow-500/10 border-yellow-500/20',
         },
         {
             title: 'Platform',
-            items: ['Netlify', 'Pikapods', 'YouWare', 'Google AI Studio'],
+            items: ['Cloudflare Worker', 'Netlify', 'PikaPods', 'YouWare', 'Google AI Studio'],
             tile: 'bg-indigo-500/10 border-indigo-500/20',
             heading: 'text-indigo-300',
             chip: 'bg-indigo-500/10 border-indigo-500/20',
@@ -118,7 +118,7 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         },
         {
             title: 'Docs',
-            items: ['Notion', 'Confluence'],
+            items: ['Notion', 'Confluence', 'MkDocs'],
             tile: 'bg-cyan-500/10 border-cyan-500/20',
             heading: 'text-cyan-300',
             chip: 'bg-cyan-500/10 border-cyan-500/20',
@@ -131,8 +131,8 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
             chip: 'bg-violet-500/10 border-violet-500/20',
         },
         {
-            title: 'Work',
-            items: ['Windows 11', 'Microsoft 365'],
+            title: 'Environment',
+            items: ['Windows 11', 'Microsoft 365', 'WSL2 (Ubuntu)', 'Podman Desktop', 'Hyper-V', 'Windows Sandbox'],
             tile: 'bg-zinc-500/10 border-zinc-500/20',
             heading: 'text-zinc-300',
             chip: 'bg-zinc-500/10 border-zinc-500/20',
@@ -146,14 +146,21 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         },
         {
             title: 'Web',
-            items: ['IIS', 'Nginx', 'Apache'],
+            items: ['IIS', 'Nginx', 'Apache', 'Echo (Go)', 'Spring (Java)', 'PocketBase (Go)'],
             tile: 'bg-orange-500/10 border-orange-500/20',
             heading: 'text-orange-300',
             chip: 'bg-orange-500/10 border-orange-500/20',
         },
         {
+            title: 'Database',
+            items: ['MySQL', 'SQLite', 'MongoDB', 'Redis', 'Cassandra'],
+            tile: 'bg-green-500/10 border-green-500/20',
+            heading: 'text-green-300',
+            chip: 'bg-green-500/10 border-green-500/20',
+        },
+        {
             title: 'SSH',
-            items: ['SecureCRT', 'Filezilla Pro'],
+            items: ['SecureCRT', 'FileZilla Pro'],
             tile: 'bg-lime-500/10 border-lime-500/20',
             heading: 'text-lime-300',
             chip: 'bg-lime-500/10 border-lime-500/20',
@@ -314,7 +321,7 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
                 <section className="md:col-span-2">
                     <h2 className="text-2xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Explore</h2>
                     <div className="space-y-3">
-                        <button onClick={() => onOpenFile('project')} className="w-full text-left rounded-md p-4 bg-white/[0.03] hover:bg-white/10 transition">
+                        <button onClick={() => onOpenFile('works')} className="w-full text-left rounded-md p-4 bg-white/[0.03] hover:bg-white/10 transition">
                             <div className="flex items-center gap-3 text-blue-400">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"/></svg>
                                 <span className="text-lg">Works</span>

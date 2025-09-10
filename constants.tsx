@@ -10,6 +10,7 @@ import NotesBoardPage from './components/pages/NotesBoardPage';
 import DomainPage from './components/pages/DomainPage';
 import AppsPage from './components/pages/AppsPage';
 import DocsPage from './components/pages/DocsPage';
+import WorksPage from './components/pages/WorksPage';
 
 export const FileIcon = () => (
   <svg
@@ -42,6 +43,11 @@ export const PAGES: {
   domain: {
     title: 'tts-history.md',
     component: DomainPage,
+    icon: <FileIcon />,
+  },
+  works: {
+    title: 'works.md',
+    component: WorksPage,
     icon: <FileIcon />,
   },
   apps: {
