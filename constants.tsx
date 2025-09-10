@@ -178,14 +178,22 @@ export const ACTIVITY_BAR_ITEMS = [
     title: 'Media',
   },
   {
-    id: ViewId.Library,
+    id: ViewId.Playground,
     section: 'top',
     icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
-        <g fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19.562 7a2.132 2.132 0 0 0-2.1-2.5H6.538a2.132 2.132 0 0 0-2.1 2.5M17.5 4.5c.028-.26.043-.389.043-.496a2 2 0 0 0-1.787-1.993C15.65 2 15.52 2 15.26 2H8.74c-.26 0-.391 0-.497.011a2 2 0 0 0-1.787 1.993c0 .107.014.237.043.496"/><path strokeLinecap="round" d="M15 18H9"/><path d="M2.384 13.793c-.447-3.164-.67-4.745.278-5.77C3.61 7 5.298 7 8.672 7h6.656c3.374 0 5.062 0 6.01 1.024s.724 2.605.278 5.769l-.422 3c-.35 2.48-.525 3.721-1.422 4.464s-2.22.743-4.867.743h-5.81c-2.646 0-3.97 0-4.867-.743s-1.072-1.983-1.422-4.464z"/></g>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="w-7 h-7">
+        <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="32" d="M448 341.37V170.61A32 32 0 0 0 432.11 143l-152-88.46a47.94 47.94 0 0 0-48.24 0L79.89 143A32 32 0 0 0 64 170.61v170.76A32 32 0 0 0 79.89 369l152 88.46a48 48 0 0 0 48.24 0l152-88.46A32 32 0 0 0 448 341.37"/>
+        <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="32" d="m69 153.99l187 110l187-110m-187 310v-200"/>
+        <ellipse cx="256" cy="152" fill="currentColor" rx="24" ry="16"/>
+        <ellipse cx="208" cy="296" fill="currentColor" rx="16" ry="24"/>
+        <ellipse cx="112" cy="328" fill="currentColor" rx="16" ry="24"/>
+        <ellipse cx="304" cy="296" fill="currentColor" rx="16" ry="24"/>
+        <ellipse cx="400" cy="240" fill="currentColor" rx="16" ry="24"/>
+        <ellipse cx="304" cy="384" fill="currentColor" rx="16" ry="24"/>
+        <ellipse cx="400" cy="328" fill="currentColor" rx="16" ry="24"/>
       </svg>
     ),
-    title: 'Library',
+    title: 'Playground',
   },
   {
     id: ViewId.Bookmark,

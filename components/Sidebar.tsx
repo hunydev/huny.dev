@@ -387,8 +387,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile, width = 256 }
         return <AppsView onOpenFile={onOpenFile} />;
       case ViewId.Media:
         return <MediaView onOpenFile={onOpenFile} />;
-      case ViewId.Library:
-        return <GenericView title="Library"><p className="text-sm text-gray-400">Library section coming soon.</p></GenericView>;
+      case ViewId.Playground:
+        return <GenericView title="Playground"><p className="text-sm text-gray-400">실험적 기능들을 모아두는 공간입니다. (Coming soon)</p></GenericView>;
       case ViewId.Bookmark:
         return <BookmarkView onOpenFile={onOpenFile} />;
       case ViewId.Notes:

@@ -6,7 +6,7 @@ export enum ViewId {
   Docs = 'DOCS',
   Apps = 'APPS',
   Media = 'MEDIA',
-  Library = 'LIBRARY',
+  Playground = 'PLAYGROUND',
   Bookmark = 'BOOKMARK',
   Notes = 'NOTES',
   GitHub = 'GITHUB',
