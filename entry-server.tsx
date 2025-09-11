@@ -34,7 +34,7 @@ export async function render(url: string, manifest?: ViteManifest) {
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>HunyDev</title>
     <meta name="description" content="HunyDev · Works & Digital Playground — TTS/AI/Full‑stack engineering works, notes, docs, and apps." />
     <link rel="canonical" href="https://huny.dev/" />
