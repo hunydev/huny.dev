@@ -7,9 +7,6 @@
   --color-thumb-hover: #858585;
   --color-thumb-active: #b5b5b5;
   --color-accent: #3b82f6;   /* blue-500 */
-  /* dynamic viewport units fallback (updated via JS) */
-  --vh: 1vh;
-  --app-vh: 100vh;
 }
 
 /* Base page theme */
@@ -24,8 +21,6 @@ html, body {
 #root {
   background: var(--color-bg);
   min-height: 100vh;              /* fallback */
-  min-height: 100dvh;             /* modern dynamic viewport (iOS/Android) */
-  min-height: calc(var(--vh, 1vh) * 100); /* JS-patched fallback for older browsers */
 }
 
 /* Make form controls inherit foreground color for caret and placeholder */
