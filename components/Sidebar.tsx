@@ -174,9 +174,9 @@ const ExplorerView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
                 <img src={welcomeIcon} alt="Welcome" className="w-4 h-4 mr-2 rounded-sm" />
                 <span>Welcome</span>
             </button>
-            <button onClick={() => onOpenFile('project')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-                <FileIcon />
-                <span>project.js</span>
+            <button onClick={() => onOpenFile('works')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
+              <FileIcon />
+              <span>works.md</span>
             </button>
             <button onClick={() => onOpenFile('about')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
               <FileIcon />
@@ -190,17 +190,17 @@ const ExplorerView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
               <FileIcon />
               <span>digital-shelf.json</span>
             </button>
+            <button onClick={() => onOpenFile('domain')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
+                <FileIcon />
+                <span>tts-history.md</span>
+            </button>
             <button onClick={() => onOpenFile('mascot')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
               <FileIcon />
               <span>mascot.gallery</span>
             </button>
-            <button onClick={() => onOpenFile('works')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-              <FileIcon />
-              <span>works.md</span>
-            </button>
-            <button onClick={() => onOpenFile('domain')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
+            <button onClick={() => onOpenFile('project')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
                 <FileIcon />
-                <span>tts-history.md</span>
+                <span>project.js</span>
             </button>
         </div>
     </div>

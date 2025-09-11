@@ -174,6 +174,17 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         },
     ], []);
     
+    // Explorer panel items (keep Welcome pinned at top in the sidebar, others listed here)
+    const explorerItems: Array<{ id: keyof typeof PAGES; desc: string }> = [
+        { id: 'works', desc: 'Works & experiments' },
+        { id: 'about', desc: 'About me' },
+        { id: 'stack', desc: 'Full‑stack map for huny.dev' },
+        { id: 'digital-shelf', desc: 'Subscriptions · Licenses · Free‑tier' },
+        { id: 'domain', desc: 'TTS history timeline (2015 → present)' },
+        { id: 'mascot', desc: 'Brand mascot gallery (concept · base · variations)' },
+        { id: 'project', desc: 'Projects listing (code-style)' },
+    ];
+
     return (
         <div className="text-gray-300 max-w-6xl mx-auto font-sans leading-relaxed px-6 md:px-8">
             <header className="mb-12">
@@ -317,24 +328,29 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
                     </div>
                 </section>
 
-                {/* Explore: richer cards to guide first-time visitors (full width, placed below Highlights) */}
+                {/* Explorer panel guide (full width) */}
                 <section className="md:col-span-2">
-                    <h2 className="text-2xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Explore</h2>
-                    <div className="space-y-3">
-                        <button onClick={() => onOpenFile('works')} className="w-full text-left rounded-md p-4 bg-white/[0.03] hover:bg-white/10 transition">
-                            <div className="flex items-center gap-3 text-blue-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"/></svg>
-                                <span className="text-lg">Works</span>
-                            </div>
-                            <p className="ml-9 mt-1 text-sm text-gray-400">Browse works, experiments, and results.</p>
-                        </button>
-                        <button onClick={() => onOpenFile('about')} className="w-full text-left rounded-md p-4 bg-white/[0.03] hover:bg-white/10 transition">
-                            <div className="flex items-center gap-3 text-blue-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Zm-4 7a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7z"/></svg>
-                                <span className="text-lg">About Me</span>
-                            </div>
-                            <p className="ml-9 mt-1 text-sm text-gray-400">Who I am, what I do, and how I work.</p>
-                        </button>
+                    <h2 className="text-2xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Explorer</h2>
+                    <p className="text-gray-500 mb-3">Key items available under Explorer. Welcome is always on top; others are ordered by purpose.</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {explorerItems.map((item) => {
+                            const meta = PAGES[item.id];
+                            if (!meta) return null;
+                            return (
+                                <button
+                                  key={item.id}
+                                  onClick={() => onOpenFile(item.id)}
+                                  className="w-full text-left rounded-md p-4 bg-white/[0.03] hover:bg-white/10 transition"
+                                  title={meta.title}
+                                >
+                                  <div className="flex items-center gap-3 text-blue-400">
+                                    <span className="inline-flex items-center justify-center w-6 h-6">{meta.icon}</span>
+                                    <span className="text-sm font-medium text-gray-200">{meta.title}</span>
+                                  </div>
+                                  <p className="ml-9 mt-1 text-xs text-gray-400">{item.desc}</p>
+                                </button>
+                            );
+                        })}
                     </div>
                 </section>
             </main>
