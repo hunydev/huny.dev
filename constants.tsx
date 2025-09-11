@@ -13,6 +13,7 @@ import DocsPage from './components/pages/DocsPage';
 import WorksPage from './components/pages/WorksPage';
 import DigitalShelfPage from './components/pages/DigitalShelfPage';
 import StackHunyDevPage from './components/pages/StackHunyDevPage';
+import MascotGalleryPage from './components/pages/MascotGalleryPage';
 
 export const FileIcon = () => (
   <svg
@@ -60,6 +61,11 @@ export const PAGES: {
   'digital-shelf': {
     title: 'digital-shelf.json',
     component: DigitalShelfPage,
+    icon: <FileIcon />,
+  },
+  mascot: {
+    title: 'mascot.gallery',
+    component: MascotGalleryPage,
     icon: <FileIcon />,
   },
   apps: {
