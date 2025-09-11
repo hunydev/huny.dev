@@ -326,12 +326,20 @@ const DomainPage: React.FC<PageProps> = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <header className="mb-6">
-        <h1 className="text-xl md:text-2xl font-semibold text-white">TTS 음성합성 기술의 역사적 발전</h1>
-        <p className="text-sm md:text-base text-gray-400 mt-1">1950년대부터 현재까지의 기술 혁신 여정</p>
-      </header>
+    <div className="min-h-full">
+      <div className="relative overflow-hidden rounded-lg border border-white/10 bg-[#1b1b1b] p-5 md:p-7">
+        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-rose-500/10 rounded-full blur-3xl" />
+        </div>
+        <div className="relative">
+          <h1 className="mt-1 text-2xl md:text-3xl font-semibold text-white">TTS History</h1>
+          <p className="mt-1 text-sm md:text-base text-gray-400">TTS 음성합성 기술의 역사적 발전 · 1950s → Present</p>
+          <p className="mt-2 text-xs md:text-sm text-blue-300/90">2015년 이후: 나의 TTS 도메인 전문 영역</p>
+        </div>
+      </div>
 
+      <div className="mt-6 max-w-5xl mx-auto">
       <nav className="mb-6">
         <div className="flex flex-wrap gap-2">
           {FILTERS.map(f => (
@@ -365,6 +373,7 @@ const DomainPage: React.FC<PageProps> = () => {
           ))}
         </ul>
       </section>
+      </div>
 
       {/* Modal overlay */}
       {selectedItem && (

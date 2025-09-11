@@ -39,20 +39,35 @@ const ProjectPage: React.FC<PageProps> = () => {
     ];
 
     return (
-        <div className="text-gray-300 font-mono">
-            <h1 className="text-3xl font-bold text-white mb-2">
-                <span className="text-gray-500">const</span> <span className="text-yellow-400">projects</span> <span className="text-gray-500">=</span> [
-            </h1>
-            <div className="space-y-6 pl-4 border-l-2 border-gray-700 ml-2">
-                {projects.map((project, index) => (
-                    <div key={index} className="my-4">
-                       <span className="text-gray-500">{`{`}</span>
-                         <ProjectCard {...project} />
-                       <span className="text-gray-500">{`},`}</span>
-                    </div>
-                ))}
+        <div className="min-h-full">
+            {/* Hero */}
+            <div className="relative overflow-hidden rounded-lg border border-white/10 bg-[#1b1b1b] p-5 md:p-7">
+                <div className="absolute inset-0 pointer-events-none" aria-hidden>
+                    <div className="absolute -top-24 -right-24 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl" />
+                    <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl" />
+                </div>
+                <div className="relative">
+                    <h1 className="mt-1 text-2xl md:text-3xl font-semibold text-white">Projects</h1>
+                    <p className="mt-1 text-sm md:text-base text-gray-400">Selected projects</p>
+                </div>
             </div>
-             <h1 className="text-3xl font-bold text-white mt-2">];</h1>
+
+            {/* Body */}
+            <div className="mt-6 text-gray-300 font-mono">
+                <h1 className="text-3xl font-bold text-white mb-2">
+                    <span className="text-gray-500">const</span> <span className="text-yellow-400">projects</span> <span className="text-gray-500">=</span> [
+                </h1>
+                <div className="space-y-6 pl-4 border-l-2 border-gray-700 ml-2">
+                    {projects.map((project, index) => (
+                        <div key={index} className="my-4">
+                            <span className="text-gray-500">{`{`}</span>
+                            <ProjectCard {...project} />
+                            <span className="text-gray-500">{`},`}</span>
+                        </div>
+                    ))}
+                </div>
+                <h1 className="text-3xl font-bold text-white mt-2">];</h1>
+            </div>
         </div>
     );
 };

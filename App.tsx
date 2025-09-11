@@ -3,7 +3,7 @@ import ActivityBar from './components/ActivityBar';
 import Sidebar from './components/Sidebar';
 import MainPanel from './components/MainPanel';
 import { ViewId, Tab, PageProps } from './types';
-import { PAGES, ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS, FileIcon } from './constants';
+import { PAGES, ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS, FileIcon, ImageIcon, VideoIcon } from './constants';
 import logo from './logo_128x128.png';
 import { getCategoryById } from './components/pages/bookmarksData';
 import { getNoteGroupById } from './components/pages/notesData';
@@ -68,15 +68,7 @@ const App: React.FC = () => {
         const mType = payload?.type ?? 'image';
         const mName = payload?.name ?? 'file';
         tabTitle = `media (${mName})`;
-        tabIcon = mType === 'image' ? (
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 mr-2">
-            <path d="M1.5 3A1.5 1.5 0 0 0 0 4.5v7A1.5 1.5 0 0 0 1.5 13h13a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 14.5 3h-13Zm2 2 3 4 2-2 4 5h-11l2-7Z" />
-          </svg>
-        ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 mr-2">
-            <path d="M4 3.5a.5.5 0 0 1 .79-.407l6 4.5a.5.5 0 0 1 0 .814l-6 4.5A.5.5 0 0 1 4 12.5v-9Z" />
-          </svg>
-        );
+        tabIcon = mType === 'image' ? ImageIcon() : VideoIcon();
       } catch { }
     }
     else if (baseId === 'notes' && arg) {

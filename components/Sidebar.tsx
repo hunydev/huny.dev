@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ViewId } from '../types';
-import { FileIcon } from '../constants';
+import { FileIcon, ImageIcon, VideoIcon } from '../constants';
 import { BOOKMARK_CATEGORIES, getBookmarkCountByCategory } from './pages/bookmarksData';
 import { NOTE_GROUPS, getNoteCountByGroup } from './pages/notesData';
 import { CATEGORIES } from './pages/appsData';
@@ -293,15 +293,7 @@ const MediaView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenF
           style={{ paddingLeft: depth * 12 + 12 }}
         >
           <span className="mr-2">
-            {node.type === 'image' ? (
-              <svg className="w-4 h-4 inline text-gray-400" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M1.5 3A1.5 1.5 0 0 0 0 4.5v7A1.5 1.5 0 0 0 1.5 13h13a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 14.5 3h-13Zm2 2 3 4 2-2 4 5h-11l2-7Z" />
-              </svg>
-            ) : (
-              <svg className="w-4 h-4 inline text-gray-400" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M4 3.5a.5.5 0 0 1 .79-.407l6 4.5a.5.5 0 0 1 0 .814l-6 4.5A.5.5 0 0 1 4 12.5v-9Z" />
-              </svg>
-            )}
+            {node.type === 'image' ? ImageIcon() : VideoIcon() }
           </span>
           <span className="text-sm">{node.name}</span>
         </button>

@@ -32,8 +32,21 @@ const AboutPage: React.FC<PageProps> = () => {
   );
 
   return (
-    <div className="font-mono text-base text-gray-300 leading-relaxed">
-      <p className="text-gray-500">{`{`}</p>
+    <div className="min-h-full">
+      {/* Hero */}
+      <div className="relative overflow-hidden rounded-lg border border-white/10 bg-[#1b1b1b] p-5 md:p-7">
+        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-sky-500/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-teal-500/10 rounded-full blur-3xl" />
+        </div>
+        <div className="relative">
+          <h1 className="mt-1 text-2xl md:text-3xl font-semibold text-white">About Me</h1>
+          <p className="mt-1 text-sm md:text-base text-gray-400">소개</p>
+        </div>
+      </div>
+
+      <div className="mt-6 font-mono text-base text-gray-300 leading-relaxed">
+        <p className="text-gray-500">{`{`}</p>
 
       <JsonLine field="name" value="Hun Jang" />
       <JsonLine field="alias" value="HunyDev" />
@@ -121,9 +134,9 @@ const AboutPage: React.FC<PageProps> = () => {
         {/* 마지막 항목이므로 쉼표 없음 */}
       </div>
 
-      <p className="text-gray-500">{`}`}</p>
+        <p className="text-gray-500">{`}`}</p>
+      </div>
     </div>
-
   );
 };
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { PageProps, ViewId } from '../../types';
-import { ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS, FileIcon } from '../../constants';
+import { ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS, FileIcon, ImageIcon, VideoIcon } from '../../constants';
 import { DOCS } from './docsData';
 import { BOOKMARK_CATEGORIES, getBookmarkCountByCategory } from './bookmarksData';
 import { NOTE_GROUPS, getNoteCountByGroup } from './notesData';
@@ -122,15 +122,7 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile }) => {
                     title={item.name}
                   >
                     <span className="mr-1">
-                      {item.type === 'image' ? (
-                        <svg className="w-4 h-4 inline text-gray-400" viewBox="0 0 16 16" fill="currentColor">
-                          <path d="M1.5 3A1.5 1.5 0 0 0 0 4.5v7A1.5 1.5 0 0 0 1.5 13h13a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 14.5 3h-13Zm2 2 3 4 2-2 4 5h-11l2-7Z" />
-                        </svg>
-                      ) : (
-                        <svg className="w-4 h-4 inline text-gray-400" viewBox="0 0 16 16" fill="currentColor">
-                          <path d="M4 3.5a.5.5 0 0 1 .79-.407l6 4.5a.5.5 0 0 1 0 .814l-6 4.5A.5.5 0 0 1 4 12.5v-9Z" />
-                        </svg>
-                      )}
+                      {item.type === 'image' ? ImageIcon() : VideoIcon()}
                     </span>
                     <span>{item.name}</span>
                   </button>

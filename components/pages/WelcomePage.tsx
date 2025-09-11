@@ -1,6 +1,6 @@
 import React from 'react';
 import { PageProps, ViewId } from '../../types';
-import { ACTIVITY_BAR_ITEMS, PAGES, FileIcon } from '../../constants';
+import { ACTIVITY_BAR_ITEMS, PAGES, FileIcon, ImageIcon, VideoIcon } from '../../constants';
 import { getCategoryById } from './bookmarksData';
 import { getNoteGroupById } from './notesData';
 import { getAppCategoryById } from './appsData';
@@ -251,15 +251,7 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
                                         const mType = payload?.type ?? 'image';
                                         const mName = payload?.name ?? 'file';
                                         displayTitle = `media (${mName})`;
-                                        displayIcon = mType === 'image' ? (
-                                            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
-                                                <path d="M1.5 3A1.5 1.5 0 0 0 0 4.5v7A1.5 1.5 0 0 0 1.5 13h13a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 14.5 3h-13Zm2 2 3 4 2-2 4 5h-11l2-7Z" />
-                                            </svg>
-                                        ) : (
-                                            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
-                                                <path d="M4 3.5a.5.5 0 0 1 .79-.407l6 4.5a.5.5 0 0 1 0 .814l-6 4.5A.5.5 0 0 1 4 12.5v-9Z" />
-                                            </svg>
-                                        );
+                                        displayIcon = mType === 'image' ? ImageIcon() : VideoIcon();
                                     } catch {}
                                 } else if (baseId === 'notes' && arg) {
                                     const group = getNoteGroupById(arg);

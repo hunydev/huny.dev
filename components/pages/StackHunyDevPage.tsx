@@ -46,8 +46,8 @@ const StackHunyDevPage: React.FC<PageProps> = () => {
           <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl" />
         </div>
         <div className="relative">
-          <h1 className="mt-1 text-2xl md:text-3xl font-semibold text-white">stack-huny.dev</h1>
-          <p className="mt-1 text-sm md:text-base text-gray-400">huny.dev의 아이디어 → 개발 → 배포까지, 나의 Full-Stack 흐름을 한눈에.</p>
+          <h1 className="mt-1 text-2xl md:text-3xl font-semibold text-white">huny.dev Tech Stack</h1>
+          <p className="mt-1 text-sm md:text-base text-gray-400">From ideation to deployment: the full‑stack map of huny.dev.</p>
         </div>
       </div>
 
@@ -55,7 +55,7 @@ const StackHunyDevPage: React.FC<PageProps> = () => {
       <div className="mt-6 grid gap-4 md:gap-6 md:grid-cols-[1fr,320px]">
         {/* Stages / Lanes */}
         <div className="space-y-4">
-          <Section title="1) Ideation · Prototype" note="아이디어 스케치 / 프로토타입">
+          <Section title="1) Ideation · Prototype" note="Sketching ideas / Prototyping">
             <div className="flex flex-wrap items-center gap-2">
               <CHIP label="Gemini Build" color="#60a5fa" />
               <CHIP label="ChatGPT" color="#22d3ee" />
@@ -63,7 +63,7 @@ const StackHunyDevPage: React.FC<PageProps> = () => {
             </div>
           </Section>
 
-          <Section title="2) Local Development · Agentic" note="로컬로 가져와 보완/개발">
+          <Section title="2) Local Development · Agentic" note="Local development & agentic iteration">
             <div className="flex flex-wrap items-center gap-2">
               <CHIP label="Windsurf" color="#34d399" />
               <CHIP label="GPT‑5 (Agent)" color="#f59e0b" />
@@ -72,21 +72,21 @@ const StackHunyDevPage: React.FC<PageProps> = () => {
             </div>
           </Section>
 
-          <Section title="3) Assets · Media" note="아이콘/이미지 등 제작">
+          <Section title="3) Assets · Media" note="Create icons/images and media">
             <div className="flex flex-wrap items-center gap-2">
               <CHIP label="Gemini Chat" color="#60a5fa" />
               <CHIP label="ChatGPT" color="#22d3ee" />
             </div>
           </Section>
 
-          <Section title="4) Delivery · Hosting" note="프리뷰/프로덕션 배포">
+          <Section title="4) Delivery · Hosting" note="Preview/Production deployment">
             <div className="flex flex-wrap items-center gap-2">
               <CHIP label="Cloudflare Workers" color="#f472b6" />
               <CHIP label="Netlify" color="#22c55e" />
             </div>
           </Section>
 
-          <Section title="5) Data · Storage" note="필요 시 연결">
+          <Section title="5) Data · Storage" note="Connect as needed">
             <div className="flex flex-wrap items-center gap-2">
               <CHIP label="Cloudflare KV" color="#c084fc" />
               <CHIP label="Cloudflare D1" color="#a3e635" />
@@ -98,14 +98,14 @@ const StackHunyDevPage: React.FC<PageProps> = () => {
             </div>
           </Section>
 
-          <Section title="6) DNS · Domain (huny.dev)" note="서브도메인 라우팅">
+          <Section title="6) DNS · Domain (huny.dev)" note="Subdomain routing">
             <div className="flex flex-wrap items-center gap-2">
               <CHIP label="Cloudflare DNS" color="#f59e0b" />
               <CHIP label="huny.dev / *.huny.dev" color="#60a5fa" />
             </div>
           </Section>
 
-          <Section title="7) Clients" note="브라우저에서 사용">
+          <Section title="7) Clients" note="Used in browsers">
             <div className="flex flex-wrap items-center gap-2">
               <CHIP label="PC Browser" color="#9ca3af" />
               <CHIP label="Mobile Browser" color="#9ca3af" />
@@ -119,14 +119,14 @@ const StackHunyDevPage: React.FC<PageProps> = () => {
             <div className="flex flex-wrap items-center gap-2">
               <CHIP label="GitHub" color="#9ca3af" />
             </div>
-            <p className="text-xs text-gray-400">이슈/PR/프로젝트, 배포 태그, 릴리즈 노트 등 운영·배포 전반에 연동</p>
+            <p className="text-xs text-gray-400">Issues/PRs/projects, release tags, release notes — integrated across ops & delivery</p>
           </RailCard>
           <RailCard title="Continuous · CI/CD & Delivery">
             <div className="flex flex-wrap items-center gap-2">
               <CHIP label="Netlify" color="#22c55e" />
               <CHIP label="Cloudflare Workers" color="#f472b6" />
             </div>
-            <p className="text-xs text-gray-400">Preview/Prod 파이프라인, 브랜치 프리뷰, 자동 캐시 무효화 등</p>
+            <p className="text-xs text-gray-400">Preview/Prod pipelines, branch previews, automatic cache invalidation, etc.</p>
           </RailCard>
           <RailCard title="Continuous · Assets / Media">
             <div className="flex flex-wrap items-center gap-2">
@@ -134,7 +134,7 @@ const StackHunyDevPage: React.FC<PageProps> = () => {
               <CHIP label="Cloudflare Stream" color="#06b6d4" />
               <CHIP label="Cloudflare R2" color="#f97316" />
             </div>
-            <p className="text-xs text-gray-400">이미지/영상 호스팅, 리사이즈·서빙, 미디어 파이프라인 운영</p>
+            <p className="text-xs text-gray-400">Image/video hosting, resizing & serving, operating the media pipeline</p>
           </RailCard>
           <RailCard title="Continuous · Data & Storage">
             <div className="flex flex-wrap items-center gap-2">
@@ -143,7 +143,7 @@ const StackHunyDevPage: React.FC<PageProps> = () => {
               <CHIP label="Netlify Postgres" color="#38bdf8" />
               <CHIP label="Netlify Blob" color="#eab308" />
             </div>
-            <p className="text-xs text-gray-400">설정/캐시/데이터 영속화, 파일 저장소, Postgres 기반 데이터 서비스</p>
+            <p className="text-xs text-gray-400">Configuration/cache/data persistence, object/blob storage, Postgres‑backed data services</p>
           </RailCard>
         </div>
       </div>
