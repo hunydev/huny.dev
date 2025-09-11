@@ -7,6 +7,7 @@ import { NOTE_GROUPS, getNoteCountByGroup } from './notesData';
 import { CATEGORIES } from './appsData';
 import logoImg from '../../logo.png';
 import logo128 from '../../logo_128x128.png';
+import welcomeIcon from '../../icon_32x32.png';
 
 const Section: React.FC<{ title: string; children?: React.ReactNode }> = ({ title, children }) => (
   <section className="mb-6">
@@ -80,14 +81,14 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile }) => {
             <ul className="space-y-1 text-sm">
               <li>
                 <button onClick={() => onOpenFile('welcome')} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left">
-                  <span className="w-4 h-4" />
+                  <img src={welcomeIcon} alt="Welcome" className="w-4 h-4 mr-2 rounded-sm" />
                   <span>Welcome</span>
                 </button>
               </li>
               <li>
-                <button onClick={() => onOpenFile('project')} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left">
+                <button onClick={() => onOpenFile('works')} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left">
                   <FileIcon />
-                  <span>project.js</span>
+                  <span>works.md</span>
                 </button>
               </li>
               <li>
@@ -97,9 +98,9 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile }) => {
                 </button>
               </li>
               <li>
-                <button onClick={() => onOpenFile('domain')} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left">
+                <button onClick={() => onOpenFile('stack')} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left">
                   <FileIcon />
-                  <span>tts-history.md</span>
+                  <span>stack-huny.dev</span>
                 </button>
               </li>
             </ul>
