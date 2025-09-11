@@ -61,14 +61,24 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile }) => {
   return (
     <div className="max-w-6xl mx-auto px-4">
       {/* Top: Welcome shortcuts */}
-      <div className="flex items-center justify-between gap-3 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-xl md:text-2xl font-semibold text-white mb-1">Welcome</h1>
           <p className="text-sm text-gray-400">탭이 모두 닫힌 상태입니다. 아래 사이트맵에서 원하는 항목을 열어보세요.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={openWelcome} className="px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white text-sm">Welcome 열기</button>
-          <button onClick={openRandom} className="px-3 py-1.5 rounded bg-white/10 hover:bg-white/20 text-sm">랜덤 탭 열기</button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <button
+            onClick={openWelcome}
+            className="flex-1 sm:flex-none w-full sm:w-auto whitespace-nowrap text-center px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white text-sm"
+          >
+            Welcome 열기
+          </button>
+          <button
+            onClick={openRandom}
+            className="flex-1 sm:flex-none w-full sm:w-auto whitespace-nowrap text-center px-3 py-1.5 rounded bg-white/10 hover:bg-white/20 text-sm"
+          >
+            랜덤 탭 열기
+          </button>
         </div>
       </div>
 

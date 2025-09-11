@@ -28,6 +28,15 @@ const App: React.FC = () => {
   const restoredRef = useRef<boolean>(false);
   const restoringRef = useRef<boolean>(false);
 
+  // Default: on small screens, start with sidebar unpinned for better mobile UX
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined' && window.innerWidth < 768) {
+        setIsSidebarPinned(false);
+      }
+    } catch {}
+  }, []);
+
   const handleOpenFile = useCallback((fileId: string) => {
     const originalId = fileId;
     let baseId = fileId;
@@ -452,6 +461,14 @@ const App: React.FC = () => {
               <Sidebar activeView={overlayView} onOpenFile={handleOpenFile} width={sidebarWidth} />
             )}
           </div>
+        )}
+        {/* Click-outside mask: close overlay when clicking main panel area */}
+        {!isSidebarPinned && overlayOpen && (
+          <div
+            className="absolute inset-0 left-12 z-20"
+            onClick={() => setOverlayOpen(false)}
+            aria-hidden
+          />
         )}
       </div>
 
