@@ -182,6 +182,10 @@ const ExplorerView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
               <FileIcon />
               <span>about.json</span>
             </button>
+            <button onClick={() => onOpenFile('stack')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
+              <FileIcon />
+              <span>stack-huny.dev</span>
+            </button>
             <button onClick={() => onOpenFile('digital-shelf')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
               <FileIcon />
               <span>digital-shelf.json</span>

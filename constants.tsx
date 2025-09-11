@@ -12,6 +12,7 @@ import AppsPage from './components/pages/AppsPage';
 import DocsPage from './components/pages/DocsPage';
 import WorksPage from './components/pages/WorksPage';
 import DigitalShelfPage from './components/pages/DigitalShelfPage';
+import StackHunyDevPage from './components/pages/StackHunyDevPage';
 
 export const FileIcon = () => (
   <svg
@@ -49,6 +50,11 @@ export const PAGES: {
   works: {
     title: 'works.md',
     component: WorksPage,
+    icon: <FileIcon />,
+  },
+  stack: {
+    title: 'stack-huny.dev',
+    component: StackHunyDevPage,
     icon: <FileIcon />,
   },
   'digital-shelf': {
