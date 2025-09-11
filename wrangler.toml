@@ -1,0 +1,13 @@
+name = "hunydev-works"
+main = "server/worker.ts"
+compatibility_date = "2025-02-15"
+workers_dev = true
+
+[assets]
+directory = "dist/client"
+# By default this binds to `env.ASSETS` in the Worker
+binding = "ASSETS"
+
+[vars]
+# Example for future server-side keys
+# GEMINI_API_KEY = ""
