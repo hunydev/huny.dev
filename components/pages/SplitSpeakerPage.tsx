@@ -1,9 +1,8 @@
 import React from 'react';
 import { PageProps } from '../../types';
 
-// 개발 환경에서만 Vite define로 주입됩니다. 프로덕션 번들은 undefined가 됩니다.
-const DEV_GEMINI_API_KEY = process.env.GEMINI_API_KEY as unknown as string | undefined;
-const GEMINI_MODEL = 'gemini-2.0-flash';
+// Gemini model used by the server worker
+const GEMINI_MODEL = 'gemini-2.5-flash';
 
 // Types for output structure
 export type SplitSpeakerEntry = {
@@ -11,6 +10,7 @@ export type SplitSpeakerEntry = {
   name: string;
   gender: 'male' | 'female' | 'unknown' | string;
   extra?: string;
+  directive: string;
 };
 export type SplitSpeakerResult = {
   prompts: SplitSpeakerEntry[];
@@ -21,74 +21,32 @@ const SAMPLE_TEXT = `"안녕하세요, 저는 한이예요." 라고 소녀가 �
 그때 문이 열리며 중년 남성이 들어왔다. 그는 차분한 목소리로 말했다. "두 분, 회의 시간이 다 됐습니다." 소녀와 소년은 서로를 쳐다보고 조용히 자리에서 일어섰다.`;
 
 async function callSplitServerFirst(input: string): Promise<SplitSpeakerResult> {
-  // 1) 서버 라우트 시도 (권장)
-  try {
-    const res = await fetch('/api/split-speaker', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: input }),
-    });
-    if (res.ok) {
-      const data = (await res.json()) as SplitSpeakerResult;
-      if (!data || !Array.isArray(data.prompts)) throw new Error('Unexpected server response');
-      return data;
-    }
-    // 서버가 준비되지 않았거나(404 등) 키 미설정(500)인 경우 폴백 고려
-  } catch {
-    // 네트워크/개발 서버 미기동 등
-  }
-
-  // 2) 개발 환경 폴백: 클라이언트에서 직접 Gemini 호출 (키가 주입된 경우에만)
-  if (!DEV_GEMINI_API_KEY) {
-    throw new Error('서버 API를 사용할 수 없고 개발용 GEMINI_API_KEY도 감지되지 않았습니다.\n옵션A) npm run serve:ssr 로 워커 개발 서버를 실행하세요.\n옵션B) .env.local에 GEMINI_API_KEY를 추가하고 개발 중에만 사용하세요.');
-  }
-
-  const instructions = [
-    '당신은 주어진 한국어/영어 텍스트에서 화자를 분리하여 JSON을 만드는 도우미입니다.',
-    '규칙:',
-    '- 같은 화자가 연속으로 말하는 구간은 하나의 엔트리로 묶습니다.',
-    '- 내레이션(서술자, 지문)은 name을 "Narrator"로 설정합니다.',
-    '- 등장인물의 이름을 문맥에서 유추할 수 있으면 name에 기록합니다. 유추가 어렵다면 "Unknown#1"과 같이 넘버링합니다.',
-    '- gender는 남성 male, 여성 female, 알 수 없으면 unknown 으로 표기합니다. 확실치 않다면 unknown을 사용합니다.',
-    '- extra에는 직업, 관계, 연령대 등 문맥에서 확실히 추정 가능한 보조 정보를 간략히 기술합니다. 불확실하면 생략합니다.',
-    '- 결과는 반드시 다음 스키마의 JSON만 출력합니다: { "prompts": [ { "text": string, "name": string, "gender": string, "extra": string } ] }',
-    '- 마크다운 코드펜스나 설명 텍스트 없이 JSON만 반환합니다.'
-  ].join('\n');
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-  const res = await fetch(url, {
+  const res = await fetch('/api/split-speaker', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-goog-api-key': DEV_GEMINI_API_KEY,
-    },
-    body: JSON.stringify({
-      contents: [
-        { parts: [ { text: instructions }, { text: `INPUT:\n${input}` } ] },
-      ],
-      generationConfig: { responseMimeType: 'application/json' },
-    }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: input }),
   });
-
   if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`Gemini API 오류: ${res.status} ${res.statusText}\n${text}`);
+    const msg = await res.text().catch(() => '');
+    throw new Error(`서버 API 오류: ${res.status} ${res.statusText}${msg ? '\n' + msg : ''}\n개발 중이라면 별도 터미널에서 'wrangler dev'를 실행하고 .dev.vars에 GEMINI_API_KEY를 설정하세요.`);
   }
-  const data: any = await res.json();
-  const raw: string = ((data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [])
-    .map((p: any) => p?.text || '')
-    .join('');
-  const jsonStr = extractJsonString(raw);
-  let parsed: SplitSpeakerResult;
-  try {
-    parsed = JSON.parse(jsonStr);
-  } catch (e) {
-    throw new Error('Gemini 응답을 JSON으로 파싱하는 데 실패했습니다.\n원문:\n' + raw);
+  const data = (await res.json()) as SplitSpeakerResult;
+  if (!data || !Array.isArray(data.prompts)) {
+    throw new Error('Unexpected server response: prompts 배열이 없습니다.');
   }
-  if (!parsed || !Array.isArray(parsed.prompts)) {
-    throw new Error('예상 형식과 다른 응답입니다. prompts 배열이 없습니다.');
-  }
-  return parsed;
+  // Client-side normalization (idempotent)
+  const normalized: SplitSpeakerResult = {
+    prompts: data.prompts.map((p: any) => {
+      const text = typeof p?.text === 'string' ? p.text : String(p?.text ?? '');
+      const name = typeof p?.name === 'string' && p.name.trim() ? p.name.trim() : 'Unknown';
+      let gender = typeof p?.gender === 'string' ? p.gender.toLowerCase() : 'unknown';
+      if (!['male', 'female', 'unknown'].includes(gender)) gender = 'unknown';
+      const extra = typeof p?.extra === 'string' ? p.extra : '';
+      const directive = typeof p?.directive === 'string' && p.directive.trim() ? p.directive.trim() : 'Neutral, clear, medium pace.';
+      return { text, name, gender, extra, directive } as SplitSpeakerEntry;
+    })
+  };
+  return normalized;
 }
 
 function extractJsonString(s: string): string {
@@ -170,7 +128,7 @@ const SplitSpeakerPage: React.FC<PageProps> = () => {
       <header className="mb-6">
         <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
           <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-blue-300">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M12 2a7 7 0 0 0-7 7v1.278A4 4 0 0 0 3 14v2a4 4 0 0 0 4 4h3l4 2v-2h1a4 4 0 0 0 4-4v-2a4 4 0 0 0-2-3.464V9a7 7 0 0 0-7-7m0 2a5 5 0 0 1 5 5v1.278A4 4 0 0 0 15 12v2a4 4 0 0 0 .318 1.56A2 2 0 0 1 14 16h-1v1.382L10.236 16H7a2 2 0 0 1-2-2v-2c0-.74.402-1.385 1-1.732V9a5 5 0 0 1 5-5"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M2 5a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3H9l-4 3v-3H5a3 3 0 0 1-3-3z"/><path d="M14 10a3 3 0 0 0 3-3v-.5h2a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3h-1l-3 2.25V16h-1a3 3 0 0 1-3-3v-1z" opacity=".65"/></svg>
           </span>
           Split Speaker
         </h1>
@@ -180,7 +138,7 @@ const SplitSpeakerPage: React.FC<PageProps> = () => {
         <div className="mt-2 flex items-center gap-2 text-xs">
           <Badge>Playground</Badge>
           <Badge>Gemini · {GEMINI_MODEL}</Badge>
-          {DEV_GEMINI_API_KEY ? <Badge>Dev key detected</Badge> : <Badge>Server API preferred</Badge>}
+          <Badge>Worker API</Badge>
         </div>
       </header>
 
@@ -220,11 +178,9 @@ const SplitSpeakerPage: React.FC<PageProps> = () => {
               {loading ? '분석 중…' : '분리 실행'}
             </button>
           </div>
-          {(!DEV_GEMINI_API_KEY) && (
-            <p className="mt-2 text-xs text-amber-300">
-              팁: 개발 중인 경우 .env.local에 GEMINI_API_KEY를 설정하면 서버 없이도 테스트할 수 있습니다. 프로덕션에서는 서버 API를 사용합니다.
-            </p>
-          )}
+          <p className="mt-2 text-xs text-amber-300">
+            개발 중에는 워커 서버가 필요합니다. 별도 터미널에서 <code>wrangler dev</code>를 실행하고, 프로젝트 루트의 <code>.dev.vars</code>에 <code>GEMINI_API_KEY</code>를 설정하세요. Vite 개발 서버는 <code>/api</code> 요청을 워커(127.0.0.1:8787)로 프록시합니다.
+          </p>
           {error && (
             <div className="mt-3 text-sm text-red-300 whitespace-pre-wrap">{error}</div>
           )}
@@ -271,6 +227,9 @@ const SplitSpeakerPage: React.FC<PageProps> = () => {
                       <span className="text-xs text-gray-400">· {p.gender || 'unknown'}</span>
                       {p.extra && <span className="text-xs text-gray-400">· {p.extra}</span>}
                     </div>
+                    {p.directive && (
+                      <div className="text-[11px] text-blue-300/90 italic mb-1">directive: {p.directive}</div>
+                    )}
                     <div className="text-sm text-gray-300 whitespace-pre-wrap">{p.text}</div>
                   </div>
                 ))}

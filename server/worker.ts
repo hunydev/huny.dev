@@ -38,18 +38,21 @@ export default {
           }
 
           const instructions = [
-            '당신은 주어진 한국어/영어 텍스트에서 화자를 분리하여 JSON을 만드는 도우미입니다.',
+            '당신은 주어진 한국어/영어 텍스트에서 화자와 내레이션을 분리하여 JSON을 만드는 도우미입니다.',
             '규칙:',
-            '- 같은 화자가 연속으로 말하는 구간은 하나의 엔트리로 묶습니다.',
+            '- 대화만 추출하지 말고, 대화가 아닌 모든 텍스트(지문/서술)를 반드시 내레이션으로 포함하세요.',
+            '- 대화와 내레이션이 섞여 있으면 각각 분리하여 순서대로 나열합니다.',
             '- 내레이션(서술자, 지문)은 name을 "Narrator"로 설정합니다.',
-            '- 등장인물의 이름을 문맥에서 유추할 수 있으면 name에 기록합니다. 유추가 어렵다면 "Unknown#1"과 같이 넘버링합니다.',
-            '- gender는 남성 male, 여성 female, 알 수 없으면 unknown 으로 표기합니다. 확실치 않다면 unknown을 사용합니다.',
-            '- extra에는 직업, 관계, 연령대 등 문맥에서 확실히 추정 가능한 보조 정보를 간략히 기술합니다. 불확실하면 생략합니다.',
-            '- 결과는 반드시 다음 스키마의 JSON만 출력합니다: { "prompts": [ { "text": string, "name": string, "gender": string, "extra": string } ] }',
+            '- 같은 화자가 연속으로 말하는 구간은 하나의 엔트리로 묶습니다.',
+            '- 등장인물의 이름을 문맥에서 유추할 수 있으면 name에 기록합니다. 유추가 어렵다면 "Unknown#1"처럼 넘버링합니다.',
+            '- gender는 male | female | unknown 중 하나로 표기합니다. 확실치 않다면 unknown.',
+            '- extra에는 직업/관계/연령대 등 확실히 추정 가능한 보조 정보를 간략히 기술(불확실하면 생략).',
+            '- directive(발성 지침)는 반드시 포함합니다. 문맥상 유추가 어려우면 "Neutral, clear, medium pace." 같이 중립적 지침을 사용하세요.',
+            '- 결과는 반드시 다음 스키마의 JSON만 출력합니다: { "prompts": [ { "text": string, "name": string, "gender": "male"|"female"|"unknown", "extra": string, "directive": string } ] }',
             '- 마크다운 코드펜스나 설명 텍스트 없이 JSON만 반환합니다.'
           ].join('\n');
 
-          const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+          const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
           const gRes = await fetch(geminiUrl, {
             method: 'POST',
             headers: {
@@ -91,7 +94,19 @@ export default {
               headers: { 'content-type': 'application/json; charset=UTF-8' },
             });
           }
-          return new Response(JSON.stringify(parsed), {
+          // Normalize output to ensure directive exists and fields are sanitized
+          const normalized = {
+            prompts: parsed.prompts.map((p: any) => {
+              const text = typeof p?.text === 'string' ? p.text : String(p?.text ?? '');
+              const name = typeof p?.name === 'string' && p.name.trim() ? p.name.trim() : 'Unknown';
+              let gender = typeof p?.gender === 'string' ? String(p.gender).toLowerCase() : 'unknown';
+              if (!['male', 'female', 'unknown'].includes(gender)) gender = 'unknown';
+              const extra = typeof p?.extra === 'string' ? p.extra : '';
+              const directive = typeof p?.directive === 'string' && p.directive.trim() ? p.directive.trim() : 'Neutral, clear, medium pace.';
+              return { text, name, gender, extra, directive };
+            })
+          };
+          return new Response(JSON.stringify(normalized), {
             headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
           });
         } catch (e: any) {
