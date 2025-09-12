@@ -114,7 +114,7 @@ const AboutPage: React.FC<PageProps> = () => {
         <span className="text-blue-400">"environment"</span>
         <span className="text-gray-500">: {`{`}</span>
 
-        <JsonArray field="os" items={["Windows", "Linux"]} level={2} />
+        <JsonArray field="os" items={["Windows(amd64, arm64)", "Linux", "Android(Web)"]} level={2} />
         <JsonArray field="ide" items={["Visual Studio Code", "Visual Studio", "Eclipse(STS)"]} level={2} />
         <JsonArray field="scm" items={["Git (GitHub)", "SVN"]} level={2} />
         <JsonArray field="ci_cd" items={["GitHub Actions", "Jenkins"]} level={2} />

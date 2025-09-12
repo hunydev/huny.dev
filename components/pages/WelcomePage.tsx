@@ -69,7 +69,7 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         },
         {
             title: 'OS',
-            items: ['Windows', 'Linux'],
+            items: ['Windows(amd64, arm64)', 'Linux', 'Android(Web)'],
             tile: 'bg-slate-500/10 border-slate-500/20',
             heading: 'text-slate-300',
             chip: 'bg-slate-500/10 border-slate-500/20',
