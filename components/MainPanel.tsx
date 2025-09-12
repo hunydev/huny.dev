@@ -137,7 +137,7 @@ const MainPanel: React.FC<MainPanelProps> = ({ openTabs, activeTabId, onTabClick
   }
 
   return (
-    <div className="flex-1 min-w-0 min-h-0 flex flex-col">
+    <div className="flex-1 min-w-0 min-h-0 flex flex-col" style={{ minHeight: 0 }}>
       <TabBar
         openTabs={openTabs}
         activeTabId={activeTabId}
@@ -145,7 +145,7 @@ const MainPanel: React.FC<MainPanelProps> = ({ openTabs, activeTabId, onTabClick
         onCloseTab={onCloseTab}
         onTogglePin={onTogglePin}
       />
-      <div className="flex-1 min-w-0 min-h-0 bg-[#1e1e1e] p-4 md:p-8 overflow-y-auto overflow-x-hidden">
+      <div className="flex-1 min-w-0 min-h-0 bg-[#1e1e1e] p-4 md:p-8 overflow-y-auto overflow-x-hidden" style={{ minHeight: 0 }}>
         {ActiveComponentContent ? (
           ActiveComponentContent
         ) : (

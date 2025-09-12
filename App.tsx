@@ -315,9 +315,9 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen w-full flex-col bg-[#1e1e1e] text-gray-300 font-sans overflow-hidden">
+    <div className="flex w-full flex-col bg-[#1e1e1e] text-gray-300 font-sans overflow-hidden" style={{ height: 'var(--app-height, 100vh)' }}>
       {/* Top title bar (VS Code style) */}
-      <div className="h-8 bg-[#2d2d2d] border-b border-black/30 flex items-center px-2">
+      <div className="h-8 bg-[#2d2d2d] border-b border-black/30 flex items-center px-2 shrink-0">
         <img src={logo} alt="HunyDev logo" className="h-5 w-5" />
         <div className="ml-auto flex items-center gap-1">
           <button
@@ -413,7 +413,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Main content area */}
-      <div className="flex flex-1 min-w-0 min-h-0 relative overflow-hidden">
+      <div className="flex flex-1 min-w-0 min-h-0 relative overflow-hidden" style={{ minHeight: 0 }}>
         <ActivityBar
           activeView={activeView}
           setActiveView={setActiveView}
@@ -541,7 +541,7 @@ const App: React.FC = () => {
       )}
 
       {/* Bottom status bar (VS Code style) */}
-      <div className="bg-[#252526] text-gray-300 text-[11px] border-t border-black/30 flex flex-col items-start px-3 py-1.5 gap-1 md:h-7 md:flex-row md:items-center md:py-0 md:gap-0 relative z-50">
+      <div className="bg-[#252526] text-gray-300 text-[11px] border-t border-black/30 flex flex-col items-start px-3 py-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))] gap-1 md:h-7 md:flex-row md:items-center md:py-0 md:pb-[env(safe-area-inset-bottom)] md:gap-0 relative z-50 shrink-0">
         <div className="flex-1 min-w-0">
           <span className="block truncate">This site is inspired by the Visual Studio Code UI. Not affiliated with or endorsed by Microsoft.</span>
         </div>
