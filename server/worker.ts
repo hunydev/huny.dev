@@ -7,6 +7,7 @@ import { render } from '../dist/server/entry-server.js';
 export interface Env {
   ASSETS: Fetcher;
   GEMINI_API_KEY?: string;
+  OPENAI_API_KEY?: string;
 }
 
 export default {
@@ -19,6 +20,103 @@ export default {
         return new Response(JSON.stringify({ ok: true, time: new Date().toISOString() }), {
           headers: { 'content-type': 'application/json; charset=UTF-8' },
         });
+      }
+      if (url.pathname === '/api/bird-generator') {
+        if (request.method !== 'POST') {
+          return new Response('Method Not Allowed', { status: 405 });
+        }
+        if (!env.OPENAI_API_KEY) {
+          return new Response(JSON.stringify({ error: 'OPENAI_API_KEY is not configured on the server.' }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+        try {
+          const form = await request.formData();
+          const prompt = String(form.get('prompt') || '').trim();
+          if (!prompt) {
+            return new Response(JSON.stringify({ error: 'Missing prompt' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+
+          // Gather images (can be multiple). Accept both 'image' and 'image[]' from client.
+          const images: File[] = [];
+          const imgFieldsCombined = [...form.getAll('image'), ...form.getAll('image[]')];
+          for (const it of imgFieldsCombined) {
+            if (it instanceof File) images.push(it);
+          }
+          if (images.length === 0) {
+            return new Response(JSON.stringify({ error: 'At least one image is required' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+
+          const background = form.get('background'); // 'auto' | 'transparent' | 'opaque' (gpt-image-1 only)
+          const n = form.get('n');
+          const output_format = form.get('output_format'); // 'png' | 'jpeg' | 'webp' (gpt-image-1 only)
+          const size = form.get('size'); // gpt-image-1: 1024x1024 | 1536x1024 | 1024x1536 | auto; dall-e-2: 256|512|1024
+          let model = String(form.get('model') || 'gpt-image-1').toLowerCase();
+          if (model !== 'gpt-image-1' && model !== 'dall-e-2') model = 'gpt-image-1';
+
+          // Build outbound form-data to OpenAI
+          const out = new FormData();
+          out.append('model', model);
+          if (model === 'gpt-image-1') {
+            // Multiple images as image[]
+            for (const f of images) out.append('image[]', f, f.name || 'image.png');
+            out.append('prompt', prompt);
+            if (background && typeof background === 'string') out.append('background', String(background));
+            if (n && typeof n === 'string') out.append('n', n);
+            if (output_format && typeof output_format === 'string') out.append('output_format', String(output_format));
+            if (size && typeof size === 'string') out.append('size', String(size));
+            // gpt-image-1 always returns base64; do not send response_format
+          } else {
+            // dall-e-2: single image only, size set {256x256,512x512,1024x1024}
+            const first = images[0];
+            out.append('image', first, first.name || 'image.png');
+            out.append('prompt', prompt);
+            if (n && typeof n === 'string') out.append('n', n);
+            const allowedSizes = new Set(['256x256','512x512','1024x1024']);
+            if (size && typeof size === 'string' && allowedSizes.has(String(size))) {
+              out.append('size', String(size));
+            } else {
+              out.append('size', '1024x1024');
+            }
+            out.append('response_format', 'url');
+            // Do not send background/output_format for dall-e-2
+          }
+
+          const oiRes = await fetch('https://api.openai.com/v1/images/edits', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${env.OPENAI_API_KEY}`,
+              // Content-Type will be set automatically for multipart/form-data
+            },
+            body: out,
+          });
+          if (!oiRes.ok) {
+            const err = await oiRes.text().catch(() => '');
+            return new Response(JSON.stringify({ error: `OpenAI API error: ${oiRes.status} ${oiRes.statusText}`, detail: err }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const oiJson: any = await oiRes.json();
+          const dataArr: any[] = Array.isArray(oiJson?.data) ? oiJson.data : [];
+          // Normalize to urls[]: use provided url when present; otherwise convert b64_json to data URL
+          const mime = (typeof output_format === 'string' && output_format) ? `image/${output_format === 'jpeg' ? 'jpeg' : output_format}` : 'image/png';
+          const urls: string[] = dataArr.map((d: any) => {
+            if (d?.url) return String(d.url);
+            if (d?.b64_json) return `data:${mime};base64,${d.b64_json}`;
+            return '';
+          }).filter(Boolean);
+
+          return new Response(JSON.stringify({ urls }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
       }
       if (url.pathname === '/api/split-speaker') {
         if (request.method !== 'POST') {
