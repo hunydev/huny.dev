@@ -9,6 +9,7 @@ export enum ViewId {
   Playground = 'PLAYGROUND',
   Bookmark = 'BOOKMARK',
   Notes = 'NOTES',
+  Blog = 'BLOG',
   GitHub = 'GITHUB',
   Discord = 'DISCORD',
   X = 'X',

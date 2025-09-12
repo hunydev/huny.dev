@@ -259,6 +259,16 @@ export const ACTIVITY_BAR_ITEMS = [
 
   // Bottom section (social/external)
   {
+    id: ViewId.Blog,
+    section: 'bottom',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7">
+        <path d="M3 3v18h18V3zm15 15H6v-1h12zm0-2H6v-1h12zm0-4H6V6h12z" />
+      </svg>
+    ),
+    title: 'Blog',
+  },
+  {
     id: ViewId.GitHub,
     section: 'bottom',
     icon: (
@@ -301,6 +311,7 @@ export const ACTIVITY_BAR_ITEMS = [
 ];
 
 export const EXTERNAL_LINKS: Partial<Record<ViewId, { title: string; url: string }>> = {
+  [ViewId.Blog]: { title: 'Blog', url: 'https://blog.huny.dev' },
   [ViewId.GitHub]: { title: 'GitHub', url: 'https://github.com/hunydev' },
   [ViewId.Discord]: { title: 'Discord', url: 'https://discord.gg/2NWa39bU' },
   [ViewId.X]: { title: 'X / Twitter', url: 'https://x.com/janghun2722' },
