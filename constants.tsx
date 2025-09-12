@@ -14,6 +14,7 @@ import WorksPage from './components/pages/WorksPage';
 import DigitalShelfPage from './components/pages/DigitalShelfPage';
 import StackHunyDevPage from './components/pages/StackHunyDevPage';
 import MascotGalleryPage from './components/pages/MascotGalleryPage';
+import SplitSpeakerPage from './components/pages/SplitSpeakerPage';
 
 export const FileIcon = () => (
   <svg
@@ -111,6 +112,16 @@ export const PAGES: {
         className="w-4 h-4 mr-2 text-gray-400"
       >
         <path d="M1.5 3A1.5 1.5 0 0 0 0 4.5v7A1.5 1.5 0 0 0 1.5 13h13a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 14.5 3h-13Zm2 2 3 4 2-2 4 5h-11l2-7Z" />
+      </svg>
+    ),
+  },
+  'split-speaker': {
+    title: 'Split Speaker',
+    component: SplitSpeakerPage,
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-2 text-gray-400">
+        <path d="M2 5a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3H9l-4 3v-3H5a3 3 0 0 1-3-3z"/>
+        <path d="M14 10a3 3 0 0 0 3-3v-.5h2a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3h-1l-3 2.25V16h-1a3 3 0 0 1-3-3v-1z" opacity=".65"/>
       </svg>
     ),
   },

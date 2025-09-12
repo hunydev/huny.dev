@@ -130,6 +130,23 @@ const DocsView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFi
   );
 };
 
+const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => (
+  <div className="p-2">
+    <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Playground</h2>
+    <div className="flex flex-col gap-1">
+      <button
+        onClick={() => onOpenFile('split-speaker')}
+        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
+      >
+        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M2 5a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3H9l-4 3v-3H5a3 3 0 0 1-3-3z"/><path d="M14 10a3 3 0 0 0 3-3v-.5h2a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3h-1l-3 2.25V16h-1a3 3 0 0 1-3-3v-1z" opacity=".65"/></svg>
+        </span>
+        <span className="text-sm">Split Speaker</span>
+      </button>
+    </div>
+  </div>
+);
+
 const AppsView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
   const ORDER: Array<'huny' | 'dev' | 'ai' | 'tools' | 'design'> = ['huny', 'dev', 'ai', 'tools', 'design'];
   const items = ORDER.map(id => CATEGORIES.find(c => c.id === id)!).filter(Boolean);
@@ -388,7 +405,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile, width = 256 }
       case ViewId.Media:
         return <MediaView onOpenFile={onOpenFile} />;
       case ViewId.Playground:
-        return <GenericView title="Playground"><p className="text-sm text-gray-400">실험적 기능들을 모아두는 공간입니다. (Coming soon)</p></GenericView>;
+        return <PlaygroundView onOpenFile={onOpenFile} />;
       case ViewId.Bookmark:
         return <BookmarkView onOpenFile={onOpenFile} />;
       case ViewId.Notes:
