@@ -115,8 +115,10 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
     updateNote(id, { fontSize: size });
   };
 
-  const onNoteMouseDown = (e: React.MouseEvent, id: string) => {
-    if (e.button !== 0) return; // left only
+  const onNotePointerDown = (e: React.PointerEvent, id: string) => {
+    // Allow touch/pen/mouse primary interactions. For mouse, restrict to left button.
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault();
     e.stopPropagation();
     const note = notes.find(n => n.id === id);
     if (!note) return;
@@ -128,7 +130,7 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
 
   React.useEffect(() => {
     if (!dragId) return;
-    const onMove = (ev: MouseEvent) => {
+    const onMove = (ev: PointerEvent) => {
       const board = boardRef.current;
       const rect = board?.getBoundingClientRect();
       const note = notesRef.current.find(n => n.id === dragId);
@@ -142,20 +144,22 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
     };
     const onUp = () => {
       setDragId(null);
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('pointermove', onMove as any);
+      document.removeEventListener('pointerup', onUp as any);
       document.body.style.userSelect = '';
     };
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
+    document.addEventListener('pointermove', onMove as any);
+    document.addEventListener('pointerup', onUp as any);
     return () => {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('pointermove', onMove as any);
+      document.removeEventListener('pointerup', onUp as any);
     };
   }, [dragId]);
 
   // Resizing
-  const onResizeMouseDown = (e: React.MouseEvent, id: string) => {
+  const onResizePointerDown = (e: React.PointerEvent, id: string) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault();
     e.stopPropagation();
     const note = notes.find(n => n.id === id);
     if (!note) return;
@@ -167,7 +171,7 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
 
   React.useEffect(() => {
     if (!resizing) return;
-    const onMove = (ev: MouseEvent) => {
+    const onMove = (ev: PointerEvent) => {
       const dx = ev.clientX - resizing.startX;
       const dy = ev.clientY - resizing.startY;
       const board = boardRef.current;
@@ -184,16 +188,16 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
     };
     const onUp = () => {
       setResizing(null);
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('pointermove', onMove as any);
+      document.removeEventListener('pointerup', onUp as any);
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
     };
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
+    document.addEventListener('pointermove', onMove as any);
+    document.addEventListener('pointerup', onUp as any);
     return () => {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('pointermove', onMove as any);
+      document.removeEventListener('pointerup', onUp as any);
     };
   }, [resizing]);
 
@@ -225,8 +229,8 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
             <div
               key={n.id}
               className="absolute shadow-md rounded p-2 select-none"
-              style={{ left: n.x, top: n.y, zIndex: n.z, background: n.color, width: n.w, position: 'absolute', color: getContrastColor(n.color) }}
-              onMouseDown={(e) => onNoteMouseDown(e, n.id)}
+              style={{ left: n.x, top: n.y, zIndex: n.z, background: n.color, width: n.w, position: 'absolute', color: getContrastColor(n.color), touchAction: 'none' }}
+              onPointerDown={(e) => onNotePointerDown(e, n.id)}
               role="group"
             >
               {/* Toolbar */}
@@ -306,13 +310,14 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
                 value={n.text}
                 onChange={(e) => updateNote(n.id, { text: e.target.value })}
                 onMouseDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
               />
 
               {/* Resize handle */}
               <div
-                onMouseDown={(e) => onResizeMouseDown(e, n.id)}
+                onPointerDown={(e) => onResizePointerDown(e, n.id)}
                 className="absolute bottom-1 right-1 w-3 h-3 rounded-sm cursor-se-resize"
-                style={{ backgroundColor: getContrastColor(n.color) === '#fff' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}
+                style={{ backgroundColor: getContrastColor(n.color) === '#fff' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)', touchAction: 'none' }}
                 title="Resize"
                 aria-label="Resize note"
               />
