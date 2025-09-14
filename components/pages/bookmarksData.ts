@@ -4,7 +4,6 @@ export type BookmarkCategory = {
   id: string;
   name: string;
   color: string; // hex color for badges/dots
-  emoji?: string; // optional emoji for simple icon in lists
 };
 
 export type Bookmark = {
@@ -20,10 +19,10 @@ export type Bookmark = {
 };
 
 export const BOOKMARK_CATEGORIES: BookmarkCategory[] = [
-  { id: 'dev', name: 'Development', color: '#60a5fa', emoji: '💻' },
-  { id: 'design', name: 'Design', color: '#f59e0b', emoji: '🎨' },
-  { id: 'tools', name: 'Tools', color: '#10b981', emoji: '🧰' },
-  { id: 'learn', name: 'Learning', color: '#a78bfa', emoji: '📚' },
+  { id: 'dev', name: 'Development', color: '#60a5fa' },
+  { id: 'design', name: 'Design', color: '#f59e0b' },
+  { id: 'tools', name: 'Tools', color: '#10b981' },
+  { id: 'learn', name: 'Learning', color: '#a78bfa' },
 ];
 
 export const BOOKMARKS: Bookmark[] = [

@@ -2,7 +2,6 @@ export type NoteGroup = {
   id: string;
   name: string;
   color: string; // hex color for group accent
-  emoji?: string;
 };
 
 export type StickyNote = {
@@ -18,9 +17,9 @@ export type StickyNote = {
 };
 
 export const NOTE_GROUPS: NoteGroup[] = [
-  { id: 'personal', name: 'Personal', color: '#f59e0b', emoji: '📝' },
-  { id: 'work', name: 'Work', color: '#60a5fa', emoji: '💼' },
-  { id: 'ideas', name: 'Ideas', color: '#10b981', emoji: '💡' },
+  { id: 'personal', name: 'Personal', color: '#f59e0b' },
+  { id: 'work', name: 'Work', color: '#60a5fa' },
+  { id: 'ideas', name: 'Ideas', color: '#10b981' },
 ];
 
 export const getNoteGroupById = (id: string | undefined | null): NoteGroup | undefined => {
