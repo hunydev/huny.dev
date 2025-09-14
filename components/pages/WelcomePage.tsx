@@ -118,7 +118,7 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         },
         {
             title: 'Docs',
-            items: ['Notion', 'Confluence', 'MkDocs'],
+            items: ['MS365', 'Notion', 'Confluence', 'MkDocs'],
             tile: 'bg-cyan-500/10 border-cyan-500/20',
             heading: 'text-cyan-300',
             chip: 'bg-cyan-500/10 border-cyan-500/20',
@@ -132,7 +132,7 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         },
         {
             title: 'Environment',
-            items: ['Windows 11', 'Microsoft 365', 'WSL2 (Ubuntu)', 'Podman Desktop', 'Hyper-V', 'Windows Sandbox'],
+            items: ['Windows 11', 'WSL2 (Ubuntu)', 'Podman Desktop', 'Hyper-V', 'Windows Sandbox', "GitHub Codespaces"],
             tile: 'bg-zinc-500/10 border-zinc-500/20',
             heading: 'text-zinc-300',
             chip: 'bg-zinc-500/10 border-zinc-500/20',

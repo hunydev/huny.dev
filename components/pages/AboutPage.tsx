@@ -121,9 +121,9 @@ const AboutPage: React.FC<PageProps> = () => {
         <JsonArray field="infra" items={["AWS", "Cloudflare", "Docker"]} level={2} />
         <JsonArray field="platform" items={["Cloudflare Worker", "Netlify", "PikaPods", "YouWare", "Google AI Studio"]} level={2} />
         <JsonArray field="ai_tools" items={["ChatGPT", "Copilot", "Gemini", "Windsurf"]} level={2} />
-        <JsonArray field="docs" items={["Notion", "Confluence", "MkDocs"]} level={2} />
+        <JsonArray field="docs" items={["MS365", "Notion", "Confluence", "MkDocs"]} level={2} />
         <JsonArray field="project" items={["Teams", "JIRA"]} level={2} />
-        <JsonArray field="work" items={["Windows 11", "Microsoft 365", "WSL2 (Ubuntu)", "Podman Desktop", "Hyper-V", "Windows Sandbox"]} level={2} />
+        <JsonArray field="work" items={["Windows 11", "WSL2 (Ubuntu)", "Podman Desktop", "Hyper-V", "Windows Sandbox", "GitHub Codespaces"]} level={2} />
         <JsonArray field="chart" items={["Whimsical", "Draw.io"]} level={2} />
         <JsonArray field="web" items={["IIS", "Nginx", "Apache", "Echo (Go)", "Spring (Java)", "PocketBase (Go)"]} level={2} />
         <JsonArray field="database" items={["MySQL", "SQLite", "MongoDB", "Redis", "Cassandra"]} level={2} />

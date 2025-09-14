@@ -386,25 +386,42 @@ const App: React.FC = () => {
             {socialOpen && (
               <div className="absolute right-0 top-full mt-1 w-44 bg-[#2d2d2d] border border-black/30 rounded shadow-lg z-50">
                 <ul className="py-1">
-                  {ACTIVITY_BAR_ITEMS.filter((i: any) => i.section === 'bottom').map(item => {
-                    const link = EXTERNAL_LINKS[item.id as keyof typeof EXTERNAL_LINKS];
-                    if (!link) return null;
-                    const href = link.url;
-                    const isMail = href.startsWith('mailto:');
+                  {(() => {
+                    const items = ACTIVITY_BAR_ITEMS.filter((i: any) => i.section === 'bottom');
+                    const blogIdx = items.findIndex((i: any) => i.id === ViewId.Blog);
+                    const blogItem = blogIdx >= 0 ? items[blogIdx] : null;
+                    const rest = items.filter((_: any, idx: number) => idx !== blogIdx);
+
+                    const renderItem = (item: any) => {
+                      const link = EXTERNAL_LINKS[item.id as keyof typeof EXTERNAL_LINKS];
+                      if (!link) return null;
+                      const href = link.url;
+                      const isMail = href.startsWith('mailto:');
+                      return (
+                        <li key={item.id} className="w-full">
+                          <a
+                            href={href}
+                            target={isMail ? undefined : '_blank'}
+                            rel={isMail ? undefined : 'noopener'}
+                            className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-white/10"
+                          >
+                            <span className="text-gray-300">{item.icon}</span>
+                            <span>{link.title}</span>
+                          </a>
+                        </li>
+                      );
+                    };
+
                     return (
-                      <li key={item.id} className="w-full">
-                        <a
-                          href={href}
-                          target={isMail ? undefined : '_blank'}
-                          rel={isMail ? undefined : 'noopener'}
-                          className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-white/10"
-                        >
-                          <span className="text-gray-300">{item.icon}</span>
-                          <span>{link.title}</span>
-                        </a>
-                      </li>
+                      <>
+                        {blogItem && renderItem(blogItem)}
+                        {blogItem && (
+                          <li role="separator" aria-hidden className="my-1 border-t border-white/10" />
+                        )}
+                        {rest.map(renderItem)}
+                      </>
                     );
-                  })}
+                  })()}
                 </ul>
               </div>
             )}
