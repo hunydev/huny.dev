@@ -1,15 +1,16 @@
 import React from 'react';
 import { PageProps } from '../../types';
 
-const DEFAULT_TEXT = `이미 그 깊은 숲속에는 많은 너구리들이 살고 있었어요.
-"숲속의 도토리는 다 임자가 있어.
-어디서 굴러먹던 놈이 와 함부로 손을 대는 거야?"
-깊은 숲속의 너구리들은 아주 차가운 표정으로 그렇게 말했어요.
-이 다람쥐는 닥쳐올 겨울이 걱정되었습니다.
-생각다 못한 다람쥐는 너구리들에게 이렇게 말했지요.
-"도토리를 주워 드릴게요.
-대신 그것을 조금만 제게 나누어 주시지 않겠어요?"
-너구리들은 그러마고 이내 고개를 끄덕였습니다.
+const DEFAULT_TEXT = `작은 항구 마을에 낡은 등대가 있었습니다.
+“오늘은 또 불이 꺼져 있네.” 어부 아저씨가 한숨을 내쉬었지요.
+“불이 없으면 밤에 배들이 길을 잃을 거야.” 어린 소녀가 걱정스레 말했습니다.
+그때 등대 안에서 작은 목소리가 들려왔습니다.
+“미안해요… 제 심지가 다 닳아서 불을 켤 수가 없어요.” 등대 불꽃 요정이 속삭였지요.
+소녀는 깜짝 놀라 대답했습니다. “그럼 내가 새 심지를 구해 줄게!”
+“정말? 그렇다면 다시 환하게 빛낼 수 있어.” 요정의 눈이 반짝였습니다.
+다음 날, 어부와 소녀는 함께 새 심지를 찾아 등대에 불을 밝혔습니다.
+“고마워! 이제 배들이 다시 길을 잃지 않을 거야.” 요정이 기쁘게 외쳤습니다.
+밤바다 위, 환한 불빛이 멀리까지 퍼지며 사람들의 마음을 든든하게 비추어 주었습니다.
 `;
 
 const MultiVoiceReaderPage: React.FC<PageProps> = () => {
@@ -20,14 +21,9 @@ const MultiVoiceReaderPage: React.FC<PageProps> = () => {
   const [error, setError] = React.useState<string>('');
   const [audioInfo, setAudioInfo] = React.useState<{ base64: string; sampleRate: number; numChannels: number; sampleFormat: string } | null>(null);
   const [prompts, setPrompts] = React.useState<Array<{ text: string; name: string; gender: 'male' | 'female' | 'unknown'; extra: string; directive: string }>>([]);
-  const [mapping, setMapping] = React.useState<'narration_vs_others' | 'alternate'>('narration_vs_others');
-  const [speakerALabel, setSpeakerALabel] = React.useState<string>('Narrator');
-  const [speakerBLabel, setSpeakerBLabel] = React.useState<string>('Speaker');
   const FEMALE = ['Zephyr','Kore','Leda','Aoede','Callirrhoe','Autonoe','Despina','Erinome','Laomedeia','Achernar','Gacrux','Pulcherrima','Vindemiatrix','Sulafat'] as const;
   const MALE = ['Puck','Charon','Fenrir','Orus','Enceladus','Iapetus','Umbriel','Algieba','Algenib','Rasalgethi','Alnilam','Schedar','Achird','Zubenelgenubi','Sadachbia','Sadaltager'] as const;
   const ALL_VOICES = [...FEMALE, ...MALE] as const;
-  const [voiceAName, setVoiceAName] = React.useState<typeof ALL_VOICES[number]>('Gacrux');
-  const [voiceBName, setVoiceBName] = React.useState<typeof ALL_VOICES[number]>('Puck');
   const [voiceMap, setVoiceMap] = React.useState<Record<string, typeof ALL_VOICES[number]>>({});
   const uniqueNames = React.useMemo(() => {
     const s = new Set<string>();
@@ -38,12 +34,26 @@ const MultiVoiceReaderPage: React.FC<PageProps> = () => {
   // Segments fallback support
   const [segments, setSegments] = React.useState<Array<{ base64: string; sampleRate: number; mimeType: string }>>([]);
   const [playingSegments, setPlayingSegments] = React.useState(false);
+  // Play/Stop state for single audio
+  const [isPlaying, setIsPlaying] = React.useState(false);
+  const audioCtxRef = React.useRef<AudioContext | null>(null);
+  const srcRef = React.useRef<AudioBufferSourceNode | null>(null);
 
   const canConvert = !convertLoading && text.trim().length > 0;
-  const canSynthesize = !synthLoading && prompts.length > 0;
+  const canSynthesize = !synthLoading && text.trim().length > 0;
 
   // Decode base64 s16le PCM and play via Web Audio API
   const playPcmBase64 = async (b64: string, sampleRate = 24000, numChannels = 1) => {
+    // stop if already playing
+    if (srcRef.current) {
+      try { srcRef.current.stop(0); } catch {}
+      srcRef.current = null;
+    }
+    if (audioCtxRef.current) {
+      try { await audioCtxRef.current.close(); } catch {}
+      audioCtxRef.current = null;
+    }
+
     const binary = atob(b64);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
@@ -51,6 +61,7 @@ const MultiVoiceReaderPage: React.FC<PageProps> = () => {
     // Convert little-endian 16-bit PCM to Float32Array
     const frameCount = Math.floor(bytes.length / 2 / numChannels);
     const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate });
+    audioCtxRef.current = audioCtx;
     const audioBuffer = audioCtx.createBuffer(numChannels, frameCount, sampleRate);
 
     const view = new DataView(bytes.buffer);
@@ -66,11 +77,31 @@ const MultiVoiceReaderPage: React.FC<PageProps> = () => {
     const src = audioCtx.createBufferSource();
     src.buffer = audioBuffer;
     src.connect(audioCtx.destination);
+    srcRef.current = src;
+    setIsPlaying(true);
     const done = new Promise<void>((resolve) => {
-      src.onended = () => resolve();
+      src.onended = () => {
+        setIsPlaying(false);
+        srcRef.current = null;
+        audioCtxRef.current?.close().catch(() => {});
+        audioCtxRef.current = null;
+        resolve();
+      };
     });
     src.start();
     await done;
+  };
+
+  const stopPlayback = async () => {
+    if (srcRef.current) {
+      try { srcRef.current.stop(0); } catch {}
+      srcRef.current = null;
+    }
+    if (audioCtxRef.current) {
+      try { await audioCtxRef.current.close(); } catch {}
+      audioCtxRef.current = null;
+    }
+    setIsPlaying(false);
   };
 
   // Play segments sequentially. Supports raw PCM and encoded audio via HTMLAudioElement
@@ -129,17 +160,26 @@ const MultiVoiceReaderPage: React.FC<PageProps> = () => {
           body: JSON.stringify({ text }),
         }, 2);
       setPrompts(data.prompts || []);
-      // 기본 보이스 매핑 초기화(성별 기반 추천)
+      // 기본 보이스 매핑 초기화: 성별 선호 리스트를 우선하되, 전체 풀에서 중복 없이 배정
       const initMap: Record<string, typeof ALL_VOICES[number]> = {};
       const seen = new Set<string>();
-      let fIdx = 0, mIdx = 0, uIdx = 0;
+      const used = new Set<typeof ALL_VOICES[number]>();
+      const pickUnique = (preferred: readonly typeof ALL_VOICES[number][]) => {
+        const found = preferred.find(v => !used.has(v));
+        if (found) { used.add(found); return found; }
+        const any = (ALL_VOICES as readonly typeof ALL_VOICES[number][]).find(v => !used.has(v));
+        if (any) { used.add(any); return any; }
+        // 모든 보이스를 소진한 경우 중복 허용(마지막 수단)
+        return preferred[0] ?? ALL_VOICES[0];
+      };
       for (const p of data.prompts || []) {
         const nm = p.name?.trim() || 'Unknown';
         if (seen.has(nm)) continue;
         seen.add(nm);
-        if (p.gender === 'female') initMap[nm] = FEMALE[fIdx++ % FEMALE.length];
-        else if (p.gender === 'male') initMap[nm] = MALE[mIdx++ % MALE.length];
-        else initMap[nm] = (ALL_VOICES as any)[uIdx++ % ALL_VOICES.length];
+        const g = p.gender;
+        if (g === 'female') initMap[nm] = pickUnique(FEMALE);
+        else if (g === 'male') initMap[nm] = pickUnique(MALE);
+        else initMap[nm] = pickUnique(ALL_VOICES);
       }
       setVoiceMap(initMap);
     } catch (e: any) {
@@ -155,15 +195,39 @@ const MultiVoiceReaderPage: React.FC<PageProps> = () => {
     setSegments([]);
     setSynthLoading(true);
     try {
+      // If no intermediate prompts, auto convert first
+      let promptsToUse = prompts;
+      if (promptsToUse.length === 0) {
+        const data: { prompts: Array<{ text: string; name: string; gender: 'male'|'female'|'unknown'; extra: string; directive: string }> }
+          = await fetchJsonWithRetry('/api/split-speaker', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text }),
+          }, 2);
+        promptsToUse = data.prompts || [];
+        setPrompts(promptsToUse);
+        // init voice map
+        const initMap: Record<string, typeof ALL_VOICES[number]> = {};
+        const seen = new Set<string>();
+        let fIdx = 0, mIdx = 0, uIdx = 0;
+        for (const p of promptsToUse) {
+          const nm = p.name?.trim() || 'Unknown';
+          if (seen.has(nm)) continue;
+          seen.add(nm);
+          if (p.gender === 'female') initMap[nm] = FEMALE[fIdx++ % FEMALE.length];
+          else if (p.gender === 'male') initMap[nm] = MALE[mIdx++ % MALE.length];
+          else initMap[nm] = (ALL_VOICES as any)[uIdx++ % ALL_VOICES.length];
+        }
+        setVoiceMap(initMap);
+        // use newly built voice map immediately
+        var voiceMapToUse: Record<string, typeof ALL_VOICES[number]> = initMap;
+      } else {
+        var voiceMapToUse: Record<string, typeof ALL_VOICES[number]> = voiceMap;
+      }
       const body = {
         model,
-        prompts,
-        mapping,
-        speakerALabel,
-        speakerBLabel,
-        voiceAName,
-        voiceBName,
-        voiceMap,
+        prompts: promptsToUse,
+        voiceMap: voiceMapToUse,
       };
       const data: any = await fetchJsonWithRetry('/api/multivoice-tts', {
         method: 'POST',
@@ -172,8 +236,6 @@ const MultiVoiceReaderPage: React.FC<PageProps> = () => {
       }, 2);
       if (data?.audio) {
         setAudioInfo({ base64: data.audio, sampleRate: data.sampleRate || 24000, numChannels: data.numChannels || 1, sampleFormat: data.sampleFormat || 's16le' });
-      } else if (Array.isArray(data?.segments) && data.segments.length > 0) {
-        setSegments(data.segments.map((s: any) => ({ base64: s.audio, sampleRate: s.sampleRate || 24000, mimeType: s.mimeType || 'audio/raw;rate=24000' })));
       } else {
         throw new Error('오디오 데이터가 없습니다.');
       }
@@ -186,11 +248,11 @@ const MultiVoiceReaderPage: React.FC<PageProps> = () => {
 
   const handlePlay = async () => {
     if (!audioInfo) return;
-    await playPcmBase64(audioInfo.base64, audioInfo.sampleRate, audioInfo.numChannels);
-  };
-  const handlePlaySegments = async () => {
-    if (segments.length === 0) return;
-    await playSegments(segments);
+    if (isPlaying) {
+      await stopPlayback();
+    } else {
+      await playPcmBase64(audioInfo.base64, audioInfo.sampleRate, audioInfo.numChannels);
+    }
   };
 
   return (
@@ -198,12 +260,15 @@ const MultiVoiceReaderPage: React.FC<PageProps> = () => {
       <header className="mb-6">
         <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
           <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-blue-300">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M3 10a1 1 0 0 1 1-1h1c2.761 0 5-2.239 5-5a1 1 0 1 1 2 0c0 3.86-3.14 7-7 7H4a1 1 0 0 1-1-1m15.5-5a.75.75 0 0 1 .75.75V18.5a.75.75 0 0 1-1.135.65l-4.5-2.75a.75.75 0 0 1-.365-.65V6.35a.75.75 0 0 1 .365-.65l4.5-2.75A.75.75 0 0 1 18.5 5"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M4 22q-.825 0-1.412-.587T2 20V4q0-.825.588-1.412T4 2h8.15l-2 2H4v16h11v-2h2v2q0 .825-.587 1.413T15 22zm2-4v-2h7v2zm0-3v-2h5v2zm9 0l-4-4H8V6h3l4-4zm2-3.05v-6.9q.9.525 1.45 1.425T19 8.5t-.55 2.025T17 11.95m0 4.3v-2.1q1.75-.625 2.875-2.162T21 8.5t-1.125-3.488T17 2.85V.75q2.6.675 4.3 2.813T23 8.5t-1.7 4.938T17 16.25"/></svg>
           </span>
           MultiVoice Reader
         </h1>
         <p className="mt-2 text-gray-400 text-sm md:text-base">
           입력 텍스트의 화자를 자동 분리하고 Gemini TTS 멀티스피커로 합성하여 하나의 오디오로 재생합니다.
+        </p>
+        <p className="mt-1 text-[12px] text-gray-500">
+          사용 방법: (1) 텍스트 입력 → (2) 변환(선택) 또는 바로 합성 → (3) 결과에서 재생/중지. 화자별 보이스는 아래 "화자별 보이스 지정"에서 설정할 수 있어요.
         </p>
       </header>
 
@@ -243,19 +308,43 @@ const MultiVoiceReaderPage: React.FC<PageProps> = () => {
                   {synthLoading ? '합성 중…' : '합성'}
                 </button>
               </div>
-              {audioInfo && (
-                <button
-                  type="button"
-                  onClick={handlePlay}
-                  className="w-full mt-2 px-4 py-2 rounded text-sm bg-emerald-600 hover:bg-emerald-500 text-white"
-                >
-                  재생
-                </button>
-              )}
             </div>
           </div>
         </div>
         {error && <div className="mt-3 text-sm text-red-300 whitespace-pre-wrap">{error}</div>}
+      </section>
+
+      {/* Result panel placed above Intermediate for better visibility */}
+      <section className="mt-4 rounded-md border border-white/10 bg-white/[0.03] p-3 md:p-4">
+        <h2 className="text-sm font-medium text-white mb-2">결과</h2>
+        {audioInfo ? (
+          <div className="text-xs text-gray-400">
+            <div>Sample rate: {audioInfo.sampleRate} Hz</div>
+            <div>Channels: {audioInfo.numChannels}</div>
+            <div>Format: {audioInfo.sampleFormat}</div>
+            <button
+              type="button"
+              onClick={handlePlay}
+              className={`mt-3 px-4 py-2 rounded text-sm ${!isPlaying ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-rose-600 hover:bg-rose-500 text-white'}`}
+            >
+              {!isPlaying ? '재생' : '중지'}
+            </button>
+          </div>
+        ) : segments.length > 0 ? (
+          <div>
+            <div className="text-xs text-gray-400 mb-2">세그먼트 수: {segments.length}개</div>
+            <button
+              type="button"
+              onClick={() => playSegments(segments)}
+              className={`px-4 py-2 rounded text-sm ${!playingSegments ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-emerald-600/40 text-white/70 cursor-not-allowed'}`}
+              disabled={playingSegments}
+            >
+              {playingSegments ? '재생 중…' : '세그먼트 재생'}
+            </button>
+          </div>
+        ) : (
+          <div className="text-sm text-gray-500">아직 결과가 없습니다. ‘합성’을 누르면 자동으로 변환 후 합성까지 한 번에 수행됩니다.</div>
+        )}
       </section>
 
       {/* Intermediate structured prompts and voice mapping */}
@@ -265,37 +354,7 @@ const MultiVoiceReaderPage: React.FC<PageProps> = () => {
           <div className="text-sm text-gray-500">먼저 ‘변환’을 눌러 화자/네레이션을 분리하세요.</div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
-              <div>
-                <label className="block text-xs text-gray-400 mb-1">매핑 방식</label>
-                <select className="w-full bg-[#1f1f1f] border border-white/10 rounded p-2 text-sm" value={mapping} onChange={(e) => setMapping(e.target.value as any)}>
-                  <option value="narration_vs_others">Narrator vs Others</option>
-                  <option value="alternate">Alternate (교대로 배정)</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs text-gray-400 mb-1">Speaker A Label</label>
-                <input className="w-full bg-[#1f1f1f] border border-white/10 rounded p-2 text-sm" value={speakerALabel} onChange={(e) => setSpeakerALabel(e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-400 mb-1">Speaker B Label</label>
-                <input className="w-full bg-[#1f1f1f] border border-white/10 rounded p-2 text-sm" value={speakerBLabel} onChange={(e) => setSpeakerBLabel(e.target.value)} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-gray-400 mb-1">Voice A</label>
-                  <select className="w-full bg-[#1f1f1f] border border-white/10 rounded p-2 text-sm" value={voiceAName} onChange={(e) => setVoiceAName(e.target.value as any)}>
-                    {ALL_VOICES.map(v => <option key={`A-${v}`} value={v}>{v}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-400 mb-1">Voice B</label>
-                  <select className="w-full bg-[#1f1f1f] border border-white/10 rounded p-2 text-sm" value={voiceBName} onChange={(e) => setVoiceBName(e.target.value as any)}>
-                    {ALL_VOICES.map(v => <option key={`B-${v}`} value={v}>{v}</option>)}
-                  </select>
-                </div>
-              </div>
-            </div>
+            <div className="mb-4 text-xs text-gray-400">아래는 모델이 분리한 화자/내레이션입니다. 필요하면 이름/성별/지시문/텍스트를 수정하세요. 각 화자의 보이스는 바로 아래에서 지정합니다.</div>
 
             {/* Per-speaker voice mapping */}
             <div className="mb-3">
@@ -350,31 +409,6 @@ const MultiVoiceReaderPage: React.FC<PageProps> = () => {
               ))}
             </div>
           </>
-        )}
-      </section>
-
-      <section className="mt-4 rounded-md border border-white/10 bg-white/[0.03] p-3 md:p-4">
-        <h2 className="text-sm font-medium text-white mb-2">결과</h2>
-        {audioInfo ? (
-          <div className="text-xs text-gray-400">
-            <div>Sample rate: {audioInfo.sampleRate} Hz</div>
-            <div>Channels: {audioInfo.numChannels}</div>
-            <div>Format: {audioInfo.sampleFormat}</div>
-          </div>
-        ) : segments.length > 0 ? (
-          <div>
-            <div className="text-xs text-gray-400 mb-2">세그먼트 수: {segments.length}개</div>
-            <button
-              type="button"
-              onClick={handlePlaySegments}
-              className={`px-4 py-2 rounded text-sm ${!playingSegments ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-emerald-600/40 text-white/70 cursor-not-allowed'}`}
-              disabled={playingSegments}
-            >
-              {playingSegments ? '재생 중…' : '세그먼트 재생'}
-            </button>
-          </div>
-        ) : (
-          <div className="text-sm text-gray-500">아직 결과가 없습니다. 텍스트를 입력하고 ‘변환’ 후 ‘합성’을 눌러보세요.</div>
         )}
       </section>
     </div>
