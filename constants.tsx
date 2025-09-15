@@ -16,6 +16,7 @@ import StackHunyDevPage from './components/pages/StackHunyDevPage';
 import MascotGalleryPage from './components/pages/MascotGalleryPage';
 import SplitSpeakerPage from './components/pages/SplitSpeakerPage';
 import BirdGeneratorPage from './components/pages/BirdGeneratorPage';
+import MultiVoiceReaderPage from './components/pages/MultiVoiceReaderPage';
 
 export const FileIcon = () => (
   <svg
@@ -99,6 +100,15 @@ export const PAGES: {
         className="w-4 h-4 mr-2 text-gray-400"
       >
         <path d="M3 5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm9 0a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2zM3 14a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm9 0a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2z" />
+      </svg>
+    ),
+  },
+  'multi-voice-reader': {
+    title: 'MultiVoice Reader',
+    component: MultiVoiceReaderPage,
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-2 text-gray-400">
+        <path d="M3 10a1 1 0 0 1 1-1h1c2.761 0 5-2.239 5-5a1 1 0 1 1 2 0c0 3.86-3.14 7-7 7H4a1 1 0 0 1-1-1m15.5-5a.75.75 0 0 1 .75.75V18.5a.75.75 0 0 1-1.135.65l-4.5-2.75a.75.75 0 0 1-.365-.65V6.35a.75.75 0 0 1 .365-.65l4.5-2.75A.75.75 0 0 1 18.5 5"/>
       </svg>
     ),
   },
