@@ -7,6 +7,7 @@ import rearImg from '../../extra/mascot/images/rear.png';
 
 const BirdGeneratorPage: React.FC<PageProps> = () => {
   const [model, setModel] = React.useState<'gpt-image-1' | 'dall-e-2'>('gpt-image-1');
+  const [dimension, setDimension] = React.useState<'2d' | '3d'>('2d');
   const [prompt, setPrompt] = React.useState<string>('A stylized cyberpunk bird with neon highlights, highly detailed');
   const [background, setBackground] = React.useState<'auto' | 'transparent' | 'opaque'>('auto');
   const [n, setN] = React.useState<number>(1);
@@ -37,6 +38,12 @@ const BirdGeneratorPage: React.FC<PageProps> = () => {
         fetchAsFile(rearImg, 'rear.png'),
       ]);
 
+      // Compose prompt with 2D/3D dimension hint
+      const dimensionHint = dimension === '2d'
+        ? 'Render as a 2D flat illustration. Minimal depth, stylized, vector-like, no 3D shading.'
+        : 'Render as a 3D volumetric scene with realistic depth and lighting (physically-based shading).';
+      const combinedPrompt = `${prompt}\n\nStyle: ${dimensionHint}`;
+
       const fd = new FormData();
       fd.append('model', model);
       // Images: gpt-image-1 supports multiple images (image[]). dall-e-2 supports only one (use center/front).
@@ -45,7 +52,7 @@ const BirdGeneratorPage: React.FC<PageProps> = () => {
       } else {
         fd.append('image', files[1]);
       }
-      fd.append('prompt', prompt);
+      fd.append('prompt', combinedPrompt);
       fd.append('background', background);
       fd.append('n', String(n));
       fd.append('output_format', outputFormat);
@@ -107,7 +114,7 @@ const BirdGeneratorPage: React.FC<PageProps> = () => {
 
       {/* Controls */}
       <section className="mt-4 rounded-md border border-white/10 bg-white/[0.03] p-3 md:p-4">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
           <div>
             <label className="block text-xs text-gray-400 mb-1">Model</label>
             <select
@@ -127,6 +134,17 @@ const BirdGeneratorPage: React.FC<PageProps> = () => {
             >
               <option value="gpt-image-1">gpt-image-1</option>
               <option value="dall-e-2">dall-e-2</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Dimension</label>
+            <select
+              className="w-full bg-[#1f1f1f] border border-white/10 rounded p-2 text-sm"
+              value={dimension}
+              onChange={(e) => setDimension(e.target.value as '2d' | '3d')}
+            >
+              <option value="2d">2D (flat)</option>
+              <option value="3d">3D (depth)</option>
             </select>
           </div>
           <div>
