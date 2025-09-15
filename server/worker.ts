@@ -1,6 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
 
-// The SSR entry is built via `vite build --mode ssr`
+// The SSR entry is built via `vite build --ssr` (Vite v6)
 // Importing here lets Wrangler bundle it into the worker.
 import { render } from '../dist/server/entry-server.js';
 
