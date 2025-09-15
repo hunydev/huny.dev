@@ -125,6 +125,8 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
     bringToFront(id);
     setDragId(id);
     dragOffset.current = { dx: e.clientX - note.x, dy: e.clientY - note.y };
+    // Ensure continuous pointer events during drag on touch devices
+    try { (e.currentTarget as any)?.setPointerCapture?.(e.pointerId); } catch {}
     document.body.style.userSelect = 'none';
   };
 
@@ -146,13 +148,16 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
       setDragId(null);
       document.removeEventListener('pointermove', onMove as any);
       document.removeEventListener('pointerup', onUp as any);
+      document.removeEventListener('pointercancel', onUp as any);
       document.body.style.userSelect = '';
     };
     document.addEventListener('pointermove', onMove as any);
     document.addEventListener('pointerup', onUp as any);
+    document.addEventListener('pointercancel', onUp as any);
     return () => {
       document.removeEventListener('pointermove', onMove as any);
       document.removeEventListener('pointerup', onUp as any);
+      document.removeEventListener('pointercancel', onUp as any);
     };
   }, [dragId]);
 
@@ -165,6 +170,8 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
     if (!note) return;
     bringToFront(id);
     setResizing({ id, startX: e.clientX, startY: e.clientY, startW: note.w, startH: note.h });
+    // Capture pointer so move events keep firing even if finger leaves the handle area
+    try { (e.currentTarget as any)?.setPointerCapture?.(e.pointerId); } catch {}
     document.body.style.userSelect = 'none';
     document.body.style.cursor = 'se-resize';
   };
@@ -190,14 +197,17 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
       setResizing(null);
       document.removeEventListener('pointermove', onMove as any);
       document.removeEventListener('pointerup', onUp as any);
+      document.removeEventListener('pointercancel', onUp as any);
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
     };
     document.addEventListener('pointermove', onMove as any);
     document.addEventListener('pointerup', onUp as any);
+    document.addEventListener('pointercancel', onUp as any);
     return () => {
       document.removeEventListener('pointermove', onMove as any);
       document.removeEventListener('pointerup', onUp as any);
+      document.removeEventListener('pointercancel', onUp as any);
     };
   }, [resizing]);
 
@@ -316,8 +326,8 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
               {/* Resize handle */}
               <div
                 onPointerDown={(e) => onResizePointerDown(e, n.id)}
-                className="absolute bottom-1 right-1 w-3 h-3 rounded-sm cursor-se-resize"
-                style={{ backgroundColor: getContrastColor(n.color) === '#fff' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)', touchAction: 'none' }}
+                className="absolute bottom-1 right-1 w-4 h-4 rounded-sm cursor-se-resize"
+                style={{ backgroundColor: getContrastColor(n.color) === '#fff' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)', touchAction: 'none', zIndex: 20 }}
                 title="Resize"
                 aria-label="Resize note"
               />
