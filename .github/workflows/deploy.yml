@@ -38,35 +38,3 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: npx wrangler deploy
-
-  notify-on-failure:
-    name: Notify (on failure)
-    if: ${{ failure() }}
-    needs: [deploy]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send failure email (SMTP)
-        if: ${{ secrets.SMTP_HOST != '' && secrets.SMTP_USERNAME != '' && secrets.SMTP_PASSWORD != '' && secrets.MAIL_FROM != '' && secrets.MAIL_TO != '' }}
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: ${{ secrets.SMTP_HOST }}
-          server_port: ${{ secrets.SMTP_PORT || '587' }}
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          subject: "[CI] Deploy failed: ${{ github.repository }}@${{ github.ref_name }} (#${{ github.run_number }})"
-          to: ${{ secrets.MAIL_TO }}
-          from: ${{ secrets.MAIL_FROM }}
-          secure: true
-          content_type: text/html
-          body: |
-            <p><strong>Deploy workflow failed.</strong></p>
-            <ul>
-              <li>Repo: ${{ github.repository }}</li>
-              <li>Branch: ${{ github.ref_name }}</li>
-              <li>Run: <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">${{ github.run_id }}</a></li>
-              <li>Commit: ${{ github.sha }}</li>
-            </ul>
-
-      - name: Skip email (no SMTP secrets)
-        if: ${{ !(secrets.SMTP_HOST != '' && secrets.SMTP_USERNAME != '' && secrets.SMTP_PASSWORD != '' && secrets.MAIL_FROM != '' && secrets.MAIL_TO != '') }}
-        run: echo "SMTP secrets not configured; skipping email notification."
