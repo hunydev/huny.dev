@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { PageProps } from '../../types';
-import { BOOKMARK_CATEGORIES, getBookmarksByCategoryId, getCategoryById, type Bookmark } from './bookmarksData';
+import { BOOKMARK_CATEGORIES, BOOKMARKS, getCategoryById, type Bookmark } from './bookmarksData';
+import { fetchNotionBookmarks } from '../../utils/notionClient';
 
 const formatDate = (iso?: string) => {
   if (!iso) return '-';
@@ -21,7 +22,40 @@ const BookmarkPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
   });
 
   const category = useMemo(() => (categoryId === 'all' ? undefined : getCategoryById(categoryId)), [categoryId]);
-  const bookmarks = useMemo(() => getBookmarksByCategoryId(categoryId), [categoryId]);
+  const [all, setAll] = useState<Bookmark[]>(() => BOOKMARKS);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Local filter that mirrors bookmarksData.ts logic (including 'uncategorized').
+  const filtered = useMemo(() => {
+    if (categoryId === 'all') return all;
+    if (categoryId === 'uncategorized') {
+      const known = new Set(BOOKMARK_CATEGORIES.map(c => c.id).filter(id => id !== 'uncategorized'));
+      return all.filter(b => !b.categoryId || !known.has(b.categoryId));
+    }
+    return all.filter(b => b.categoryId === categoryId);
+  }, [all, categoryId]);
+
+  // Fetch once on mount from Notion via Worker proxy; fallback to static if fails.
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const items = await fetchNotionBookmarks({});
+        if (!alive) return;
+        setAll(items);
+      } catch (e: any) {
+        if (!alive) return;
+        setError(e?.message || String(e));
+        setAll(BOOKMARKS);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
 
   const onToggleView = (next: 'card' | 'list') => {
     setView(next);
@@ -39,7 +73,7 @@ const BookmarkPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-xl font-semibold text-white">{headerTitle}</h1>
-          <p className="text-sm text-gray-400">{bookmarks.length} items</p>
+          <p className="text-sm text-gray-400">{filtered.length} items</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -67,22 +101,28 @@ const BookmarkPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
         </div>
       </div>
 
+      {loading && (
+        <div className="mb-3 text-sm text-gray-400">Notion에서 불러오는 중…</div>
+      )}
+      {error && (
+        <div className="mb-3 text-xs text-amber-300">Notion 로드 실패: {error} — 로컬 데이터로 표시합니다.</div>
+      )}
       {view === 'card' ? (
-        bookmarks.length === 0 ? (
+        filtered.length === 0 ? (
           <EmptyState onReset={() => onOpenFile?.('bookmark:all')} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {bookmarks.map((b) => (
+            {filtered.map((b) => (
               <CardItem key={b.id} bm={b} />
             ))}
           </div>
         )
       ) : (
-        bookmarks.length === 0 ? (
+        filtered.length === 0 ? (
           <EmptyState onReset={() => onOpenFile?.('bookmark:all')} />
         ) : (
           <div className="divide-y divide-white/10 rounded border border-white/10">
-            {bookmarks.map((b) => (
+            {filtered.map((b) => (
               <ListItem key={b.id} bm={b} />)
             )}
           </div>
@@ -129,7 +169,7 @@ const CardItem: React.FC<{ bm: Bookmark }> = ({ bm }) => {
           <div className="flex items-center gap-2 mt-2">
             <span className="inline-flex items-center gap-1 text-xs text-gray-400">
               <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: cat?.color || '#6b7280' }} />
-              {cat?.name || 'Misc'}
+              {cat?.name || 'Uncategorized'}
             </span>
             <span className="text-xs text-gray-500">•</span>
             <span className="text-xs text-gray-400">Created {formatDate(bm.createdAt)}</span>

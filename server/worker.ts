@@ -10,6 +10,9 @@ export interface Env {
   OPENAI_API_KEY?: string;
   PB_LOGIN_EMAIL?: string;
   PB_LOGIN_PASSWORD?: string;
+  NOTION_BOOKMARK_ID?: string;
+  NOTION_PRIVATE_API_SECRET?: string;
+  NOTION_API_VERSION?: string;
 }
 
 export default {
@@ -91,6 +94,69 @@ export default {
           });
         } catch (e: any) {
           return new Response(JSON.stringify({ error: 'PB refresh error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
+      // Notion Bookmarks proxy: secure server-side call to Notion Data Source Query API
+      if (url.pathname === '/api/bookmarks') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        if (!env.NOTION_BOOKMARK_ID || !env.NOTION_PRIVATE_API_SECRET) {
+          return new Response(JSON.stringify({ error: 'NOTION_BOOKMARK_ID/NOTION_PRIVATE_API_SECRET must be set on server.' }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+        try {
+          const incoming = await request.json<any>().catch(() => ({} as any));
+          const baseUrl = `https://api.notion.com/v1/data_sources/${encodeURIComponent(env.NOTION_BOOKMARK_ID)}/query`;
+          const headers: Record<string, string> = {
+            'content-type': 'application/json',
+            'authorization': `Bearer ${env.NOTION_PRIVATE_API_SECRET}`,
+            // Use provided Notion API version from env; fallback to a recent default
+            'Notion-Version': env.NOTION_API_VERSION || '2024-08-27',
+          };
+
+          const pageSize = typeof incoming?.page_size === 'number' ? incoming.page_size : 100;
+          let cursor: string | undefined = typeof incoming?.start_cursor === 'string' ? incoming.start_cursor : undefined;
+          // The filter body may include complex conditions; pass-through under root
+          const queryRoot = { ...incoming } as any;
+          delete queryRoot.start_cursor; // handled separately
+          delete queryRoot.page_size; // we will set explicitly
+
+          const allResults: any[] = [];
+          for (let safety = 0; safety < 20; safety++) { // pagination safety cap
+            const payload: any = { ...queryRoot, page_size: pageSize };
+            if (cursor) payload.start_cursor = cursor;
+            const res = await fetch(baseUrl, {
+              method: 'POST',
+              headers,
+              body: JSON.stringify(payload),
+            });
+            const text = await res.text();
+            let js: any = {};
+            try { js = text ? JSON.parse(text) : {}; } catch { js = {}; }
+            if (!res.ok) {
+              const msg = (js && js.message) ? js.message : `Notion query failed: ${res.status}`;
+              return new Response(JSON.stringify({ error: msg, detail: js }), {
+                status: 502,
+                headers: { 'content-type': 'application/json; charset=UTF-8' },
+              });
+            }
+            const results: any[] = Array.isArray(js?.results) ? js.results : [];
+            allResults.push(...results);
+            if (js?.has_more && js?.next_cursor) {
+              cursor = String(js.next_cursor);
+            } else {
+              break;
+            }
+          }
+          return new Response(JSON.stringify({ results: allResults }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Notion proxy error', detail: String(e?.message || e) }), {
             status: 500,
             headers: { 'content-type': 'application/json; charset=UTF-8' },
           });

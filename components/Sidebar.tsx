@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { ViewId } from '../types';
 import { FileIcon, ImageIcon, VideoIcon } from '../constants';
-import { BOOKMARK_CATEGORIES, getBookmarkCountByCategory } from './pages/bookmarksData';
+import { BOOKMARK_CATEGORIES, BOOKMARKS, type Bookmark } from './pages/bookmarksData';
 import { NOTE_GROUPS, getNoteCountByGroup } from './pages/notesData';
 import { CATEGORIES } from './pages/appsData';
 import { DOCS } from './pages/docsData';
 import logoImg from '../logo.png';
 import logo128 from '../logo_128x128.png';
 import welcomeIcon from '../icon_32x32.png';
+import { fetchNotionBookmarks } from '../utils/notionClient';
 
 type SidebarProps = {
   activeView: ViewId;
@@ -370,7 +371,39 @@ const BookmarkView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
     </button>
   );
 
-  const total = getBookmarkCountByCategory('all');
+  // Load counts from Notion once; fallback to static BOOKMARKS on error.
+  const [all, setAll] = React.useState<Bookmark[]>(() => BOOKMARKS);
+  const [error, setError] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    let alive = true;
+    (async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const items = await fetchNotionBookmarks({});
+        if (!alive) return;
+        setAll(items);
+      } catch (e: any) {
+        if (!alive) return;
+        setError(e?.message || String(e));
+        setAll(BOOKMARKS);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  const known = React.useMemo(() => new Set(BOOKMARK_CATEGORIES.map(c => c.id).filter(id => id !== 'uncategorized')), []);
+  const count = React.useCallback((categoryId: string) => {
+    if (categoryId === 'all') return all.length;
+    if (categoryId === 'uncategorized') return all.filter(b => !b.categoryId || !known.has(b.categoryId)).length;
+    return all.filter(b => b.categoryId === categoryId).length;
+  }, [all, known]);
+
+  const total = count('all');
 
   return (
     <div className="p-2">
@@ -378,7 +411,7 @@ const BookmarkView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
       <div className="flex flex-col gap-1">
         <Item id="all" name="All" color="#9ca3af" count={total} />
         {BOOKMARK_CATEGORIES.map(c => (
-          <Item key={c.id} id={c.id} name={c.name} color={c.color} count={getBookmarkCountByCategory(c.id)} />
+          <Item key={c.id} id={c.id} name={c.name} color={c.color} count={count(c.id)} />
         ))}
       </div>
     </div>
