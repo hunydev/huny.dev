@@ -367,12 +367,12 @@ const BookmarkView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
         </span>
         <span className="text-sm">{name}</span>
       </span>
-      <span className="text-xs text-gray-400">{count}</span>
+      {!loading && <span className="text-xs text-gray-400">{count}</span>}
     </button>
   );
 
-  // Load counts from Notion once; fallback to static BOOKMARKS on error.
-  const [all, setAll] = React.useState<Bookmark[]>(() => BOOKMARKS);
+  // Load counts from Notion once (remote-first); fallback to static BOOKMARKS on error.
+  const [all, setAll] = React.useState<Bookmark[]>(() => []);
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
 

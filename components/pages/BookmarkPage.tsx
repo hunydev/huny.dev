@@ -22,8 +22,8 @@ const BookmarkPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
   });
 
   const category = useMemo(() => (categoryId === 'all' ? undefined : getCategoryById(categoryId)), [categoryId]);
-  const [all, setAll] = useState<Bookmark[]>(() => BOOKMARKS);
-  const [loading, setLoading] = useState(false);
+  const [all, setAll] = useState<Bookmark[]>(() => []);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   // Local filter that mirrors bookmarksData.ts logic (including 'uncategorized').
@@ -73,7 +73,7 @@ const BookmarkPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-xl font-semibold text-white">{headerTitle}</h1>
-          <p className="text-sm text-gray-400">{filtered.length} items</p>
+          <p className="text-sm text-gray-400">{loading ? '…' : `${filtered.length} items`}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -108,7 +108,13 @@ const BookmarkPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
         <div className="mb-3 text-xs text-amber-300">Notion 로드 실패: {error} — 로컬 데이터로 표시합니다.</div>
       )}
       {view === 'card' ? (
-        filtered.length === 0 ? (
+        loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 opacity-80">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="p-4 rounded bg-[#252526] border border-black/30 animate-pulse h-28" />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
           <EmptyState onReset={() => onOpenFile?.('bookmark:all')} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -118,7 +124,13 @@ const BookmarkPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
           </div>
         )
       ) : (
-        filtered.length === 0 ? (
+        loading ? (
+          <div className="divide-y divide-white/10 rounded border border-white/10">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="px-3 py-3 bg-[#1e1e1e] animate-pulse" />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
           <EmptyState onReset={() => onOpenFile?.('bookmark:all')} />
         ) : (
           <div className="divide-y divide-white/10 rounded border border-white/10">

@@ -29,9 +29,9 @@ const WebIcon: React.FC<{ className?: string }> = ({ className }) => (
 const AppsPage: React.FC<PageProps> = ({ routeParams }) => {
   const categoryId = (routeParams?.categoryId as AppCategoryId) || 'huny';
   const category = useMemo(() => getAppCategoryById(categoryId), [categoryId]);
-  const [allApps, setAllApps] = useState<AppItem[]>(() => APPS);
+  const [allApps, setAllApps] = useState<AppItem[]>(() => []);
   const apps = useMemo(() => allApps.filter(a => a.categoryId === categoryId), [allApps, categoryId]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
 
   const [selected, setSelected] = useState<AppItem | null>(null);
@@ -119,51 +119,59 @@ const AppsPage: React.FC<PageProps> = ({ routeParams }) => {
         {loadError && (
           <div className="text-xs text-amber-300 mb-2">PB 로드 실패: {loadError} — 로컬 데이터로 표시합니다.</div>
         )}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-3">
-          {apps.map(app => (
-            <button
-              key={app.id}
-              onClick={() => setSelected(app)}
-              className="relative group bg-white/5 border border-white/10 hover:border-white/20 rounded-md p-2 flex flex-col items-center justify-between h-28 md:h-32 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/20"
-            >
-              <div className="flex flex-col items-center gap-1">
-                {/* App icon */}
-                <div>
-                  {app.iconUrl ? (
-                    <img src={app.iconUrl} alt="" className="w-8 h-8 rounded-sm" />
-                  ) : (
-                    <span className="text-2xl" aria-hidden>{app.iconEmoji || '📦'}</span>
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-3 opacity-80">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div key={i} className="bg-white/5 border border-white/10 rounded-md p-2 h-28 md:h-32 animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-3">
+            {apps.map(app => (
+              <button
+                key={app.id}
+                onClick={() => setSelected(app)}
+                className="relative group bg-white/5 border border-white/10 hover:border-white/20 rounded-md p-2 flex flex-col items-center justify-between h-28 md:h-32 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+              >
+                <div className="flex flex-col items-center gap-1">
+                  {/* App icon */}
+                  <div>
+                    {app.iconUrl ? (
+                      <img src={app.iconUrl} alt="" className="w-8 h-8 rounded-sm" />
+                    ) : (
+                      <span className="text-2xl" aria-hidden>{app.iconEmoji || '📦'}</span>
+                    )}
+                  </div>
+                  {/* Name */}
+                  <div className="text-center">
+                    <div className="text-xs text-white font-medium truncate max-w-[8rem]">{app.name}</div>
+                  </div>
+                </div>
+                {/* Platforms */}
+                <div className="flex items-center gap-1">
+                  {app.platforms.desktop && app.platforms.desktop.length > 0 && (
+                    <span className="relative group" title={app.platforms.desktop.join(', ')}>
+                      <DesktopIcon className="w-4 h-4 text-gray-300" />
+                      <span className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] bg-black/80 text-gray-200 px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">{app.platforms.desktop.join(', ')}</span>
+                    </span>
+                  )}
+                  {app.platforms.mobile && app.platforms.mobile.length > 0 && (
+                    <span className="relative group" title={app.platforms.mobile.join(', ')}>
+                      <MobileIcon className="w-4 h-4 text-gray-300" />
+                      <span className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] bg-black/80 text-gray-200 px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">{app.platforms.mobile.join(', ')}</span>
+                    </span>
+                  )}
+                  {app.platforms.web && (
+                    <span className="relative group" title="Web">
+                      <WebIcon className="w-4 h-4 text-gray-300" />
+                      <span className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] bg-black/80 text-gray-200 px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">Web</span>
+                    </span>
                   )}
                 </div>
-                {/* Name */}
-                <div className="text-center">
-                  <div className="text-xs text-white font-medium truncate max-w-[8rem]">{app.name}</div>
-                </div>
-              </div>
-              {/* Platforms */}
-              <div className="flex items-center gap-1">
-                {app.platforms.desktop && app.platforms.desktop.length > 0 && (
-                  <span className="relative group" title={app.platforms.desktop.join(', ')}>
-                    <DesktopIcon className="w-4 h-4 text-gray-300" />
-                    <span className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] bg-black/80 text-gray-200 px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">{app.platforms.desktop.join(', ')}</span>
-                  </span>
-                )}
-                {app.platforms.mobile && app.platforms.mobile.length > 0 && (
-                  <span className="relative group" title={app.platforms.mobile.join(', ')}>
-                    <MobileIcon className="w-4 h-4 text-gray-300" />
-                    <span className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] bg-black/80 text-gray-200 px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">{app.platforms.mobile.join(', ')}</span>
-                  </span>
-                )}
-                {app.platforms.web && (
-                  <span className="relative group" title="Web">
-                    <WebIcon className="w-4 h-4 text-gray-300" />
-                    <span className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] bg-black/80 text-gray-200 px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">Web</span>
-                  </span>
-                )}
-              </div>
-            </button>
-          ))}
-        </div>
+              </button>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Modal */}
