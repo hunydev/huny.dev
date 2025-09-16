@@ -8,7 +8,7 @@ export type BookmarkCategory = {
 
 export type Bookmark = {
   id: string;
-  categoryId: string;
+  categoryId?: string;
   name: string;
   description?: string;
   url: string;
@@ -23,6 +23,8 @@ export const BOOKMARK_CATEGORIES: BookmarkCategory[] = [
   { id: 'design', name: 'Design', color: '#f59e0b' },
   { id: 'tools', name: 'Tools', color: '#10b981' },
   { id: 'learn', name: 'Learning', color: '#a78bfa' },
+  // Special bucket: shows items that don't belong to any known category (missing/unknown categoryId)
+  { id: 'uncategorized', name: 'Uncategorized', color: '#9ca3af' },
 ];
 
 export const BOOKMARKS: Bookmark[] = [
@@ -116,10 +118,22 @@ export const getCategoryById = (id: string | undefined | null): BookmarkCategory
 
 export const getBookmarksByCategoryId = (categoryId: string | undefined | null): Bookmark[] => {
   if (!categoryId || categoryId === 'all') return BOOKMARKS;
+  if (categoryId === 'uncategorized') {
+    const known = new Set(BOOKMARK_CATEGORIES
+      .map(c => c.id)
+      .filter(id => id !== 'uncategorized'));
+    return BOOKMARKS.filter(b => !b.categoryId || !known.has(b.categoryId));
+  }
   return BOOKMARKS.filter(b => b.categoryId === categoryId);
 };
 
 export const getBookmarkCountByCategory = (categoryId: string): number => {
   if (categoryId === 'all') return BOOKMARKS.length;
+  if (categoryId === 'uncategorized') {
+    const known = new Set(BOOKMARK_CATEGORIES
+      .map(c => c.id)
+      .filter(id => id !== 'uncategorized'));
+    return BOOKMARKS.filter(b => !b.categoryId || !known.has(b.categoryId)).length;
+  }
   return BOOKMARKS.filter(b => b.categoryId === categoryId).length;
 };
