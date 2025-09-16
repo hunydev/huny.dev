@@ -28,6 +28,44 @@ const App: React.FC = () => {
   const restoredRef = useRef<boolean>(false);
   const restoringRef = useRef<boolean>(false);
 
+  // Map a tab id (e.g., 'docs:intro', 'bookmark:all', 'split-speaker') to the corresponding left sidebar view
+  function viewForTabId(tabId: string): ViewId {
+    try {
+      const idx = tabId.indexOf(':');
+      const base = idx > -1 ? tabId.slice(0, idx) : tabId;
+      switch (base) {
+        case 'docs':
+          return ViewId.Docs;
+        case 'apps':
+          return ViewId.Apps;
+        case 'bookmark':
+          return ViewId.Bookmark;
+        case 'notes':
+          return ViewId.Notes;
+        case 'media':
+          return ViewId.Media;
+        case 'split-speaker':
+        case 'bird-generator':
+        case 'multi-voice-reader':
+          return ViewId.Playground;
+        // Explorer bucket: core files
+        case 'welcome':
+        case 'project':
+        case 'about':
+        case 'domain':
+        case 'works':
+        case 'stack':
+        case 'digital-shelf':
+        case 'mascot':
+          return ViewId.Explorer;
+        default:
+          return ViewId.Explorer;
+      }
+    } catch {
+      return ViewId.Explorer;
+    }
+  }
+
   // Default: on small screens, start with sidebar unpinned for better mobile UX
   useEffect(() => {
     try {
@@ -170,6 +208,13 @@ const App: React.FC = () => {
     // Fallback: open Welcome if no saved state
     handleOpenFile('welcome');
   }, [handleOpenFile]);
+
+  // Keep left sidebar selection in sync with the active tab
+  useEffect(() => {
+    if (!activeTabId) return;
+    const v = viewForTabId(activeTabId);
+    setActiveView(v);
+  }, [activeTabId]);
 
   // Keep session-based recent list in sync with last visited tab
   useEffect(() => {
