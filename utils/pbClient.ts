@@ -3,7 +3,7 @@
 // - Refreshes token when expiring: POST /api/pb-refresh with Authorization: <token>
 // - Exposes fetchPB() to call pb.huny.dev directly with Authorization header.
 
-const PB_HOST = 'https://pb.huny.dev';
+export const PB_HOST = 'https://pb.huny.dev';
 const LS_KEY = 'pbToken';
 
 export type PBAuth = {
@@ -102,17 +102,43 @@ export async function fetchPB(path: string, init: RequestInit = {}): Promise<Res
   return fetch(url, { ...init, headers });
 }
 
-// Example: fetch apps records by category
-export async function fetchAppsByCategory(categoryId: string): Promise<any[]> {
-  // PocketBase list API: /api/collections/<collection>/records
+export function buildPBFileUrl(collectionId: string, recordId: string, fileName: string): string {
+  return `${PB_HOST}/api/files/${encodeURIComponent(collectionId)}/${encodeURIComponent(recordId)}/${encodeURIComponent(fileName)}`;
+}
+
+export async function fetchAllApps(): Promise<any[]> {
   const params = new URLSearchParams();
   params.set('perPage', '200');
   params.set('sort', 'name');
-  // filter expression: categoryId = "<id>"
-  params.set('filter', `categoryId = "${categoryId}"`);
-  const res = await fetchPB(`/api/collections/apps/records?${params.toString()}`);
-  if (!res.ok) throw new Error(`PB apps fetch failed: ${res.status}`);
-  const js: any = await res.json().catch(() => ({}));
+  const res = await fetchPB(`/api/collections/hunydev_apps/records?${params.toString()}`);
+  const text = await res.text();
+  let js: any = {};
+  try { js = text ? JSON.parse(text) : {}; } catch { js = {}; }
+  if (!res.ok) {
+    const msg = (js && js.message) ? js.message : `PB apps fetch failed: ${res.status}`;
+    throw new Error(msg);
+  }
   const items = Array.isArray(js && js.items) ? js.items : [];
   return items;
+}
+
+// Example: fetch apps records by category
+export async function fetchAppsByCategory(categoryId: string): Promise<any[]> {
+  // PB list API: GET /api/collections/hunydev_apps/records
+  // 서버에서 필터 오류 가능성이 있어 우선 전체를 불러온 뒤 클라이언트에서 카테고리 필터링
+  const params = new URLSearchParams();
+  params.set('perPage', '200');
+  params.set('sort', 'name');
+  const res = await fetchPB(`/api/collections/hunydev_apps/records?${params.toString()}`);
+  const text = await res.text();
+  let js: any = {};
+  try { js = text ? JSON.parse(text) : {}; } catch { js = {}; }
+  if (!res.ok) {
+    // PB 에러 포맷: { status, message, data }
+    const msg = (js && js.message) ? js.message : `PB apps fetch failed: ${res.status}`;
+    throw new Error(msg);
+  }
+  const items = Array.isArray(js && js.items) ? js.items : [];
+  // 클라이언트에서 카테고리 필터링
+  return items.filter((r: any) => String(r?.categoryId || '') === String(categoryId));
 }

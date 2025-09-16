@@ -2,12 +2,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { PageProps } from '../../types';
 import {
   AppItem,
-  CATEGORIES,
+  APPS,
   getAppCategoryById,
-  getAppsByCategoryId,
   AppCategoryId,
 } from './appsData';
-import { fetchAppsByCategory } from '../../utils/pbClient';
+import { fetchAllApps, buildPBFileUrl } from '../../utils/pbClient';
 
 const DesktopIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -30,7 +29,8 @@ const WebIcon: React.FC<{ className?: string }> = ({ className }) => (
 const AppsPage: React.FC<PageProps> = ({ routeParams }) => {
   const categoryId = (routeParams?.categoryId as AppCategoryId) || 'huny';
   const category = useMemo(() => getAppCategoryById(categoryId), [categoryId]);
-  const [apps, setApps] = useState<AppItem[]>(() => getAppsByCategoryId(categoryId));
+  const [allApps, setAllApps] = useState<AppItem[]>(() => APPS);
+  const apps = useMemo(() => allApps.filter(a => a.categoryId === categoryId), [allApps, categoryId]);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState('');
 
@@ -50,12 +50,21 @@ const AppsPage: React.FC<PageProps> = ({ routeParams }) => {
     const desktop = toArr(platformsObj.desktop ?? rec?.platformsDesktop ?? rec?.desktop);
     const mobile = toArr(platformsObj.mobile ?? rec?.platformsMobile ?? rec?.mobile);
     const web = Boolean(platformsObj.web ?? rec?.platformsWeb ?? rec?.web ?? rec?.isWeb);
+    // iconUrl: PocketBase 파일명만 오는 경우 실제 파일 URL 구성
+    let iconUrl: string | undefined = rec?.iconUrl || undefined;
+    if (iconUrl && !/^https?:/i.test(iconUrl)) {
+      const colId = String(rec?.collectionId || rec?.collectionName || '');
+      const recId = String(rec?.id || '');
+      if (colId && recId) {
+        iconUrl = buildPBFileUrl(colId, recId, iconUrl);
+      }
+    }
     return {
       id: String(rec?.id ?? rec?.collectionId ?? crypto.randomUUID()),
       name: String(rec?.name ?? rec?.title ?? 'Unknown'),
       categoryId: (rec?.categoryId as AppCategoryId) || categoryId,
       iconEmoji: rec?.iconEmoji || undefined,
-      iconUrl: rec?.iconUrl || undefined,
+      iconUrl,
       link: rec?.link ?? rec?.url ?? undefined,
       description: rec?.description || '',
       platforms: {
@@ -66,27 +75,28 @@ const AppsPage: React.FC<PageProps> = ({ routeParams }) => {
     };
   };
 
-  // Load from PocketBase (with worker-issued token). Fallback to local static on error.
+  // Load ALL apps from PocketBase once on tab load, then filter locally per category.
+  // Fallback to local static APPS on error.
   useEffect(() => {
     let alive = true;
     (async () => {
       setLoading(true);
       setLoadError('');
       try {
-        const records = await fetchAppsByCategory(categoryId);
+        const records = await fetchAllApps();
         if (!alive) return;
         const mapped = records.map(mapPbRecordToAppItem);
-        setApps(mapped);
+        setAllApps(mapped);
       } catch (e: any) {
         if (!alive) return;
         setLoadError(e?.message || String(e));
-        setApps(getAppsByCategoryId(categoryId));
+        setAllApps(APPS);
       } finally {
         if (alive) setLoading(false);
       }
     })();
     return () => { alive = false; };
-  }, [categoryId]);
+  }, []);
 
   return (
     <div className="max-w-6xl mx-auto">
