@@ -8,6 +8,8 @@ export interface Env {
   ASSETS: Fetcher;
   GEMINI_API_KEY?: string;
   OPENAI_API_KEY?: string;
+  PB_LOGIN_EMAIL?: string;
+  PB_LOGIN_PASSWORD?: string;
 }
 
 export default {
@@ -16,6 +18,84 @@ export default {
 
     // 0) Example API routes (you can expand later)
     if (url.pathname.startsWith('/api/')) {
+      // PocketBase auth: issue service token using server-side credentials
+      if (url.pathname === '/api/pb-token') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        if (!env.PB_LOGIN_EMAIL || !env.PB_LOGIN_PASSWORD) {
+          return new Response(JSON.stringify({ error: 'PB_LOGIN_EMAIL/PB_LOGIN_PASSWORD must be set on server.' }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+        try {
+          const res = await fetch('https://pb.huny.dev/api/collections/users/auth-with-password', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ identity: env.PB_LOGIN_EMAIL, password: env.PB_LOGIN_PASSWORD }),
+          });
+          const js: any = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            return new Response(JSON.stringify({ error: `PB login failed: ${res.status} ${res.statusText}`, detail: js }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const token = String(js?.token || '');
+          if (!token) {
+            return new Response(JSON.stringify({ error: 'PB login did not return token', detail: js }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          return new Response(JSON.stringify({ token, authHeader: `Bearer ${token}`, record: js?.record || null }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'PB login error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
+      // PocketBase token refresh (client supplies Authorization header)
+      if (url.pathname === '/api/pb-refresh') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        const auth = request.headers.get('authorization') || request.headers.get('Authorization') || '';
+        if (!auth) {
+          return new Response(JSON.stringify({ error: 'Missing Authorization header' }), {
+            status: 400,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+        try {
+          const res = await fetch('https://pb.huny.dev/api/collections/users/auth-refresh', {
+            method: 'POST',
+            headers: { 'authorization': auth },
+          });
+          const js: any = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            return new Response(JSON.stringify({ error: `PB refresh failed: ${res.status} ${res.statusText}`, detail: js }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const token = String(js?.token || '');
+          if (!token) {
+            return new Response(JSON.stringify({ error: 'PB refresh did not return token', detail: js }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          return new Response(JSON.stringify({ token, authHeader: `Bearer ${token}`, record: js?.record || null }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'PB refresh error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
       if (url.pathname === '/api/health') {
         return new Response(JSON.stringify({ ok: true, time: new Date().toISOString() }), {
           headers: { 'content-type': 'application/json; charset=UTF-8' },

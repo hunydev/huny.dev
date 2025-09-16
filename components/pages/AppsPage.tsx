@@ -7,6 +7,7 @@ import {
   getAppsByCategoryId,
   AppCategoryId,
 } from './appsData';
+import { fetchAppsByCategory } from '../../utils/pbClient';
 
 const DesktopIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -29,7 +30,9 @@ const WebIcon: React.FC<{ className?: string }> = ({ className }) => (
 const AppsPage: React.FC<PageProps> = ({ routeParams }) => {
   const categoryId = (routeParams?.categoryId as AppCategoryId) || 'huny';
   const category = useMemo(() => getAppCategoryById(categoryId), [categoryId]);
-  const apps = useMemo(() => getAppsByCategoryId(categoryId), [categoryId]);
+  const [apps, setApps] = useState<AppItem[]>(() => getAppsByCategoryId(categoryId));
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState('');
 
   const [selected, setSelected] = useState<AppItem | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
@@ -39,6 +42,51 @@ const AppsPage: React.FC<PageProps> = ({ routeParams }) => {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
+
+  // Map PB record to AppItem (tolerant to field naming)
+  const mapPbRecordToAppItem = (rec: any): AppItem => {
+    const toArr = (v: any): any[] => Array.isArray(v) ? v : [];
+    const platformsObj = typeof rec?.platforms === 'object' && rec.platforms ? rec.platforms : {};
+    const desktop = toArr(platformsObj.desktop ?? rec?.platformsDesktop ?? rec?.desktop);
+    const mobile = toArr(platformsObj.mobile ?? rec?.platformsMobile ?? rec?.mobile);
+    const web = Boolean(platformsObj.web ?? rec?.platformsWeb ?? rec?.web ?? rec?.isWeb);
+    return {
+      id: String(rec?.id ?? rec?.collectionId ?? crypto.randomUUID()),
+      name: String(rec?.name ?? rec?.title ?? 'Unknown'),
+      categoryId: (rec?.categoryId as AppCategoryId) || categoryId,
+      iconEmoji: rec?.iconEmoji || undefined,
+      iconUrl: rec?.iconUrl || undefined,
+      link: rec?.link ?? rec?.url ?? undefined,
+      description: rec?.description || '',
+      platforms: {
+        desktop: desktop.length ? desktop as any : undefined,
+        mobile: mobile.length ? mobile as any : undefined,
+        web: web || undefined,
+      },
+    };
+  };
+
+  // Load from PocketBase (with worker-issued token). Fallback to local static on error.
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      setLoading(true);
+      setLoadError('');
+      try {
+        const records = await fetchAppsByCategory(categoryId);
+        if (!alive) return;
+        const mapped = records.map(mapPbRecordToAppItem);
+        setApps(mapped);
+      } catch (e: any) {
+        if (!alive) return;
+        setLoadError(e?.message || String(e));
+        setApps(getAppsByCategoryId(categoryId));
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => { alive = false; };
+  }, [categoryId]);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -55,6 +103,12 @@ const AppsPage: React.FC<PageProps> = ({ routeParams }) => {
       </header>
 
       <section>
+        {loading && (
+          <div className="text-sm text-gray-400 mb-2">PocketBase에서 불러오는 중…</div>
+        )}
+        {loadError && (
+          <div className="text-xs text-amber-300 mb-2">PB 로드 실패: {loadError} — 로컬 데이터로 표시합니다.</div>
+        )}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-3">
           {apps.map(app => (
             <button
