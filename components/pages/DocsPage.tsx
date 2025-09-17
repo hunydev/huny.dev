@@ -162,7 +162,7 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
   if (isR2) {
     return (
       <div className="max-w-6xl mx-auto px-4 md:grid md:grid-cols-[1fr,240px] md:gap-8">
-        <div>
+        <div className="min-w-0">
           <header className="mb-4 flex items-center justify-between gap-3">
             <div>
               <h1 className="text-xl md:text-2xl font-semibold text-white truncate" title={r2Title || r2Path}>{r2Title || r2Path}</h1>
@@ -191,7 +191,7 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
           {r2Loading && <div className="text-sm text-gray-400 mb-2">Loading from R2…</div>}
           {r2Error && <div className="text-xs text-amber-300 mb-2">{r2Error}</div>}
           {showRaw ? (
-            <pre className="p-3 text-xs md:text-sm leading-relaxed bg-[#1e1e1e] border border-white/10 rounded overflow-auto whitespace-pre">
+            <pre className="p-3 text-xs md:text-sm leading-relaxed bg-[#1e1e1e] border border-white/10 rounded whitespace-pre max-w-full overflow-x-auto overflow-y-auto">
               {rawHtml}
             </pre>
           ) : (
@@ -247,7 +247,7 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 md:grid md:grid-cols-[1fr,240px] md:gap-8">
-      <div>
+      <div className="min-w-0">
         <header className="mb-4 flex items-center justify-between gap-3">
           <div>
             <h1 className="text-xl md:text-2xl font-semibold text-white truncate" title={doc.title}>{doc.title}</h1>
@@ -274,7 +274,7 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
           </div>
         </header>
         {showRaw ? (
-          <pre className="p-3 text-xs md:text-sm leading-relaxed bg-[#1e1e1e] border border-white/10 rounded overflow-auto whitespace-pre">
+          <pre className="p-3 text-xs md:text-sm leading-relaxed bg-[#1e1e1e] border border-white/10 rounded whitespace-pre max-w-full overflow-x-auto overflow-y-auto">
             {rawHtml || doc.contentHtml}
           </pre>
         ) : (
