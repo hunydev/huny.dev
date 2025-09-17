@@ -10,4 +10,6 @@ binding = "ASSETS"
 
 [vars]
 # Example for future server-side keys
-# GEMINI_API_KEY = ""
+PB_LOGIN_EMAIL=api@huny.dev
+NOTION_BOOKMARK_ID=8fd541f1-6b68-4358-aa40-8b472ecad670
+NOTION_API_VERSION=2025-09-03
