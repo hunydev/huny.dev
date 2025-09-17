@@ -39,6 +39,27 @@ function pickFirstFileUrl(files: any[]): string | undefined {
   return undefined;
 }
 
+function pickPageIconUrl(icon: any): string | undefined {
+  try {
+    if (!icon) return undefined;
+    if (icon?.type === 'file' && icon?.file?.url) return String(icon.file.url);
+    if (icon?.type === 'external' && icon?.external?.url) return String(icon.external.url);
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function pickPropertyImageUrl(field: any): string | undefined {
+  if (!field || typeof field !== 'object') return undefined;
+  // Files type
+  const viaFiles = pickFirstFileUrl(field?.files);
+  if (viaFiles) return viaFiles;
+  // URL type
+  if (typeof field?.url === 'string' && field.url) return String(field.url);
+  return undefined;
+}
+
 function mapNotionPageToBookmark(page: any): Bookmark | null {
   try {
     const props = page?.properties || {};
@@ -48,7 +69,10 @@ function mapNotionPageToBookmark(page: any): Bookmark | null {
     const tags: string[] = Array.isArray(props?.tags?.multi_select) ? props.tags.multi_select.map((t: any) => String(t?.name || '')).filter(Boolean) : [];
     const catNames: string[] = Array.isArray(props?.categoryId?.multi_select) ? props.categoryId.multi_select.map((t: any) => String(t?.name || '')).filter(Boolean) : [];
     const categoryId = catNames[0] || undefined; // first tag as categoryId
-    const thumbnail = pickFirstFileUrl(props?.thumbnail?.files);
+    const thumbnail =
+      pickPropertyImageUrl(props?.thumbnail) ||
+      pickPropertyImageUrl(props?.icon) ||
+      pickPageIconUrl(page?.icon);
 
     const createdAt = String(page?.created_time || '');
     const updatedAt = page?.last_edited_time ? String(page.last_edited_time) : undefined;
