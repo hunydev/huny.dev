@@ -63,6 +63,7 @@ export const DIGITAL_SHELF: DigitalShelfData = {
     { name: 'Hoverify', category: 'Browser DevTools', price: 89, currency: 'USD', note: 'License for 3 activations' },
     { name: 'BlogPro', category: 'Blog', price: 399, currency: 'USD', note: 'Turn Notion into Blog' },
     { name: 'SecureCRT 9', category: 'SSH', price: 130.9, currency: 'USD', note: 'w/1 Yr of Updates' },
+    { name: 'Copy To Notion', category: 'Utilities', price: 59, currency: 'USD', note: 'Lifetime deal pro' },
   ],
   freeTiers: [
     { name: 'Netlify', kind: 'Hosting', minPlan: '$9/mo' },
