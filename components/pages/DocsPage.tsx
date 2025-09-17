@@ -14,6 +14,8 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
   const [r2Title, setR2Title] = React.useState<string>('');
   const [r2Loading, setR2Loading] = React.useState<boolean>(false);
   const [r2Error, setR2Error] = React.useState<string>('');
+  const [showRaw, setShowRaw] = React.useState<boolean>(false);
+  const [rawHtml, setRawHtml] = React.useState<string>('');
 
   const processHtml = React.useCallback((raw: string) => {
     const wrap = document.createElement('div');
@@ -86,9 +88,11 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
       const { html, toc } = processHtml(doc.contentHtml);
       setProcessedHtml(html);
       setToc(toc);
+      setRawHtml(doc.contentHtml);
     } else {
       setProcessedHtml('');
       setToc([]);
+      setRawHtml('');
     }
   }, [doc, isR2, processHtml]);
 
@@ -114,11 +118,13 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
         setProcessedHtml(processed);
         setToc(localToc);
         setR2Title(title);
+        setRawHtml(body);
       } catch (e: any) {
         if (!alive) return;
         setR2Error(e?.message || String(e));
         setProcessedHtml('');
         setToc([]);
+        setRawHtml('');
       } finally {
         if (alive) setR2Loading(false);
       }
@@ -157,13 +163,40 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
     return (
       <div className="max-w-6xl mx-auto px-4 md:grid md:grid-cols-[1fr,240px] md:gap-8">
         <div>
-          <header className="mb-4">
-            <h1 className="text-xl md:text-2xl font-semibold text-white truncate" title={r2Title || r2Path}>{r2Title || r2Path}</h1>
-            <p className="text-xs text-gray-500">{r2Path}</p>
+          <header className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <h1 className="text-xl md:text-2xl font-semibold text-white truncate" title={r2Title || r2Path}>{r2Title || r2Path}</h1>
+              <p className="text-xs text-gray-500">{r2Path}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                className={`px-2.5 py-1.5 text-xs rounded border border-white/10 ${showRaw ? 'bg-white/10 text-white' : 'text-gray-300 hover:bg-white/10'}`}
+                onClick={() => setShowRaw(v => !v)}
+                aria-pressed={showRaw}
+                title={showRaw ? '처리된 보기로 전환' : '원문 HTML 보기'}
+              >
+                {showRaw ? '처리된 보기' : '원문 보기'}
+              </button>
+              {showRaw && (
+                <button
+                  className="px-2.5 py-1.5 text-xs rounded border border-white/10 text-gray-300 hover:bg-white/10"
+                  onClick={async () => { try { await navigator.clipboard.writeText(rawHtml); } catch {} }}
+                  title="원문 HTML 복사"
+                >
+                  복사
+                </button>
+              )}
+            </div>
           </header>
           {r2Loading && <div className="text-sm text-gray-400 mb-2">Loading from R2…</div>}
           {r2Error && <div className="text-xs text-amber-300 mb-2">{r2Error}</div>}
-          <article ref={containerRef} className="docs-content" dangerouslySetInnerHTML={{ __html: processedHtml }} />
+          {showRaw ? (
+            <pre className="p-3 text-xs md:text-sm leading-relaxed bg-[#1e1e1e] border border-white/10 rounded overflow-auto whitespace-pre">
+              {rawHtml}
+            </pre>
+          ) : (
+            <article ref={containerRef} className="docs-content" dangerouslySetInnerHTML={{ __html: processedHtml }} />
+          )}
         </div>
         <aside className="hidden md:block sticky top-16 self-start max-h-[calc(100vh-6rem)] overflow-auto">
           <div className="text-xs uppercase text-gray-400 tracking-wider mb-2">On this page</div>
@@ -215,11 +248,38 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
   return (
     <div className="max-w-6xl mx-auto px-4 md:grid md:grid-cols-[1fr,240px] md:gap-8">
       <div>
-        <header className="mb-4">
-          <h1 className="text-xl md:text-2xl font-semibold text-white truncate" title={doc.title}>{doc.title}</h1>
-          <p className="text-xs text-gray-500">{doc.slug}.html</p>
+        <header className="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <h1 className="text-xl md:text-2xl font-semibold text-white truncate" title={doc.title}>{doc.title}</h1>
+            <p className="text-xs text-gray-500">{doc.slug}.html</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              className={`px-2.5 py-1.5 text-xs rounded border border-white/10 ${showRaw ? 'bg-white/10 text-white' : 'text-gray-300 hover:bg-white/10'}`}
+              onClick={() => setShowRaw(v => !v)}
+              aria-pressed={showRaw}
+              title={showRaw ? '처리된 보기로 전환' : '원문 HTML 보기'}
+            >
+              {showRaw ? '처리된 보기' : '원문 보기'}
+            </button>
+            {showRaw && (
+              <button
+                className="px-2.5 py-1.5 text-xs rounded border border-white/10 text-gray-300 hover:bg-white/10"
+                onClick={async () => { try { await navigator.clipboard.writeText(rawHtml); } catch {} }}
+                title="원문 HTML 복사"
+              >
+                복사
+              </button>
+            )}
+          </div>
         </header>
-        <article ref={containerRef} className="docs-content" dangerouslySetInnerHTML={{ __html: processedHtml || doc.contentHtml }} />
+        {showRaw ? (
+          <pre className="p-3 text-xs md:text-sm leading-relaxed bg-[#1e1e1e] border border-white/10 rounded overflow-auto whitespace-pre">
+            {rawHtml || doc.contentHtml}
+          </pre>
+        ) : (
+          <article ref={containerRef} className="docs-content" dangerouslySetInnerHTML={{ __html: processedHtml || doc.contentHtml }} />
+        )}
       </div>
       <aside className="hidden md:block sticky top-16 self-start max-h-[calc(100vh-6rem)] overflow-auto">
         <div className="text-xs uppercase text-gray-400 tracking-wider mb-2">On this page</div>
