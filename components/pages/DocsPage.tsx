@@ -1,6 +1,8 @@
 import React from 'react';
 import { PageProps } from '../../types';
 import { DOCS, getDocBySlug } from './docsData';
+import hljs from 'highlight.js';
+import 'highlight.js/styles/github-dark.css';
 
 const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
   const slug = routeParams?.slug as string | undefined;
@@ -16,6 +18,24 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
   const [r2Error, setR2Error] = React.useState<string>('');
   const [showRaw, setShowRaw] = React.useState<boolean>(false);
   const [rawHtml, setRawHtml] = React.useState<string>('');
+  const [rawHighlighted, setRawHighlighted] = React.useState<string>('');
+
+  const stripScripts = React.useCallback((html: string): string => {
+    try {
+      return html.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
+    } catch {
+      return html;
+    }
+  }, []);
+
+  const highlightRaw = React.useCallback((html: string): string => {
+    try {
+      // Use xml for HTML highlighting (hljs treats HTML as XML)
+      return hljs.highlight(html, { language: 'xml', ignoreIllegals: true }).value;
+    } catch {
+      return '';
+    }
+  }, []);
 
   const processHtml = React.useCallback((raw: string) => {
     const wrap = document.createElement('div');
@@ -88,13 +108,16 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
       const { html, toc } = processHtml(doc.contentHtml);
       setProcessedHtml(html);
       setToc(toc);
-      setRawHtml(doc.contentHtml);
+      const sanitized = stripScripts(doc.contentHtml);
+      setRawHtml(sanitized);
+      setRawHighlighted(highlightRaw(sanitized));
     } else {
       setProcessedHtml('');
       setToc([]);
       setRawHtml('');
+      setRawHighlighted('');
     }
-  }, [doc, isR2, processHtml]);
+  }, [doc, isR2, processHtml, stripScripts, highlightRaw]);
 
   // Load from R2 when slug starts with r2/
   React.useEffect(() => {
@@ -118,19 +141,22 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
         setProcessedHtml(processed);
         setToc(localToc);
         setR2Title(title);
-        setRawHtml(body);
+        const sanitized = stripScripts(body);
+        setRawHtml(sanitized);
+        setRawHighlighted(highlightRaw(sanitized));
       } catch (e: any) {
         if (!alive) return;
         setR2Error(e?.message || String(e));
         setProcessedHtml('');
         setToc([]);
         setRawHtml('');
+        setRawHighlighted('');
       } finally {
         if (alive) setR2Loading(false);
       }
     })();
     return () => { alive = false; };
-  }, [isR2, r2Path, processHtml]);
+  }, [isR2, r2Path, processHtml, stripScripts, highlightRaw]);
 
   React.useEffect(() => {
     const el = containerRef.current;
@@ -192,7 +218,7 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
           {r2Error && <div className="text-xs text-amber-300 mb-2">{r2Error}</div>}
           {showRaw ? (
             <pre className="p-3 text-xs md:text-sm leading-relaxed bg-[#1e1e1e] border border-white/10 rounded whitespace-pre max-w-full overflow-x-auto overflow-y-auto">
-              {rawHtml}
+              <code className="hljs language-html" dangerouslySetInnerHTML={{ __html: rawHighlighted }} />
             </pre>
           ) : (
             <article ref={containerRef} className="docs-content" dangerouslySetInnerHTML={{ __html: processedHtml }} />
@@ -275,7 +301,7 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
         </header>
         {showRaw ? (
           <pre className="p-3 text-xs md:text-sm leading-relaxed bg-[#1e1e1e] border border-white/10 rounded whitespace-pre max-w-full overflow-x-auto overflow-y-auto">
-            {rawHtml || doc.contentHtml}
+            <code className="hljs language-html" dangerouslySetInnerHTML={{ __html: rawHighlighted || highlightRaw(rawHtml || doc.contentHtml) }} />
           </pre>
         ) : (
           <article ref={containerRef} className="docs-content" dangerouslySetInnerHTML={{ __html: processedHtml || doc.contentHtml }} />
