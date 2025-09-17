@@ -133,18 +133,16 @@ const DocsView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFi
     }
     const filePath = path ? `${path}/${node.name}` : node.name;
     return (
-      <a
+      <button
         key={`doc:${filePath}`}
-        href={node.url}
-        target="_blank"
-        rel="noopener noreferrer"
+        onClick={() => onOpenFile(`docs:r2/${node.path}`)}
         className={`flex items-center text-left w-full rounded px-2 py-1 hover:bg-white/10`}
         style={{ paddingLeft: depth * 12 + 12 }}
         title={node.path}
       >
         <FileIcon />
         <span className="text-sm truncate" title={node.name}>{node.name}</span>
-      </a>
+      </button>
     );
   };
 

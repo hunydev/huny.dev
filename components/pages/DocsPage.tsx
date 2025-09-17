@@ -8,6 +8,12 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [processedHtml, setProcessedHtml] = React.useState<string>('');
   const [toc, setToc] = React.useState<Array<{ id: string; text: string; level: number }>>([]);
+  const isR2 = !!slug && slug.startsWith('r2/');
+  const r2Path = isR2 ? slug.slice(3) : '';
+  const R2_PUBLIC_BASE = 'https://r2.huny.dev';
+  const [r2Title, setR2Title] = React.useState<string>('');
+  const [r2Loading, setR2Loading] = React.useState<boolean>(false);
+  const [r2Error, setR2Error] = React.useState<string>('');
 
   const processHtml = React.useCallback((raw: string) => {
     const wrap = document.createElement('div');
@@ -76,7 +82,7 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
   }, []);
 
   React.useEffect(() => {
-    if (doc) {
+    if (doc && !isR2) {
       const { html, toc } = processHtml(doc.contentHtml);
       setProcessedHtml(html);
       setToc(toc);
@@ -84,7 +90,41 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
       setProcessedHtml('');
       setToc([]);
     }
-  }, [doc, processHtml]);
+  }, [doc, isR2, processHtml]);
+
+  // Load from R2 when slug starts with r2/
+  React.useEffect(() => {
+    if (!isR2 || !r2Path) return;
+    let alive = true;
+    (async () => {
+      setR2Loading(true);
+      setR2Error('');
+      try {
+        const encoded = r2Path.split('/').map(encodeURIComponent).join('/');
+        const url = `${R2_PUBLIC_BASE}/docs/${encoded}`;
+        const res = await fetch(url);
+        const html = await res.text();
+        if (!res.ok) throw new Error(`Failed to load R2 doc (${res.status})`);
+        const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+        const title = (titleMatch ? titleMatch[1].trim() : '') || (r2Path.split('/').pop() || 'docs').replace(/\.?html$/i, '');
+        const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+        const body = bodyMatch ? bodyMatch[1] : html;
+        const { html: processed, toc: localToc } = processHtml(body);
+        if (!alive) return;
+        setProcessedHtml(processed);
+        setToc(localToc);
+        setR2Title(title);
+      } catch (e: any) {
+        if (!alive) return;
+        setR2Error(e?.message || String(e));
+        setProcessedHtml('');
+        setToc([]);
+      } finally {
+        if (alive) setR2Loading(false);
+      }
+    })();
+    return () => { alive = false; };
+  }, [isR2, r2Path, processHtml]);
 
   React.useEffect(() => {
     const el = containerRef.current;
@@ -112,6 +152,38 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
     el.addEventListener('click', onClick);
     return () => { el.removeEventListener('click', onClick); };
   }, [processedHtml]);
+
+  if (isR2) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 md:grid md:grid-cols-[1fr,240px] md:gap-8">
+        <div>
+          <header className="mb-4">
+            <h1 className="text-xl md:text-2xl font-semibold text-white truncate" title={r2Title || r2Path}>{r2Title || r2Path}</h1>
+            <p className="text-xs text-gray-500">{r2Path}</p>
+          </header>
+          {r2Loading && <div className="text-sm text-gray-400 mb-2">Loading from R2…</div>}
+          {r2Error && <div className="text-xs text-amber-300 mb-2">{r2Error}</div>}
+          <article ref={containerRef} className="docs-content" dangerouslySetInnerHTML={{ __html: processedHtml }} />
+        </div>
+        <aside className="hidden md:block sticky top-16 self-start max-h-[calc(100vh-6rem)] overflow-auto">
+          <div className="text-xs uppercase text-gray-400 tracking-wider mb-2">On this page</div>
+          {toc.length === 0 ? (
+            <div className="text-sm text-gray-500">No headings</div>
+          ) : (
+            <ul className="text-sm space-y-1">
+              {toc.map(item => (
+                <li key={item.id} className={item.level === 3 ? 'ml-3' : ''}>
+                  <a href={`#${item.id}`} className="text-gray-300 hover:text-white">
+                    {item.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </aside>
+      </div>
+    );
+  }
 
   if (!doc) {
     return (
