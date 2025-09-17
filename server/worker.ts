@@ -6,6 +6,7 @@ import { render } from '../dist/server/entry-server.js';
 
 export interface Env {
   ASSETS: Fetcher;
+  R2: R2Bucket;
   GEMINI_API_KEY?: string;
   OPENAI_API_KEY?: string;
   PB_LOGIN_EMAIL?: string;
@@ -99,6 +100,36 @@ export default {
           });
         }
       }
+      // R2 Docs tree listing
+      if (url.pathname === '/api/docs-tree') {
+        if (request.method !== 'GET') return new Response('Method Not Allowed', { status: 405 });
+        try {
+          const keys: string[] = [];
+          let cursor: string | undefined = undefined;
+          for (let safety = 0; safety < 100; safety++) {
+            const list = await env.R2.list({ prefix: 'docs/', cursor, limit: 1000 });
+            for (const obj of list.objects || []) {
+              const k = obj.key || '';
+              // only include HTML files
+              if (k.toLowerCase().endsWith('.html')) keys.push(k);
+            }
+            if (list.truncated && list.cursor) {
+              cursor = list.cursor;
+            } else {
+              break;
+            }
+          }
+          return new Response(JSON.stringify({ keys }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'R2 list error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
+
       // Notion Bookmarks proxy: secure server-side call to Notion Data Source Query API
       if (url.pathname === '/api/bookmarks') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });

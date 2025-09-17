@@ -8,6 +8,10 @@ directory = "dist/client"
 # By default this binds to `env.ASSETS` in the Worker
 binding = "ASSETS"
 
+[[r2_buckets]]
+binding = "R2"         # accessible as env.R2 in the worker
+bucket_name = "hunydev" # your R2 bucket name
+
 [vars]
 # Example for future server-side keys
 PB_LOGIN_EMAIL = "api@huny.dev"

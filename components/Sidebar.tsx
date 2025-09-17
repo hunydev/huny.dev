@@ -4,7 +4,7 @@ import { FileIcon, ImageIcon, VideoIcon } from '../constants';
 import { BOOKMARK_CATEGORIES, BOOKMARKS, type Bookmark } from './pages/bookmarksData';
 import { NOTE_GROUPS, getNoteCountByGroup } from './pages/notesData';
 import { CATEGORIES } from './pages/appsData';
-import { DOCS } from './pages/docsData';
+// DocsView now lists from R2 instead of local DOCS. The DocsPage can still use local data.
 import logoImg from '../logo.png';
 import logo128 from '../logo_128x128.png';
 import welcomeIcon from '../icon_32x32.png';
@@ -17,10 +17,23 @@ type SidebarProps = {
 };
 
 const DocsView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
-  type Node = { type: 'folder'; name: string; children: Node[]; path: string } | { type: 'doc'; name: string; title: string; slug: string; path: string };
+  // Node definition for R2-based tree
+  type Node = { type: 'folder'; name: string; children: Node[]; path: string } | { type: 'doc'; name: string; path: string; url: string };
 
-  // Build a tree from DOCS path (relative to extra/docs)
-  const buildTree = React.useCallback(() => {
+  const R2_PUBLIC_BASE = 'https://r2.huny.dev';
+
+  const [tree, setTree] = React.useState<Node>({ type: 'folder', name: '', children: [], path: '' } as any);
+  const [expanded, setExpanded] = React.useState<Record<string, boolean>>({});
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+
+  const toggle = (path: string) => setExpanded(prev => ({ ...prev, [path]: !prev[path] }));
+  const isOpen = (path: string, depth: number) => {
+    if (path === '' && depth === 0) return true; // root open
+    return !!expanded[path];
+  };
+
+  const buildTreeFromKeys = React.useCallback((keys: string[]) => {
     const root: Node = { type: 'folder', name: '', children: [], path: '' } as any;
     const ensureFolder = (parent: Node, name: string, path: string): Node => {
       if (parent.type !== 'folder') return parent;
@@ -30,29 +43,31 @@ const DocsView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFi
       parent.children.push(node);
       return node;
     };
-    DOCS.forEach(d => {
-      const idx = d.path.lastIndexOf('extra/docs/');
-      const rel = idx >= 0 ? d.path.substring(idx + 'extra/docs/'.length) : d.path;
+    for (const fullKey of keys) {
+      const rel = fullKey.startsWith('docs/') ? fullKey.substring('docs/'.length) : fullKey;
       const parts = rel.split('/');
-      const file = parts.pop() || d.slug + '.html';
+      const file = parts.pop() || '';
       let cursor = root;
       let acc = '';
       for (const dir of parts) {
         acc = acc ? `${acc}/${dir}` : dir;
         cursor = ensureFolder(cursor, dir, acc);
       }
-      if ((cursor as any).type === 'folder') {
-        (cursor as any).children.push({ type: 'doc', name: file, title: d.title, slug: d.slug, path: rel });
+      if (cursor && (cursor as any).type === 'folder' && file) {
+        const name = file.replace(/\.html$/i, '');
+        const path = rel; // e.g., guides/intro.html
+        const encodedPath = rel.split('/').map(encodeURIComponent).join('/');
+        const url = `${R2_PUBLIC_BASE}/docs/${encodedPath}`;
+        (cursor as any).children.push({ type: 'doc', name, path, url });
       }
-    });
-
+    }
     const sortTree = (node: Node) => {
       if (node.type === 'folder') {
         node.children.sort((a, b) => {
           if (a.type !== b.type) return a.type === 'folder' ? -1 : 1;
-          const an = a.type === 'folder' ? (a as any).name : (a as any).title;
-          const bn = b.type === 'folder' ? (b as any).name : (b as any).title;
-          return an.localeCompare(bn);
+          const an = a.type === 'folder' ? (a as any).name : (a as any).name;
+          const bn = b.type === 'folder' ? (b as any).name : (b as any).name;
+          return String(an).localeCompare(String(bn));
         });
         node.children.forEach(sortTree);
       }
@@ -61,14 +76,29 @@ const DocsView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFi
     return root;
   }, []);
 
-  const [expanded, setExpanded] = React.useState<Record<string, boolean>>({});
-  const toggle = (path: string) => setExpanded(prev => ({ ...prev, [path]: !prev[path] }));
-  const isOpen = (path: string, depth: number) => {
-    if (path === '' && depth === 0) return true; // root open
-    return !!expanded[path];
-  };
-
-  const tree = React.useMemo(buildTree, [buildTree]);
+  React.useEffect(() => {
+    let alive = true;
+    (async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const res = await fetch('/api/docs-tree');
+        const js = (await res.json()) as { keys?: string[]; error?: string };
+        if (!res.ok) throw new Error(js?.error || `Failed: ${res.status}`);
+        const keys: string[] = Array.isArray(js?.keys) ? js.keys as string[] : [];
+        const t = buildTreeFromKeys(keys);
+        if (!alive) return;
+        setTree(t);
+      } catch (e: any) {
+        if (!alive) return;
+        setError(e?.message || String(e));
+        setTree({ type: 'folder', name: '', children: [], path: '' } as any);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => { alive = false; };
+  }, [buildTreeFromKeys]);
 
   const renderNode = (node: Node, path: string, depth = 0): React.ReactNode => {
     if (node.type === 'folder') {
@@ -101,32 +131,31 @@ const DocsView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFi
         </div>
       );
     }
-    // doc
     const filePath = path ? `${path}/${node.name}` : node.name;
     return (
-      <button
+      <a
         key={`doc:${filePath}`}
-        onClick={() => onOpenFile(`docs:${node.slug}`)}
+        href={node.url}
+        target="_blank"
+        rel="noopener noreferrer"
         className={`flex items-center text-left w-full rounded px-2 py-1 hover:bg-white/10`}
         style={{ paddingLeft: depth * 12 + 12 }}
-        title={node.name}
+        title={node.path}
       >
         <FileIcon />
-        <span className="text-sm truncate" title={node.title}>{node.title}</span>
-      </button>
+        <span className="text-sm truncate" title={node.name}>{node.name}</span>
+      </a>
     );
   };
 
   return (
     <div className="p-2">
       <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Docs</h2>
-      {DOCS.length === 0 ? (
-        <p className="text-sm text-gray-500">No docs yet. Put HTML files in <code className="bg-white/10 px-1 py-0.5 rounded">extra/docs/</code>.</p>
-      ) : (
-        <div className="flex flex-col gap-1">
-          {renderNode(tree, '')}
-        </div>
-      )}
+      {loading && <p className="text-sm text-gray-500">Loading docs from R2…</p>}
+      {error && <p className="text-xs text-amber-300 mb-2">{error}</p>}
+      <div className="flex flex-col gap-1">
+        {renderNode(tree, '')}
+      </div>
     </div>
   );
 };
