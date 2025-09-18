@@ -163,26 +163,47 @@ const ActivityBar: React.FC<ActivityBarProps> = ({ activeView, setActiveView, is
           </div>
 
           <div ref={bottomGroupRef} className={`flex flex-col items-center gap-2 pt-2 ${hideBottom ? 'hidden' : ''}`}>
-            {bottomItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  if (isDragging) return;
-                  const link = EXTERNAL_LINKS[item.id as keyof typeof EXTERNAL_LINKS];
-                  if (!link) return;
-                  const url = link.url;
-                  if (url.startsWith('mailto:')) {
-                    window.location.href = url;
-                  } else {
-                    window.open(url, '_blank');
-                  }
-                }}
-                className={`p-2 rounded-md transition-colors duration-200 relative text-gray-400 hover:text-white hover:bg-white/10`}
-                title={item.title}
-              >
-                {item.icon}
-              </button>
-            ))}
+            {bottomItems.map(item => {
+              const link = EXTERNAL_LINKS[item.id as keyof typeof EXTERNAL_LINKS];
+              if (!link) return null;
+              const asAnchor = item.id === ViewId.Blog || item.id === ViewId.Apps || item.id === ViewId.Sites;
+              if (asAnchor) {
+                const href = link.url;
+                const isMail = href.startsWith('mailto:');
+                return (
+                  <a
+                    key={item.id}
+                    href={href}
+                    target={isMail ? undefined : '_blank'}
+                    rel={isMail ? undefined : 'noopener'}
+                    className={`p-2 rounded-md transition-colors duration-200 relative text-gray-400 hover:text-white hover:bg-white/10`}
+                    title={item.title}
+                  >
+                    {item.icon}
+                    <span className="sr-only">{link.title}</span>
+                  </a>
+                );
+              }
+              // Fallback: keep button behavior for the rest (GitHub, Discord, X, Email)
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    if (isDragging) return;
+                    const href = link.url;
+                    if (href.startsWith('mailto:')) {
+                      window.location.href = href;
+                    } else {
+                      window.open(href, '_blank');
+                    }
+                  }}
+                  className={`p-2 rounded-md transition-colors duration-200 relative text-gray-400 hover:text-white hover:bg-white/10`}
+                  title={item.title}
+                >
+                  {item.icon}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
