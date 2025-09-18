@@ -199,9 +199,9 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
                 className={`px-2.5 py-1.5 text-xs rounded border border-white/10 ${showRaw ? 'bg-white/10 text-white' : 'text-gray-300 hover:bg-white/10'}`}
                 onClick={() => setShowRaw(v => !v)}
                 aria-pressed={showRaw}
-                title={showRaw ? '처리된 보기로 전환' : '원문 HTML 보기'}
+                title={showRaw ? '결과 보기로 전환' : '원문 HTML 보기'}
               >
-                {showRaw ? '처리된 보기' : '원문 보기'}
+                {showRaw ? '결과 보기' : '원문 보기'}
               </button>
               {showRaw && (
                 <button
@@ -284,9 +284,9 @@ const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
               className={`px-2.5 py-1.5 text-xs rounded border border-white/10 ${showRaw ? 'bg-white/10 text-white' : 'text-gray-300 hover:bg-white/10'}`}
               onClick={() => setShowRaw(v => !v)}
               aria-pressed={showRaw}
-              title={showRaw ? '처리된 보기로 전환' : '원문 HTML 보기'}
+              title={showRaw ? '결과 보기로 전환' : '원문 HTML 보기'}
             >
-              {showRaw ? '처리된 보기' : '원문 보기'}
+              {showRaw ? '결과 보기' : '원문 보기'}
             </button>
             {showRaw && (
               <button
