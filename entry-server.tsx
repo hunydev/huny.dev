@@ -1,6 +1,7 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import App from './App';
+import { getMetaFromUrl } from './seo';
 
 export type ViteManifest = Record<string, {
   file: string;
@@ -18,53 +19,8 @@ export async function render(url: string, manifest?: ViteManifest) {
     </React.StrictMode>
   );
 
-  // Parse URL for dynamic head
-  let origin = 'https://huny.dev';
-  let pathname = '/';
-  try {
-    const u = new URL(url);
-    origin = u.origin || origin;
-    pathname = u.pathname || '/';
-  } catch {
-    try {
-      const u2 = new URL(origin + (url.startsWith('/') ? url : `/${url}`));
-      origin = u2.origin || origin;
-      pathname = u2.pathname || '/';
-    } catch {}
-  }
-  const canonical = `${origin}${pathname}`;
-
-  // Dynamic head meta by path
-  const meta = (() => {
-    const base = {
-      title: 'HunyDev · Works & Digital Playground',
-      description:
-        'More than a portfolio — a personal playground of apps, works, docs, and notes. Built with TypeScript, React, and Cloudflare Workers.',
-      image: `${origin}/og-image.png`,
-    };
-    if (pathname === '/bird-generator') {
-      return {
-        title: 'Bird Generator · HunyDev',
-        description: 'Generate bird images with OpenAI. Play with prompts and edits.',
-        image: `${origin}/og-image.png`,
-      };
-    }
-    if (pathname === '/multi-voice-reader') {
-      return {
-        title: 'Multi‑Voice Reader · HunyDev',
-        description: 'Turn text into multi‑speaker TTS with Gemini. Narration and dialogues.',
-        image: `${origin}/og-image.png`,
-      };
-    }
-    if (pathname === '/split-speaker') {
-      return {
-        title: 'Split Speaker · HunyDev',
-        description: 'Experiment with speaker‑segmented TTS pipelines.',
-        image: `${origin}/og-image.png`,
-      };
-    }
-    return base;
-  })();
+  // Resolve meta info from URL using shared SEO helper
+  const meta = getMetaFromUrl(url);
 
   // Resolve entry chunk from manifest
   let entry = manifest?.['entry-client.tsx'];
@@ -86,21 +42,23 @@ export async function render(url: string, manifest?: ViteManifest) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>${meta.title}</title>
     <meta name="description" content="${meta.description}" />
-    <link rel="canonical" href="${canonical}" />
+    <link rel="canonical" href="${meta.canonical}" />
     <meta name="robots" content="index, follow" />
     <meta name="googlebot" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="${canonical}" />
+    <meta property="og:url" content="${meta.canonical}" />
     <meta property="og:site_name" content="HunyDev" />
     <meta property="og:locale" content="ko_KR" />
     <meta property="og:title" content="${meta.title}" />
     <meta property="og:description" content="${meta.description}" />
     <meta property="og:image" content="${meta.image}" />
+    <meta property="og:image:alt" content="${meta.imageAlt}" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@janghun2722" />
     <meta name="twitter:title" content="${meta.title}" />
     <meta name="twitter:description" content="${meta.description}" />
     <meta name="twitter:image" content="${meta.image}" />
+    <meta name="twitter:image:alt" content="${meta.imageAlt}" />
     <script src="https://cdn.tailwindcss.com"></script>
     ${cssLinks}
     <script type="application/ld+json">${JSON.stringify({

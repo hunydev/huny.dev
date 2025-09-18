@@ -244,6 +244,19 @@ const App: React.FC = () => {
     } catch {}
   }, [openTabs, activeTabId]);
 
+  // Sync document.title with active tab for better UX (SEO handled by SSR)
+  useEffect(() => {
+    try {
+      const base = 'HunyDev';
+      const active = openTabs.find(t => t.id === activeTabId);
+      const tabTitle = (active?.title || '').trim();
+      const finalTitle = tabTitle ? `${base} — ${tabTitle}` : 'HunyDev · Works & Digital Playground';
+      if (typeof document !== 'undefined') {
+        document.title = finalTitle;
+      }
+    } catch {}
+  }, [activeTabId, openTabs]);
+
   const handleSidebarResizeStart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setIsResizing(true);

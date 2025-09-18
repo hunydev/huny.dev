@@ -60,44 +60,7 @@
 }
 </script>
 <link rel="stylesheet" href="/index.css">
-
-    <!-- JSON-LD: Person -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "Person",
-        "name": "Huny",
-        "url": "https://huny.dev/",
-        "email": "mailto:jang@huny.dev",
-        "sameAs": [
-          "https://github.com/hunydev",
-          "https://x.com/janghun2722",
-          "https://discord.gg/2NWa39bU"
-        ]
-      }
-    </script>
-    <!-- JSON-LD: WebSite -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "HunyDev",
-        "url": "https://huny.dev/"
-      }
-    </script>
-    <!-- JSON-LD: SiteNavigationElement (primary sitelinks) -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "SiteNavigationElement",
-        "name": ["Blog", "Apps", "Sites"],
-        "url": [
-          "https://blog.huny.dev",
-          "https://apps.huny.dev",
-          "https://sites.huny.dev"
-        ]
-      }
-    </script>
+    <!-- JSON-LD is injected by SSR (entry-server.tsx) -->
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
