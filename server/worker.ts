@@ -758,6 +758,33 @@ export default {
       return new Response('Not Found', { status: 404 });
     }
 
+    // Special route: dynamic sitemap.xml with automated lastmod
+    if (url.pathname === '/sitemap.xml') {
+      try {
+        const lastmod = new Date().toISOString().slice(0, 10);
+        const xml = [
+          '<?xml version="1.0" encoding="UTF-8"?>',
+          '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+          '  <url>',
+          '    <loc>https://huny.dev/</loc>',
+          `    <lastmod>${lastmod}</lastmod>`,
+          '    <changefreq>weekly</changefreq>',
+          '    <priority>1.0</priority>',
+          '  </url>',
+          '</urlset>',
+          ''
+        ].join('\n');
+        return new Response(xml, {
+          headers: {
+            'content-type': 'application/xml; charset=UTF-8',
+            'cache-control': 'public, max-age=3600',
+          },
+        });
+      } catch (e) {
+        return new Response('Internal error', { status: 500 });
+      }
+    }
+
     // 1) Try serving static assets first (only for requests with extensions or common static paths)
     const hasExt = /\.[a-zA-Z0-9]{1,6}$/.test(url.pathname);
     if (hasExt || url.pathname.startsWith('/assets') || url.pathname.startsWith('/static')) {
@@ -788,7 +815,7 @@ export default {
             break;
           }
         }
-        const html = await render(url.pathname, manifestData);
+        const html = await render(request.url, manifestData);
         return new Response(html, {
           headers: {
             'content-type': 'text/html; charset=UTF-8',
