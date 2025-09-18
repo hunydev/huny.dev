@@ -1,0 +1,314 @@
+import React from 'react';
+import type { PageProps } from '../../types';
+
+// Types
+export type TaskNode = {
+  id: string;
+  title: string;
+  checked: boolean;
+  children: TaskNode[];
+};
+
+const uid = () => Math.random().toString(36).slice(2, 9);
+
+const ToDoGeneratorPage: React.FC<PageProps> = () => {
+  const [prompt, setPrompt] = React.useState('');
+  const [generating, setGenerating] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const [root, setRoot] = React.useState<TaskNode>({ id: 'root', title: 'root', checked: false, children: [] });
+  const [copied, setCopied] = React.useState<'md' | 'app' | ''>('');
+
+  const setTasks = (tasks: TaskNode[]) => setRoot(prev => ({ ...prev, children: tasks }));
+
+  // Tree helpers
+  const visit = (node: TaskNode, fn: (n: TaskNode, parent?: TaskNode) => void, parent?: TaskNode) => {
+    fn(node, parent);
+    node.children.forEach(ch => visit(ch, fn, node));
+  };
+
+  const clone = (node: TaskNode): TaskNode => ({ ...node, children: node.children.map(clone) });
+
+  const recalc = (node: TaskNode) => {
+    node.children.forEach(recalc);
+    if (node.children.length > 0) {
+      node.checked = node.children.every(c => c.checked);
+    }
+  };
+
+  const toggleNode = (id: string, checked?: boolean) => {
+    setRoot(curr => {
+      const next = clone(curr);
+      const byId = new Map<string, TaskNode>();
+      visit(next, n => byId.set(n.id, n));
+      const n = byId.get(id);
+      if (!n) return curr;
+      const newVal = typeof checked === 'boolean' ? checked : !n.checked;
+      // 1) Toggle subtree to newVal
+      const toggleSubtree = (x: TaskNode, val: boolean) => {
+        x.checked = val;
+        x.children.forEach(c => toggleSubtree(c, val));
+      };
+      toggleSubtree(n, newVal);
+      // 2) Bubble up: parent checked = all children checked
+      const parents = new Map<string, string | null>();
+      const mapParent = (node: TaskNode, parent?: TaskNode) => {
+        parents.set(node.id, parent ? parent.id : null);
+        node.children.forEach(ch => mapParent(ch, node));
+      };
+      mapParent(next);
+      let p = parents.get(id);
+      while (p) {
+        const pn = byId.get(p)!;
+        pn.checked = pn.children.length > 0 && pn.children.every(c => c.checked);
+        p = parents.get(p) || null;
+      }
+      return next;
+    });
+  };
+
+  const editNodeTitle = (id: string, title: string) => {
+    setRoot(curr => {
+      const next = clone(curr);
+      visit(next, n => { if (n.id === id) n.title = title; });
+      return next;
+    });
+  };
+
+  const deleteNode = (id: string) => {
+    if (id === 'root') return;
+    setRoot(curr => {
+      const next = clone(curr);
+      const removeFrom = (node: TaskNode): boolean => {
+        const before = node.children.length;
+        node.children = node.children.filter(c => c.id !== id);
+        if (before !== node.children.length) return true;
+        node.children.forEach(removeFrom);
+        return false;
+      };
+      removeFrom(next);
+      recalc(next);
+      return next;
+    });
+  };
+
+  const addSiblingRoot = () => {
+    setTasks([
+      ...root.children,
+      { id: uid(), title: '새 작업', checked: false, children: [] },
+    ]);
+  };
+
+  const addChild = (parentId: string) => {
+    setRoot(curr => {
+      const next = clone(curr);
+      visit(next, n => {
+        if (n.id === parentId) {
+          n.children.push({ id: uid(), title: '하위 작업', checked: false, children: [] });
+        }
+      });
+      recalc(next);
+      return next;
+    });
+  };
+
+  // Copy helpers
+  const toMarkdown = React.useCallback(() => {
+    const lines: string[] = [];
+    const walk = (nodes: TaskNode[], depth = 0) => {
+      for (const n of nodes) {
+        const box = n.checked ? '[X]' : '[ ]';
+        const indent = '  '.repeat(depth);
+        lines.push(`${indent}- ${box} ${n.title}`);
+        if (n.children?.length) walk(n.children, depth + 1);
+      }
+    };
+    walk(root.children, 0);
+    return lines.join('\n');
+  }, [root.children]);
+
+  const toChecklistPlain = React.useCallback(() => {
+    // For Notion/MS Todo/OneNote-like apps: tab-indented Markdown style is widely recognized.
+    // Use same format for broad compatibility.
+    return toMarkdown();
+  }, [toMarkdown]);
+
+  const copyText = async (kind: 'md' | 'app') => {
+    const text = kind === 'md' ? toMarkdown() : toChecklistPlain();
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(kind);
+      setTimeout(() => setCopied(''), 1200);
+    } catch {}
+  };
+
+  // Fetch from server
+  const generate = async () => {
+    if (!prompt.trim()) return;
+    setGenerating(true);
+    setError('');
+    try {
+      const res = await fetch('/api/todo-generator', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ prompt, max_items: 30 }),
+      });
+      const text = await res.text();
+      if (!res.ok) {
+        throw new Error(text || `Failed: ${res.status}`);
+      }
+      let js: any = {};
+      try { js = text ? JSON.parse(text) : {}; } catch {}
+      const items: Array<any> = Array.isArray(js?.tasks) ? js.tasks : [];
+      const toTree = (arr: any[]): TaskNode[] => (arr || []).map((t: any) => ({
+        id: uid(),
+        title: String(t?.title ?? ''),
+        checked: false,
+        children: Array.isArray(t?.children) ? toTree(t.children) : [],
+      }));
+      setTasks(toTree(items));
+    } catch (e: any) {
+      setError(e?.message || String(e));
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  // Editable item component
+  const Item: React.FC<{ node: TaskNode; depth: number }> = ({ node, depth }) => {
+    const [isEditing, setIsEditing] = React.useState(false);
+    const [temp, setTemp] = React.useState(node.title);
+
+    React.useEffect(() => setTemp(node.title), [node.title]);
+
+    return (
+      <div className="pl-2">
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            className="accent-blue-500"
+            checked={node.checked}
+            onChange={(e) => toggleNode(node.id, e.target.checked)}
+            aria-label={`${node.title} ${node.checked ? '완료됨' : '미완료'}`}
+          />
+          {isEditing ? (
+            <input
+              value={temp}
+              onChange={(e) => setTemp(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') { editNodeTitle(node.id, temp); setIsEditing(false); }
+                if (e.key === 'Escape') { setTemp(node.title); setIsEditing(false); }
+              }}
+              className="px-2 py-1 text-sm rounded bg-[#1e1e1e] border border-white/10 text-gray-200 w-[min(560px,80vw)]"
+              autoFocus
+            />
+          ) : (
+            <span className={`text-sm ${node.checked ? 'line-through text-gray-500' : 'text-gray-200'}`}>{node.title}</span>
+          )}
+
+          <div className="ml-auto flex items-center gap-1">
+            {depth < 1 && (
+              <button
+                className="px-2 py-0.5 text-xs rounded border border-white/10 text-gray-300 hover:bg-white/10"
+                onClick={() => addChild(node.id)}
+                title="하위 작업 추가"
+              >하위</button>
+            )}
+            {isEditing ? (
+              <>
+                <button
+                  className="px-2 py-0.5 text-xs rounded border border-white/10 text-gray-300 hover:bg-white/10"
+                  onClick={() => { editNodeTitle(node.id, temp); setIsEditing(false); }}
+                >저장</button>
+                <button
+                  className="px-2 py-0.5 text-xs rounded border border-white/10 text-gray-300 hover:bg-white/10"
+                  onClick={() => { setTemp(node.title); setIsEditing(false); }}
+                >취소</button>
+              </>
+            ) : (
+              <>
+                <button
+                  className="px-2 py-0.5 text-xs rounded border border-white/10 text-gray-300 hover:bg-white/10"
+                  onClick={() => setIsEditing(true)}
+                >편집</button>
+                <button
+                  className="px-2 py-0.5 text-xs rounded border border-white/10 text-gray-300 hover:bg-white/10"
+                  onClick={() => deleteNode(node.id)}
+                >삭제</button>
+              </>
+            )}
+          </div>
+        </div>
+        {node.children?.length > 0 && (
+          <div className="ml-5 mt-1 border-l border-white/10 pl-2 space-y-1">
+            {node.children.map(ch => (
+              <Item key={ch.id} node={ch} depth={depth + 1} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="max-w-[1200px] mx-auto">
+      <header className="mb-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-white">To-do Generator</h1>
+          <p className="text-sm text-gray-400">간단한 설명을 입력하면 Gemini가 깊이 2의 체크리스트를 생성합니다.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            className="px-2.5 py-1.5 text-xs rounded border border-white/10 text-gray-300 hover:bg-white/10"
+            onClick={() => copyText('md')}
+            title="Markdown 체크리스트로 복사"
+          >{copied === 'md' ? '복사됨' : '복사(MD)'}</button>
+          <button
+            className="px-2.5 py-1.5 text-xs rounded border border-white/10 text-gray-300 hover:bg-white/10"
+            onClick={() => copyText('app')}
+            title="체크리스트 앱용으로 복사 (Notion/MS Todo/OneNote 등)"
+          >{copied === 'app' ? '복사됨' : '복사(체크리스트 앱)'}</button>
+        </div>
+      </header>
+
+      <section className="mb-4">
+        <div className="flex items-center gap-2">
+          <input
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="예: 3일간 도쿄 여행 준비"
+            className="flex-1 min-w-0 px-3 py-2 rounded bg-[#1e1e1e] border border-white/10 text-gray-200 placeholder:text-gray-500"
+          />
+          <button
+            onClick={generate}
+            disabled={generating || !prompt.trim()}
+            className={`px-3 py-2 rounded text-sm border border-white/10 ${generating ? 'opacity-70' : 'hover:bg-white/10'} ${prompt.trim() ? 'text-white' : 'text-gray-400'}`}
+            title={generating ? '생성 중…' : '목록 생성'}
+          >{generating ? '생성 중…' : '생성'}</button>
+          <button
+            onClick={addSiblingRoot}
+            className="px-3 py-2 rounded text-sm border border-white/10 text-gray-300 hover:bg-white/10"
+            title="맨 위에 새 작업 추가"
+          >+ 작업</button>
+        </div>
+        {error && <p className="mt-2 text-xs text-amber-300">{error}</p>}
+      </section>
+
+      {root.children.length === 0 ? (
+        <div className="border border-white/10 rounded p-6 text-center text-gray-400 bg-[#1e1e1e]">
+          <p className="mb-2">아직 항목이 없습니다. 상단에 해야할 일을 입력하고 "생성"을 눌러 보세요.</p>
+          <p className="text-xs">또는 "+ 작업"으로 수동으로 추가할 수 있습니다.</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {root.children.map(n => (
+            <div key={n.id} className="rounded border border-white/10 bg-[#1e1e1e] p-2">
+              <Item node={n} depth={0} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ToDoGeneratorPage;

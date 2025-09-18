@@ -162,6 +162,22 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
     <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Playground</h2>
     <div className="flex flex-col gap-1">
       <button
+        onClick={() => onOpenFile('todo-generator')}
+        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
+      >
+        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4">
+            <g fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8 7h12M8 12h12M8 17h12" />
+              <path d="m3.5 7l1.5 1.5l3-3" />
+              <path d="m3.5 12l1.5 1.5l3-3" />
+              <path d="m3.5 17l1.5 1.5l3-3" />
+            </g>
+          </svg>
+        </span>
+        <span className="text-sm">To-do Generator</span>
+      </button>
+      <button
         onClick={() => onOpenFile('split-speaker')}
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >

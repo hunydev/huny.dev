@@ -198,6 +198,87 @@ export default {
           headers: { 'content-type': 'application/json; charset=UTF-8' },
         });
       }
+      // To-do Generator: build a two-level checklist using Gemini
+      if (url.pathname === '/api/todo-generator') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        if (!env.GEMINI_API_KEY) {
+          return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+        try {
+          const body = await request.json<any>().catch(() => ({} as any));
+          const prompt: string = typeof body?.prompt === 'string' ? body.prompt : '';
+          const maxItems: number = typeof body?.max_items === 'number' ? Math.max(1, Math.min(100, body.max_items)) : 30;
+          if (!prompt.trim()) {
+            return new Response(JSON.stringify({ error: 'Missing prompt' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+          // Instruction: return strict JSON with depth <= 2
+          const instructions = [
+            'You generate a structured to-do checklist from a short description.',
+            'Rules:',
+            '- Output MUST be JSON only, no commentary, no markdown fences.',
+            '- Use this schema: { "tasks": [ { "title": string, "children": [ { "title": string } ] } ] }',
+            '- Depth MUST be at most 2 (top-level + one level of children).',
+            '- Provide as many actionable items as reasonably possible (up to a practical limit).',
+            '- Titles should be concise, imperative, and self-contained. Avoid emojis.',
+            `- Aim for up to ${maxItems} total leaf items if reasonable.`,
+          ].join('\n');
+
+          const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+          const aiRes = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': env.GEMINI_API_KEY!,
+            },
+            body: JSON.stringify({
+              contents: [ { parts: [ { text: instructions }, { text: `INPUT:\n${prompt}` } ] } ],
+              generationConfig: { responseMimeType: 'application/json' },
+            }),
+          });
+          if (!aiRes.ok) {
+            const errText = await aiRes.text().catch(() => '');
+            return new Response(JSON.stringify({ error: `Gemini error: ${aiRes.status} ${aiRes.statusText}`, detail: errText }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const out: any = await aiRes.json();
+          const raw: string = ((out && out.candidates && out.candidates[0] && out.candidates[0].content && out.candidates[0].content.parts) || [])
+            .map((p: any) => p?.text || '')
+            .join('');
+          const jsonStr = extractJsonString(raw);
+          let parsed: any = {};
+          try { parsed = JSON.parse(jsonStr); } catch { parsed = {}; }
+          const tasksIn: any[] = Array.isArray(parsed?.tasks) ? parsed.tasks : [];
+          // Sanitize to enforce depth <= 2 and title strings
+          const norm = (arr: any[]): Array<{ title: string; children?: Array<{ title: string }> }> => {
+            const out: Array<{ title: string; children?: Array<{ title: string }> }> = [];
+            for (const it of (arr || [])) {
+              const title = typeof it?.title === 'string' ? it.title.trim() : '';
+              if (!title) continue;
+              const childrenIn = Array.isArray(it?.children) ? it.children : [];
+              const children = childrenIn
+                .map((c: any) => ({ title: typeof c?.title === 'string' ? c.title.trim() : '' }))
+                .filter((c: any) => c.title)
+                .slice(0, 50);
+              out.push({ title, ...(children.length ? { children } : {}) });
+            }
+            return out.slice(0, 100);
+          };
+          const tasks = norm(tasksIn);
+          return new Response(JSON.stringify({ tasks }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
       if (url.pathname === '/api/multivoice-tts') {
         if (request.method !== 'POST') {
           return new Response('Method Not Allowed', { status: 405 });

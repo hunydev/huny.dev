@@ -17,6 +17,7 @@ import MascotGalleryPage from './components/pages/MascotGalleryPage';
 import SplitSpeakerPage from './components/pages/SplitSpeakerPage';
 import BirdGeneratorPage from './components/pages/BirdGeneratorPage';
 import MultiVoiceReaderPage from './components/pages/MultiVoiceReaderPage';
+import ToDoGeneratorPage from './components/pages/ToDoGeneratorPage';
 
 export const FileIcon = () => (
   <svg
@@ -100,6 +101,20 @@ export const PAGES: {
         className="w-4 h-4 mr-2 text-gray-400"
       >
         <path d="M3 5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm9 0a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2zM3 14a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm9 0a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2z" />
+      </svg>
+    ),
+  },
+  'todo-generator': {
+    title: 'To-do Generator',
+    component: ToDoGeneratorPage,
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4 mr-2 text-gray-400">
+        <g fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M8 7h12M8 12h12M8 17h12" />
+          <path d="m3.5 7l1.5 1.5l3-3" />
+          <path d="m3.5 12l1.5 1.5l3-3" />
+          <path d="m3.5 17l1.5 1.5l3-3" />
+        </g>
       </svg>
     ),
   },
