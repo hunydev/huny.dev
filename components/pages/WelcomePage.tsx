@@ -191,7 +191,7 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
                 <h1 className="text-5xl font-thin mb-2">Huny<span className="font-light">Dev</span></h1>
                 <p className="text-xl text-gray-400">Works & Digital Playground</p>
                 <p className="mt-3 text-gray-400 max-w-3xl">
-                    I craft dependable, delightful web experiences with TypeScript and React. Explore my Works, learn more About me, or get in touch.
+                    More than a portfolio — this is my personal playground of apps, works, docs, and notes. I build dependable web experiences with TypeScript, React, and Cloudflare Workers. Explore Works, open Apps, read the Blog, visit Sites, or get in touch.
                 </p>
             </header>
 
