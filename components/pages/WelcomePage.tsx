@@ -270,7 +270,7 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
                                     const catName = cat?.name ?? categoryId;
                                     displayTitle = `apps – ${catName}`;
                                     displayIcon = cat?.iconUrl ? (
-                                        <img src={cat.iconUrl} alt="" className="w-4 h-4 rounded-sm" />
+                                        <img src={cat.iconUrl} alt="" className="w-4 h-4 rounded-sm" loading="lazy" decoding="async" />
                                     ) : cat?.emoji ? (
                                         <span className="text-sm" aria-hidden>{cat.emoji}</span>
                                     ) : (

@@ -159,10 +159,10 @@ const EmptyState: React.FC<{ onReset?: () => void }> = ({ onReset }) => (
   </div>
 );
 
-const Thumb: React.FC<{ src?: string; alt: string }> = ({ src, alt }) => (
+const Thumb: React.FC<{ src?: string; alt: string }> = ({ src }) => (
   <div className="w-14 h-14 rounded overflow-hidden bg-[#2d2d2d] border border-white/10 shrink-0">
     {src ? (
-      <img src={src} alt={alt} className="w-full h-full object-cover" />
+      <img src={src} alt="" aria-hidden="true" className="w-full h-full object-cover" />
     ) : (
       <div className="w-full h-full grid place-items-center text-gray-500">—</div>
     )}

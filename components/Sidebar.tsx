@@ -5,8 +5,7 @@ import { BOOKMARK_CATEGORIES, BOOKMARKS, type Bookmark } from './pages/bookmarks
 import { NOTE_GROUPS, getNoteCountByGroup } from './pages/notesData';
 import { CATEGORIES } from './pages/appsData';
 // DocsView now lists from R2 instead of local DOCS. The DocsPage can still use local data.
-import logoImg from '../logo.png';
-import logo128 from '../logo_128x128.png';
+// Avoid bundling large images into main chunk: use static paths so they load only when rendered
 import welcomeIcon from '../icon_32x32.png';
 import { fetchNotionBookmarks } from '../utils/notionClient';
 
@@ -239,7 +238,7 @@ const ExplorerView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
         </div>
         <div className="mt-2 pl-4 flex flex-col gap-1">
             <button onClick={() => onOpenFile('welcome')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-                <img src={welcomeIcon} alt="Welcome" className="w-4 h-4 mr-2 rounded-sm" decoding="async" />
+                <img src={welcomeIcon} alt="" aria-hidden="true" className="w-4 h-4 mr-2 rounded-sm" decoding="async" />
                 <span>Welcome</span>
             </button>
             <button onClick={() => onOpenFile('works')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
@@ -295,8 +294,8 @@ const MEDIA_TREE: MediaNode[] = [
         type: 'folder',
         name: 'logos',
         children: [
-          { type: 'image', name: 'logo.png', src: logoImg },
-          { type: 'image', name: 'logo_128x128.png', src: logo128 },
+          { type: 'image', name: 'logo.png', src: '/logo.png' },
+          { type: 'image', name: 'logo_128x128.png', src: '/logo_128x128.png' },
         ],
       },
     ],

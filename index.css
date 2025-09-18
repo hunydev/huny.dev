@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* VS Code Dark-inspired scrollbar theming */
 :root {
   --color-bg: #1e1e1e;       /* editor background */

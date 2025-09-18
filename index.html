@@ -38,27 +38,13 @@
     <link rel="apple-touch-icon" href="/logo_128x128.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
-    <!-- Perf hints for CDN -->
-    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com" />
-    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin />
-    <link rel="dns-prefetch" href="https://aistudiocdn.com" />
-    <link rel="preconnect" href="https://aistudiocdn.com" crossorigin />
-
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Removed render-blocking Tailwind CDN and unused preconnects; Tailwind is built via PostCSS -->
     <style>
       body {
         overscroll-behavior: none;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.1.1/",
-    "react": "https://aistudiocdn.com/react@^19.1.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/"
-  }
-}
-</script>
+  
 <link rel="stylesheet" href="/index.css">
     <!-- JSON-LD is injected by SSR (entry-server.tsx) -->
   </head>
