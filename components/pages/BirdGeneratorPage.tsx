@@ -100,13 +100,13 @@ const BirdGeneratorPage: React.FC<PageProps> = () => {
       <section className="rounded-md border border-white/10 bg-white/[0.03] p-3 md:p-4">
         <div className="grid grid-cols-3 gap-3 items-center">
           <div className="aspect-square rounded overflow-hidden bg-black/30 flex items-center justify-center">
-            <img src={sideImg} alt="side" className="h-full w-full object-contain" />
+            <img src={sideImg} alt="side" className="h-full w-full object-contain" loading="lazy" decoding="async" />
           </div>
           <div className="aspect-square rounded overflow-hidden bg-black/30 flex items-center justify-center">
-            <img src={frontImg} alt="front" className="h-full w-full object-contain" />
+            <img src={frontImg} alt="front" className="h-full w-full object-contain" loading="lazy" decoding="async" />
           </div>
           <div className="aspect-square rounded overflow-hidden bg-black/30 flex items-center justify-center">
-            <img src={rearImg} alt="rear" className="h-full w-full object-contain" />
+            <img src={rearImg} alt="rear" className="h-full w-full object-contain" loading="lazy" decoding="async" />
           </div>
         </div>
         <div className="mt-2 text-center text-xs text-gray-400">재료(좌: side, 중: front, 우: rear)</div>
@@ -223,7 +223,7 @@ const BirdGeneratorPage: React.FC<PageProps> = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {results.urls.map((u, idx) => (
                   <div key={idx} className="rounded border border-white/10 bg-black/40 overflow-hidden">
-                    <img src={u} alt={`result-${idx+1}`} className="w-full h-auto object-contain" />
+                    <img src={u} alt={`result-${idx+1}`} className="w-full h-auto object-contain" loading="lazy" decoding="async" />
                   </div>
                 ))}
               </div>

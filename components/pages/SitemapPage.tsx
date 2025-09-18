@@ -57,7 +57,7 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile }) => {
             <ul className="space-y-1 text-sm">
               <li>
                 <button onClick={() => onOpenFile('welcome')} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left">
-                  <img src={welcomeIcon} alt="Welcome" className="w-4 h-4 mr-2 rounded-sm" />
+                  <img src={welcomeIcon} alt="Welcome" className="w-4 h-4 mr-2 rounded-sm" decoding="async" />
                   <span>Welcome</span>
                 </button>
               </li>
@@ -131,7 +131,7 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile }) => {
                 <li key={c.id}>
                   <button onClick={() => onOpenFile(`apps:${c.id}`)} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left">
                     {c.iconUrl ? (
-                      <img src={c.iconUrl} alt="" className="w-4 h-4 rounded-sm" />
+                      <img src={c.iconUrl} alt="" className="w-4 h-4 rounded-sm" loading="lazy" decoding="async" />
                     ) : c.emoji ? (
                       <span className="text-base leading-4" aria-hidden>{c.emoji}</span>
                     ) : (

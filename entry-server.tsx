@@ -45,6 +45,10 @@ export async function render(url: string, manifest?: ViteManifest) {
     <link rel="canonical" href="${meta.canonical}" />
     <meta name="robots" content="index, follow" />
     <meta name="googlebot" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" />
+    <link rel="dns-prefetch" href="https://pb.huny.dev" />
+    <link rel="preconnect" href="https://pb.huny.dev" crossorigin />
+    <link rel="dns-prefetch" href="https://r2.huny.dev" />
+    <link rel="preconnect" href="https://r2.huny.dev" crossorigin />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="${meta.canonical}" />
     <meta property="og:site_name" content="HunyDev" />
@@ -60,6 +64,7 @@ export async function render(url: string, manifest?: ViteManifest) {
     <meta name="twitter:image" content="${meta.image}" />
     <meta name="twitter:image:alt" content="${meta.imageAlt}" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="modulepreload" href="/${jsFile}" crossorigin />
     ${cssLinks}
     <script type="application/ld+json">${JSON.stringify({
       '@context': 'https://schema.org',

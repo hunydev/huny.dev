@@ -102,7 +102,7 @@ const AppsPage: React.FC<PageProps> = ({ routeParams }) => {
     <div className="max-w-6xl mx-auto">
       <header className="mb-6 flex items-center gap-3">
         {category?.iconUrl ? (
-          <img src={category.iconUrl} alt={category.name} className="w-6 h-6 rounded-sm" />
+          <img src={category.iconUrl} alt={category.name} className="w-6 h-6 rounded-sm" decoding="async" />
         ) : category?.emoji ? (
           <span className="text-xl" aria-hidden>{category.emoji}</span>
         ) : null}
@@ -137,7 +137,7 @@ const AppsPage: React.FC<PageProps> = ({ routeParams }) => {
                   {/* App icon */}
                   <div>
                     {app.iconUrl ? (
-                      <img src={app.iconUrl} alt="" className="w-8 h-8 rounded-sm" />
+                      <img src={app.iconUrl} alt="" className="w-8 h-8 rounded-sm" loading="lazy" decoding="async" />
                     ) : (
                       <span className="text-2xl" aria-hidden>{app.iconEmoji || '📦'}</span>
                     )}
@@ -188,7 +188,7 @@ const AppsPage: React.FC<PageProps> = ({ routeParams }) => {
             <div className="flex items-start gap-3">
               <div className="shrink-0 mt-0.5">
                 {selected.iconUrl ? (
-                  <img src={selected.iconUrl} alt="" className="w-8 h-8 rounded-sm" />
+                  <img src={selected.iconUrl} alt="" className="w-8 h-8 rounded-sm" decoding="async" />
                 ) : (
                   <span className="text-3xl" aria-hidden>{selected.iconEmoji || '📦'}</span>
                 )}

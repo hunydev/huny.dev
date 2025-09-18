@@ -213,7 +213,7 @@ const AppsView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFi
             className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
           >
             {cat.iconUrl ? (
-              <img src={cat.iconUrl} alt="" className="w-4 h-4 mr-2 rounded-sm" />
+              <img src={cat.iconUrl} alt="" className="w-4 h-4 mr-2 rounded-sm" loading="lazy" decoding="async" />
             ) : cat.emoji ? (
               <span className="w-4 h-4 mr-2 text-base leading-4" aria-hidden>{cat.emoji}</span>
             ) : (
@@ -239,7 +239,7 @@ const ExplorerView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
         </div>
         <div className="mt-2 pl-4 flex flex-col gap-1">
             <button onClick={() => onOpenFile('welcome')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-                <img src={welcomeIcon} alt="Welcome" className="w-4 h-4 mr-2 rounded-sm" />
+                <img src={welcomeIcon} alt="Welcome" className="w-4 h-4 mr-2 rounded-sm" decoding="async" />
                 <span>Welcome</span>
             </button>
             <button onClick={() => onOpenFile('works')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">

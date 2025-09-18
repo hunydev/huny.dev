@@ -57,7 +57,7 @@ export const PAGES: {
   welcome: {
     title: 'Welcome',
     component: WelcomePage,
-    icon: <img src={welcomeIcon} alt="Welcome" className="w-4 h-4 mr-2 rounded-sm" />,
+    icon: <img src={welcomeIcon} alt="Welcome" className="w-4 h-4 mr-2 rounded-sm" decoding="async" />,
   },
   docs: {
     title: 'docs',

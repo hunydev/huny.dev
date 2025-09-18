@@ -376,7 +376,7 @@ const App: React.FC = () => {
     <div className="flex w-full flex-col bg-[#1e1e1e] text-gray-300 font-sans overflow-hidden" style={{ height: 'var(--app-height, 100vh)' }}>
       {/* Top title bar (VS Code style) */}
       <div className="h-8 bg-[#2d2d2d] border-b border-black/30 flex items-center px-2 shrink-0">
-        <img src={logo} alt="HunyDev logo" className="h-5 w-5" />
+        <img src={logo} alt="HunyDev logo" className="h-5 w-5" decoding="async" />
         <div className="ml-auto flex items-center gap-1">
           <button
             type="button"
