@@ -14,6 +14,7 @@ export enum ViewId {
   Discord = 'DISCORD',
   X = 'X',
   Email = 'EMAIL'
+  , Sites = 'SITES'
 }
 
 export type Tab = {

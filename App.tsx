@@ -433,9 +433,13 @@ const App: React.FC = () => {
                 <ul className="py-1">
                   {(() => {
                     const items = ACTIVITY_BAR_ITEMS.filter((i: any) => i.section === 'bottom');
-                    const blogIdx = items.findIndex((i: any) => i.id === ViewId.Blog);
-                    const blogItem = blogIdx >= 0 ? items[blogIdx] : null;
-                    const rest = items.filter((_: any, idx: number) => idx !== blogIdx);
+                    // Featured links at the top of the menu, in order: Blog, Apps, Sites
+                    const featuredOrder = [ViewId.Blog, ViewId.Apps, ViewId.Sites];
+                    const featured = featuredOrder
+                      .map((id) => items.find((i: any) => i.id === id))
+                      .filter(Boolean) as any[];
+                    const featuredIds = new Set(featured.map((i: any) => i.id));
+                    const rest = items.filter((i: any) => !featuredIds.has(i.id));
 
                     const renderItem = (item: any) => {
                       const link = EXTERNAL_LINKS[item.id as keyof typeof EXTERNAL_LINKS];
@@ -459,8 +463,8 @@ const App: React.FC = () => {
 
                     return (
                       <>
-                        {blogItem && renderItem(blogItem)}
-                        {blogItem && (
+                        {featured.map(renderItem)}
+                        {featured.length > 0 && (
                           <li role="separator" aria-hidden className="my-1 border-t border-white/10" />
                         )}
                         {rest.map(renderItem)}

@@ -292,6 +292,33 @@ export const ACTIVITY_BAR_ITEMS = [
     title: 'Blog',
   },
   {
+    id: ViewId.Apps, // external Apps hub (bottom)
+    section: 'bottom',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-7 h-7">
+        <path fill="currentColor" d="M11 20H3q-.425 0-.712-.288T2 19t.288-.712T3 18h8q.425 0 .713.288T12 19t-.288.713T11 20m-6-3q-.825 0-1.412-.587T3 15V6q0-.825.588-1.412T5 4h14q.825 0 1.413.588T21 6h-5.5q-1.45 0-2.475 1.025T12 9.5V16q0 .425-.288.713T11 17zm10.5 3q-.625 0-1.062-.437T14 18.5v-9q0-.625.438-1.062T15.5 8h5q.625 0 1.063.438T22 9.5v9q0 .625-.437 1.063T20.5 20zm2.5-7.5q.325 0 .538-.225t.212-.525q0-.325-.213-.537T18 11q-.3 0-.525.213t-.225.537q0 .3.225.525T18 12.5" />
+      </svg>
+    ),
+    title: 'Apps',
+  },
+  {
+    id: ViewId.Sites,
+    section: 'bottom',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="w-7 h-7">
+        <g fill="none" stroke="currentColor" strokeWidth="4">
+          <circle cx="22" cy="40" r="4" fill="currentColor" />
+          <circle cx="26" cy="8" r="4" fill="currentColor" />
+          <circle cx="36" cy="24" r="4" fill="currentColor" />
+          <circle cx="12" cy="24" r="4" fill="currentColor" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M32 24H16m7-13l-8 10" />
+          <path d="m33 27l-8.001 10" />
+        </g>
+      </svg>
+    ),
+    title: 'Sites',
+  },
+  {
     id: ViewId.GitHub,
     section: 'bottom',
     icon: (
@@ -335,6 +362,8 @@ export const ACTIVITY_BAR_ITEMS = [
 
 export const EXTERNAL_LINKS: Partial<Record<ViewId, { title: string; url: string }>> = {
   [ViewId.Blog]: { title: 'Blog', url: 'https://blog.huny.dev' },
+  [ViewId.Apps]: { title: 'Apps', url: 'https://apps.huny.dev' },
+  [ViewId.Sites]: { title: 'Sites', url: 'https://sites.huny.dev' },
   [ViewId.GitHub]: { title: 'GitHub', url: 'https://github.com/hunydev' },
   [ViewId.Discord]: { title: 'Discord', url: 'https://discord.gg/2NWa39bU' },
   [ViewId.X]: { title: 'X / Twitter', url: 'https://x.com/janghun2722' },
