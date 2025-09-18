@@ -27,34 +27,6 @@ const MEDIA_ITEMS = [
 const SitemapPage: React.FC<PageProps> = ({ onOpenFile }) => {
   const openWelcome = () => onOpenFile('welcome');
 
-  const candidates = React.useMemo(() => {
-    const arr: string[] = [];
-    // Core
-    arr.push('welcome', 'project', 'about', 'domain');
-    // Docs
-    arr.push(...DOCS.map(d => `docs:${d.slug}`));
-    // Apps
-    arr.push(...CATEGORIES.map(c => `apps:${c.id}`));
-    // Bookmarks
-    arr.push('bookmark:all');
-    arr.push(...BOOKMARK_CATEGORIES.map(c => `bookmark:${c.id}`));
-    // Notes
-    arr.push(...NOTE_GROUPS.map(g => `notes:${g.id}`));
-    // Media
-    try {
-      MEDIA_ITEMS.forEach(item => {
-        const encoded = typeof btoa !== 'undefined' ? btoa(JSON.stringify(item)) : '';
-        if (encoded) arr.push(`media:${encoded}`);
-      });
-    } catch {}
-    return arr;
-  }, []);
-
-  const openRandom = () => {
-    if (candidates.length === 0) return;
-    const idx = Math.floor(Math.random() * candidates.length);
-    onOpenFile(candidates[idx]);
-  };
 
   const bottomItems = ACTIVITY_BAR_ITEMS.filter((i: any) => i.section === 'bottom');
 
@@ -72,12 +44,6 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile }) => {
             className="flex-1 sm:flex-none w-full sm:w-auto whitespace-nowrap text-center px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white text-sm"
           >
             Welcome 열기
-          </button>
-          <button
-            onClick={openRandom}
-            className="flex-1 sm:flex-none w-full sm:w-auto whitespace-nowrap text-center px-3 py-1.5 rounded bg-white/10 hover:bg-white/20 text-sm"
-          >
-            랜덤 탭 열기
           </button>
         </div>
       </div>
