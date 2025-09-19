@@ -298,11 +298,13 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
           >{generating ? '생성 중…' : '생성'}</button>
           <button
             onClick={addSiblingRoot}
-            className="px-3 py-2 rounded text-sm border border-white/10 text-gray-300 hover:bg-white/10"
+            className="px-3 py-2 rounded text-sm border border-white/10 text-gray-300 hover:bg-white/10 inline-flex items-center gap-1 whitespace-nowrap"
             title="맨 위에 새 작업 추가"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M20 14h-6v6h-4v-6H4v-4h6V4h4v6h6z"/></svg> 
-            작업
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4" aria-hidden="true">
+              <path fill="currentColor" d="M20 14h-6v6h-4v-6H4v-4h6V4h4v6h6z"/>
+            </svg>
+            <span>작업</span>
           </button>
         </div>
         {error && <p className="mt-2 text-xs text-amber-300">{error}</p>}
