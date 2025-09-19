@@ -16,7 +16,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
   const [generating, setGenerating] = React.useState(false);
   const [error, setError] = React.useState('');
   const [root, setRoot] = React.useState<TaskNode>({ id: 'root', title: 'root', checked: false, children: [] });
-  const [copied, setCopied] = React.useState<'md' | 'app' | ''>('');
+  const [copied, setCopied] = React.useState(false);
 
   const setTasks = (tasks: TaskNode[]) => setRoot(prev => ({ ...prev, children: tasks }));
 
@@ -116,7 +116,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
     const lines: string[] = [];
     const walk = (nodes: TaskNode[], depth = 0) => {
       for (const n of nodes) {
-        const box = n.checked ? '[X]' : '[ ]';
+        const box = n.checked ? '[x]' : '[ ]';
         const indent = '  '.repeat(depth);
         lines.push(`${indent}- ${box} ${n.title}`);
         if (n.children?.length) walk(n.children, depth + 1);
@@ -126,18 +126,12 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
     return lines.join('\n');
   }, [root.children]);
 
-  const toChecklistPlain = React.useCallback(() => {
-    // For Notion/MS Todo/OneNote-like apps: tab-indented Markdown style is widely recognized.
-    // Use same format for broad compatibility.
-    return toMarkdown();
-  }, [toMarkdown]);
-
-  const copyText = async (kind: 'md' | 'app') => {
-    const text = kind === 'md' ? toMarkdown() : toChecklistPlain();
+  const copyText = async () => {
+    const text = toMarkdown();
     try {
       await navigator.clipboard.writeText(text);
-      setCopied(kind);
-      setTimeout(() => setCopied(''), 1200);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
     } catch {}
   };
 
@@ -208,32 +202,51 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
           <div className="ml-auto flex items-center gap-1">
             {depth < 1 && (
               <button
-                className="px-2 py-0.5 text-xs rounded border border-white/10 text-gray-300 hover:bg-white/10"
+                className="p-1.5 rounded border border-white/10 text-gray-300 hover:bg-white/10"
                 onClick={() => addChild(node.id)}
                 title="하위 작업 추가"
-              >하위</button>
+                aria-label="하위 작업 추가"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><g fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></g></svg>
+              </button>
             )}
             {isEditing ? (
               <>
                 <button
-                  className="px-2 py-0.5 text-xs rounded border border-white/10 text-gray-300 hover:bg-white/10"
+                  className="p-1.5 rounded border border-white/10 text-gray-300 hover:bg-white/10"
                   onClick={() => { editNodeTitle(node.id, temp); setIsEditing(false); }}
-                >저장</button>
+                  title="저장"
+                  aria-label="저장"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </button>
                 <button
-                  className="px-2 py-0.5 text-xs rounded border border-white/10 text-gray-300 hover:bg-white/10"
+                  className="p-1.5 rounded border border-white/10 text-gray-300 hover:bg-white/10"
                   onClick={() => { setTemp(node.title); setIsEditing(false); }}
-                >취소</button>
+                  title="취소"
+                  aria-label="취소"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path d="M6 6l12 12M6 18L18 6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+                </button>
               </>
             ) : (
               <>
                 <button
-                  className="px-2 py-0.5 text-xs rounded border border-white/10 text-gray-300 hover:bg-white/10"
+                  className="p-1.5 rounded border border-white/10 text-gray-300 hover:bg-white/10"
                   onClick={() => setIsEditing(true)}
-                >편집</button>
+                  title="편집"
+                  aria-label="편집"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25z" fill="currentColor"/><path d="M15.04 6.19l2.75 2.75" fill="none" stroke="currentColor" strokeWidth="1.2"/></svg>
+                </button>
                 <button
-                  className="px-2 py-0.5 text-xs rounded border border-white/10 text-gray-300 hover:bg-white/10"
+                  className="p-1.5 rounded border border-white/10 text-gray-300 hover:bg-white/10"
                   onClick={() => deleteNode(node.id)}
-                >삭제</button>
+                  title="삭제"
+                  aria-label="삭제"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><g fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 7h12"/><path d="M10 7v10"/><path d="M14 7v10"/><path d="M9 4h6l1 2H8z"/></g></svg>
+                </button>
               </>
             )}
           </div>
@@ -254,19 +267,17 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
       <header className="mb-4 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-white">To-do Generator</h1>
-          <p className="text-sm text-gray-400">간단한 설명을 입력하면 Gemini가 깊이 2의 체크리스트를 생성합니다.</p>
+          <p className="text-sm text-gray-400">간단한 설명을 입력하면 체크리스트를 생성합니다.</p>
         </div>
         <div className="flex items-center gap-2">
           <button
-            className="px-2.5 py-1.5 text-xs rounded border border-white/10 text-gray-300 hover:bg-white/10"
-            onClick={() => copyText('md')}
-            title="Markdown 체크리스트로 복사"
-          >{copied === 'md' ? '복사됨' : '복사(MD)'}</button>
-          <button
-            className="px-2.5 py-1.5 text-xs rounded border border-white/10 text-gray-300 hover:bg-white/10"
-            onClick={() => copyText('app')}
-            title="체크리스트 앱용으로 복사 (Notion/MS Todo/OneNote 등)"
-          >{copied === 'app' ? '복사됨' : '복사(체크리스트 앱)'}</button>
+            className="px-2.5 py-1.5 text-xs rounded border border-white/10 text-gray-300 hover:bg-white/10 inline-flex items-center gap-1"
+            onClick={copyText}
+            title="체크리스트 복사"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-3.5 h-3.5"><path fill="currentColor" d="M8 7V3.5A1.5 1.5 0 0 1 9.5 2h8A1.5 1.5 0 0 1 19 3.5v8A1.5 1.5 0 0 1 17.5 13H14v4.5A1.5 1.5 0 0 1 12.5 19h-8A1.5 1.5 0 0 1 3 17.5v-8A1.5 1.5 0 0 1 4.5 8zM9 8h5.5A1.5 1.5 0 0 0 16 6.5V5H9.5A1.5 1.5 0 0 0 8 6.5z"/></svg>
+            {copied ? '복사됨' : '복사'}
+          </button>
         </div>
       </header>
 
@@ -275,6 +286,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
           <input
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (!generating && prompt.trim()) generate(); } }}
             placeholder="예: 3일간 도쿄 여행 준비"
             className="flex-1 min-w-0 px-3 py-2 rounded bg-[#1e1e1e] border border-white/10 text-gray-200 placeholder:text-gray-500"
           />
