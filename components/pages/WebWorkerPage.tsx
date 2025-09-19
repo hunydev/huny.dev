@@ -22,6 +22,10 @@ function parseArgsCSV(input: string): { ok: true; value: any[] } | { ok: false; 
   }
 }
 
+function isOkResult(x: { ok: true; value: any[] } | { ok: false; error: string }): x is { ok: true; value: any[] } {
+  return (x as any).ok === true;
+}
+
 const WebWorkerPage: React.FC<PageProps> = () => {
   const [params, setParams] = React.useState<string>(DEFAULT_PARAMS);
   const [body, setBody] = React.useState<string>(DEFAULT_BODY);
@@ -57,10 +61,11 @@ const WebWorkerPage: React.FC<PageProps> = () => {
     setResult(null);
 
     const parsed = parseArgsCSV(argsText);
-    if (!parsed.ok) {
+    if (!isOkResult(parsed)) {
       setError(parsed.error);
       return;
     }
+    const args = parsed.value;
 
     try {
       const blob = new Blob([WORKER_SRC], { type: 'application/javascript' });
@@ -85,7 +90,7 @@ const WebWorkerPage: React.FC<PageProps> = () => {
         terminateWorker();
       }, 10_000) as unknown as number;
 
-      w.postMessage({ userCode: assembled, fnName: DEFAULT_FN_NAME, args: parsed.value });
+      w.postMessage({ userCode: assembled, fnName: DEFAULT_FN_NAME, args });
     } catch (e: any) {
       setResult({ ok: false, err: String(e?.message || e) });
       terminateWorker();
@@ -125,15 +130,15 @@ const WebWorkerPage: React.FC<PageProps> = () => {
           <h1 className="text-xl font-semibold text-white">Web Worker</h1>
           <p className="text-sm text-gray-400">격리된 워커(Blob)를 사용해 사용자 JS를 안전하게 실행합니다. 함수 이름은 고정: <code>worker_function</code></p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
-            className={`px-3 py-2 rounded text-sm border border-white/10 ${running ? 'opacity-70' : 'hover:bg-white/10'} text-white`}
+            className={`px-3 py-2 rounded text-sm border border-white/10 ${running ? 'opacity-70' : 'hover:bg-white/10'} text-white whitespace-nowrap shrink-0`}
             onClick={run}
             disabled={running}
             title={running ? '실행 중…' : '실행'}
           >{running ? '실행 중…' : '실행'}</button>
           <button
-            className="px-3 py-2 rounded text-sm border border-white/10 text-gray-300 hover:bg-white/10"
+            className="px-3 py-2 rounded text-sm border border-white/10 text-gray-300 hover:bg-white/10 whitespace-nowrap shrink-0"
             onClick={terminateWorker}
             disabled={!running}
             title="강제 종료"
@@ -166,15 +171,15 @@ const WebWorkerPage: React.FC<PageProps> = () => {
           <div className="space-y-2">
             <div className="grid grid-cols-1 sm:grid-cols-[140px,1fr] gap-2 items-center">
               <label className="text-xs text-gray-400">함수 서명</label>
-              <div className="flex items-center gap-2">
-                <code className="px-2 py-1 rounded bg-[#1e1e1e] border border-white/10 text-gray-300">{DEFAULT_FN_NAME}(</code>
+              <div className="flex items-center gap-2 min-w-0 flex-wrap md:flex-nowrap">
+                <code className="px-1.5 py-0.5 md:px-2 md:py-1 rounded bg-[#1e1e1e] border border-white/10 text-gray-300 shrink-0 text-xs md:text-sm">{DEFAULT_FN_NAME}(</code>
                 <input
                   className="flex-1 min-w-0 px-2 py-1 rounded bg-[#1e1e1e] border border-white/10 text-gray-200"
                   value={params}
                   onChange={(e) => setParams(e.target.value)}
                   placeholder="예: n 또는 a, b"
                 />
-                <code className="px-2 py-1 rounded bg-[#1e1e1e] border border-white/10 text-gray-300">)</code>
+                <code className="px-1.5 py-0.5 md:px-2 md:py-1 rounded bg-[#1e1e1e] border border-white/10 text-gray-300 shrink-0 text-xs md:text-sm">)</code>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-[140px,1fr] gap-2 items-center">
