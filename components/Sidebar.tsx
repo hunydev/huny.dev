@@ -162,6 +162,15 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
     <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Playground</h2>
     <div className="flex flex-col gap-1">
       <button
+        onClick={() => onOpenFile('web-worker')}
+        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
+      >
+        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M12 7a5 5 0 1 1 0 10a5 5 0 0 1 0-10m0-5a1 1 0 0 1 1 1v1.126a8.003 8.003 0 0 1 3.874 1.606l.796-.796a1 1 0 1 1 1.415 1.415l-.796.796A8.003 8.003 0 0 1 20.874 11H22a1 1 0 1 1 0 2h-1.126a8.003 8.003 0 0 1-1.606 3.874l.796.796a1 1 0 0 1-1.415 1.415l-.796-.796A8.003 8.003 0 0 1 13 20.874V22a1 1 0 1 1-2 0v-1.126a8.003 8.003 0 0 1-3.874-1.606l-.796.796a1 1 0 1 1-1.415-1.415l.796-.796A8.003 8.003 0 0 1 3.126 13H2a1 1 0 1 1 0-2h1.126a8.003 8.003 0 0 1 1.606-3.874l-.796-.796a1 1 0 1 1 1.415-1.415l.796.796A8.003 8.003 0 0 1 11 3.126V2a1 1 0 0 1 1-1"/></svg>
+        </span>
+        <span className="text-sm">Web Worker</span>
+      </button>
+      <button
         onClick={() => onOpenFile('todo-generator')}
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >

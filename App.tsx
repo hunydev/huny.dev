@@ -48,6 +48,7 @@ const App: React.FC = () => {
         case 'bird-generator':
         case 'multi-voice-reader':
         case 'todo-generator':
+        case 'web-worker':
           return ViewId.Playground;
         // Explorer bucket: core files
         case 'welcome':

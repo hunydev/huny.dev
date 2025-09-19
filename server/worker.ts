@@ -198,6 +198,75 @@ export default {
           headers: { 'content-type': 'application/json; charset=UTF-8' },
         });
       }
+      // Worker code generator: return only JS function body string for calc(params)
+      if (url.pathname === '/api/worker-codegen') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        if (!env.GEMINI_API_KEY) {
+          return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+        try {
+          const body = await request.json<any>().catch(() => ({} as any));
+          const prompt: string = typeof body?.prompt === 'string' ? body.prompt : '';
+          const fnName: string = typeof body?.fnName === 'string' && body.fnName.trim() ? body.fnName.trim() : 'calc';
+          const params: string = typeof body?.params === 'string' ? body.params : 'n';
+          if (!prompt.trim()) {
+            return new Response(JSON.stringify({ error: 'Missing prompt' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+
+          const instructions = [
+            'You generate ONLY a JavaScript function body that will run inside a sandboxed Web Worker.',
+            'Constraints:',
+            `- The function name is fixed as ${fnName}(...) and is provided by the host; you MUST output ONLY the function body (no function signature, no braces).`,
+            `- Parameters of the function are: (${params}). Do not include the signature; just use these names as variables inside the body.`,
+            '- The body MUST include a return statement. Return final result only.',
+            '- Do not use imports, top-level declarations that leak state across calls, fetch, eval, postMessage, setTimeout, or DOM APIs.',
+            '- Pure computations and simple data structures only.',
+            '- Output MUST be strict JSON in the form: { "body": string } with no markdown fences or commentary.',
+          ].join('\n');
+
+          const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+          const aiRes = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': env.GEMINI_API_KEY!,
+            },
+            body: JSON.stringify({
+              contents: [ { parts: [ { text: instructions }, { text: `INPUT (describe desired logic):\n${prompt}` } ] } ],
+              generationConfig: { responseMimeType: 'application/json' },
+            }),
+          });
+          if (!aiRes.ok) {
+            const errText = await aiRes.text().catch(() => '');
+            return new Response(JSON.stringify({ error: `Gemini error: ${aiRes.status} ${aiRes.statusText}`, detail: errText }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const data: any = await aiRes.json();
+          const raw: string = ((data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [])
+            .map((p: any) => p?.text || '')
+            .join('');
+          const jsonStr = extractJsonString(raw);
+          let parsed: any;
+          try { parsed = JSON.parse(jsonStr); } catch { return new Response(JSON.stringify({ error: 'Failed to parse AI JSON', raw: raw }), { status: 500, headers: { 'content-type': 'application/json; charset=UTF-8' } }); }
+          const bodyText: string = typeof parsed?.body === 'string' ? parsed.body : '';
+          if (!bodyText || !/return\s+/m.test(bodyText)) {
+            return new Response(JSON.stringify({ error: 'AI did not return a valid function body with return.' }), { status: 500, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+          return new Response(JSON.stringify({ body: bodyText }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
       // To-do Generator: build a two-level checklist using Gemini
       if (url.pathname === '/api/todo-generator') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });

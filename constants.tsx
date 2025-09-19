@@ -18,6 +18,7 @@ import SplitSpeakerPage from './components/pages/SplitSpeakerPage';
 import BirdGeneratorPage from './components/pages/BirdGeneratorPage';
 import MultiVoiceReaderPage from './components/pages/MultiVoiceReaderPage';
 import ToDoGeneratorPage from './components/pages/ToDoGeneratorPage';
+import WebWorkerPage from './components/pages/WebWorkerPage';
 
 export const FileIcon = () => (
   <svg
@@ -109,6 +110,15 @@ export const PAGES: {
     component: ToDoGeneratorPage,
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" className="w-4 h-4 mr-2 text-gray-400"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M13 5h8m-8 7h8m-8 7h8M3 17l2 2l4-4"/><rect width="6" height="6" x="3" y="4" rx="1"/></g></svg>
+    ),
+  },
+  'web-worker': {
+    title: 'Web Worker',
+    component: WebWorkerPage,
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4 mr-2 text-gray-400">
+        <path fill="currentColor" d="M12 7a5 5 0 1 1 0 10a5 5 0 0 1 0-10m0-5a1 1 0 0 1 1 1v1.126a8.003 8.003 0 0 1 3.874 1.606l.796-.796a1 1 0 1 1 1.415 1.415l-.796.796A8.003 8.003 0 0 1 20.874 11H22a1 1 0 1 1 0 2h-1.126a8.003 8.003 0 0 1-1.606 3.874l.796.796a1 1 0 0 1-1.415 1.415l-.796-.796A8.003 8.003 0 0 1 13 20.874V22a1 1 0 1 1-2 0v-1.126a8.003 8.003 0 0 1-3.874-1.606l-.796.796a1 1 0 1 1-1.415-1.415l.796-.796A8.003 8.003 0 0 1 3.126 13H2a1 1 0 1 1 0-2h1.126a8.003 8.003 0 0 1 1.606-3.874l-.796-.796a1 1 0 1 1 1.415-1.415l.796.796A8.003 8.003 0 0 1 11 3.126V2a1 1 0 0 1 1-1" />
+      </svg>
     ),
   },
   'multi-voice-reader': {
