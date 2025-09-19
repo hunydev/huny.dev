@@ -300,14 +300,18 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
             onClick={addSiblingRoot}
             className="px-3 py-2 rounded text-sm border border-white/10 text-gray-300 hover:bg-white/10"
             title="맨 위에 새 작업 추가"
-          >+ 작업</button>
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M20 14h-6v6h-4v-6H4v-4h6V4h4v6h6z"/></svg> 
+            작업
+          </button>
         </div>
         {error && <p className="mt-2 text-xs text-amber-300">{error}</p>}
       </section>
 
       {root.children.length === 0 ? (
         <div className="border border-white/10 rounded p-6 text-center text-gray-400 bg-[#1e1e1e]">
-          <p className="mb-2">아직 항목이 없습니다. 상단에 해야할 일을 입력하고 "생성"을 눌러 보세요.</p>
+          <p className="mb-2">아직 항목이 없습니다.</p>
+          <p className="mb-2">해야할 일을 입력하고 "생성"을 눌러 보세요.</p>
           <p className="text-xs">또는 "+ 작업"으로 수동으로 추가할 수 있습니다.</p>
         </div>
       ) : (
