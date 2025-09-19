@@ -108,14 +108,7 @@ export const PAGES: {
     title: 'To-do Generator',
     component: ToDoGeneratorPage,
     icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4 mr-2 text-gray-400">
-        <g fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M8 7h12M8 12h12M8 17h12" />
-          <path d="m3.5 7l1.5 1.5l3-3" />
-          <path d="m3.5 12l1.5 1.5l3-3" />
-          <path d="m3.5 17l1.5 1.5l3-3" />
-        </g>
-      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" className="w-4 h-4 mr-2 text-gray-400"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M13 5h8m-8 7h8m-8 7h8M3 17l2 2l4-4"/><rect width="6" height="6" x="3" y="4" rx="1"/></g></svg>
     ),
   },
   'multi-voice-reader': {

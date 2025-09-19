@@ -207,7 +207,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
                 title="하위 작업 추가"
                 aria-label="하위 작업 추가"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><g fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></g></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M20 14h-6v6h-4v-6H4v-4h6V4h4v6h6z"/></svg>
               </button>
             )}
             {isEditing ? (
@@ -218,7 +218,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
                   title="저장"
                   aria-label="저장"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="m9 20.42l-6.21-6.21l2.83-2.83L9 14.77l9.88-9.89l2.83 2.83z"/></svg>
                 </button>
                 <button
                   className="p-1.5 rounded border border-white/10 text-gray-300 hover:bg-white/10"
@@ -226,7 +226,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
                   title="취소"
                   aria-label="취소"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path d="M6 6l12 12M6 18L18 6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M20 6.91L17.09 4L12 9.09L6.91 4L4 6.91L9.09 12L4 17.09L6.91 20L12 14.91L17.09 20L20 17.09L14.91 12z"/></svg>
                 </button>
               </>
             ) : (
@@ -237,7 +237,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
                   title="편집"
                   aria-label="편집"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25z" fill="currentColor"/><path d="M15.04 6.19l2.75 2.75" fill="none" stroke="currentColor" strokeWidth="1.2"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83l3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"/></svg>
                 </button>
                 <button
                   className="p-1.5 rounded border border-white/10 text-gray-300 hover:bg-white/10"
@@ -245,7 +245,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
                   title="삭제"
                   aria-label="삭제"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><g fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 7h12"/><path d="M10 7v10"/><path d="M14 7v10"/><path d="M9 4h6l1 2H8z"/></g></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6z"/></svg>
                 </button>
               </>
             )}
@@ -275,7 +275,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
             onClick={copyText}
             title="체크리스트 복사"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-3.5 h-3.5"><path fill="currentColor" d="M8 7V3.5A1.5 1.5 0 0 1 9.5 2h8A1.5 1.5 0 0 1 19 3.5v8A1.5 1.5 0 0 1 17.5 13H14v4.5A1.5 1.5 0 0 1 12.5 19h-8A1.5 1.5 0 0 1 3 17.5v-8A1.5 1.5 0 0 1 4.5 8zM9 8h5.5A1.5 1.5 0 0 0 16 6.5V5H9.5A1.5 1.5 0 0 0 8 6.5z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-3.5 h-3.5"><path fill="currentColor" d="M19 21H8V7h11m0-2H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2m-3-4H4a2 2 0 0 0-2 2v14h2V3h12z"/></svg>
             {copied ? '복사됨' : '복사'}
           </button>
         </div>
