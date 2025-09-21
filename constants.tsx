@@ -18,6 +18,7 @@ import SplitSpeakerPage from './components/pages/SplitSpeakerPage';
 import BirdGeneratorPage from './components/pages/BirdGeneratorPage';
 import MultiVoiceReaderPage from './components/pages/MultiVoiceReaderPage';
 import ToDoGeneratorPage from './components/pages/ToDoGeneratorPage';
+import TextToPhonemePage from './components/pages/TextToPhonemePage';
 import WebWorkerPage from './components/pages/WebWorkerPage';
 
 export const FileIcon = () => (
@@ -110,6 +111,19 @@ export const PAGES: {
     component: ToDoGeneratorPage,
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" className="w-4 h-4 mr-2 text-gray-400"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M13 5h8m-8 7h8m-8 7h8M3 17l2 2l4-4"/><rect width="6" height="6" x="3" y="4" rx="1"/></g></svg>
+    ),
+  },
+  'text-to-phoneme': {
+    title: 'Text to Phoneme',
+    component: TextToPhonemePage,
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4 mr-2 text-gray-400">
+        <g fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 10a7 7 0 1 1 14 0v1a4 4 0 0 0 0 8H9a4 4 0 0 1-4-4z" />
+          <path d="M17 14c1.657 0 3 1.79 3 4s-1.343 4-3 4" opacity=".7" />
+          <path d="M7 10h6M7 13h4" />
+        </g>
+      </svg>
     ),
   },
   'web-worker': {

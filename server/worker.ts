@@ -198,6 +198,83 @@ export default {
           headers: { 'content-type': 'application/json; charset=UTF-8' },
         });
       }
+      // Text to Phoneme: normalize input text then produce Korean G2P in a single shot
+      if (url.pathname === '/api/text-to-phoneme') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        if (!env.GEMINI_API_KEY) {
+          return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+        try {
+          const body = await request.json<any>().catch(() => ({} as any));
+          const text: string = typeof body?.text === 'string' ? body.text : '';
+          const lang: string = typeof body?.lang === 'string' ? body.lang : 'ko';
+          if (!text.trim()) {
+            return new Response(JSON.stringify({ error: 'Missing text' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+          // Compose instruction for single-response JSON with normalized + g2p (context-aware Korean rules)
+          const instructions = [
+            '당신은 텍스트를 한국어 발화 기준으로 전처리하고 발음 표기(G2P)까지 수행합니다.',
+            '출력은 JSON ONLY (설명/마크다운 금지).',
+            '스키마: { "normalized": string, "g2p": string }',
+            '규칙(중요):',
+            '- 의미를 보존하면서 숫자, 날짜, 단위, 기호, 영어/외래어/약어 등을 표준국어 맞춤법과 띄어쓰기에 맞게 자연스럽게 변환합니다.',
+            '- 문맥에 따라 고유어 수사(하나, 둘, 셋, 넷, 다섯, 여섯, 일곱, 여덟, 아홉, 열, 스무, 서른, 마흔...)와 한자어 수사(일, 이, 삼, 사, 오, 육, 칠, 팔, 구, 십, 이십...)를 올바르게 선택합니다.',
+            '- 다음과 같은 경우 고유어 수사를 우선 사용합니다: 횟수(번), 사람 수(명/분), 개수(개), 권, 살(나이), 마리, 시간의 "시"(1~12).',
+            '- 다음은 보통 한자어 수사를 사용합니다: 년/월/일(날짜), 분/초, 층, 학년, 호, 쪽/페이지, 원(금액), 회(횟수 표기), SI 단위(미터, 킬로그램 등).',
+            '- 서수 "번째"는 보통 고유어 수사를 사용합니다. (예: 1번째 → 첫 번째, 10번째 → 열 번째, 20번째 → 스무 번째)',
+            '- 고유어 수 앞에서는 축약형을 사용합니다: 하나/둘/셋/넷 → 한/두/세/네. (예: 1개 → 한 개, 2명 → 두 명, 3권 → 세 권, 4시 → 네 시)',
+            '- 20의 고유어는 "스무"를 씁니다: 20살 → 스무 살, 20번째 → 스무 번째.',
+            '- 시간의 "시"는 일반적으로 1~12까지 고유어 수를 사용합니다: 한 시, 두 시, 세 시, ... , 열두 시. (분/초는 한자어 수: 이십 분, 삼십 초)',
+            '- 식별자/번호/코드/주소 등은 숫자/한자어 수를 보존합니다: 버스 10번, 101호, 12번 출구, 201동, 101번지, 3호선, 24시 편의점 등은 숫자를 유지합니다.',
+            '- 예: "질문을 10번 했다" → "질문을 열 번 했다"; "사과 2개" → "사과 두 개"; "10살" → "열 살"; "10세" → "십 세"; "오전 10시 20분" → "오전 열 시 이십 분"; "1992년" → "천구백구십이년"; "10층" → "십 층".',
+            '- 고유명사/모델명/코드 등 맥락상 숫자 전환이 부적절한 경우는 보존합니다. (예: iPhone 13 → 아이폰 13)',
+            '- 영어/약어는 한국어 표준 표기에 맞게 변환합니다. (bus → 버스, AI → 에이아이)',
+            '- 띄어쓰기는 표준에 맞춰 조정합니다. (한 번/두 개/열 시 등)',
+            '- normalized는 사람이 읽기 쉬운 표기, g2p는 한국어 발음에 맞춘 표기(연음, 동화, 경음화 등 일반적 음운 변동 반영)입니다.',
+            `- 입력 언어 힌트: ${lang}`,
+          ].join('\n');
+
+          const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+          const aiRes = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': env.GEMINI_API_KEY!,
+            },
+            body: JSON.stringify({
+              contents: [ { parts: [ { text: instructions }, { text: `INPUT:\n${text}` } ] } ],
+              generationConfig: { responseMimeType: 'application/json', temperature: 0.2 },
+            }),
+          });
+          if (!aiRes.ok) {
+            const errText = await aiRes.text().catch(() => '');
+            return new Response(JSON.stringify({ error: `Gemini error: ${aiRes.status} ${aiRes.statusText}`, detail: errText }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const out: any = await aiRes.json();
+          const raw: string = ((out && out.candidates && out.candidates[0] && out.candidates[0].content && out.candidates[0].content.parts) || [])
+            .map((p: any) => p?.text || '')
+            .join('');
+          const jsonStr = extractJsonString(raw);
+          let parsed: any = {};
+          try { parsed = JSON.parse(jsonStr); } catch { parsed = {}; }
+          const normalized: string = typeof parsed?.normalized === 'string' ? parsed.normalized : '';
+          const g2p: string = typeof parsed?.g2p === 'string' ? parsed.g2p : '';
+          return new Response(JSON.stringify({ normalized, g2p }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
       // Worker code generator: return only JS function body string for calc(params)
       if (url.pathname === '/api/worker-codegen') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });

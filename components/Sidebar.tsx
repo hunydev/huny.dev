@@ -162,6 +162,15 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
     <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Playground</h2>
     <div className="flex flex-col gap-1">
       <button
+        onClick={() => onOpenFile('text-to-phoneme')}
+        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
+      >
+        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><g fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 10a7 7 0 1 1 14 0v1a4 4 0 0 0 0 8H9a4 4 0 0 1-4-4z" /><path d="M17 14c1.657 0 3 1.79 3 4s-1.343 4-3 4" opacity=".7" /><path d="M7 10h6M7 13h4" /></g></svg>
+        </span>
+        <span className="text-sm">Text to Phoneme</span>
+      </button>
+      <button
         onClick={() => onOpenFile('web-worker')}
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >
