@@ -263,26 +263,20 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
   };
 
   return (
-    <div className="max-w-[1200px] mx-auto">
-      <header className="mb-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-white">To-do Generator</h1>
-          <p className="text-sm text-gray-400">간단한 설명을 입력하면 체크리스트를 생성합니다.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            className="px-2.5 py-1.5 text-xs rounded border border-white/10 text-gray-300 hover:bg-white/10 inline-flex items-center gap-1"
-            onClick={copyText}
-            title="체크리스트 복사"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-3.5 h-3.5"><path fill="currentColor" d="M19 21H8V7h11m0-2H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2m-3-4H4a2 2 0 0 0-2 2v14h2V3h12z"/></svg>
-            {copied ? '복사됨' : '복사'}
-          </button>
-        </div>
+    <div className="text-gray-300 max-w-6xl mx-auto font-sans leading-relaxed">
+      <header className="mb-6">
+        <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
+          <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-emerald-300">
+            {/* Checklist icon */}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-6 h-6"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M13 5h8m-8 7h8m-8 7h8M3 17l2 2l4-4"/><rect width="6" height="6" x="3" y="4" rx="1"/></g></svg>
+          </span>
+          To-do Generator
+        </h1>
+        <p className="mt-2 text-gray-400 text-sm md:text-base">간단한 설명을 입력하면 체크리스트를 생성합니다.</p>
       </header>
 
       <section className="mb-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <input
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
@@ -305,6 +299,14 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
               <path fill="currentColor" d="M20 14h-6v6h-4v-6H4v-4h6V4h4v6h6z"/>
             </svg>
             <span>작업</span>
+          </button>
+          <button
+            className="px-3 py-2 rounded text-sm border border-white/10 text-gray-300 hover:bg-white/10 inline-flex items-center gap-1"
+            onClick={copyText}
+            title="체크리스트 복사"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M19 21H8V7h11m0-2H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2m-3-4H4a2 2 0 0 0-2 2v14h2V3h12z"/></svg>
+            <span>{copied ? '복사됨' : '복사'}</span>
           </button>
         </div>
         {error && <p className="mt-2 text-xs text-amber-300">{error}</p>}
