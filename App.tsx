@@ -28,6 +28,51 @@ const App: React.FC = () => {
   const restoredRef = useRef<boolean>(false);
   const restoringRef = useRef<boolean>(false);
 
+  // Map between ViewId and URL hash tokens (lowercase)
+  const VIEW_HASH: Record<ViewId, string> = {
+    [ViewId.Explorer]: 'explorer',
+    [ViewId.Search]: 'search',
+    [ViewId.Docs]: 'docs',
+    [ViewId.Apps]: 'apps',
+    [ViewId.Media]: 'media',
+    [ViewId.Playground]: 'playground',
+    [ViewId.Bookmark]: 'bookmark',
+    [ViewId.Notes]: 'notes',
+    // Bottom/external items intentionally omitted from hash routing
+    [ViewId.Blog]: 'blog',
+    [ViewId.GitHub]: 'github',
+    [ViewId.Discord]: 'discord',
+    [ViewId.X]: 'x',
+    [ViewId.Email]: 'email',
+    [ViewId.Sites]: 'sites',
+  };
+  const HASH_VIEW: Partial<Record<string, ViewId>> = {
+    explorer: ViewId.Explorer,
+    search: ViewId.Search,
+    docs: ViewId.Docs,
+    apps: ViewId.Apps,
+    media: ViewId.Media,
+    playground: ViewId.Playground,
+    bookmark: ViewId.Bookmark,
+    notes: ViewId.Notes,
+  };
+  const activeViewRef = useRef<ViewId>(ViewId.Explorer);
+  useEffect(() => { activeViewRef.current = activeView; }, [activeView]);
+
+  const setHashForView = useCallback((view: ViewId, replace?: boolean) => {
+    try {
+      const token = (VIEW_HASH[view] || 'explorer').toLowerCase();
+      const current = (typeof window !== 'undefined' ? (window.location.hash || '').slice(1).toLowerCase() : '');
+      if (current === token) return;
+      if (replace) {
+        history.replaceState(null, '', `#${token}`);
+      } else {
+        // Use hash assignment to also fire hashchange
+        window.location.hash = token;
+      }
+    } catch {}
+  }, []);
+
   // Map a tab id (e.g., 'docs:intro', 'bookmark:all', 'split-speaker') to the corresponding left sidebar view
   function viewForTabId(tabId: string): ViewId {
     try {
@@ -78,6 +123,33 @@ const App: React.FC = () => {
       }
     } catch {}
   }, []);
+
+  // Initialize from URL hash and keep in sync with hashchange
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return;
+      const applyHash = () => {
+        const token = (window.location.hash || '').slice(1).toLowerCase();
+        const v = token ? HASH_VIEW[token] : undefined;
+        if (v && v !== activeViewRef.current) {
+          setActiveView(v);
+        }
+      };
+      // Initial
+      const initial = (window.location.hash || '').slice(1).toLowerCase();
+      if (initial) {
+        const v = HASH_VIEW[initial];
+        if (v) setActiveView(v);
+      } else {
+        // Ensure hash reflects default state without pushing history
+        setHashForView(activeViewRef.current, true);
+      }
+      // Listen to future changes
+      const onHashChange = () => applyHash();
+      window.addEventListener('hashchange', onHashChange);
+      return () => window.removeEventListener('hashchange', onHashChange);
+    } catch {}
+  }, [setHashForView]);
 
   const handleOpenFile = useCallback((fileId: string) => {
     const originalId = fileId;
@@ -220,6 +292,14 @@ const App: React.FC = () => {
     setActiveView(v);
   }, [activeTabId]);
 
+  // Whenever activeView changes (by tabs or user click when pinned), push hash
+  useEffect(() => {
+    try {
+      if (!activeView) return;
+      setHashForView(activeView);
+    } catch {}
+  }, [activeView, setHashForView]);
+
   // Keep session-based recent list in sync with last visited tab
   useEffect(() => {
     if (!activeTabId) return;
@@ -320,6 +400,7 @@ const App: React.FC = () => {
   const handleActivityItemClick = (view: ViewId) => {
     if (isSidebarPinned) {
       setActiveView(view);
+      // Hash will be set by the [activeView] effect
       return;
     }
     // Overlay behavior when unpinned
@@ -329,6 +410,8 @@ const App: React.FC = () => {
       setOverlayView(view);
       setOverlayOpen(true);
     }
+    // Reflect selection in URL hash immediately
+    setHashForView(view);
   };
 
   const toggleSidebarPinned = () => {
