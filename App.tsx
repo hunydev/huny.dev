@@ -50,6 +50,7 @@ const App: React.FC = () => {
         case 'todo-generator':
         case 'text-to-phoneme':
         case 'web-worker':
+        case 'ui-clone':
           return ViewId.Playground;
         // Explorer bucket: core files
         case 'welcome':

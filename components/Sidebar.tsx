@@ -171,6 +171,15 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
         <span className="text-sm">Text to Phoneme</span>
       </button>
       <button
+        onClick={() => onOpenFile('ui-clone')}
+        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
+      >
+        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M11 22q-.825 0-1.412-.587T9 20v-7q0-.825.588-1.412T11 11h7q.825 0 1.413.588T20 13v7q0 .825-.587 1.413T18 22zM4 15q-.825 0-1.412-.587T2 13V6q0-.825.588-1.412T4 4h7q.825 0 1.413.588T13 6v1H6q-.825 0-1.412.588T4 9z"/></svg>
+        </span>
+        <span className="text-sm">UI Clone</span>
+      </button>
+      <button
         onClick={() => onOpenFile('web-worker')}
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >

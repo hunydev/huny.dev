@@ -20,6 +20,7 @@ import MultiVoiceReaderPage from './components/pages/MultiVoiceReaderPage';
 import ToDoGeneratorPage from './components/pages/ToDoGeneratorPage';
 import TextToPhonemePage from './components/pages/TextToPhonemePage';
 import WebWorkerPage from './components/pages/WebWorkerPage';
+import UIClonePage from './components/pages/UIClonePage';
 
 export const FileIcon = () => (
   <svg
@@ -132,6 +133,13 @@ export const PAGES: {
         <circle cx="6" cy="8" r="1" fill="currentColor"/>
         <path fill="currentColor" d="M28 4H4c-1.103 0-2 .898-2 2v20c0 1.103.897 2 2 2h24c1.103 0 2-.897 2-2V6c0-1.102-.897-2-2-2m0 2v4H4V6zM4 26V12h24v14z"/>
       </svg>
+    ),
+  },
+  'ui-clone': {
+    title: 'UI Clone',
+    component: UIClonePage,
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4 mr-2 text-gray-400"><path fill="currentColor" d="M11 22q-.825 0-1.412-.587T9 20v-7q0-.825.588-1.412T11 11h7q.825 0 1.413.588T20 13v7q0 .825-.587 1.413T18 22zM4 15q-.825 0-1.412-.587T2 13V6q0-.825.588-1.412T4 4h7q.825 0 1.413.588T13 6v1H6q-.825 0-1.412.588T4 9z"/></svg>
     ),
   },
   'multi-voice-reader': {

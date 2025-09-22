@@ -61,6 +61,80 @@ export default {
           });
         }
       }
+      // UI Clone: accept an image and return single-file HTML (inline CSS) via Gemini
+      if (url.pathname === '/api/ui-clone') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        if (!env.GEMINI_API_KEY) {
+          return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+        try {
+          const form = await request.formData();
+          const img = form.get('image');
+          if (!img || typeof (img as any).arrayBuffer !== 'function') {
+            return new Response(JSON.stringify({ error: 'Missing image' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+          const constraints: string = typeof form.get('constraints') === 'string' ? String(form.get('constraints')) : '';
+          const file = img as File;
+          const mime = (file.type && /image\//.test(file.type)) ? file.type : 'image/png';
+          const buf = new Uint8Array(await file.arrayBuffer());
+          const b64 = u8ToB64(buf);
+
+          const instructions = [
+            'You transform a UI screenshot into production-ready HTML/CSS (and minimal JS only if absolutely necessary).',
+            'Output policy: STRICT JSON ONLY — { "html": string } with no markdown/code fences.',
+            'HTML requirements:',
+            '- Single self-contained .html. Inline all CSS using <style> in <head>. No external links, no remote fonts/images, no CDN.',
+            '- Do not embed the uploaded image; instead reconstruct layout with semantic HTML and CSS (Flex/Grid/Positioning).',
+            '- Reasonable defaults: system fonts (e.g., -apple-system, Segoe UI, Roboto). Reset/normalize styles if needed.',
+            '- Include minimal responsive behavior where straightforward. Approximate colors/spacing/typography.',
+            '- If icons/illustrations are essential, use simple CSS shapes or inline SVG placeholders.',
+            '- Avoid frameworks. No analytics. No script unless needed for minor interactivity.',
+            'Return only valid HTML in the html field. It should render standalone and visually match the screenshot as closely as practical.',
+          ].join('\n');
+
+          const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+          const aiRes = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-goog-api-key': env.GEMINI_API_KEY! },
+            body: JSON.stringify({
+              contents: [
+                { parts: [
+                  { text: instructions },
+                  { inlineData: { mimeType: mime, data: b64 } },
+                  ...(constraints ? [ { text: `CONSTRAINTS:\n${constraints}` } ] : []),
+                ]}
+              ],
+              generationConfig: { responseMimeType: 'application/json', temperature: 0.2 },
+            }),
+          });
+          if (!aiRes.ok) {
+            const errText = await aiRes.text().catch(() => '');
+            return new Response(JSON.stringify({ error: `Gemini error: ${aiRes.status} ${aiRes.statusText}`, detail: errText }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const data: any = await aiRes.json();
+          const raw: string = ((data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [])
+            .map((p: any) => p?.text || '')
+            .join('');
+          const jsonStr = extractJsonString(raw);
+          let parsed: any = {};
+          try { parsed = JSON.parse(jsonStr); } catch { parsed = {}; }
+          const html: string = typeof parsed?.html === 'string' ? parsed.html : '';
+          return new Response(JSON.stringify({ html }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
       // PocketBase token refresh (client supplies Authorization header)
       if (url.pathname === '/api/pb-refresh') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
