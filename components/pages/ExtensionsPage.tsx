@@ -136,55 +136,65 @@ const ExtensionsPage: React.FC<PageProps> = () => {
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto px-4">
-      <header className="mb-6">
-        <h1 className="text-xl md:text-2xl font-semibold text-white">VSCode Extensions</h1>
-        <p className="text-sm text-gray-400">내가 사용하는 VS Code 확장 목록입니다. 빌드 시점에 Marketplace에서 최신 정보를 조회하여 생성됩니다.</p>
-      </header>
-
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-xs text-gray-400">Sort:</span>
-        <SortButton keyId="publisher" label="Publisher" />
-        <SortButton keyId="name" label="Name" />
-        <SortButton keyId="download" label="Download" />
-        <SortButton keyId="rating" label="Rating" />
+    <div className="min-h-full">
+      {/* Hero */}
+      <div className="relative overflow-hidden rounded-lg border border-white/10 bg-[#1b1b1b] p-5 md:p-7">
+        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl" />
+        </div>
+        <div className="relative">
+          <h1 className="mt-1 text-2xl md:text-3xl font-semibold text-white">VSCode Extensions</h1>
+          <p className="mt-1 text-sm md:text-base text-gray-400">내가 사용하는 VS Code 확장 목록입니다. 빌드 시점에 Marketplace에서 최신 정보를 조회하여 생성됩니다.</p>
+        </div>
       </div>
 
-      {loading && <div className="text-sm text-gray-400">Loading extensions…</div>}
-      {error && <div className="text-xs text-amber-300">{error}</div>}
+      {/* Body */}
+      <div className="mt-6">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-xs text-gray-400">Sort:</span>
+          <SortButton keyId="publisher" label="Publisher" />
+          <SortButton keyId="name" label="Name" />
+          <SortButton keyId="download" label="Download" />
+          <SortButton keyId="rating" label="Rating" />
+        </div>
 
-      {sorted.length > 0 ? (
-        <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sorted.map((x, idx) => (
-            <li key={`${x.publisherName}.${x.extensionName}-${idx}`} className="rounded border border-white/10 bg-white/[0.03] p-3 flex gap-3">
-              <div className="shrink-0 w-10 h-10 rounded bg-[#2d2d2d] border border-white/10 overflow-hidden flex items-center justify-center">
-                {x.icon ? (
-                  <img src={x.icon} alt="" className="w-10 h-10 object-cover" loading="lazy" decoding="async" />
-                ) : (
-                  <svg viewBox="0 0 24 24" className="w-6 h-6 text-gray-500" fill="currentColor"><path d="M3 3v18h18V3zm15 15H6v-1h12zm0-2H6v-1h12zm0-4H6V6h12z"/></svg>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="font-medium text-white truncate" title={x.displayName}>{x.displayName}</div>
-                    <div className="text-xs text-gray-400 truncate" title={`${x.publisherDisplayName} · ${x.extensionName}`}>
-                      <a href={x.publisherLink} target="_blank" rel="noopener" className="underline text-blue-300">{x.publisherDisplayName}</a>
-                      <span className="mx-1">·</span>
-                      <span>{x.extensionName}</span>
-                    </div>
-                  </div>
-                  <div className="text-xs text-gray-400 whitespace-nowrap">{x.install.toLocaleString()} installs</div>
+        {loading && <div className="text-sm text-gray-400">Loading extensions…</div>}
+        {error && <div className="text-xs text-amber-300">{error}</div>}
+
+        {sorted.length > 0 ? (
+          <ul className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {sorted.map((x, idx) => (
+              <li key={`${x.publisherName}.${x.extensionName}-${idx}`} className="rounded border border-white/10 bg-white/[0.03] p-3 flex gap-3">
+                <div className="shrink-0 w-10 h-10 rounded bg-[#2d2d2d] border border-white/10 overflow-hidden flex items-center justify-center">
+                  {x.icon ? (
+                    <img src={x.icon} alt="" className="w-10 h-10 object-cover" loading="lazy" decoding="async" />
+                  ) : (
+                    <svg viewBox="0 0 24 24" className="w-6 h-6 text-gray-500" fill="currentColor"><path d="M3 3v18h18V3zm15 15H6v-1h12zm0-2H6v-1h12zm0-4H6V6h12z"/></svg>
+                  )}
                 </div>
-                <p className="text-sm text-gray-300 mt-1 line-clamp-3">{x.shortDescription}</p>
-                <div className="mt-2"><RatingStars rating={x.rating || 0} ratingCount={x.ratingCount || 0} /></div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        !loading && !error && <div className="text-sm text-gray-400">No extensions found.</div>
-      )}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="font-medium text-white truncate" title={x.displayName}>{x.displayName}</div>
+                      <div className="text-xs text-gray-400 truncate" title={`${x.publisherDisplayName} · ${x.extensionName}`}>
+                        <a href={x.publisherLink} target="_blank" rel="noopener" className="underline text-blue-300">{x.publisherDisplayName}</a>
+                        <span className="mx-1">·</span>
+                        <span>{x.extensionName}</span>
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-400 whitespace-nowrap">{x.install.toLocaleString()} installs</div>
+                  </div>
+                  <p className="text-sm text-gray-300 mt-1 line-clamp-3">{x.shortDescription}</p>
+                  <div className="mt-2"><RatingStars rating={x.rating || 0} ratingCount={x.ratingCount || 0} /></div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          !loading && !error && <div className="text-sm text-gray-400">No extensions found.</div>
+        )}
+      </div>
     </div>
   );
 };
