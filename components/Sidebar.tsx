@@ -162,6 +162,17 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
     <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Playground</h2>
     <div className="flex flex-col gap-1">
       <button
+        onClick={() => onOpenFile('ai-business-card')}
+        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
+      >
+        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor" aria-hidden>
+            <path d="M3 5h18v14H3zm2 2v10h14V7zM6 9h6v2H6zm0 3h8v2H6z"/>
+          </svg>
+        </span>
+        <span className="text-sm">AI Business Card</span>
+      </button>
+      <button
         onClick={() => onOpenFile('text-cleaning')}
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >

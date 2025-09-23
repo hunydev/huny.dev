@@ -51,6 +51,7 @@ const App: React.FC = () => {
         case 'text-to-phoneme':
         case 'web-worker':
         case 'text-cleaning':
+        case 'ai-business-card':
         case 'ui-clone':
           return ViewId.Playground;
         // Explorer bucket: core files

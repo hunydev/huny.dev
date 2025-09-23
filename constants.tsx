@@ -24,6 +24,7 @@ const WebWorkerPage = React.lazy(() => import('./components/pages/WebWorkerPage'
 const UIClonePage = React.lazy(() => import('./components/pages/UIClonePage'));
 const ExtensionsPage = React.lazy(() => import('./components/pages/ExtensionsPage'));
 const TextCleaningPage = React.lazy(() => import('./components/pages/TextCleaningPage'));
+const AIBusinessCardPage = React.lazy(() => import('./components/pages/AIBusinessCardPage'));
 
 export const FileIcon = () => (
   <svg
@@ -146,6 +147,15 @@ export const PAGES: {
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4 mr-2 text-gray-400">
         <path fill="currentColor" d="m14.1 22l-4.25-4.25l1.4-1.4l2.85 2.85l5.65-5.65l1.4 1.4zM3 16L7.85 3h2.35l4.85 13h-2.3l-1.15-3.3H6.35L5.2 16zm4.05-5.2h3.9l-1.9-5.4h-.1z"/>
+      </svg>
+    ),
+  },
+  'ai-business-card': {
+    title: 'AI Business Card',
+    component: AIBusinessCardPage,
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4 mr-2 text-gray-400" fill="currentColor">
+        <path d="M3 5h18v14H3zm2 2v10h14V7zM6 9h6v2H6zm0 3h8v2H6z"/>
       </svg>
     ),
   },

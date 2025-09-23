@@ -199,6 +199,111 @@ export default {
           });
         }
       }
+      // AI Business Card: generate front (and optionally back) background images using Gemini
+      if (url.pathname === '/api/ai-business-card') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        if (!env.GEMINI_API_KEY) {
+          return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+        try {
+          const form = await request.formData();
+          const logo = form.get('logo');
+          const includeBack = String(form.get('include_back') || '0') === '1';
+          const prompt = typeof form.get('prompt') === 'string' ? String(form.get('prompt')) : '';
+          const fieldsRaw = typeof form.get('fields') === 'string' ? String(form.get('fields')) : '[]';
+          let fields: any[] = [];
+          try { fields = JSON.parse(fieldsRaw); } catch {}
+          const extras: File[] = [];
+          const extrasEntry = form.getAll('extras');
+          for (const it of extrasEntry) {
+            if (it && typeof (it as any).arrayBuffer === 'function') extras.push(it as File);
+          }
+          if (!logo || typeof (logo as any).arrayBuffer !== 'function') {
+            return new Response(JSON.stringify({ error: 'Missing logo image' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+
+          // Prepare inline data
+          const logoFile = logo as File;
+          const logoMime = (logoFile.type && /image\//.test(logoFile.type)) ? logoFile.type : 'image/png';
+          const logoBuf = new Uint8Array(await logoFile.arrayBuffer());
+          const logoB64 = u8ToB64(logoBuf);
+          const extraParts: Array<{ mime: string; data: string }> = [];
+          for (const f of extras) {
+            const m = (f.type && /image\//.test(f.type)) ? f.type : 'image/png';
+            const b = new Uint8Array(await f.arrayBuffer());
+            extraParts.push({ mime: m, data: u8ToB64(b) });
+          }
+
+          const instructions = [
+            'You are a brand designer generating a BUSINESS CARD BACKGROUND image (no textual contact info rendered by you).',
+            'Constraints:',
+            '- Use the provided logo image for style guidance; you MAY incorporate the logo as a graphic watermark or placeholder area, but avoid rasterizing small text for contact details.',
+            '- Leave clear areas and visual hierarchy where human-placed text (name, title, phone, etc.) can be overlaid later.',
+            '- Produce a modern, professional aesthetic. Consider color palette derived from the logo. Keep ample margins (safe area).',
+            'Output: a single 1050x600 px landscape image that fills the canvas.'
+          ].join('\n');
+
+          // Use the model per provided spec
+          const model = 'gemini-2.5-flash-image-preview';
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+
+          // Shared image parts (snake_case inline_data)
+          const imageParts: any[] = [ { inline_data: { mime_type: logoMime, data: logoB64 } } ];
+          for (const p of extraParts) imageParts.push({ inline_data: { mime_type: p.mime, data: p.data } });
+
+          // Helper to call API and extract first image inline_data
+          const callOnce = async (taskText: string) => {
+            const parts: any[] = [
+              { text: instructions },
+              { text: taskText },
+              { text: `FIELDS (for style context only):\n${JSON.stringify(fields)}` },
+              ...(prompt ? [ { text: `USER PROMPT:\n${prompt}` } ] : []),
+              ...imageParts,
+            ];
+            const res = await fetch(apiUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'X-goog-api-key': env.GEMINI_API_KEY! },
+              body: JSON.stringify({ contents: [ { parts } ], generationConfig: { temperature: 0.7 } }),
+            });
+            const txt = await res.text();
+            if (!res.ok) {
+              throw new Error(`Gemini error: ${res.status} ${res.statusText}\n${txt}`);
+            }
+            let js: any = {};
+            try { js = txt ? JSON.parse(txt) : {}; } catch {}
+            const candidates: any[] = Array.isArray(js?.candidates) ? js.candidates : [];
+            for (const c of candidates) {
+              const parts = c?.content?.parts || [];
+              for (const p of parts) {
+                const d = p?.inline_data?.data || p?.inlineData?.data;
+                const mt = p?.inline_data?.mime_type || p?.inlineData?.mimeType || '';
+                if (d && (/^image\//.test(mt) || mt === 'image/png' || mt === 'image/jpeg')) {
+                  return `data:${mt || 'image/png'};base64,${d}`;
+                }
+              }
+            }
+            throw new Error('No image returned from Gemini');
+          };
+
+          const frontImgUrl = await callOnce('TASK: Generate FRONT background only (no textual contact info). Provide clear text-safe areas.');
+          let backImgUrl = '';
+          if (includeBack) {
+            backImgUrl = await callOnce('TASK: Generate BACK background only (brand motif or subtle pattern). No textual contact info.');
+          }
+
+          const out: any = { images: { front: frontImgUrl } };
+          if (includeBack && backImgUrl) out.images.back = backImgUrl;
+          return new Response(JSON.stringify(out), { headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' } });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
       // PocketBase token refresh (client supplies Authorization header)
       if (url.pathname === '/api/pb-refresh') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
