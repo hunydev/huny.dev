@@ -4,13 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/generate-vscode-extensions.mjs || echo 'skip gen'",
     "dev": "vite",
+    "prebuild": "node scripts/generate-vscode-extensions.mjs",
     "build": "npm run build:client && npm run build:ssr",
     "build:client": "vite build",
     "build:ssr": "vite build --ssr",
     "preview": "vite preview",
     "serve:ssr": "npm run build && wrangler dev",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run build && wrangler deploy",
+    "gen:extensions": "node scripts/generate-vscode-extensions.mjs"
   },
   "dependencies": {
     "react": "^19.1.1",

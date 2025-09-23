@@ -305,6 +305,10 @@ const ExplorerView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
                 <FileIcon />
                 <span>project.js</span>
             </button>
+            <button onClick={() => onOpenFile('extensions')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
+                <FileIcon />
+                <span>extensions.txt</span>
+            </button>
         </div>
     </div>
   </div>

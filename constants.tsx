@@ -22,6 +22,7 @@ const ToDoGeneratorPage = React.lazy(() => import('./components/pages/ToDoGenera
 const TextToPhonemePage = React.lazy(() => import('./components/pages/TextToPhonemePage'));
 const WebWorkerPage = React.lazy(() => import('./components/pages/WebWorkerPage'));
 const UIClonePage = React.lazy(() => import('./components/pages/UIClonePage'));
+const ExtensionsPage = React.lazy(() => import('./components/pages/ExtensionsPage'));
 
 export const FileIcon = () => (
   <svg
@@ -193,6 +194,11 @@ export const PAGES: {
   project: {
     title: 'project.js',
     component: ProjectPage,
+    icon: <FileIcon />,
+  },
+  extensions: {
+    title: 'extensions.txt',
+    component: ExtensionsPage,
     icon: <FileIcon />,
   },
   about: {
