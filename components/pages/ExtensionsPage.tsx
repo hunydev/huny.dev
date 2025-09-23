@@ -55,6 +55,65 @@ const ExtensionsPage: React.FC<PageProps> = () => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string>('');
 
+  type SortKey = 'publisher' | 'name' | 'download' | 'rating';
+  const [sortBy, setSortBy] = React.useState<SortKey>('publisher');
+  const [sortDir, setSortDir] = React.useState<'asc' | 'desc'>('asc');
+
+  const onSort = (key: SortKey) => {
+    if (sortBy === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortBy(key);
+      setSortDir('asc');
+    }
+  };
+
+  const sorted = React.useMemo(() => {
+    const arr = Array.isArray(data?.extensions) ? [...(data!.extensions)] : [];
+    const collator = new Intl.Collator(undefined, { sensitivity: 'base', numeric: true });
+    const cmp = (a: VSCodeExtensionsPayload['extensions'][number], b: VSCodeExtensionsPayload['extensions'][number]) => {
+      switch (sortBy) {
+        case 'publisher': {
+          const A = (a.publisherDisplayName || a.publisherName || '').trim();
+          const B = (b.publisherDisplayName || b.publisherName || '').trim();
+          return collator.compare(A, B);
+        }
+        case 'name': {
+          const A = (a.displayName || a.extensionName || '').trim();
+          const B = (b.displayName || b.extensionName || '').trim();
+          return collator.compare(A, B);
+        }
+        case 'download':
+          return (a.install || 0) - (b.install || 0);
+        case 'rating':
+          return (a.rating || 0) - (b.rating || 0);
+        default:
+          return 0;
+      }
+    };
+    arr.sort((a, b) => (sortDir === 'asc' ? cmp(a, b) : -cmp(a, b)));
+    return arr;
+  }, [data, sortBy, sortDir]);
+
+  const SortButton: React.FC<{ keyId: SortKey; label: string }> = ({ keyId, label }) => {
+    const active = sortBy === keyId;
+    return (
+      <button
+        onClick={() => onSort(keyId)}
+        className={`px-2 py-1 text-xs rounded border transition-colors ${
+          active ? 'border-white/30 bg-white/10 text-white' : 'border-white/10 text-gray-300 hover:bg-white/5'
+        }`}
+      >
+        <span>{label}</span>
+        {active && (
+          <svg className={`w-3 h-3 ml-1 inline-block ${sortDir === 'desc' ? 'rotate-180' : ''}`} viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+            <path d="M8 5l4 6H4z" />
+          </svg>
+        )}
+      </button>
+    );
+  };
+
   React.useEffect(() => {
     let alive = true;
     (async () => {
@@ -83,12 +142,20 @@ const ExtensionsPage: React.FC<PageProps> = () => {
         <p className="text-sm text-gray-400">내가 사용하는 VS Code 확장 목록입니다. 빌드 시점에 Marketplace에서 최신 정보를 조회하여 생성됩니다.</p>
       </header>
 
+      <div className="flex items-center gap-2 mb-4">
+        <span className="text-xs text-gray-400">Sort:</span>
+        <SortButton keyId="publisher" label="Publisher" />
+        <SortButton keyId="name" label="Name" />
+        <SortButton keyId="download" label="Download" />
+        <SortButton keyId="rating" label="Rating" />
+      </div>
+
       {loading && <div className="text-sm text-gray-400">Loading extensions…</div>}
       {error && <div className="text-xs text-amber-300">{error}</div>}
 
-      {data?.extensions && data.extensions.length > 0 ? (
+      {sorted.length > 0 ? (
         <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {data.extensions.map((x, idx) => (
+          {sorted.map((x, idx) => (
             <li key={`${x.publisherName}.${x.extensionName}-${idx}`} className="rounded border border-white/10 bg-white/[0.03] p-3 flex gap-3">
               <div className="shrink-0 w-10 h-10 rounded bg-[#2d2d2d] border border-white/10 overflow-hidden flex items-center justify-center">
                 {x.icon ? (
