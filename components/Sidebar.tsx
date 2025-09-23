@@ -162,6 +162,15 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
     <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Playground</h2>
     <div className="flex flex-col gap-1">
       <button
+        onClick={() => onOpenFile('sticker-generator')}
+        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
+      >
+        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M3 4h13l5 5v11a2 2 0 0 1-2 2H3zm2 2v14h14V10h-4a2 2 0 0 1-2-2V6zM6 12h6v2H6zm0 3h5v2H6z"/></svg>
+        </span>
+        <span className="text-sm">Sticker Generator</span>
+      </button>
+      <button
         onClick={() => onOpenFile('ai-business-card')}
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >

@@ -52,6 +52,7 @@ const App: React.FC = () => {
         case 'web-worker':
         case 'text-cleaning':
         case 'ai-business-card':
+        case 'sticker-generator':
         case 'ui-clone':
           return ViewId.Playground;
         // Explorer bucket: core files

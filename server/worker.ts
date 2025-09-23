@@ -61,6 +61,102 @@ export default {
           });
         }
       }
+
+      // Sticker Generator: create a sticker sheet (multiple variations) from a user image
+      if (url.pathname === '/api/sticker-generator') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        if (!env.GEMINI_API_KEY) {
+          return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+        try {
+          const form = await request.formData();
+          const img = form.get('image');
+          if (!img || typeof (img as any).arrayBuffer !== 'function') {
+            return new Response(JSON.stringify({ error: 'Missing image' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+          const minRaw = String(form.get('min') || '10');
+          let minCount = parseInt(minRaw, 10);
+          if (!Number.isFinite(minCount) || minCount < 1) minCount = 10;
+          if (minCount > 64) minCount = 64; // safety cap
+          const transparent = String(form.get('transparent') || '0') === '1';
+          const userPrompt = typeof form.get('prompt') === 'string' ? String(form.get('prompt')) : '';
+
+          const file = img as File;
+          const mime = (file.type && /image\//.test(file.type)) ? file.type : 'image/png';
+          const buf = new Uint8Array(await file.arrayBuffer());
+          const b64 = u8ToB64(buf);
+
+          // Model and endpoint per spec
+          const model = 'gemini-2.5-flash-image-preview';
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+
+          const instructions = [
+            'You are a sticker sheet generator. Create a SINGLE image that contains multiple sticker variations derived from the provided subject image.',
+            'Variety requirements:',
+            '- Use diverse poses, directions (facing left/right/front/angled), and thematic concepts so the set is not monotonous.',
+            `- At least ${minCount} distinct stickers. Arrange in a neat grid or mosaic with even spacing/margins.`,
+            'Visual style:',
+            '- Keep a consistent cohesive style across variations. Avoid text watermarks.',
+            '- If background is required, prefer a clean white or very light neutral. If TRANSPARENT=1, produce PNG with alpha background fully transparent.',
+            'Output:',
+            '- Return ONE composite image (a sticker sheet). Prefer square or landscape canvas sized reasonably for many stickers (e.g., ~1536–2048px).',
+            '- Stickers should have clear separation (padding) so they can be cropped later.',
+          ].join('\n');
+
+          // Build parts (snake_case inline_data as in other image routes)
+          const parts: any[] = [
+            { text: instructions },
+            { text: `GENERATE:\nMIN=${minCount}\nTRANSPARENT=${transparent ? '1' : '0'}\nFORMAT=PNG\n` },
+            ...(userPrompt ? [ { text: `EXTRA USER PROMPT:\n${userPrompt}` } ] : []),
+            { inline_data: { mime_type: mime, data: b64 } },
+          ];
+
+          const aiRes = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-goog-api-key': env.GEMINI_API_KEY! },
+            body: JSON.stringify({ contents: [ { parts } ], generationConfig: { temperature: 0.7 } }),
+          });
+          const txt = await aiRes.text();
+          if (!aiRes.ok) {
+            return new Response(JSON.stringify({ error: `Gemini error: ${aiRes.status} ${aiRes.statusText}`, detail: txt }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          let js: any = {};
+          try { js = txt ? JSON.parse(txt) : {}; } catch {}
+          const candidates: any[] = Array.isArray(js?.candidates) ? js.candidates : [];
+          let dataUrl = '';
+          outer: for (const c of candidates) {
+            const cparts = c?.content?.parts || [];
+            for (const p of cparts) {
+              const d = p?.inline_data?.data || p?.inlineData?.data;
+              const mt = p?.inline_data?.mime_type || p?.inlineData?.mimeType || '';
+              if (d && (/^image\//.test(mt) || mt === 'image/png' || mt === 'image/jpeg')) {
+                dataUrl = `data:${mt || 'image/png'};base64,${d}`;
+                break outer;
+              }
+            }
+          }
+          if (!dataUrl) {
+            return new Response(JSON.stringify({ error: 'No image returned from Gemini' }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          return new Response(JSON.stringify({ image: dataUrl }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
       // Text Cleaning: proofread typos/spacing/grammar while preserving meaning; return JSON only
       if (url.pathname === '/api/text-cleaning') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });

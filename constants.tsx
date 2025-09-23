@@ -25,6 +25,7 @@ const UIClonePage = React.lazy(() => import('./components/pages/UIClonePage'));
 const ExtensionsPage = React.lazy(() => import('./components/pages/ExtensionsPage'));
 const TextCleaningPage = React.lazy(() => import('./components/pages/TextCleaningPage'));
 const AIBusinessCardPage = React.lazy(() => import('./components/pages/AIBusinessCardPage'));
+const StickerGeneratorPage = React.lazy(() => import('./components/pages/StickerGeneratorPage'));
 
 export const FileIcon = () => (
   <svg
@@ -157,6 +158,13 @@ export const PAGES: {
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4 mr-2 text-gray-400" fill="currentColor">
         <path d="M3 5h18v14H3zm2 2v10h14V7zM6 9h6v2H6zm0 3h8v2H6z"/>
       </svg>
+    ),
+  },
+  'sticker-generator': {
+    title: 'Sticker Generator',
+    component: StickerGeneratorPage,
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4 mr-2 text-gray-400"><path fill="currentColor" d="M3 4h13l5 5v11a2 2 0 0 1-2 2H3zm2 2v14h14V10h-4a2 2 0 0 1-2-2V6zM6 12h6v2H6zm0 3h5v2H6z"/></svg>
     ),
   },
   'ui-clone': {
