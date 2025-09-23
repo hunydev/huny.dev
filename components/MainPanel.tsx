@@ -132,7 +132,12 @@ const MainPanel: React.FC<MainPanelProps> = ({ openTabs, activeTabId, onTabClick
     const pageInfo = PAGES[baseId];
     if (pageInfo) {
       const finalProps: PageProps = { ...pageProps, routeParams };
-      ActiveComponentContent = React.createElement(pageInfo.component, finalProps);
+      const Comp = pageInfo.component as React.ComponentType<PageProps>;
+      ActiveComponentContent = (
+        <React.Suspense fallback={<div className="text-sm text-gray-400">Loading…</div>}>
+          <Comp {...finalProps} />
+        </React.Suspense>
+      );
     }
   }
 

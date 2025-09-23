@@ -31,9 +31,20 @@ export default defineConfig(({ mode, isSsrBuild }) => {
       : {
           outDir: path.resolve(__dirname, 'dist/client'),
           manifest: true,
+          chunkSizeWarningLimit: 1024,
           rollupOptions: {
             input: path.resolve(__dirname, 'index.html'),
+            output: {
+              manualChunks(id) {
+                if (id.includes('node_modules')) {
+                  if (id.includes('highlight.js')) return 'hljs';
+                  if (id.includes('react') || id.includes('scheduler')) return 'react-vendor';
+                  return 'vendor';
+                }
+              },
+            },
           },
         },
   };
 });
+

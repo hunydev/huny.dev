@@ -1,26 +1,27 @@
 import React from 'react';
 import { ViewId, PageProps } from './types';
-import WelcomePage from './components/pages/WelcomePage';
 import welcomeIcon from './icon_32x32.png';
-import ProjectPage from './components/pages/ProjectPage';
-import AboutPage from './components/pages/AboutPage';
-import BookmarkPage from './components/pages/BookmarkPage';
-import MediaPreviewPage from './components/pages/MediaPreviewPage';
-import NotesBoardPage from './components/pages/NotesBoardPage';
-import DomainPage from './components/pages/DomainPage';
-import AppsPage from './components/pages/AppsPage';
-import DocsPage from './components/pages/DocsPage';
-import WorksPage from './components/pages/WorksPage';
-import DigitalShelfPage from './components/pages/DigitalShelfPage';
-import StackHunyDevPage from './components/pages/StackHunyDevPage';
-import MascotGalleryPage from './components/pages/MascotGalleryPage';
-import SplitSpeakerPage from './components/pages/SplitSpeakerPage';
-import BirdGeneratorPage from './components/pages/BirdGeneratorPage';
-import MultiVoiceReaderPage from './components/pages/MultiVoiceReaderPage';
-import ToDoGeneratorPage from './components/pages/ToDoGeneratorPage';
-import TextToPhonemePage from './components/pages/TextToPhonemePage';
-import WebWorkerPage from './components/pages/WebWorkerPage';
-import UIClonePage from './components/pages/UIClonePage';
+// Route-level code splitting with lazy imports
+const WelcomePage = React.lazy(() => import('./components/pages/WelcomePage'));
+const ProjectPage = React.lazy(() => import('./components/pages/ProjectPage'));
+const AboutPage = React.lazy(() => import('./components/pages/AboutPage'));
+const BookmarkPage = React.lazy(() => import('./components/pages/BookmarkPage'));
+const MediaPreviewPage = React.lazy(() => import('./components/pages/MediaPreviewPage'));
+const NotesBoardPage = React.lazy(() => import('./components/pages/NotesBoardPage'));
+const DomainPage = React.lazy(() => import('./components/pages/DomainPage'));
+const AppsPage = React.lazy(() => import('./components/pages/AppsPage'));
+const DocsPage = React.lazy(() => import('./components/pages/DocsPage'));
+const WorksPage = React.lazy(() => import('./components/pages/WorksPage'));
+const DigitalShelfPage = React.lazy(() => import('./components/pages/DigitalShelfPage'));
+const StackHunyDevPage = React.lazy(() => import('./components/pages/StackHunyDevPage'));
+const MascotGalleryPage = React.lazy(() => import('./components/pages/MascotGalleryPage'));
+const SplitSpeakerPage = React.lazy(() => import('./components/pages/SplitSpeakerPage'));
+const BirdGeneratorPage = React.lazy(() => import('./components/pages/BirdGeneratorPage'));
+const MultiVoiceReaderPage = React.lazy(() => import('./components/pages/MultiVoiceReaderPage'));
+const ToDoGeneratorPage = React.lazy(() => import('./components/pages/ToDoGeneratorPage'));
+const TextToPhonemePage = React.lazy(() => import('./components/pages/TextToPhonemePage'));
+const WebWorkerPage = React.lazy(() => import('./components/pages/WebWorkerPage'));
+const UIClonePage = React.lazy(() => import('./components/pages/UIClonePage'));
 
 export const FileIcon = () => (
   <svg
@@ -51,10 +52,12 @@ export const VideoIcon = () => (
   </svg>
 );
 
+type PageComp = React.ComponentType<PageProps> | React.LazyExoticComponent<React.ComponentType<PageProps>>;
+
 export const PAGES: {
   [key: string]: {
     title: string;
-    component: React.FC<PageProps>;
+    component: PageComp;
     icon: React.ReactNode;
   };
 } = {

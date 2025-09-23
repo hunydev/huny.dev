@@ -1,8 +1,11 @@
 import React from 'react';
 import { PageProps } from '../../types';
 import { DOCS, getDocBySlug } from './docsData';
-import hljs from 'highlight.js';
+import hljs from 'highlight.js/lib/core';
+import xml from 'highlight.js/lib/languages/xml';
 import 'highlight.js/styles/github-dark.css';
+// Register only XML to minimize bundle size
+hljs.registerLanguage('xml', xml);
 
 const DocsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
   const slug = routeParams?.slug as string | undefined;
