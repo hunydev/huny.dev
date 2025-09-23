@@ -68,21 +68,33 @@ export async function render(url: string, manifest?: ViteManifest) {
     ${cssLinks}
     <script type="application/ld+json">${JSON.stringify({
       '@context': 'https://schema.org',
-      '@type': 'Person',
-      name: 'Huny',
+      '@type': 'Organization',
+      name: 'HunyDev',
       url: 'https://huny.dev/',
-      email: 'mailto:jang@huny.dev',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://huny.dev/logo_128x128.png',
+      },
       sameAs: [
         'https://github.com/hunydev',
         'https://x.com/janghun2722',
         'https://discord.gg/2NWa39bU',
+        'https://blog.huny.dev',
+        'https://apps.huny.dev',
+        'https://sites.huny.dev',
       ],
     })}</script>
     <script type="application/ld+json">${JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'WebSite',
       name: 'HunyDev',
+      alternateName: ['Huny', 'Huny Dev'],
       url: 'https://huny.dev/',
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://huny.dev/?q={search_term_string}',
+        'query-input': 'required name=search_term_string',
+      },
     })}</script>
     <script type="application/ld+json">${JSON.stringify({
       '@context': 'https://schema.org',
