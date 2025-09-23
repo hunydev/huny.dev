@@ -61,6 +61,70 @@ export default {
           });
         }
       }
+      // Text Cleaning: proofread typos/spacing/grammar while preserving meaning; return JSON only
+      if (url.pathname === '/api/text-cleaning') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        if (!env.GEMINI_API_KEY) {
+          return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+        try {
+          const body = await request.json<any>().catch(() => ({} as any));
+          const text: string = typeof body?.text === 'string' ? body.text : '';
+          if (!text.trim()) {
+            return new Response(JSON.stringify({ error: 'Missing text' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+
+          const instructions = [
+            '당신은 한국어 텍스트의 교정/교열 도우미입니다.',
+            '역할: 오타, 맞춤법, 띄어쓰기, 조사/어미, 간단한 문법 오류를 자연스럽게 바로잡되, 원문의 의미와 톤은 보존합니다.',
+            '정책:',
+            '- 고유명사, 코드, 명시적 표기(버전/모델명/식별자)는 보존합니다.',
+            '- 문체는 존댓말/반말 등 맥락을 유지합니다.',
+            '- 과도한 의역/요약/확장 없이 필요한 범위에서만 수정합니다.',
+            '- 한국어 표준 맞춤법과 띄어쓰기를 기본으로 합니다.',
+            '출력 형식: JSON ONLY — { "cleaned": string } (마크다운/설명 금지).',
+          ].join('\n');
+
+          const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+          const aiRes = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': env.GEMINI_API_KEY!,
+            },
+            body: JSON.stringify({
+              contents: [ { parts: [ { text: instructions }, { text: `INPUT:\n${text}` } ] } ],
+              generationConfig: { responseMimeType: 'application/json', temperature: 0.2 },
+            }),
+          });
+          if (!aiRes.ok) {
+            const errText = await aiRes.text().catch(() => '');
+            return new Response(JSON.stringify({ error: `Gemini error: ${aiRes.status} ${aiRes.statusText}`, detail: errText }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const data: any = await aiRes.json();
+          const raw: string = ((data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [])
+            .map((p: any) => p?.text || '')
+            .join('');
+          const jsonStr = extractJsonString(raw);
+          let parsed: any = {};
+          try { parsed = JSON.parse(jsonStr); } catch { parsed = {}; }
+          const cleaned: string = typeof parsed?.cleaned === 'string' ? parsed.cleaned : '';
+          return new Response(JSON.stringify({ cleaned }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
       // UI Clone: accept an image and return single-file HTML (inline CSS) via Gemini
       if (url.pathname === '/api/ui-clone') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });

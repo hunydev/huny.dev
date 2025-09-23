@@ -162,11 +162,22 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
     <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Playground</h2>
     <div className="flex flex-col gap-1">
       <button
+        onClick={() => onOpenFile('text-cleaning')}
+        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
+      >
+        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+            <path d="m14.1 22l-4.25-4.25l1.4-1.4l2.85 2.85l5.65-5.65l1.4 1.4zM3 16L7.85 3h2.35l4.85 13h-2.3l-1.15-3.3H6.35L5.2 16zm4.05-5.2h3.9l-1.9-5.4h-.1z" />
+          </svg>
+        </span>
+        <span className="text-sm">Text Cleaning</span>
+      </button>
+      <button
         onClick={() => onOpenFile('text-to-phoneme')}
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >
         <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M5.4 12.575q.65 0 1.113-.287t.462-.863t-.462-.875t-1.113-.3t-1.112.3t-.463.875t.463.863t1.112.287M1.875 8.8V7.7h2.85V6.3h1.3v1.4H8.9v1.1zM5.4 13.675q-1.175 0-2.013-.587t-.837-1.663q0-1.1.838-1.675T5.4 9.175q1.2 0 2.038.575t.837 1.675t-.837 1.675t-2.038.575M3.575 17.7v-3.5H4.9v2.4h6.6v1.1zM9.7 15.075V6.3h1.275v3.75H12.7v1.1H11v3.925zm7.85.575q.7 0 1.363-.325t1.212-.925v-2.65q-.575.075-1.062.175t-.913.225q-1.125.35-1.687.875T15.9 14.25q0 .65.45 1.025t1.2.375m-.575 1.7q-1.425 0-2.25-.812t-.825-2.213q0-1.3.825-2.125t2.65-1.325q.575-.15 1.263-.275t1.487-.225q-.05-1.175-.55-1.713t-1.55-.537q-.65 0-1.287.238T15.1 9.2l-.8-1.4q.825-.625 1.938-1.012T18.5 6.4q1.775 0 2.7 1.1t.925 3.2v6.425H20.45L20.3 16q-.7.625-1.537.988t-1.788.362"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M5.4 12.575q.65 0 1.113-.287t.462-.863t-.462-.875t-1.113-.3t-1.112.3t-.463.875t.463.863t1.112.287M1.875 8.8V7.7h2.85V6.3h1.3v1.4H8.9v1.1zM5.4 13.675q-1.175 0-2.013-.587t-.837-1.663q0-1.1.838-1.675T5.4 9.175q1.2 0 2.038.575t.837 1.675t-.837 1.675t-2.038.575M3.575 17.7v-3.5H4.9v2.4h6.6v1.1zM9.7 15.075V6.3h1.275v3.75H12.7v1.1H11v3.925zm7.85.575q.7 0 1.363-.325t1.212-.925v-2.65q-.575.075-1.062.175t-.913.225q-1.125.35-1.687.875T15.9 14.25q0 .65.45 1.025t1.2.375m-.575 1.7q-1.425 0-2.25-.812t-.825-2.213q0-1.3.825-2.125t2.65-1.325q.575-.15 1.263-.275t1.487-.225q-.05-1.175-.55-1.713t-1.55-.537q-.65 0-1.287.238T15.1 9.2l-.8-1.4q.825-.625 1.938-1.012T18.5 6.4q1.775 0 2.7 1.1t.925 3.2v6.425H20.45L20.3 16q-.7.625-1.537.988t-1.788.362" /></svg>
         </span>
         <span className="text-sm">Text to Phoneme</span>
       </button>
@@ -175,7 +186,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >
         <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M11 22q-.825 0-1.412-.587T9 20v-7q0-.825.588-1.412T11 11h7q.825 0 1.413.588T20 13v7q0 .825-.587 1.413T18 22zM4 15q-.825 0-1.412-.587T2 13V6q0-.825.588-1.412T4 4h7q.825 0 1.413.588T13 6v1H6q-.825 0-1.412.588T4 9z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M11 22q-.825 0-1.412-.587T9 20v-7q0-.825.588-1.412T11 11h7q.825 0 1.413.588T20 13v7q0 .825-.587 1.413T18 22zM4 15q-.825 0-1.412-.587T2 13V6q0-.825.588-1.412T4 4h7q.825 0 1.413.588T13 6v1H6q-.825 0-1.412.588T4 9z" /></svg>
         </span>
         <span className="text-sm">UI Clone</span>
       </button>
@@ -184,7 +195,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >
         <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-4 h-4"><path fill="currentColor" d="m20.17 19l-2.59 2.59L19 23l4-4l-4-4l-1.42 1.41zm-8.34 0l2.59-2.59L13 15l-4 4l4 4l1.42-1.41z"/><circle cx="9" cy="8" r="1" fill="currentColor"/><circle cx="6" cy="8" r="1" fill="currentColor"/><path fill="currentColor" d="M28 4H4c-1.103 0-2 .898-2 2v20c0 1.103.897 2 2 2h24c1.103 0 2-.897 2-2V6c0-1.102-.897-2-2-2m0 2v4H4V6zM4 26V12h24v14z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-4 h-4"><path fill="currentColor" d="m20.17 19l-2.59 2.59L19 23l4-4l-4-4l-1.42 1.41zm-8.34 0l2.59-2.59L13 15l-4 4l4 4l1.42-1.41z" /><circle cx="9" cy="8" r="1" fill="currentColor" /><circle cx="6" cy="8" r="1" fill="currentColor" /><path fill="currentColor" d="M28 4H4c-1.103 0-2 .898-2 2v20c0 1.103.897 2 2 2h24c1.103 0 2-.897 2-2V6c0-1.102-.897-2-2-2m0 2v4H4V6zM4 26V12h24v14z" /></svg>
         </span>
         <span className="text-sm">Web Worker</span>
       </button>
@@ -193,7 +204,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >
         <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" className="w-4 h-4"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M13 5h8m-8 7h8m-8 7h8M3 17l2 2l4-4"/><rect width="6" height="6" x="3" y="4" rx="1"/></g></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" className="w-4 h-4"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M13 5h8m-8 7h8m-8 7h8M3 17l2 2l4-4" /><rect width="6" height="6" x="3" y="4" rx="1" /></g></svg>
         </span>
         <span className="text-sm">To-do Generator</span>
       </button>
@@ -202,7 +213,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >
         <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M2 5a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3H9l-4 3v-3H5a3 3 0 0 1-3-3z"/><path d="M14 10a3 3 0 0 0 3-3v-.5h2a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3h-1l-3 2.25V16h-1a3 3 0 0 1-3-3v-1z" opacity=".65"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M2 5a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3H9l-4 3v-3H5a3 3 0 0 1-3-3z" /><path d="M14 10a3 3 0 0 0 3-3v-.5h2a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3h-1l-3 2.25V16h-1a3 3 0 0 1-3-3v-1z" opacity=".65" /></svg>
         </span>
         <span className="text-sm">Split Speaker</span>
       </button>
@@ -225,7 +236,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >
         <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M4 22q-.825 0-1.412-.587T2 20V4q0-.825.588-1.412T4 2h8.15l-2 2H4v16h11v-2h2v2q0 .825-.587 1.413T15 22zm2-4v-2h7v2zm0-3v-2h5v2zm9 0l-4-4H8V6h3l4-4zm2-3.05v-6.9q.9.525 1.45 1.425T19 8.5t-.55 2.025T17 11.95m0 4.3v-2.1q1.75-.625 2.875-2.162T21 8.5t-1.125-3.488T17 2.85V.75q2.6.675 4.3 2.813T23 8.5t-1.7 4.938T17 16.25"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M4 22q-.825 0-1.412-.587T2 20V4q0-.825.588-1.412T4 2h8.15l-2 2H4v16h11v-2h2v2q0 .825-.587 1.413T15 22zm2-4v-2h7v2zm0-3v-2h5v2zm9 0l-4-4H8V6h3l4-4zm2-3.05v-6.9q.9.525 1.45 1.425T19 8.5t-.55 2.025T17 11.95m0 4.3v-2.1q1.75-.625 2.875-2.162T21 8.5t-1.125-3.488T17 2.85V.75q2.6.675 4.3 2.813T23 8.5t-1.7 4.938T17 16.25" /></svg>
         </span>
         <span className="text-sm">MultiVoice Reader</span>
       </button>
@@ -266,59 +277,59 @@ const ExplorerView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
   <div className="p-2">
     <h2 className="text-xs uppercase text-gray-400 tracking-wider">Explorer</h2>
     <div className="mt-4">
-        <div className="flex items-center cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 mr-1">
-                <path fillRule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
-            </svg>
-            <h3 className="text-sm font-bold uppercase tracking-wide">HunyDev</h3>
-        </div>
-        <div className="mt-2 pl-4 flex flex-col gap-1">
-            <button onClick={() => onOpenFile('welcome')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-                <img src={welcomeIcon} alt="" aria-hidden="true" className="w-4 h-4 mr-2 rounded-sm" decoding="async" />
-                <span>Welcome</span>
-            </button>
-            <button onClick={() => onOpenFile('works')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-              <FileIcon />
-              <span>works.md</span>
-            </button>
-            <button onClick={() => onOpenFile('about')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-              <FileIcon />
-              <span>about.json</span>
-            </button>
-            <button onClick={() => onOpenFile('stack')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-              <FileIcon />
-              <span>stack-huny.dev</span>
-            </button>
-            <button onClick={() => onOpenFile('digital-shelf')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-              <FileIcon />
-              <span>digital-shelf.json</span>
-            </button>
-            <button onClick={() => onOpenFile('domain')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-                <FileIcon />
-                <span>tts-history.md</span>
-            </button>
-            <button onClick={() => onOpenFile('mascot')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-              <FileIcon />
-              <span>mascot.gallery</span>
-            </button>
-            <button onClick={() => onOpenFile('project')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-                <FileIcon />
-                <span>project.js</span>
-            </button>
-            <button onClick={() => onOpenFile('extensions')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-                <FileIcon />
-                <span>extensions.txt</span>
-            </button>
-        </div>
+      <div className="flex items-center cursor-pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 mr-1">
+          <path fillRule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+        </svg>
+        <h3 className="text-sm font-bold uppercase tracking-wide">HunyDev</h3>
+      </div>
+      <div className="mt-2 pl-4 flex flex-col gap-1">
+        <button onClick={() => onOpenFile('welcome')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
+          <img src={welcomeIcon} alt="" aria-hidden="true" className="w-4 h-4 mr-2 rounded-sm" decoding="async" />
+          <span>Welcome</span>
+        </button>
+        <button onClick={() => onOpenFile('works')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
+          <FileIcon />
+          <span>works.md</span>
+        </button>
+        <button onClick={() => onOpenFile('about')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
+          <FileIcon />
+          <span>about.json</span>
+        </button>
+        <button onClick={() => onOpenFile('stack')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
+          <FileIcon />
+          <span>stack-huny.dev</span>
+        </button>
+        <button onClick={() => onOpenFile('digital-shelf')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
+          <FileIcon />
+          <span>digital-shelf.json</span>
+        </button>
+        <button onClick={() => onOpenFile('domain')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
+          <FileIcon />
+          <span>tts-history.md</span>
+        </button>
+        <button onClick={() => onOpenFile('mascot')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
+          <FileIcon />
+          <span>mascot.gallery</span>
+        </button>
+        <button onClick={() => onOpenFile('project')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
+          <FileIcon />
+          <span>project.js</span>
+        </button>
+        <button onClick={() => onOpenFile('extensions')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
+          <FileIcon />
+          <span>extensions.txt</span>
+        </button>
+      </div>
     </div>
   </div>
 );
 
 const GenericView: React.FC<{ title: string; children?: React.ReactNode }> = ({ title, children }) => (
-    <div className="p-2">
-        <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-4">{title}</h2>
-        {children}
-    </div>
+  <div className="p-2">
+    <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-4">{title}</h2>
+    {children}
+  </div>
 );
 
 type MediaNode =
@@ -400,7 +411,7 @@ const MediaView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenF
           style={{ paddingLeft: depth * 12 + 12 }}
         >
           <span className="mr-2">
-            {node.type === 'image' ? ImageIcon() : VideoIcon() }
+            {node.type === 'image' ? ImageIcon() : VideoIcon()}
           </span>
           <span className="text-sm">{node.name}</span>
         </button>
@@ -421,21 +432,21 @@ const MediaView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenF
 const BookmarkView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
   const Item: React.FC<{ id: string; name: string; color: string; count: number }>
     = ({ id, name, color, count }) => (
-    <button
-      onClick={() => onOpenFile(`bookmark:${id}`)}
-      className="flex items-center justify-between text-left w-full hover:bg-white/10 rounded px-2 py-1.5"
-    >
-      <span className="flex items-center gap-2">
-        <span className="inline-flex items-center justify-center w-5 h-5">
-          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" style={{ color }} aria-hidden>
-            <path d="M4 2.5A1.5 1.5 0 0 1 5.5 1h5A1.5 1.5 0 0 1 12 2.5v11.086a.5.5 0 0 1-.777.416L8 11.972l-3.223 2.03A.5.5 0 0 1 4 13.586z" />
-          </svg>
+      <button
+        onClick={() => onOpenFile(`bookmark:${id}`)}
+        className="flex items-center justify-between text-left w-full hover:bg-white/10 rounded px-2 py-1.5"
+      >
+        <span className="flex items-center gap-2">
+          <span className="inline-flex items-center justify-center w-5 h-5">
+            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" style={{ color }} aria-hidden>
+              <path d="M4 2.5A1.5 1.5 0 0 1 5.5 1h5A1.5 1.5 0 0 1 12 2.5v11.086a.5.5 0 0 1-.777.416L8 11.972l-3.223 2.03A.5.5 0 0 1 4 13.586z" />
+            </svg>
+          </span>
+          <span className="text-sm">{name}</span>
         </span>
-        <span className="text-sm">{name}</span>
-      </span>
-      {!loading && <span className="text-xs text-gray-400">{count}</span>}
-    </button>
-  );
+        {!loading && <span className="text-xs text-gray-400">{count}</span>}
+      </button>
+    );
 
   // Load counts from Notion once (remote-first); fallback to static BOOKMARKS on error.
   const [all, setAll] = React.useState<Bookmark[]>(() => []);
@@ -487,17 +498,17 @@ const BookmarkView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
 const NotesView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
   const Item: React.FC<{ id: string; name: string; color: string; count: number }>
     = ({ id, name, color, count }) => (
-    <button
-      onClick={() => onOpenFile(`notes:${id}`)}
-      className="flex items-center justify-between text-left w-full hover:bg-white/10 rounded px-2 py-1.5"
-    >
-      <span className="flex items-center gap-2">
-        <span className="inline-flex items-center justify-center w-5 h-5 rounded-sm" style={{ background: color }} />
-        <span className="text-sm">{name}</span>
-      </span>
-      <span className="text-xs text-gray-400">{count}</span>
-    </button>
-  );
+      <button
+        onClick={() => onOpenFile(`notes:${id}`)}
+        className="flex items-center justify-between text-left w-full hover:bg-white/10 rounded px-2 py-1.5"
+      >
+        <span className="flex items-center gap-2">
+          <span className="inline-flex items-center justify-center w-5 h-5 rounded-sm" style={{ background: color }} />
+          <span className="text-sm">{name}</span>
+        </span>
+        <span className="text-xs text-gray-400">{count}</span>
+      </button>
+    );
 
   return (
     <div className="p-2">

@@ -23,6 +23,7 @@ const TextToPhonemePage = React.lazy(() => import('./components/pages/TextToPhon
 const WebWorkerPage = React.lazy(() => import('./components/pages/WebWorkerPage'));
 const UIClonePage = React.lazy(() => import('./components/pages/UIClonePage'));
 const ExtensionsPage = React.lazy(() => import('./components/pages/ExtensionsPage'));
+const TextCleaningPage = React.lazy(() => import('./components/pages/TextCleaningPage'));
 
 export const FileIcon = () => (
   <svg
@@ -136,6 +137,15 @@ export const PAGES: {
         <circle cx="9" cy="8" r="1" fill="currentColor"/>
         <circle cx="6" cy="8" r="1" fill="currentColor"/>
         <path fill="currentColor" d="M28 4H4c-1.103 0-2 .898-2 2v20c0 1.103.897 2 2 2h24c1.103 0 2-.897 2-2V6c0-1.102-.897-2-2-2m0 2v4H4V6zM4 26V12h24v14z"/>
+      </svg>
+    ),
+  },
+  'text-cleaning': {
+    title: 'Text Cleaning',
+    component: TextCleaningPage,
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4 mr-2 text-gray-400">
+        <path fill="currentColor" d="m14.1 22l-4.25-4.25l1.4-1.4l2.85 2.85l5.65-5.65l1.4 1.4zM3 16L7.85 3h2.35l4.85 13h-2.3l-1.15-3.3H6.35L5.2 16zm4.05-5.2h3.9l-1.9-5.4h-.1z"/>
       </svg>
     ),
   },
