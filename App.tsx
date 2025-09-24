@@ -578,8 +578,8 @@ const App: React.FC = () => {
               aria-haspopup="menu"
               aria-expanded={settingsOpen}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-                <path d="M12 8a4 4 0 1 1 0 8a4 4 0 0 1 0-8m0-6l2 2l2.8-.4l1.2 2.6l2.6 1.2L20 10l.4 2l2.6 1.2l-1.2 2.6l-2.6 1.2L18 20l-2 .4l-2 2l-2-2L10 20l-2.8.4l-1.2-2.6L3.4 15.2L4.6 12.6L4 10l2.6-1.2L7.8 6.2L10.6 6z"/>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-5 h-5">
+                <path fill="currentColor" fill-rule="evenodd" d="M14.208 4.83q.68.21 1.3.54l1.833-1.1a1 1 0 0 1 1.221.15l1.018 1.018a1 1 0 0 1 .15 1.221l-1.1 1.833q.33.62.54 1.3l2.073.519a1 1 0 0 1 .757.97v1.438a1 1 0 0 1-.757.97l-2.073.519q-.21.68-.54 1.3l1.1 1.833a1 1 0 0 1-.15 1.221l-1.018 1.018a1 1 0 0 1-1.221.15l-1.833-1.1q-.62.33-1.3.54l-.519 2.073a1 1 0 0 1-.97.757h-1.438a1 1 0 0 1-.97-.757l-.519-2.073a7.5 7.5 0 0 1-1.3-.54l-1.833 1.1a1 1 0 0 1-1.221-.15L4.42 18.562a1 1 0 0 1-.15-1.221l1.1-1.833a7.5 7.5 0 0 1-.54-1.3l-2.073-.519A1 1 0 0 1 2 12.72v-1.438a1 1 0 0 1 .757-.97l2.073-.519q.21-.68.54-1.3L4.27 6.66a1 1 0 0 1 .15-1.221L5.438 4.42a1 1 0 0 1 1.221-.15l1.833 1.1q.62-.33 1.3-.54l.519-2.073A1 1 0 0 1 11.28 2h1.438a1 1 0 0 1 .97.757zM12 16a4 4 0 1 0 0-8a4 4 0 0 0 0 8"/>
               </svg>
             </button>
             {settingsOpen && (
@@ -588,7 +588,7 @@ const App: React.FC = () => {
                   <li className="w-full">
                     <button type="button" className="w-full text-left flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-white/10 text-gray-300" disabled>
                       <span className="inline-flex w-4 h-4 items-center justify-center" aria-hidden>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.17 4.48-2.96 5.74L15 20l-3-1l-3 1l.96-5.26A6.98 6.98 0 0 1 5 9a7 7 0 0 1 7-7Z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M20 12a1 1 0 0 0-1-1h-7.59l2.3-2.29a1 1 0 1 0-1.42-1.42l-4 4a1 1 0 0 0-.21.33a1 1 0 0 0 0 .76a1 1 0 0 0 .21.33l4 4a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.42L11.41 13H19a1 1 0 0 0 1-1M17 2H7a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-3a1 1 0 0 0-2 0v3a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v3a1 1 0 0 0 2 0V5a3 3 0 0 0-3-3"/></svg>
                       </span>
                       <span>Sign In</span>
                     </button>
@@ -597,7 +597,7 @@ const App: React.FC = () => {
                   <li className="w-full">
                     <button type="button" className="w-full text-left flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-white/10 text-gray-200" onClick={() => { setSettingsOpen(false); openApiKeyModal(); }}>
                       <span className="inline-flex w-4 h-4 items-center justify-center" aria-hidden>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M12.94 3.34a1.5 1.5 0 0 1 2.12 0l1.6 1.6a1.5 1.5 0 0 1 0 2.12l-.36.36l2.3 2.3l.36-.36a1.5 1.5 0 0 1 2.12 0l1.6 1.6a1.5 1.5 0 0 1 0 2.12l-3.89 3.9a2 2 0 0 1-1.41.59H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 .59-1.41l3.9-3.89a1.5 1.5 0 0 1 2.12 0l1.6 1.6a1.5 1.5 0 0 1 0 2.12l-.36.36l2.3 2.3l.36-.36a1.5 1.5 0 0 1 0-2.12z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" fill-rule="evenodd" d="M22 8.293c0 3.476-2.83 6.294-6.32 6.294c-.636 0-2.086-.146-2.791-.732l-.882.878c-.519.517-.379.669-.148.919c.096.105.208.226.295.399c0 0 .735 1.024 0 2.049c-.441.585-1.676 1.404-3.086 0l-.294.292s.881 1.025.147 2.05c-.441.585-1.617 1.17-2.646.146l-1.028 1.024c-.706.703-1.568.293-1.91 0l-.883-.878c-.823-.82-.343-1.708 0-2.05l7.642-7.61s-.735-1.17-.735-2.78c0-3.476 2.83-6.294 6.32-6.294S22 4.818 22 8.293m-6.319 2.196a2.2 2.2 0 0 0 2.204-2.195a2.2 2.2 0 0 0-2.204-2.196a2.2 2.2 0 0 0-2.204 2.196a2.2 2.2 0 0 0 2.204 2.195" clip-rule="evenodd"/></svg>
                       </span>
                       <span>API Key</span>
                     </button>
@@ -683,11 +683,11 @@ const App: React.FC = () => {
           >
             <div className="flex items-start gap-3 mb-2">
               <div className="shrink-0 p-1.5 rounded bg-white/10">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M12.94 3.34a1.5 1.5 0 0 1 2.12 0l1.6 1.6a1.5 1.5 0 0 1 0 2.12l-.36.36l2.3 2.3l.36-.36a1.5 1.5 0 0 1 2.12 0l1.6 1.6a1.5 1.5 0 0 1 0 2.12l-3.89 3.9a2 2 0 0 1-1.41.59H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 .59-1.41l3.9-3.89a1.5 1.5 0 0 1 2.12 0l1.6 1.6a1.5 1.5 0 0 1 0 2.12l-.36.36l2.3 2.3l.36-.36a1.5 1.5 0 0 1 0-2.12z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-5 h-5"><path fill="currentColor" fill-rule="evenodd" d="M22 8.293c0 3.476-2.83 6.294-6.32 6.294c-.636 0-2.086-.146-2.791-.732l-.882.878c-.519.517-.379.669-.148.919c.096.105.208.226.295.399c0 0 .735 1.024 0 2.049c-.441.585-1.676 1.404-3.086 0l-.294.292s.881 1.025.147 2.05c-.441.585-1.617 1.17-2.646.146l-1.028 1.024c-.706.703-1.568.293-1.91 0l-.883-.878c-.823-.82-.343-1.708 0-2.05l7.642-7.61s-.735-1.17-.735-2.78c0-3.476 2.83-6.294 6.32-6.294S22 4.818 22 8.293m-6.319 2.196a2.2 2.2 0 0 0 2.204-2.195a2.2 2.2 0 0 0-2.204-2.196a2.2 2.2 0 0 0-2.204 2.196a2.2 2.2 0 0 0 2.204 2.195" clip-rule="evenodd"/></svg>
               </div>
               <div className="min-w-0 flex-1">
                 <h2 id="apikey-modal-title" className="text-lg font-semibold text-white">API Key 설정</h2>
-                <p className="text-sm text-gray-400">여기에 설정한 키는 서버 환경변수 대신 우선적으로 사용됩니다. 값은 암호화되어 브라우저에 저장됩니다.</p>
+                <p className="text-sm text-gray-400">여기에 설정한 키는 서버 환경변수 대신 우선적으로 사용됩니다. 값은 암호화되어 브라우저에 저장됩니다. Playground AI 도구에 활용되며 서버 기본값은 무료 키를 사용합니다.</p>
               </div>
               <button onClick={() => setApiModalOpen(false)} className="ml-2 p-1.5 rounded hover:bg-white/10 text-gray-300" aria-label="닫기" title="닫기">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4"><path d="M3.72 3.22a.75.75 0 0 1 1.06 0L8 6.44l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 7.5l3.22 3.22a.75.75 0 0 1-1.06 1.06L8 8.56l-3.22 3.22a.75.75 0 1 1-1.06-1.06L6.94 7.5L3.72 4.28a.75.75 0 0 1 0-1.06Z" /></svg>
@@ -706,7 +706,7 @@ const App: React.FC = () => {
                   className="w-full px-2 py-2 rounded bg-black/40 border border-white/10 text-sm"
                   autoComplete="off"
                 />
-                <p className="text-xs text-gray-500 mt-1">입력하지 않으면 기존 저장값을 유지합니다.</p>
+                <p className="text-xs text-gray-500 mt-1">입력하지 않으면 서버 기본값을 사용합니다.</p>
               </div>
               <div>
                 <label className="block text-sm text-gray-300 mb-1" htmlFor="openai-key">OPENAI_API_KEY</label>
@@ -719,7 +719,7 @@ const App: React.FC = () => {
                   className="w-full px-2 py-2 rounded bg-black/40 border border-white/10 text-sm"
                   autoComplete="off"
                 />
-                <p className="text-xs text-gray-500 mt-1">입력하지 않으면 기존 저장값을 유지합니다.</p>
+                <p className="text-xs text-gray-500 mt-1">입력하지 않으면 서버 기본값을 사용합니다.</p>
               </div>
               {apiError && <div className="text-xs text-amber-300">{apiError}</div>}
               <div className="flex items-center justify-end gap-2 pt-2">
