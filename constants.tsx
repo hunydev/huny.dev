@@ -105,11 +105,7 @@ const ICON_DEFS = {
   favicon: {
     viewBox: '0 0 24 24',
     nodes: (
-      <g fill="currentColor">
-        <rect x={4} y={4} width={16} height={16} rx={4} opacity={0.15} />
-        <path d="M9.25 8.5c0-1.24 1.01-2.25 2.25-2.25h1.5a1 1 0 1 1 0 2H11.5a.25.25 0 0 0-.25.25V9h1.75a1 1 0 1 1 0 2H11.5v1h2a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1z" />
-        <path d="M7 4h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3Zm10 2H7a1 1 0 0 0-1 1v10c0 .55.45 1 1 1h10a1 1 0 0 0 1-1V7c0-.55-.45-1-1-1Z" opacity={0.6} />
-      </g>
+      <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M2 8a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3zm4 2v4"/><path d="M11 10a2 2 0 1 0 0 4m3-2a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/></g>
     ),
     defaultClassName: 'w-4 h-4',
   },
@@ -201,11 +197,7 @@ const ICON_DEFS = {
   coverCrafter: {
     viewBox: '0 0 24 24',
     nodes: (
-      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
-        <rect x={3.5} y={3.5} width={17} height={17} rx={2.5} />
-        <path d="M7 8.75h7.5M7 12h10M7 15.25h6" />
-        <path d="M16 7a1 1 0 1 1 2 0v5.5M18 10.5l-1.6 1.6" />
-      </g>
+      <path fill="currentColor" d="m20.713 8.128l-.246.566a.506.506 0 0 1-.934 0l-.246-.566a4.36 4.36 0 0 0-2.22-2.25l-.759-.339a.53.53 0 0 1 0-.963l.717-.319a4.37 4.37 0 0 0 2.251-2.326l.253-.611a.506.506 0 0 1 .942 0l.253.61a4.37 4.37 0 0 0 2.25 2.327l.718.32a.53.53 0 0 1 0 .962l-.76.338a4.36 4.36 0 0 0-2.219 2.251M2.992 3H14v2H4v14L14 9l6 6v-4h2v9.007a1 1 0 0 1-.992.993H2.992A.993.993 0 0 1 2 20.007V3.993A1 1 0 0 1 2.992 3M20 17.828l-6-6L6.828 19H20zM8 11a2 2 0 1 1 0-4a2 2 0 0 1 0 4"/>
     ),
     defaultClassName: 'w-4 h-4 text-gray-400',
   },
