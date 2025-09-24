@@ -205,6 +205,24 @@ export default {
             });
           }
 
+          if (typeof createImageBitmap !== 'function') {
+            const responseBody = {
+              preview: `data:${baseMime};base64,${base64Image}`,
+              source: `data:${sourceMime};base64,${u8ToB64(sourceBytes)}`,
+              assets: [
+                {
+                  format: 'png' as const,
+                  url: `data:${baseMime};base64,${base64Image}`,
+                  label: 'Original PNG (runtime lacks createImageBitmap; resizing unavailable)',
+                },
+              ],
+              message: 'createImageBitmap is not available in this runtime. Returned the simplified PNG only.',
+            };
+            return new Response(JSON.stringify(responseBody), {
+              headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+            });
+          }
+
           const simplifiedBytes = b64ToU8(base64Image);
           const simplifiedBlob = new Blob([simplifiedBytes], { type: baseMime || 'image/png' });
           const bitmap = await createImageBitmap(simplifiedBlob);
