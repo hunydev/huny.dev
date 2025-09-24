@@ -118,15 +118,7 @@ const App: React.FC = () => {
       tabTitle = `bookmarks (${catName})`;
       const color = categoryId === 'all' ? '#9ca3af' : (cat?.color ?? '#9ca3af');
       tabIcon = (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          className="w-4 h-4 mr-2"
-          style={{ color }}
-        >
-          <path d="M6 3.5C6 2.67 6.67 2 7.5 2h9A1.5 1.5 0 0 1 18 3.5v16.77c0 .57-.63.92-1.11.6l-4.78-3.2a1.5 1.5 0 0 0-1.64 0l-4.78 3.2c-.48.32-1.11-.03-1.11-.6z" />
-        </svg>
+        <Icon name="bookmarkRibbon" className="w-4 h-4 mr-2" style={{ color }} />
       );
     } else if (baseId === 'media' && arg) {
       try {
@@ -143,16 +135,7 @@ const App: React.FC = () => {
       const color = group?.color ?? '#9ca3af';
       tabTitle = `notes – ${groupName}`;
       tabIcon = (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 16 16"
-          fill="currentColor"
-          className="w-4 h-4 mr-2"
-          style={{ color }}
-        >
-          <path d="M2.5 2A1.5 1.5 0 0 0 1 3.5v9A1.5 1.5 0 0 0 2.5 14h7.793l3.354-3.354A.5.5 0 0 0 14 10.293V3.5A1.5 1.5 0 0 0 12.5 2h-10Z" />
-          <path d="M10.5 13.5V11a1 1 0 0 1 1-1h2.5" opacity="0.6" />
-        </svg>
+        <Icon name="note" className="w-4 h-4 mr-2" style={{ color }} />
       );
     } else if (baseId === 'apps') {
       const categoryId = arg || 'huny';

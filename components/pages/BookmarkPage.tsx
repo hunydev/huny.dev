@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import type { PageProps } from '../../types';
 import { BOOKMARK_CATEGORIES, BOOKMARKS, getCategoryById, type Bookmark } from './bookmarksData';
 import { fetchNotionBookmarks } from '../../utils/notionClient';
+import { Icon } from '../../constants';
 
 const formatDate = (iso?: string) => {
   if (!iso) return '-';
@@ -83,7 +84,7 @@ const BookmarkPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
             title="Card view"
           >
             <span className="inline-flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M3 4h8v7H3zM13 4h8v7h-8zM3 13h8v7H3zM13 13h8v7h-8z"/></svg>
+              <Icon name="layoutGrid" className="w-4 h-4" aria-hidden />
               Card
             </span>
           </button>
@@ -94,7 +95,7 @@ const BookmarkPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
             title="List view"
           >
             <span className="inline-flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+              <Icon name="layoutList" className="w-4 h-4" aria-hidden />
               List
             </span>
           </button>

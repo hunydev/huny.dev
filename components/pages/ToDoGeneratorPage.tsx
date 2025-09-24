@@ -1,5 +1,6 @@
 import React from 'react';
 import type { PageProps } from '../../types';
+import { Icon } from '../../constants';
 
 // Types
 export type TaskNode = {
@@ -207,7 +208,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
                 title="하위 작업 추가"
                 aria-label="하위 작업 추가"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M20 14h-6v6h-4v-6H4v-4h6V4h4v6h6z"/></svg>
+                <Icon name="addSquare" className="w-4 h-4" aria-hidden />
               </button>
             )}
             {isEditing ? (
@@ -218,7 +219,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
                   title="저장"
                   aria-label="저장"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="m9 20.42l-6.21-6.21l2.83-2.83L9 14.77l9.88-9.89l2.83 2.83z"/></svg>
+                  <Icon name="checkBadge" className="w-4 h-4 text-emerald-300" aria-hidden />
                 </button>
                 <button
                   className="p-1.5 rounded border border-white/10 text-gray-300 hover:bg-white/10"
@@ -226,7 +227,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
                   title="취소"
                   aria-label="취소"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M20 6.91L17.09 4L12 9.09L6.91 4L4 6.91L9.09 12L4 17.09L6.91 20L12 14.91L17.09 20L20 17.09L14.91 12z"/></svg>
+                  <Icon name="close" className="w-4 h-4 text-gray-300" aria-hidden />
                 </button>
               </>
             ) : (
@@ -237,7 +238,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
                   title="편집"
                   aria-label="편집"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83l3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z"/></svg>
+                  <Icon name="edit" className="w-4 h-4 text-gray-300" aria-hidden />
                 </button>
                 <button
                   className="p-1.5 rounded border border-white/10 text-gray-300 hover:bg-white/10"
@@ -245,7 +246,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
                   title="삭제"
                   aria-label="삭제"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6z"/></svg>
+                  <Icon name="trash" className="w-4 h-4 text-gray-300" aria-hidden />
                 </button>
               </>
             )}
@@ -267,8 +268,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
       <header className="mb-6">
         <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
           <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-emerald-300">
-            {/* Checklist icon */}
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-6 h-6"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M13 5h8m-8 7h8m-8 7h8M3 17l2 2l4-4"/><rect width="6" height="6" x="3" y="4" rx="1"/></g></svg>
+            <Icon name="checklist" className="w-6 h-6" aria-hidden />
           </span>
           To-do Generator
         </h1>
@@ -295,9 +295,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
             className="px-3 py-2 rounded text-sm border border-white/10 text-gray-300 hover:bg-white/10 inline-flex items-center gap-1 whitespace-nowrap"
             title="맨 위에 새 작업 추가"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4" aria-hidden="true">
-              <path fill="currentColor" d="M20 14h-6v6h-4v-6H4v-4h6V4h4v6h6z"/>
-            </svg>
+            <Icon name="addSquare" className="w-4 h-4" aria-hidden />
             <span>작업</span>
           </button>
           <button
@@ -305,7 +303,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
             onClick={copyText}
             title="체크리스트 복사"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M19 21H8V7h11m0-2H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2m-3-4H4a2 2 0 0 0-2 2v14h2V3h12z"/></svg>
+            <Icon name="clipboard" className="w-4 h-4" aria-hidden />
             <span>{copied ? '복사됨' : '복사'}</span>
           </button>
         </div>

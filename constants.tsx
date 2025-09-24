@@ -35,10 +35,75 @@ type IconDefinition = {
 };
 
 const ICON_DEFS = {
+  addSquare: {
+    viewBox: '0 0 24 24',
+    nodes: <path d="M20 14h-6v6h-4v-6H4v-4h6V4h4v6h6z" />,
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'currentColor' },
+  },
+  bookmarkRibbon: {
+    viewBox: '0 0 24 24',
+    nodes: <path d="M6 3.5C6 2.67 6.67 2 7.5 2h9A1.5 1.5 0 0 1 18 3.5v16.77c0 .57-.63.92-1.11.6l-4.78-3.2a1.5 1.5 0 0 0-1.64 0l-4.78 3.2c-.48.32-1.11-.03-1.11-.6z" />,
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'currentColor' },
+  },
+  caretDown: {
+    viewBox: '0 0 24 24',
+    nodes: <path d="M7 10l5 5l5-5z" />,
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'currentColor' },
+  },
+  checkBadge: {
+    viewBox: '0 0 24 24',
+    nodes: <path d="m9 20.42-6.21-6.21 2.83-2.83L9 14.77l9.88-9.89 2.83 2.83z" />,
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'currentColor' },
+  },
+  clipboard: {
+    viewBox: '0 0 24 24',
+    nodes: <path d="M19 21H8V7h11m0-2H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2m-3-4H4a2 2 0 0 0-2 2v14h2V3h12z" />,
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'currentColor' },
+  },
+  close: {
+    viewBox: '0 0 24 24',
+    nodes: <path d="M20 6.91 17.09 4 12 9.09 6.91 4 4 6.91 9.09 12 4 17.09 6.91 20 12 14.91 17.09 20 20 17.09 14.91 12z" />,
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'currentColor' },
+  },
+  documentText: {
+    viewBox: '0 0 24 24',
+    nodes: <path d="M3 3v18h18V3zm15 15H6v-1h12zm0-2H6v-1h12zm0-4H6V6h12z" />,
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'currentColor' },
+  },
+  edit: {
+    viewBox: '0 0 24 24',
+    nodes: <path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75z" />,
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'currentColor' },
+  },
+  externalLink: {
+    viewBox: '0 0 16 16',
+    nodes: (
+      <>
+        <path d="M10.5 2h3a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0V3.707l-6.146 6.147a.5.5 0 0 1-.708-.708L12.293 3H10.5a.5.5 0 0 1 0-1Z" />
+        <path d="M13 7.5v6A1.5 1.5 0 0 1 11.5 15h-8A1.5 1.5 0 0 1 2 13.5v-8A1.5 1.5 0 0 1 3.5 4h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 0-.5.5v8a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-6a.5.5 0 0 1 1 0Z" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'currentColor' },
+  },
   file: {
     viewBox: '0 0 24 24',
     nodes: <path d="M13 9V3.5L18.5 9M6 2c-1.11 0-2 .89-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />,
     defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'currentColor' },
+  },
+  globe: {
+    viewBox: '0 0 24 24',
+    nodes: <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10s10-4.486 10-10S17.514 2 12 2m7.931 9h-2.764a14.7 14.7 0 0 0-1.792-6.243A8.01 8.01 0 0 1 19.931 11M12.53 4.027c1.035 1.364 2.427 3.78 2.627 6.973H9.03c.139-2.596.994-5.028 2.451-6.974c.172-.01.344-.026.519-.026c.179 0 .354.016.53.027m-3.842.7C7.704 6.618 7.136 8.762 7.03 11H4.069a8.01 8.01 0 0 1 4.619-6.273M4.069 13h2.974c.136 2.379.665 4.478 1.556 6.23A8.01 8.01 0 0 1 4.069 13m7.381 6.973C10.049 18.275 9.222 15.896 9.041 13h6.113c-.208 2.773-1.117 5.196-2.603 6.972c-.182.012-.364.028-.551.028c-.186 0-.367-.016-.55-.027m4.011-.772c.955-1.794 1.538-3.901 1.691-6.201h2.778a8 8 0 0 1-4.469 6.201" />,
+    defaultClassName: 'w-4 h-4',
     attrs: { fill: 'currentColor' },
   },
   image: {
@@ -146,6 +211,57 @@ const ICON_DEFS = {
     nodes: <path d="M4 22q-.825 0-1.412-.587T2 20V4q0-.825.588-1.412T4 2h8.15l-2 2H4v16h11v-2h2v2q0 .825-.587 1.413T15 22zm2-4v-2h7v2zm0-3v-2h5v2zm9 0-4-4H8V6h3l4-4zm2-3.05v-6.9q.9.525 1.45 1.425T19 8.5t-.55 2.025T17 11.95m0 4.3v-2.1q1.75-.625 2.875-2.162T21 8.5t-1.125-3.488T17 2.85V.75q2.6.675 4.3 2.813T23 8.5t-1.7 4.938T17 16.25" />,
     defaultClassName: 'w-4 h-4 text-gray-400',
     attrs: { fill: 'currentColor' },
+  },
+  monitor: {
+    viewBox: '0 0 24 24',
+    nodes: <path d="M20 3H4c-1.103 0-2 .897-2 2v11c0 1.103.897 2 2 2h7v2H8v2h8v-2h-3v-2h7c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2M4 14V5h16l.002 9z" />,
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'currentColor' },
+  },
+  layoutGrid: {
+    viewBox: '0 0 24 24',
+    nodes: <path d="M3 4h8v7H3zM13 4h8v7h-8zM3 13h8v7H3zM13 13h8v7h-8z" />,
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'currentColor' },
+  },
+  layoutList: {
+    viewBox: '0 0 24 24',
+    nodes: <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />,
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'currentColor' },
+  },
+  mobile: {
+    viewBox: '0 0 24 24',
+    nodes: <path d="M17 2H7c-1.103 0-2 .897-2 2v16c0 1.103.897 2 2 2h10c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2M7 16.999V5h10l.002 11.999z" />,
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'currentColor' },
+  },
+  note: {
+    viewBox: '0 0 16 16',
+    nodes: (
+      <>
+        <path d="M2.5 2A1.5 1.5 0 0 0 1 3.5v9A1.5 1.5 0 0 0 2.5 14h7.793l3.354-3.354A.5.5 0 0 0 14 10.293V3.5A1.5 1.5 0 0 0 12.5 2h-10Z" />
+        <path d="M10.5 13.5V11a1 1 0 0 1 1-1h2.5" opacity={0.6} />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'currentColor' },
+  },
+  trash: {
+    viewBox: '0 0 24 24',
+    nodes: <path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6z" />,
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'currentColor' },
+  },
+  checklist: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}>
+        <path d="M13 5h8m-8 7h8m-8 7h8M3 17l2 2l4-4" />
+        <rect width={6} height={6} x={3} y={4} rx={1} />
+      </g>
+    ),
+    defaultClassName: 'w-4 h-4',
   },
 } satisfies Record<string, IconDefinition>;
 
