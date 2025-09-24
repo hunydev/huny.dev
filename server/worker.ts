@@ -92,6 +92,203 @@ export default {
         }
       }
 
+      if (url.pathname === '/api/favicon-distiller') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const form = await request.formData();
+          const imageFile = form.get('image');
+          if (!(imageFile instanceof File)) {
+            return new Response(JSON.stringify({ error: 'Missing image file' }), {
+              status: 400,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const sizesRaw = typeof form.get('sizes') === 'string' ? String(form.get('sizes')) : '[]';
+          let requestedSizes: number[] = [];
+          try {
+            const parsed = JSON.parse(sizesRaw);
+            if (Array.isArray(parsed)) {
+              requestedSizes = parsed
+                .map((n) => Number(n))
+                .filter((n) => Number.isFinite(n) && n > 0 && n <= 512)
+                .map((n) => Math.round(n));
+            }
+          } catch {
+            requestedSizes = [];
+          }
+          if (requestedSizes.length === 0) {
+            requestedSizes = [32, 64, 128, 256];
+          }
+
+          const formatsRaw = typeof form.get('formats') === 'string' ? String(form.get('formats')) : 'png';
+          const formatSet = new Set(formatsRaw.split(',').map((s) => s.trim().toLowerCase()).filter(Boolean));
+          if (!formatSet.has('png') && !formatSet.has('ico')) {
+            formatSet.add('png');
+          }
+
+          const transparent = String(form.get('transparent') || '1') === '1';
+          const simplifyLevel = typeof form.get('simplifyLevel') === 'string' ? String(form.get('simplifyLevel')) : 'auto';
+
+          const sourceMime = imageFile.type && imageFile.type.startsWith('image/') ? imageFile.type : 'image/png';
+          const sourceBytes = new Uint8Array(await imageFile.arrayBuffer());
+
+          const instructions = [
+            'You are a favicon designer. Simplify the provided logo or illustration into a scalable favicon glyph.',
+            'Goals:',
+            '- Preserve core shapes or symbols that express the brand identity.',
+            '- Remove distracting small details so that the icon is legible at 32×32 pixels.',
+            '- Use bold contrast, centered composition, and sufficient padding.',
+            '- Prefer transparent background unless instructed otherwise.',
+            '- Avoid adding text unless the original mark relies on a single character or initial.',
+            'Output requirements:',
+            '- Return ONE PNG image (square canvas) with alpha transparency if requested.',
+            '- Recommended canvas size is 512×512 or larger.',
+            `- Simplification level hint: ${simplifyLevel}.`
+          ].join('\n');
+
+          const parts: any[] = [
+            { text: instructions },
+            { text: `SETTINGS:\nTRANSPARENT=${transparent ? '1' : '0'}\nFORMAT=PNG\n` },
+            { inline_data: { mime_type: sourceMime, data: u8ToB64(sourceBytes) } },
+          ];
+
+          const model = 'gemini-2.5-flash-image-preview';
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+          const aiRes = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': geminiKey,
+            },
+            body: JSON.stringify({ contents: [ { parts } ], generationConfig: { temperature: 0.15 } }),
+          });
+
+          const aiText = await aiRes.text();
+          if (!aiRes.ok) {
+            return new Response(JSON.stringify({ error: `Gemini error: ${aiRes.status} ${aiRes.statusText}`, detail: aiText }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          let aiJson: any = {};
+          try { aiJson = aiText ? JSON.parse(aiText) : {}; } catch { aiJson = {}; }
+          const candidates: any[] = Array.isArray(aiJson?.candidates) ? aiJson.candidates : [];
+          let base64Image = '';
+          let baseMime = 'image/png';
+          for (const cand of candidates) {
+            const contentParts = cand?.content?.parts || [];
+            for (const p of contentParts) {
+              const data = p?.inline_data?.data || p?.inlineData?.data;
+              if (data) {
+                baseMime = p?.inline_data?.mime_type || p?.inlineData?.mimeType || baseMime;
+                base64Image = String(data);
+                break;
+              }
+            }
+            if (base64Image) break;
+          }
+
+          if (!base64Image) {
+            return new Response(JSON.stringify({ error: 'Gemini did not return an image.' }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const simplifiedBytes = b64ToU8(base64Image);
+          const simplifiedBlob = new Blob([simplifiedBytes], { type: baseMime || 'image/png' });
+          const bitmap = await createImageBitmap(simplifiedBlob);
+
+          try {
+            const assets: Array<{ size?: number; format: 'png' | 'ico'; url: string; label?: string }> = [];
+            const pngOutputs = new Map<number, Uint8Array>();
+            const uniqueSizes = Array.from(new Set(requestedSizes.map((n) => Math.max(8, Math.min(512, n))))).sort((a, b) => a - b);
+
+            for (const size of uniqueSizes) {
+              try {
+                const resized = await resizePngIcon(bitmap, size, transparent);
+                pngOutputs.set(size, resized);
+                if (formatSet.has('png')) {
+                  assets.push({
+                    size,
+                    format: 'png',
+                    url: `data:image/png;base64,${u8ToB64(resized)}`,
+                    label: `${size}px PNG`,
+                  });
+                }
+              } catch (err: any) {
+                console.warn('resize error', err);
+              }
+            }
+
+            if (formatSet.has('png')) {
+              assets.unshift({
+                size: bitmap.width,
+                format: 'png',
+                url: `data:${baseMime};base64,${base64Image}`,
+                label: `${bitmap.width}×${bitmap.height} PNG (original)`,
+              });
+            }
+
+            if (formatSet.has('ico')) {
+              const icoInputs: Array<{ size: number; data: Uint8Array }> = [];
+              const icoSizes = Array.from(pngOutputs.keys()).filter((s) => s <= 256);
+              if (icoSizes.length === 0) {
+                const fallbackSize = Math.min(256, bitmap.width, bitmap.height);
+                if (!pngOutputs.has(fallbackSize)) {
+                  const resized = await resizePngIcon(bitmap, fallbackSize, transparent);
+                  pngOutputs.set(fallbackSize, resized);
+                }
+              }
+              for (const size of Array.from(pngOutputs.keys()).filter((s) => s <= 256).sort((a, b) => a - b)) {
+                const data = pngOutputs.get(size);
+                if (data) {
+                  icoInputs.push({ size, data });
+                }
+              }
+              if (icoInputs.length > 0) {
+                const icoBytes = makeIcoFromPngs(icoInputs);
+                assets.push({
+                  format: 'ico',
+                  url: `data:image/x-icon;base64,${u8ToB64(icoBytes)}`,
+                  label: 'favicon.ico (multi-size)',
+                });
+              }
+            }
+
+            const responseBody = {
+              preview: `data:${baseMime};base64,${base64Image}`,
+              source: `data:${sourceMime};base64,${u8ToB64(sourceBytes)}`,
+              assets,
+              jobId: aiJson?.usageMetadata?.candidatesTokenCount ? `gemini:${aiJson.usageMetadata.candidatesTokenCount}` : undefined,
+              message: 'Favicon assets generated successfully.',
+            };
+
+            return new Response(JSON.stringify(responseBody), {
+              headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+            });
+          } finally {
+            bitmap.close();
+          }
+        } catch (e: any) {
+          console.error('favicon-distiller error', e);
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
+
       // Sticker Generator: create a sticker sheet (multiple variations) from a user image
       if (url.pathname === '/api/sticker-generator') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
@@ -1459,6 +1656,75 @@ function u8ToB64(u8: Uint8Array): string {
   let bin = '';
   for (let i = 0; i < u8.length; i++) bin += String.fromCharCode(u8[i]);
   return btoa(bin);
+}
+
+async function resizePngIcon(bitmap: ImageBitmap, size: number, transparent: boolean): Promise<Uint8Array> {
+  const canvas = new OffscreenCanvas(size, size);
+  const ctx = canvas.getContext('2d', { alpha: true });
+  if (!ctx) {
+    throw new Error('Failed to obtain 2D context for OffscreenCanvas');
+  }
+
+  ctx.clearRect(0, 0, size, size);
+  if (!transparent) {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size, size);
+  }
+
+  const paddingRatio = 0.88;
+  const scaleBase = Math.min(size / bitmap.width, size / bitmap.height);
+  const scale = Math.max(0.05, scaleBase * paddingRatio);
+  const drawWidth = bitmap.width * scale;
+  const drawHeight = bitmap.height * scale;
+  const dx = (size - drawWidth) / 2;
+  const dy = (size - drawHeight) / 2;
+
+  ctx.drawImage(bitmap, dx, dy, drawWidth, drawHeight);
+
+  const blob = await canvas.convertToBlob({ type: 'image/png' });
+  return new Uint8Array(await blob.arrayBuffer());
+}
+
+function makeIcoFromPngs(images: Array<{ size: number; data: Uint8Array }>): Uint8Array {
+  const filtered = images
+    .filter((img) => img.size > 0 && img.data?.length)
+    .sort((a, b) => a.size - b.size);
+
+  const count = filtered.length;
+  if (count === 0) {
+    throw new Error('No PNG inputs provided for ICO generation');
+  }
+
+  const headerSize = 6;
+  const directorySize = 16 * count;
+  const dataSize = filtered.reduce((acc, img) => acc + img.data.length, 0);
+  const totalSize = headerSize + directorySize + dataSize;
+
+  const out = new Uint8Array(totalSize);
+  const view = new DataView(out.buffer);
+
+  view.setUint16(0, 0, true); // reserved
+  view.setUint16(2, 1, true); // type icon
+  view.setUint16(4, count, true); // image count
+
+  let offset = headerSize + directorySize;
+  for (let i = 0; i < count; i++) {
+    const { size, data } = filtered[i];
+    const entryOffset = headerSize + i * 16;
+    out[entryOffset + 0] = size >= 256 ? 0 : size; // width
+    out[entryOffset + 1] = size >= 256 ? 0 : size; // height
+    out[entryOffset + 2] = 0; // color palette
+    out[entryOffset + 3] = 0; // reserved
+    view.setUint16(entryOffset + 4, 1, true); // color planes
+    view.setUint16(entryOffset + 6, 32, true); // bits per pixel
+    view.setUint32(entryOffset + 8, data.length, true); // image data size
+    view.setUint32(entryOffset + 12, offset, true); // offset to data
+
+    out.set(data, offset);
+    offset += data.length;
+  }
+
+  return out;
 }
 
 // --- Symmetric encryption helpers for client API keys (AES-GCM v1) ---

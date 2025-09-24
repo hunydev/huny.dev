@@ -26,6 +26,7 @@ const ExtensionsPage = React.lazy(() => import('./components/pages/ExtensionsPag
 const TextCleaningPage = React.lazy(() => import('./components/pages/TextCleaningPage'));
 const AIBusinessCardPage = React.lazy(() => import('./components/pages/AIBusinessCardPage'));
 const StickerGeneratorPage = React.lazy(() => import('./components/pages/StickerGeneratorPage'));
+const FaviconDistillerPage = React.lazy(() => import('./components/pages/FaviconDistillerPage'));
 
 type IconDefinition = {
   viewBox: string;
@@ -99,6 +100,17 @@ const ICON_DEFS = {
     nodes: <path d="M13 9V3.5L18.5 9M6 2c-1.11 0-2 .89-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />,
     defaultClassName: 'w-4 h-4 text-gray-400',
     attrs: { fill: 'currentColor' },
+  },
+  favicon: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <g fill="currentColor">
+        <rect x={4} y={4} width={16} height={16} rx={4} opacity={0.15} />
+        <path d="M9.25 8.5c0-1.24 1.01-2.25 2.25-2.25h1.5a1 1 0 1 1 0 2H11.5a.25.25 0 0 0-.25.25V9h1.75a1 1 0 1 1 0 2H11.5v1h2a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1z" />
+        <path d="M7 4h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3Zm10 2H7a1 1 0 0 0-1 1v10c0 .55.45 1 1 1h10a1 1 0 0 0 1-1V7c0-.55-.45-1-1-1Z" opacity={0.6} />
+      </g>
+    ),
+    defaultClassName: 'w-4 h-4',
   },
   globe: {
     viewBox: '0 0 24 24',
@@ -263,6 +275,16 @@ const ICON_DEFS = {
     ),
     defaultClassName: 'w-4 h-4',
   },
+  info: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <g fill="currentColor">
+        <path d="M12 2a10 10 0 1 0 0 20a10 10 0 0 0 0-20Zm0 2a8 8 0 1 1 0 16a8 8 0 0 1 0-16Z" opacity={0.4} />
+        <path d="M12 10a1 1 0 0 1 1 1v5.5a1 1 0 1 1-2 0V11a1 1 0 0 1 1-1Zm0-3a1.25 1.25 0 1 1 0 2.5a1.25 1.25 0 0 1 0-2.5Z" />
+      </g>
+    ),
+    defaultClassName: 'w-4 h-4',
+  },
 } satisfies Record<string, IconDefinition>;
 
 export type IconName = keyof typeof ICON_DEFS;
@@ -369,6 +391,11 @@ export const PAGES: {
     title: 'Sticker Generator',
     component: StickerGeneratorPage,
     icon: <Icon name="stickerGenerator" className="mr-2" />,
+  },
+  'favicon-distiller': {
+    title: 'Favicon Distiller',
+    component: FaviconDistillerPage,
+    icon: <Icon name="favicon" className="mr-2" />,
   },
   'ui-clone': {
     title: 'UI Clone',

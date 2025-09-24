@@ -66,6 +66,7 @@ const App: React.FC = () => {
         case 'ai-business-card':
         case 'sticker-generator':
         case 'ui-clone':
+        case 'favicon-distiller':
           return ViewId.Playground;
         // Explorer bucket: core files
         case 'welcome':
