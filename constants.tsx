@@ -27,6 +27,7 @@ const TextCleaningPage = React.lazy(() => import('./components/pages/TextCleanin
 const AIBusinessCardPage = React.lazy(() => import('./components/pages/AIBusinessCardPage'));
 const StickerGeneratorPage = React.lazy(() => import('./components/pages/StickerGeneratorPage'));
 const FaviconDistillerPage = React.lazy(() => import('./components/pages/FaviconDistillerPage'));
+const CoverCrafterPage = React.lazy(() => import('./components/pages/CoverCrafterPage'));
 
 type IconDefinition = {
   viewBox: string;
@@ -196,6 +197,28 @@ const ICON_DEFS = {
     nodes: <path d="M11 22q-.825 0-1.412-.587T9 20v-7q0-.825.588-1.412T11 11h7q.825 0 1.413.588T20 13v7q0 .825-.587 1.413T18 22zM4 15q-.825 0-1.412-.587T2 13V6q0-.825.588-1.412T4 4h7q.825 0 1.413.588T13 6v1H6q-.825 0-1.412.588T4 9z" />,
     defaultClassName: 'w-4 h-4 text-gray-400',
     attrs: { fill: 'currentColor' },
+  },
+  coverCrafter: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
+        <rect x={3.5} y={3.5} width={17} height={17} rx={2.5} />
+        <path d="M7 8.75h7.5M7 12h10M7 15.25h6" />
+        <path d="M16 7a1 1 0 1 1 2 0v5.5M18 10.5l-1.6 1.6" />
+      </g>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+  },
+  download: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
+        <path d="M12 4v12" />
+        <path d="m7 11l5 5l5-5" />
+        <path d="M5 20h14" />
+      </g>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-300',
   },
   splitSpeaker: {
     viewBox: '0 0 24 24',
@@ -396,6 +419,11 @@ export const PAGES: {
     title: 'Favicon Distiller',
     component: FaviconDistillerPage,
     icon: <Icon name="favicon" className="mr-2" />,
+  },
+  'cover-crafter': {
+    title: 'Cover Crafter',
+    component: CoverCrafterPage,
+    icon: <Icon name="coverCrafter" className="mr-2" />,
   },
   'ui-clone': {
     title: 'UI Clone',

@@ -307,6 +307,146 @@ export default {
         }
       }
 
+      if (url.pathname === '/api/cover-crafter') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          let payload: any = {};
+          try {
+            payload = await request.json();
+          } catch {
+            return new Response(JSON.stringify({ error: 'Invalid JSON payload' }), {
+              status: 400,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const rawText = typeof payload?.text === 'string' ? payload.text : '';
+          const text = rawText.trim().slice(0, 5000);
+          if (!text) {
+            return new Response(JSON.stringify({ error: '텍스트 본문을 1자 이상 전달해 주세요.' }), {
+              status: 400,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const variant: 'cover' | 'thumbnail' = payload?.variant === 'thumbnail' ? 'thumbnail' : 'cover';
+          const ratio: 'wide' | 'square' | 'vertical' | 'story' = ['wide', 'square', 'vertical', 'story'].includes(payload?.ratio)
+            ? payload.ratio
+            : 'wide';
+          const style: 'illustration' | 'photoreal' = payload?.style === 'photoreal' ? 'photoreal' : 'illustration';
+
+          const variantHints = {
+            cover: 'Design a cinematic hero cover that invites readers. Use balanced composition and narrative cues.',
+            thumbnail: 'Craft a bold, high-impact thumbnail with strong contrast and a clear focal subject.',
+          } as const;
+
+          const ratioHints = {
+            wide: 'Aspect ratio 16:9 (approx. 2048×1152).',
+            square: 'Aspect ratio 1:1 (approx. 1536×1536).',
+            vertical: 'Aspect ratio 4:5 (approx. 1536×1920).',
+            story: 'Aspect ratio 9:16 (approx. 1536×2732).',
+          } as const;
+
+          const styleHints = {
+            illustration: 'Render as a polished digital illustration with stylized shapes, smooth gradients, and expressive lighting.',
+            photoreal: 'Render as a photorealistic scene with believable lighting, materials, and cinematic depth of field.',
+          } as const;
+
+          const instructions = [
+            'You are an art director creating a single marketing image derived from editorial content.',
+            variantHints[variant],
+            ratioHints[ratio],
+            styleHints[style],
+            'Summarize the supplied content into key motifs, moods, and props, then visualize them clearly.',
+            'Avoid overlaying text. Focus on imagery that communicates the theme at a glance.',
+            'Return exactly one image as inline data and include a short (<=240 chars) textual summary of the concept.',
+          ].join('\n');
+
+          const parts: any[] = [
+            { text: instructions },
+            { text: `CONTENT BRIEF:\n${text}` },
+          ];
+
+          const model = 'gemini-2.5-flash-image-preview';
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+          const aiRes = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': geminiKey,
+            },
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts }],
+              generationConfig: { temperature: 0.4 },
+            }),
+          });
+
+          const aiText = await aiRes.text();
+          if (!aiRes.ok) {
+            return new Response(JSON.stringify({ error: `Gemini error: ${aiRes.status} ${aiRes.statusText}`, detail: aiText }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          let aiJson: any = {};
+          try { aiJson = aiText ? JSON.parse(aiText) : {}; } catch { aiJson = {}; }
+          const candidates: any[] = Array.isArray(aiJson?.candidates) ? aiJson.candidates : [];
+
+          let imageData = '';
+          let mime = 'image/png';
+          let summary = '';
+          for (const cand of candidates) {
+            const cparts = cand?.content?.parts || [];
+            for (const part of cparts) {
+              if (!imageData && (part?.inline_data?.data || part?.inlineData?.data)) {
+                imageData = String(part.inline_data?.data || part.inlineData?.data || '');
+                mime = part.inline_data?.mime_type || part.inlineData?.mimeType || mime;
+              } else if (!summary && typeof part?.text === 'string') {
+                summary = part.text.trim();
+              }
+              if (imageData && summary) break;
+            }
+            if (imageData && summary) break;
+          }
+
+          if (!imageData) {
+            return new Response(JSON.stringify({ error: 'Gemini did not return an image.' }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const imageUrl = `data:${mime || 'image/png'};base64,${imageData}`;
+          const responseBody = {
+            image: imageUrl,
+            prompt: summary,
+            variant,
+            ratio,
+            style,
+            message: 'Cover Crafter 이미지가 생성되었습니다.',
+          };
+
+          return new Response(JSON.stringify(responseBody), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          console.error('cover-crafter error', e);
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
+
       // Sticker Generator: create a sticker sheet (multiple variations) from a user image
       if (url.pathname === '/api/sticker-generator') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });

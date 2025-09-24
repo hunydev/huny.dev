@@ -269,6 +269,15 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
         </span>
         <span className="text-sm">Favicon Distiller</span>
       </button>
+      <button
+        onClick={() => onOpenFile('cover-crafter')}
+        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
+      >
+        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
+          <Icon name="coverCrafter" className="w-4 h-4" aria-hidden />
+        </span>
+        <span className="text-sm">Cover Crafter</span>
+      </button>
     </div>
   </div>
 );
