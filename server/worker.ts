@@ -14,6 +14,7 @@ export interface Env {
   NOTION_BOOKMARK_ID?: string;
   NOTION_PRIVATE_API_SECRET?: string;
   NOTION_API_VERSION?: string;
+  ENC_SECRET?: string;
 }
 
 export default {
@@ -62,16 +63,46 @@ export default {
         }
       }
 
-      // Sticker Generator: create a sticker sheet (multiple variations) from a user image
-      if (url.pathname === '/api/sticker-generator') {
+      // Secure API keys: encrypt client-provided keys and return opaque cipher for storage
+      if (url.pathname === '/api/secure-apikeys') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
-        if (!env.GEMINI_API_KEY) {
-          return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+        try {
+          const body = await request.json<any>().catch(() => ({} as any));
+          const existing: string = typeof body?.existing === 'string' ? body.existing : '';
+          let prev: any = {};
+          if (existing) {
+            try { prev = await decryptApiKeyPayload(existing, env) || {}; } catch { prev = {}; }
+          }
+          const next: any = {};
+          const openaiIn: string = typeof body?.openai === 'string' ? body.openai.trim() : '';
+          const geminiIn: string = typeof body?.gemini === 'string' ? body.gemini.trim() : '';
+          if (openaiIn) next.openai = openaiIn; else if (prev?.openai) next.openai = prev.openai;
+          if (geminiIn) next.gemini = geminiIn; else if (prev?.gemini) next.gemini = prev.gemini;
+          next.ts = new Date().toISOString();
+          const cipher = await encryptApiKeyPayload(next, env);
+          const meta = { openai: !!next.openai, gemini: !!next.gemini };
+          return new Response(JSON.stringify({ cipher, meta }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Encryption error', detail: String(e?.message || e) }), {
             status: 500,
             headers: { 'content-type': 'application/json; charset=UTF-8' },
           });
         }
+      }
+
+      // Sticker Generator: create a sticker sheet (multiple variations) from a user image
+      if (url.pathname === '/api/sticker-generator') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
         try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
           const form = await request.formData();
           const img = form.get('image');
           if (!img || typeof (img as any).arrayBuffer !== 'function') {
@@ -116,7 +147,7 @@ export default {
 
           const aiRes = await fetch(apiUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-goog-api-key': env.GEMINI_API_KEY! },
+            headers: { 'Content-Type': 'application/json', 'X-goog-api-key': geminiKey! },
             body: JSON.stringify({ contents: [ { parts } ], generationConfig: { temperature: 0.7 } }),
           });
           const txt = await aiRes.text();
@@ -160,13 +191,14 @@ export default {
       // Text Cleaning: proofread typos/spacing/grammar while preserving meaning; return JSON only
       if (url.pathname === '/api/text-cleaning') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
-        if (!env.GEMINI_API_KEY) {
-          return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
-            status: 500,
-            headers: { 'content-type': 'application/json; charset=UTF-8' },
-          });
-        }
         try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
           const body = await request.json<any>().catch(() => ({} as any));
           const text: string = typeof body?.text === 'string' ? body.text : '';
           if (!text.trim()) {
@@ -189,7 +221,7 @@ export default {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'X-goog-api-key': env.GEMINI_API_KEY!,
+              'X-goog-api-key': geminiKey!,
             },
             body: JSON.stringify({
               contents: [ { parts: [ { text: instructions }, { text: `INPUT:\n${text}` } ] } ],
@@ -224,13 +256,14 @@ export default {
       // UI Clone: accept an image and return single-file HTML (inline CSS) via Gemini
       if (url.pathname === '/api/ui-clone') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
-        if (!env.GEMINI_API_KEY) {
-          return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
-            status: 500,
-            headers: { 'content-type': 'application/json; charset=UTF-8' },
-          });
-        }
         try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
           const form = await request.formData();
           const img = form.get('image');
           if (!img || typeof (img as any).arrayBuffer !== 'function') {
@@ -258,7 +291,7 @@ export default {
           const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
           const aiRes = await fetch(apiUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-goog-api-key': env.GEMINI_API_KEY! },
+            headers: { 'Content-Type': 'application/json', 'X-goog-api-key': geminiKey! },
             body: JSON.stringify({
               contents: [
                 { parts: [
@@ -298,13 +331,14 @@ export default {
       // AI Business Card: generate front (and optionally back) background images using Gemini
       if (url.pathname === '/api/ai-business-card') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
-        if (!env.GEMINI_API_KEY) {
-          return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
-            status: 500,
-            headers: { 'content-type': 'application/json; charset=UTF-8' },
-          });
-        }
         try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
           const form = await request.formData();
           const logo = form.get('logo');
           const includeBack = String(form.get('include_back') || '0') === '1';
@@ -361,7 +395,7 @@ export default {
             ];
             const res = await fetch(apiUrl, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'X-goog-api-key': env.GEMINI_API_KEY! },
+              headers: { 'Content-Type': 'application/json', 'X-goog-api-key': geminiKey! },
               body: JSON.stringify({ contents: [ { parts } ], generationConfig: { temperature: 0.7 } }),
             });
             const txt = await res.text();
@@ -540,13 +574,14 @@ export default {
       // Text to Phoneme: normalize input text then produce Korean G2P in a single shot
       if (url.pathname === '/api/text-to-phoneme') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
-        if (!env.GEMINI_API_KEY) {
-          return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
-            status: 500,
-            headers: { 'content-type': 'application/json; charset=UTF-8' },
-          });
-        }
         try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
           const body = await request.json<any>().catch(() => ({} as any));
           const text: string = typeof body?.text === 'string' ? body.text : '';
           const lang: string = typeof body?.lang === 'string' ? body.lang : 'ko';
@@ -581,7 +616,7 @@ export default {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'X-goog-api-key': env.GEMINI_API_KEY!,
+              'X-goog-api-key': geminiKey!,
             },
             body: JSON.stringify({
               contents: [ { parts: [ { text: instructions }, { text: `INPUT:\n${text}` } ] } ],
@@ -617,13 +652,14 @@ export default {
       // Worker code generator: return only JS function body string for calc(params)
       if (url.pathname === '/api/worker-codegen') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
-        if (!env.GEMINI_API_KEY) {
-          return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
-            status: 500,
-            headers: { 'content-type': 'application/json; charset=UTF-8' },
-          });
-        }
         try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
           const body = await request.json<any>().catch(() => ({} as any));
           const prompt: string = typeof body?.prompt === 'string' ? body.prompt : '';
           const fnName: string = typeof body?.fnName === 'string' && body.fnName.trim() ? body.fnName.trim() : 'calc';
@@ -648,7 +684,7 @@ export default {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'X-goog-api-key': env.GEMINI_API_KEY!,
+              'X-goog-api-key': geminiKey!,
             },
             body: JSON.stringify({
               contents: [ { parts: [ { text: instructions }, { text: `INPUT (describe desired logic):\n${prompt}` } ] } ],
@@ -686,13 +722,14 @@ export default {
       // To-do Generator: build a two-level checklist using Gemini
       if (url.pathname === '/api/todo-generator') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
-        if (!env.GEMINI_API_KEY) {
-          return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
-            status: 500,
-            headers: { 'content-type': 'application/json; charset=UTF-8' },
-          });
-        }
         try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
           const body = await request.json<any>().catch(() => ({} as any));
           const prompt: string = typeof body?.prompt === 'string' ? body.prompt : '';
           const maxItems: number = typeof body?.max_items === 'number' ? Math.max(1, Math.min(100, body.max_items)) : 30;
@@ -716,7 +753,7 @@ export default {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'X-goog-api-key': env.GEMINI_API_KEY!,
+              'X-goog-api-key': geminiKey!,
             },
             body: JSON.stringify({
               contents: [ { parts: [ { text: instructions }, { text: `INPUT:\n${prompt}` } ] } ],
@@ -768,13 +805,14 @@ export default {
         if (request.method !== 'POST') {
           return new Response('Method Not Allowed', { status: 405 });
         }
-        if (!env.GEMINI_API_KEY) {
-          return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
-            status: 500,
-            headers: { 'content-type': 'application/json; charset=UTF-8' },
-          });
-        }
         try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
           const body = await request.json<any>().catch(() => ({} as any));
           const model: string = typeof body?.model === 'string' ? body.model : 'gemini-2.5-flash-preview-tts';
           const prompts: Array<{ text: string; name: string; gender?: string; directive?: string }>
@@ -879,7 +917,7 @@ export default {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'X-goog-api-key': env.GEMINI_API_KEY!,
+                'X-goog-api-key': geminiKey!,
               },
               body: JSON.stringify({
                 contents: [ { parts: [ { text: `TTS the following conversation as-is.\n${convo}` } ] } ],
@@ -915,7 +953,7 @@ export default {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'X-goog-api-key': env.GEMINI_API_KEY!,
+                'X-goog-api-key': geminiKey!,
               },
               body: JSON.stringify({
                 contents: [ { parts: [ { text: textToSpeak } ] } ],
@@ -960,13 +998,14 @@ export default {
         if (request.method !== 'POST') {
           return new Response('Method Not Allowed', { status: 405 });
         }
-        if (!env.GEMINI_API_KEY) {
-          return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
-            status: 500,
-            headers: { 'content-type': 'application/json; charset=UTF-8' },
-          });
-        }
         try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
           const body = await request.json<any>().catch(() => ({} as any));
           const text: string = typeof body?.text === 'string' ? body.text : '';
           let ttsModel: string = typeof body?.model === 'string' ? body.model : 'gemini-2.5-flash-preview-tts';
@@ -996,7 +1035,7 @@ export default {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'X-goog-api-key': env.GEMINI_API_KEY!,
+              'X-goog-api-key': geminiKey!,
             },
             body: JSON.stringify({
               contents: [ { parts: [ { text: instructions }, { text: `INPUT:\n${text}` } ] } ],
@@ -1071,7 +1110,7 @@ export default {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'X-goog-api-key': env.GEMINI_API_KEY!,
+              'X-goog-api-key': geminiKey!,
             },
             body: JSON.stringify({
               contents: [ { parts: [ { text: `TTS the following conversation as-is.\n${convo}` } ] } ],
@@ -1132,13 +1171,14 @@ export default {
         if (request.method !== 'POST') {
           return new Response('Method Not Allowed', { status: 405 });
         }
-        if (!env.OPENAI_API_KEY) {
-          return new Response(JSON.stringify({ error: 'OPENAI_API_KEY is not configured on the server.' }), {
-            status: 500,
-            headers: { 'content-type': 'application/json; charset=UTF-8' },
-          });
-        }
         try {
+          const openaiKey = await getOpenAIKeyFromRequest(request, env);
+          if (!openaiKey) {
+            return new Response(JSON.stringify({ error: 'OPENAI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
           const form = await request.formData();
           const prompt = String(form.get('prompt') || '').trim();
           if (!prompt) {
@@ -1193,7 +1233,7 @@ export default {
           const oiRes = await fetch('https://api.openai.com/v1/images/edits', {
             method: 'POST',
             headers: {
-              Authorization: `Bearer ${env.OPENAI_API_KEY}`,
+              Authorization: `Bearer ${openaiKey}`,
               // Content-Type will be set automatically for multipart/form-data
             },
             body: out,
@@ -1229,13 +1269,14 @@ export default {
         if (request.method !== 'POST') {
           return new Response('Method Not Allowed', { status: 405 });
         }
-        if (!env.GEMINI_API_KEY) {
-          return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
-            status: 500,
-            headers: { 'content-type': 'application/json; charset=UTF-8' },
-          });
-        }
         try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
           const body = await request.json<any>().catch(() => ({} as any));
           const text: string = typeof body?.text === 'string' ? body.text : '';
           if (!text) {
@@ -1262,7 +1303,7 @@ export default {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'X-goog-api-key': env.GEMINI_API_KEY,
+              'X-goog-api-key': geminiKey,
             },
             body: JSON.stringify({
               contents: [
@@ -1418,4 +1459,64 @@ function u8ToB64(u8: Uint8Array): string {
   let bin = '';
   for (let i = 0; i < u8.length; i++) bin += String.fromCharCode(u8[i]);
   return btoa(bin);
+}
+
+// --- Symmetric encryption helpers for client API keys (AES-GCM v1) ---
+async function importAesKey(secret: string): Promise<CryptoKey> {
+  const enc = new TextEncoder();
+  const secretBytes = enc.encode(secret);
+  const hash = await crypto.subtle.digest('SHA-256', secretBytes);
+  return crypto.subtle.importKey('raw', hash, 'AES-GCM', false, ['encrypt', 'decrypt']);
+}
+
+function ensureSecret(env: Env): string {
+  const s = (env.ENC_SECRET || '').trim();
+  if (!s) throw new Error('ENC_SECRET is not configured');
+  return s;
+}
+
+export async function encryptApiKeyPayload(payload: any, env: Env): Promise<string> {
+  const secret = ensureSecret(env);
+  const key = await importAesKey(secret);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const data = new TextEncoder().encode(JSON.stringify(payload || {}));
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, data);
+  const cipher = new Uint8Array(ct);
+  return `v1:${u8ToB64(iv)}:${u8ToB64(cipher)}`;
+}
+
+export async function decryptApiKeyPayload(cipherText: string, env: Env): Promise<any> {
+  if (!cipherText || typeof cipherText !== 'string') throw new Error('Missing cipher');
+  const [v, ivB64, ctB64] = cipherText.split(':');
+  if (v !== 'v1' || !ivB64 || !ctB64) throw new Error('Bad cipher format');
+  const secret = ensureSecret(env);
+  const key = await importAesKey(secret);
+  const iv = b64ToU8(ivB64);
+  const cipher = b64ToU8(ctB64);
+  const ptBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipher);
+  const txt = new TextDecoder().decode(ptBuf);
+  return JSON.parse(txt);
+}
+
+async function getApiKeyFromRequest(request: Request, env: Env): Promise<{ gemini?: string; openai?: string }> {
+  try {
+    const hdr = request.headers.get('X-ApiKey-Cipher') || request.headers.get('x-apikey-cipher') || '';
+    if (!hdr) return { gemini: env.GEMINI_API_KEY, openai: env.OPENAI_API_KEY };
+    const js = await decryptApiKeyPayload(hdr, env).catch(() => ({}));
+    const gemini = (typeof js?.gemini === 'string' && js.gemini.trim()) ? js.gemini.trim() : (env.GEMINI_API_KEY || undefined);
+    const openai = (typeof js?.openai === 'string' && js.openai.trim()) ? js.openai.trim() : (env.OPENAI_API_KEY || undefined);
+    return { gemini, openai };
+  } catch {
+    return { gemini: env.GEMINI_API_KEY, openai: env.OPENAI_API_KEY };
+  }
+}
+
+export async function getGeminiKeyFromRequest(request: Request, env: Env): Promise<string | undefined> {
+  const { gemini } = await getApiKeyFromRequest(request, env);
+  return gemini;
+}
+
+export async function getOpenAIKeyFromRequest(request: Request, env: Env): Promise<string | undefined> {
+  const { openai } = await getApiKeyFromRequest(request, env);
+  return openai;
 }

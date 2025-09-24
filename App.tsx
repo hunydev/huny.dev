@@ -28,6 +28,18 @@ const App: React.FC = () => {
   const restoredRef = useRef<boolean>(false);
   const restoringRef = useRef<boolean>(false);
 
+  // Settings dropdown & API Key modal state
+  const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
+  const settingsRef = useRef<HTMLDivElement | null>(null);
+  const [apiModalOpen, setApiModalOpen] = useState<boolean>(false);
+  const apiModalRef = useRef<HTMLDivElement | null>(null);
+  const [apiSaving, setApiSaving] = useState<boolean>(false);
+  const [apiError, setApiError] = useState<string>('');
+  const [apiHasGemini, setApiHasGemini] = useState<boolean>(false);
+  const [apiHasOpenAI, setApiHasOpenAI] = useState<boolean>(false);
+  const [apiNewGemini, setApiNewGemini] = useState<string>('');
+  const [apiNewOpenAI, setApiNewOpenAI] = useState<string>('');
+
   // Map a tab id (e.g., 'docs:intro', 'bookmark:all', 'split-speaker') to the corresponding left sidebar view
   function viewForTabId(tabId: string): ViewId {
     try {
@@ -355,14 +367,17 @@ const App: React.FC = () => {
     const onDocMouseDown = (e: MouseEvent) => {
       if (!socialRef.current) return;
       const target = e.target as Node | null;
-      if (target && !socialRef.current.contains(target)) {
-        setSocialOpen(false);
+      if (target) {
+        if (socialRef.current && !socialRef.current.contains(target)) setSocialOpen(false);
+        if (settingsRef.current && !settingsRef.current.contains(target)) setSettingsOpen(false);
       }
     };
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setSocialOpen(false);
         setOssOpen(false);
+        setSettingsOpen(false);
+        setApiModalOpen(false);
       }
     };
     document.addEventListener('mousedown', onDocMouseDown);
@@ -372,6 +387,62 @@ const App: React.FC = () => {
       window.removeEventListener('keydown', onKeyDown);
     };
   }, []);
+
+  // Restore API key meta flags
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('secure.apikeys.meta.v1');
+      if (raw) {
+        const meta = JSON.parse(raw) as { gemini?: boolean; openai?: boolean };
+        setApiHasGemini(!!meta?.gemini);
+        setApiHasOpenAI(!!meta?.openai);
+      }
+    } catch {}
+  }, []);
+
+  const openApiKeyModal = () => {
+    setApiError('');
+    setApiNewGemini('');
+    setApiNewOpenAI('');
+    setApiModalOpen(true);
+    setSettingsOpen(false);
+  };
+
+  const saveApiKeys = async () => {
+    try {
+      setApiSaving(true);
+      setApiError('');
+      const existing = localStorage.getItem('secure.apikeys.v1') || '';
+      const payload: any = { existing };
+      if (apiNewGemini.trim()) payload.gemini = apiNewGemini.trim();
+      if (apiNewOpenAI.trim()) payload.openai = apiNewOpenAI.trim();
+      const res = await fetch('/api/secure-apikeys', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const text = await res.text();
+      if (!res.ok) throw new Error(text || `Failed: ${res.status}`);
+      let data: any = {};
+      try { data = text ? JSON.parse(text) : {}; } catch {}
+      const cipher = String(data?.cipher || '');
+      const meta = data?.meta && typeof data.meta === 'object' ? data.meta : {};
+      if (cipher) localStorage.setItem('secure.apikeys.v1', cipher);
+      localStorage.setItem('secure.apikeys.meta.v1', JSON.stringify({
+        gemini: !!meta?.gemini,
+        openai: !!meta?.openai,
+      }));
+      setApiHasGemini(!!meta?.gemini);
+      setApiHasOpenAI(!!meta?.openai);
+      setApiModalOpen(false);
+      setApiNewGemini('');
+      setApiNewOpenAI('');
+    } catch (e: any) {
+      setApiError(e?.message || String(e));
+    } finally {
+      setApiSaving(false);
+    }
+  };
 
   const pageProps: PageProps = {
     onOpenFile: handleOpenFile,
@@ -405,6 +476,7 @@ const App: React.FC = () => {
                 <line x1="9" y1="4" x2="9" y2="20" />
               </svg>
             )}
+            {/* Settings and modals are declared outside the header */}
           </button>
 
           {/* Close all tabs */}
@@ -495,6 +567,45 @@ const App: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* Settings dropdown trigger */}
+          <div className="relative" ref={settingsRef}>
+            <button
+              type="button"
+              onClick={() => setSettingsOpen(v => !v)}
+              className="p-1.5 rounded hover:bg-white/10 text-gray-300"
+              title="설정"
+              aria-haspopup="menu"
+              aria-expanded={settingsOpen}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+                <path d="M12 8a4 4 0 1 1 0 8a4 4 0 0 1 0-8m0-6l2 2l2.8-.4l1.2 2.6l2.6 1.2L20 10l.4 2l2.6 1.2l-1.2 2.6l-2.6 1.2L18 20l-2 .4l-2 2l-2-2L10 20l-2.8.4l-1.2-2.6L3.4 15.2L4.6 12.6L4 10l2.6-1.2L7.8 6.2L10.6 6z"/>
+              </svg>
+            </button>
+            {settingsOpen && (
+              <div className="absolute right-0 top-full mt-1 w-40 bg-[#2d2d2d] border border-black/30 rounded shadow-lg z-50">
+                <ul className="py-1">
+                  <li className="w-full">
+                    <button type="button" className="w-full text-left flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-white/10 text-gray-300" disabled>
+                      <span className="inline-flex w-4 h-4 items-center justify-center" aria-hidden>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.17 4.48-2.96 5.74L15 20l-3-1l-3 1l.96-5.26A6.98 6.98 0 0 1 5 9a7 7 0 0 1 7-7Z"/></svg>
+                      </span>
+                      <span>Sign In</span>
+                    </button>
+                  </li>
+                  <li role="separator" aria-hidden className="my-1 border-t border-white/10" />
+                  <li className="w-full">
+                    <button type="button" className="w-full text-left flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-white/10 text-gray-200" onClick={() => { setSettingsOpen(false); openApiKeyModal(); }}>
+                      <span className="inline-flex w-4 h-4 items-center justify-center" aria-hidden>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M12.94 3.34a1.5 1.5 0 0 1 2.12 0l1.6 1.6a1.5 1.5 0 0 1 0 2.12l-.36.36l2.3 2.3l.36-.36a1.5 1.5 0 0 1 2.12 0l1.6 1.6a1.5 1.5 0 0 1 0 2.12l-3.89 3.9a2 2 0 0 1-1.41.59H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 .59-1.41l3.9-3.89a1.5 1.5 0 0 1 2.12 0l1.6 1.6a1.5 1.5 0 0 1 0 2.12l-.36.36l2.3 2.3l.36-.36a1.5 1.5 0 0 1 0-2.12z"/></svg>
+                      </span>
+                      <span>API Key</span>
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -558,68 +669,62 @@ const App: React.FC = () => {
         )}
       </div>
 
-      {/* Open Source Notices Modal */}
-      {ossOpen && (
-        <div className="fixed inset-0 z-50" onClick={() => setOssOpen(false)}>
+      {/* API Key Modal */}
+      {apiModalOpen && (
+        <div className="fixed inset-0 z-50" onClick={() => setApiModalOpen(false)}>
           <div className="absolute inset-0 bg-black/60" />
           <div
             role="dialog"
             aria-modal="true"
-            aria-labelledby="oss-modal-title"
-            ref={ossModalRef}
-            className="relative mx-auto mt-24 w-[min(92vw,720px)] bg-[#252526] border border-white/10 rounded-lg shadow-xl p-4 text-gray-200"
+            aria-labelledby="apikey-modal-title"
+            ref={apiModalRef}
+            className="relative mx-auto mt-24 w-[min(92vw,560px)] bg-[#252526] border border-white/10 rounded-lg shadow-xl p-4 text-gray-200"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start gap-3 mb-2">
               <div className="shrink-0 p-1.5 rounded bg-white/10">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path d="M12 2a10 10 0 1 0 0 20a10 10 0 0 0 0-20m0 4a1.25 1.25 0 1 1 0 2.5A1.25 1.25 0 0 1 12 6m-1.5 4h3v8h-3z" />
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M12.94 3.34a1.5 1.5 0 0 1 2.12 0l1.6 1.6a1.5 1.5 0 0 1 0 2.12l-.36.36l2.3 2.3l.36-.36a1.5 1.5 0 0 1 2.12 0l1.6 1.6a1.5 1.5 0 0 1 0 2.12l-3.89 3.9a2 2 0 0 1-1.41.59H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 .59-1.41l3.9-3.89a1.5 1.5 0 0 1 2.12 0l1.6 1.6a1.5 1.5 0 0 1 0 2.12l-.36.36l2.3 2.3l.36-.36a1.5 1.5 0 0 1 0-2.12z"/></svg>
               </div>
               <div className="min-w-0 flex-1">
-                <h2 id="oss-modal-title" className="text-lg font-semibold text-white">Open Source Notices</h2>
-                <p className="text-sm text-gray-400">본 프로젝트에서 사용된 오픈소스 및 리소스의 라이선스를 안내합니다.</p>
+                <h2 id="apikey-modal-title" className="text-lg font-semibold text-white">API Key 설정</h2>
+                <p className="text-sm text-gray-400">여기에 설정한 키는 서버 환경변수 대신 우선적으로 사용됩니다. 값은 암호화되어 브라우저에 저장됩니다.</p>
               </div>
-              <button onClick={() => setOssOpen(false)} className="ml-2 p-1.5 rounded hover:bg-white/10 text-gray-300" aria-label="닫기" title="닫기">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
-                  <path d="M3.72 3.22a.75.75 0 0 1 1.06 0L8 6.44l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 7.5l3.22 3.22a.75.75 0 0 1-1.06 1.06L8 8.56l-3.22 3.22a.75.75 0 1 1-1.06-1.06L6.94 7.5L3.72 4.28a.75.75 0 0 1 0-1.06Z" />
-                </svg>
+              <button onClick={() => setApiModalOpen(false)} className="ml-2 p-1.5 rounded hover:bg-white/10 text-gray-300" aria-label="닫기" title="닫기">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4"><path d="M3.72 3.22a.75.75 0 0 1 1.06 0L8 6.44l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 7.5l3.22 3.22a.75.75 0 0 1-1.06 1.06L8 8.56l-3.22 3.22a.75.75 0 1 1-1.06-1.06L6.94 7.5L3.72 4.28a.75.75 0 0 1 0-1.06Z" /></svg>
               </button>
             </div>
 
             <div className="space-y-3 text-sm">
-              <div className="bg-white/[0.03] border border-white/10 rounded p-3">
-                <h3 className="font-medium text-white mb-1">Icons</h3>
-                <p className="text-gray-300">Icons provided by Iconify (<a href="https://iconify.design" target="_blank" rel="noopener" className="underline text-blue-300">https://iconify.design</a>).</p>
-                <p className="text-gray-400">Icon sets used are open source and licensed under terms such as Apache 2.0 and MIT.</p>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1" htmlFor="gemini-key">GEMINI_API_KEY</label>
+                <input
+                  id="gemini-key"
+                  type="password"
+                  value={apiNewGemini}
+                  onChange={(e) => setApiNewGemini(e.target.value)}
+                  placeholder={apiHasGemini && !apiNewGemini ? '********' : '예: AIza...'}
+                  className="w-full px-2 py-2 rounded bg-black/40 border border-white/10 text-sm"
+                  autoComplete="off"
+                />
+                <p className="text-xs text-gray-500 mt-1">입력하지 않으면 기존 저장값을 유지합니다.</p>
               </div>
-
-              <div className="bg-white/[0.03] border border-white/10 rounded p-3">
-                <h3 className="font-medium text-white mb-1">Core dependencies</h3>
-                <ul className="list-disc ml-5 space-y-1">
-                  <li>
-                    React &amp; React DOM — MIT License — <a className="underline text-blue-300" href="https://react.dev/" target="_blank" rel="noopener">https://react.dev/</a>
-                  </li>
-                  <li>
-                    Vite — MIT License — <a className="underline text-blue-300" href="https://vitejs.dev/" target="_blank" rel="noopener">https://vitejs.dev/</a>
-                  </li>
-                  <li>
-                    TypeScript — Apache-2.0 — <a className="underline text-blue-300" href="https://www.typescriptlang.org/" target="_blank" rel="noopener">https://www.typescriptlang.org/</a>
-                  </li>
-                </ul>
+              <div>
+                <label className="block text-sm text-gray-300 mb-1" htmlFor="openai-key">OPENAI_API_KEY</label>
+                <input
+                  id="openai-key"
+                  type="password"
+                  value={apiNewOpenAI}
+                  onChange={(e) => setApiNewOpenAI(e.target.value)}
+                  placeholder={apiHasOpenAI && !apiNewOpenAI ? '********' : '예: sk-...'}
+                  className="w-full px-2 py-2 rounded bg-black/40 border border-white/10 text-sm"
+                  autoComplete="off"
+                />
+                <p className="text-xs text-gray-500 mt-1">입력하지 않으면 기존 저장값을 유지합니다.</p>
               </div>
-
-              <div className="bg-white/[0.03] border border-white/10 rounded p-3">
-                <h3 className="font-medium text-white mb-1">Media</h3>
-                <ul className="list-disc ml-5 space-y-1">
-                  <li>
-                    Sample video “flower.mp4” — CC0 (public domain) — from MDN Web Docs interactive examples — <a className="underline text-blue-300" href="https://developer.mozilla.org/" target="_blank" rel="noopener">https://developer.mozilla.org/</a>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="text-xs text-gray-500">
-                위 고지 사항은 프로젝트 사용 현황에 따라 업데이트됩니다. 추가된 서드파티 리소스가 있을 경우 해당 라이선스를 본 창에 계속 반영합니다.
+              {apiError && <div className="text-xs text-amber-300">{apiError}</div>}
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button type="button" className="px-3 py-2 rounded text-sm border border-white/10 text-gray-300 hover:bg-white/10" onClick={() => setApiModalOpen(false)} disabled={apiSaving}>취소</button>
+                <button type="button" className="px-3 py-2 rounded text-sm border border-white/10 text-white hover:bg-white/10 disabled:opacity-60" onClick={saveApiKeys} disabled={apiSaving}>{apiSaving ? '저장 중…' : '저장'}</button>
               </div>
             </div>
           </div>
