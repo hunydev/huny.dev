@@ -54,7 +54,38 @@ const AIBusinessCardPage: React.FC<PageProps> = () => {
   const [activeSide, setActiveSide] = React.useState<'front' | 'back'>('front');
   const [selectedId, setSelectedId] = React.useState<string>('');
 
-  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const previewShellRef = React.useRef<HTMLDivElement | null>(null);
+  const [canvasScale, setCanvasScale] = React.useState(1);
+  const scaleRef = React.useRef(1);
+
+  React.useEffect(() => {
+    scaleRef.current = canvasScale;
+  }, [canvasScale]);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.ResizeObserver === 'undefined') {
+      setCanvasScale(1);
+      return;
+    }
+    const el = previewShellRef.current;
+    if (!el) return;
+
+    const applyScale = (width: number) => {
+      if (!width) return;
+      const next = Math.min(1, width / CANVAS_W);
+      setCanvasScale((prev) => (Math.abs(prev - next) < 0.001 ? prev : next));
+    };
+
+    applyScale(el.clientWidth);
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        applyScale(entry.contentRect.width);
+      }
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const addField = () => setFields(prev => [...prev, { id: uid(), label: '커스텀', value: '' }]);
   const removeField = (id: string) => setFields(prev => prev.filter(f => f.id !== id));
@@ -84,8 +115,9 @@ const AIBusinessCardPage: React.FC<PageProps> = () => {
     const initial = currentBoxes.find(b => b.id === id)!;
     const initX = initial.x, initY = initial.y;
     const onMove = (ev: MouseEvent) => {
-      const dx = ev.clientX - startX;
-      const dy = ev.clientY - startY;
+      const scale = scaleRef.current || 1;
+      const dx = (ev.clientX - startX) / scale;
+      const dy = (ev.clientY - startY) / scale;
       setCurrentBoxes(prev => prev.map(b => b.id === id ? { ...b, x: Math.max(0, Math.min(CANVAS_W - 10, initX + dx)), y: Math.max(0, Math.min(CANVAS_H - 10, initY + dy)) } : b));
     };
     const onUp = () => {
@@ -269,32 +301,41 @@ const AIBusinessCardPage: React.FC<PageProps> = () => {
             </div>
           </div>
 
-          <div ref={containerRef} className="relative border border-white/10 rounded bg-black/40 overflow-hidden" style={{ width: CANVAS_W, height: CANVAS_H }}>
-            {activeSide === 'front' && frontImg && (
-              <img src={frontImg} alt="front" className="absolute inset-0 w-full h-full object-cover" />
-            )}
-            {activeSide === 'back' && includeBack && backImg && (
-              <img src={backImg} alt="back" className="absolute inset-0 w-full h-full object-cover" />
-            )}
-            {/* Text boxes */}
-            {(activeSide === 'front' ? textBoxesFront : textBoxesBack).map((b) => (
-              <div
-                key={b.id}
-                onMouseDown={(e)=>onMouseDownBox(e, b.id)}
-                onClick={()=>setSelectedId(b.id)}
-                className={`absolute cursor-move ${selectedId===b.id?'outline outline-1 outline-blue-400':''}`}
-                style={{ left: b.x, top: b.y, color: b.color, fontSize: b.fontSize, fontFamily: b.fontFamily, textAlign: b.align as any, whiteSpace: 'pre' }}
-                title={b.fieldId || b.id}
-              >
-                {b.text}
-              </div>
-            ))}
-            {!frontImg && activeSide==='front' && (
-              <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm">시안을 생성하면 미리보기가 표시됩니다.</div>
-            )}
-            {activeSide==='back' && includeBack && !backImg && (
-              <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm">뒷면 시안을 생성하면 미리보기가 표시됩니다.</div>
-            )}
+          <div
+            ref={previewShellRef}
+            className="relative border border-white/10 rounded bg-black/40 overflow-hidden mx-auto"
+            style={{ width: '100%', maxWidth: CANVAS_W, height: CANVAS_H * canvasScale }}
+          >
+            <div
+              className="relative origin-top-left"
+              style={{ width: CANVAS_W, height: CANVAS_H, transform: `scale(${canvasScale})` }}
+            >
+              {activeSide === 'front' && frontImg && (
+                <img src={frontImg} alt="front" className="absolute inset-0 w-full h-full object-cover" />
+              )}
+              {activeSide === 'back' && includeBack && backImg && (
+                <img src={backImg} alt="back" className="absolute inset-0 w-full h-full object-cover" />
+              )}
+              {/* Text boxes */}
+              {(activeSide === 'front' ? textBoxesFront : textBoxesBack).map((b) => (
+                <div
+                  key={b.id}
+                  onMouseDown={(e)=>onMouseDownBox(e, b.id)}
+                  onClick={()=>setSelectedId(b.id)}
+                  className={`absolute cursor-move ${selectedId===b.id?'outline outline-1 outline-blue-400':''}`}
+                  style={{ left: b.x, top: b.y, color: b.color, fontSize: b.fontSize, fontFamily: b.fontFamily, textAlign: b.align as any, whiteSpace: 'pre' }}
+                  title={b.fieldId || b.id}
+                >
+                  {b.text}
+                </div>
+              ))}
+              {!frontImg && activeSide==='front' && (
+                <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm">시안을 생성하면 미리보기가 표시됩니다.</div>
+              )}
+              {activeSide==='back' && includeBack && !backImg && (
+                <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm">뒷면 시안을 생성하면 미리보기가 표시됩니다.</div>
+              )}
+            </div>
           </div>
         </div>
       </section>
