@@ -1,6 +1,8 @@
 name: Deploy
 
 on:
+  schedule:
+    - cron: '0 1 * * *' # 매일 10시 KST (01:00 UTC)
   push:
     branches: [ main ]
   workflow_dispatch:
