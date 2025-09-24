@@ -312,8 +312,6 @@ const ICON_DEFS = {
 
 export type IconName = keyof typeof ICON_DEFS;
 
-const mergeClassNames = (...classes: Array<string | undefined>) => classes.filter(Boolean).join(' ');
-
 interface IconProps extends React.SVGAttributes<SVGSVGElement> {
   name: IconName;
   className?: string;
@@ -322,7 +320,7 @@ interface IconProps extends React.SVGAttributes<SVGSVGElement> {
 export const Icon: React.FC<IconProps> = ({ name, className, ...rest }) => {
   const def = ICON_DEFS[name];
   if (!def) return null;
-  const mergedClass = mergeClassNames(def.defaultClassName, className);
+  const mergedClass = className && className.trim().length > 0 ? className : def.defaultClassName;
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
