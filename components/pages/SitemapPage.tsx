@@ -1,6 +1,6 @@
 import React from 'react';
 import { PageProps, ViewId } from '../../types';
-import { ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS, FileIcon, ImageIcon, VideoIcon } from '../../constants';
+import { ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS, Icon } from '../../constants';
 import { DOCS } from './docsData';
 import { BOOKMARK_CATEGORIES, getBookmarkCountByCategory } from './bookmarksData';
 import { NOTE_GROUPS, getNoteCountByGroup } from './notesData';
@@ -63,19 +63,19 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile }) => {
               </li>
               <li>
                 <button onClick={() => onOpenFile('works')} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left">
-                  <FileIcon />
+                  <Icon name="file" className="mr-2" />
                   <span>works.md</span>
                 </button>
               </li>
               <li>
                 <button onClick={() => onOpenFile('about')} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left">
-                  <FileIcon />
+                  <Icon name="file" className="mr-2" />
                   <span>about.json</span>
                 </button>
               </li>
               <li>
                 <button onClick={() => onOpenFile('stack')} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left">
-                  <FileIcon />
+                  <Icon name="file" className="mr-2" />
                   <span>stack-huny.dev</span>
                 </button>
               </li>
@@ -99,7 +99,7 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile }) => {
                     title={item.name}
                   >
                     <span className="mr-1">
-                      {item.type === 'image' ? ImageIcon() : VideoIcon()}
+                      {item.type === 'image' ? <Icon name="image" /> : <Icon name="video" />}
                     </span>
                     <span>{item.name}</span>
                   </button>
@@ -115,7 +115,7 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile }) => {
               {DOCS.map(d => (
                 <li key={d.slug}>
                   <button onClick={() => onOpenFile(`docs:${d.slug}`)} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left" title={`${d.slug}.html`}>
-                    <FileIcon />
+                    <Icon name="file" className="mr-2" />
                     <span className="truncate" title={d.title}>{d.title}</span>
                   </button>
                 </li>

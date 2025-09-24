@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ViewId } from '../types';
-import { FileIcon, ImageIcon, VideoIcon } from '../constants';
+import { Icon } from '../constants';
 import { BOOKMARK_CATEGORIES, BOOKMARKS, type Bookmark } from './pages/bookmarksData';
 import { NOTE_GROUPS, getNoteCountByGroup } from './pages/notesData';
 import { CATEGORIES } from './pages/appsData';
@@ -139,7 +139,7 @@ const DocsView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFi
         style={{ paddingLeft: depth * 12 + 12 }}
         title={node.path}
       >
-        <FileIcon />
+        <Icon name="file" className="mr-2" />
         <span className="text-sm truncate" title={node.name}>{node.name}</span>
       </button>
     );
@@ -309,35 +309,35 @@ const ExplorerView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
           <span>Welcome</span>
         </button>
         <button onClick={() => onOpenFile('works')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-          <FileIcon />
+          <Icon name="file" className="mr-2" />
           <span>works.md</span>
         </button>
         <button onClick={() => onOpenFile('about')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-          <FileIcon />
+          <Icon name="file" className="mr-2" />
           <span>about.json</span>
         </button>
         <button onClick={() => onOpenFile('stack')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-          <FileIcon />
+          <Icon name="file" className="mr-2" />
           <span>stack-huny.dev</span>
         </button>
         <button onClick={() => onOpenFile('digital-shelf')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-          <FileIcon />
+          <Icon name="file" className="mr-2" />
           <span>digital-shelf.json</span>
         </button>
         <button onClick={() => onOpenFile('domain')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-          <FileIcon />
+          <Icon name="file" className="mr-2" />
           <span>tts-history.md</span>
         </button>
         <button onClick={() => onOpenFile('mascot')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-          <FileIcon />
+          <Icon name="file" className="mr-2" />
           <span>mascot.gallery</span>
         </button>
         <button onClick={() => onOpenFile('project')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-          <FileIcon />
+          <Icon name="file" className="mr-2" />
           <span>project.js</span>
         </button>
         <button onClick={() => onOpenFile('extensions')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
-          <FileIcon />
+          <Icon name="file" className="mr-2" />
           <span>extensions.txt</span>
         </button>
       </div>
@@ -431,7 +431,7 @@ const MediaView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenF
           style={{ paddingLeft: depth * 12 + 12 }}
         >
           <span className="mr-2">
-            {node.type === 'image' ? ImageIcon() : VideoIcon()}
+            {node.type === 'image' ? <Icon name="image" /> : <Icon name="video" />}
           </span>
           <span className="text-sm">{node.name}</span>
         </button>

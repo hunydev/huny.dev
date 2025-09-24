@@ -3,7 +3,7 @@ import ActivityBar from './components/ActivityBar';
 import Sidebar from './components/Sidebar';
 import MainPanel from './components/MainPanel';
 import { ViewId, Tab, PageProps } from './types';
-import { PAGES, ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS, FileIcon, ImageIcon, VideoIcon } from './constants';
+import { PAGES, ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS, Icon } from './constants';
 import logo from './logo_128x128.png';
 import { getCategoryById } from './components/pages/bookmarksData';
 import { getNoteGroupById } from './components/pages/notesData';
@@ -134,7 +134,7 @@ const App: React.FC = () => {
         const mType = payload?.type ?? 'image';
         const mName = payload?.name ?? 'file';
         tabTitle = `media (${mName})`;
-        tabIcon = mType === 'image' ? ImageIcon() : VideoIcon();
+        tabIcon = mType === 'image' ? <Icon name="image" /> : <Icon name="video" />;
       } catch { }
     }
     else if (baseId === 'notes' && arg) {
@@ -169,7 +169,7 @@ const App: React.FC = () => {
       const doc = getDocBySlug(slug);
       const title = doc?.title || slug || 'docs';
       tabTitle = `docs – ${title}`;
-      tabIcon = <FileIcon />;
+      tabIcon = <Icon name="file" />;
     }
 
     setOpenTabs(prevTabs => {

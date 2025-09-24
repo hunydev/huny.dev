@@ -1,6 +1,6 @@
 import React from 'react';
 import { PageProps, ViewId } from '../../types';
-import { ACTIVITY_BAR_ITEMS, PAGES, FileIcon, ImageIcon, VideoIcon } from '../../constants';
+import { ACTIVITY_BAR_ITEMS, PAGES, Icon } from '../../constants';
 import { getCategoryById } from './bookmarksData';
 import { getNoteGroupById } from './notesData';
 import { getAppCategoryById } from './appsData';
@@ -251,7 +251,7 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
                                         const mType = payload?.type ?? 'image';
                                         const mName = payload?.name ?? 'file';
                                         displayTitle = `media (${mName})`;
-                                        displayIcon = mType === 'image' ? ImageIcon() : VideoIcon();
+                                        displayIcon = mType === 'image' ? <Icon name="image" /> : <Icon name="video" />;
                                     } catch {}
                                 } else if (baseId === 'notes' && arg) {
                                     const group = getNoteGroupById(arg);
@@ -281,7 +281,7 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
                                     const doc = getDocBySlug(slug);
                                     const title = doc?.title || slug || 'docs';
                                     displayTitle = `docs – ${title}`;
-                                    displayIcon = <FileIcon />;
+                                    displayIcon = <Icon name="file" />;
                                 }
 
                                 return (
