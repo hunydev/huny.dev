@@ -543,6 +543,113 @@ export default {
           });
         }
       }
+      if (url.pathname === '/api/comic-restyler') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const form = await request.formData();
+          const imageFile = form.get('image');
+          if (!(imageFile instanceof File)) {
+            return new Response(JSON.stringify({ error: 'Missing image file' }), {
+              status: 400,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const styleRaw = String(form.get('style') || 'illustration').toLowerCase();
+          const style: 'illustration' | 'photoreal' = styleRaw === 'photoreal' ? 'photoreal' : 'illustration';
+          const extraPrompt = typeof form.get('prompt') === 'string' ? String(form.get('prompt')).trim() : '';
+
+          const mime = imageFile.type && imageFile.type.startsWith('image/') ? imageFile.type : 'image/png';
+          const sourceBytes = new Uint8Array(await imageFile.arrayBuffer());
+          const sourceB64 = u8ToB64(sourceBytes);
+
+          const styleHint = style === 'photoreal'
+            ? 'Render characters, lighting, and materials with photorealistic fidelity while respecting the existing panel layout.'
+            : 'Render with high-quality illustration aesthetics: clean line art, expressive shading, and vibrant yet controlled palettes.';
+
+          const instructions = [
+            'You are an expert comic restyler. Transform the supplied multi-panel comic sketch into a polished image while preserving narrative flow.',
+            'Core requirements:',
+            '- Maintain all panel boundaries, aspect ratios, and gutter spacing exactly as in the source image.',
+            '- Keep every speech bubble, caption box, and onomatopoeia in the same position with identical text content.',
+            '- Preserve the overall camera angles, poses, sequence of actions, and layout per panel.',
+            '- Upgrade the rendering fidelity of characters, props, and backgrounds according to the selected style.',
+            '- Remove sketch artifacts or stray lines from the original while retaining the story beat.',
+            styleHint,
+            extraPrompt ? `Additional creative direction:
+${extraPrompt}` : undefined,
+          ].filter(Boolean).join('\n');
+
+          const model = 'gemini-2.5-flash-image-preview';
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+
+          const parts: any[] = [
+            { text: instructions },
+            { inline_data: { mime_type: mime, data: sourceB64 } },
+            { text: 'Output a single image as inline data (PNG preferred) with the refined comic. Do not add extra panels or rearrange content.' },
+          ];
+
+          const aiRes = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': geminiKey,
+            },
+            body: JSON.stringify({ contents: [ { parts } ], generationConfig: { temperature: 0.3 } }),
+          });
+
+          const aiText = await aiRes.text();
+          if (!aiRes.ok) {
+            return new Response(JSON.stringify({ error: `Gemini error: ${aiRes.status} ${aiRes.statusText}`, detail: aiText }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          let aiJson: any = {};
+          try { aiJson = aiText ? JSON.parse(aiText) : {}; } catch { aiJson = {}; }
+          const candidates: any[] = Array.isArray(aiJson?.candidates) ? aiJson.candidates : [];
+          let base64Image = '';
+          let outMime = 'image/png';
+          for (const cand of candidates) {
+            const cparts = cand?.content?.parts || [];
+            for (const p of cparts) {
+              const data = p?.inline_data?.data || p?.inlineData?.data;
+              if (data) {
+                base64Image = String(data);
+                outMime = p?.inline_data?.mime_type || p?.inlineData?.mimeType || outMime;
+                break;
+              }
+            }
+            if (base64Image) break;
+          }
+
+          if (!base64Image) {
+            return new Response(JSON.stringify({ error: 'Gemini did not return an image.' }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const dataUrl = `data:${outMime};base64,${base64Image}`;
+          return new Response(JSON.stringify({ image: dataUrl, style }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
       // Text Cleaning: proofread typos/spacing/grammar while preserving meaning; return JSON only
       if (url.pathname === '/api/text-cleaning') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });

@@ -26,6 +26,7 @@ const ExtensionsPage = React.lazy(() => import('./components/pages/ExtensionsPag
 const TextCleaningPage = React.lazy(() => import('./components/pages/TextCleaningPage'));
 const AIBusinessCardPage = React.lazy(() => import('./components/pages/AIBusinessCardPage'));
 const StickerGeneratorPage = React.lazy(() => import('./components/pages/StickerGeneratorPage'));
+const ComicRestylerPage = React.lazy(() => import('./components/pages/ComicRestylerPage'));
 const FaviconDistillerPage = React.lazy(() => import('./components/pages/FaviconDistillerPage'));
 const CoverCrafterPage = React.lazy(() => import('./components/pages/CoverCrafterPage'));
 
@@ -187,6 +188,13 @@ const ICON_DEFS = {
     nodes: <path d="M18.5 2h-13C3.6 2 2 3.6 2 5.5v13C2 20.4 3.6 22 5.5 22H16l6-6V5.5C22 3.6 20.4 2 18.5 2M15 20v-1.5c0-1.9 1.6-3.5 3.5-3.5H20z"/>,
     defaultClassName: 'w-4 h-4 text-gray-400',
     attrs: { fill: 'currentColor' },
+  },
+  comicRestyler: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <path fill="currentColor" d="M11 3.925L8.925 6H6v2.925L3.925 11L6 13.075V16h2.925L11 18.075l2.5-2.5l4.2 2.125l-2.15-4.175L18.075 11L16 8.925V6h-2.925zM11 1.1L13.9 4H18v4.1l2.9 2.9l-2.9 2.9l2.875 5.65q.175.325.1.638t-.275.512t-.512.275t-.638-.1L13.9 18L11 20.9L8.1 18H4v-4.1L1.1 11L4 8.1V4h4.1zm0 9.9"/>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
   },
   uiClone: {
     viewBox: '0 0 24 24',
@@ -404,6 +412,11 @@ export const PAGES: {
     title: 'Sticker Generator',
     component: StickerGeneratorPage,
     icon: <Icon name="stickerGenerator" className="mr-2" />,
+  },
+  'comic-restyler': {
+    title: 'Comic Restyler',
+    component: ComicRestylerPage,
+    icon: <Icon name="comicRestyler" className="mr-2" />,
   },
   'favicon-distiller': {
     title: 'Favicon Distiller',

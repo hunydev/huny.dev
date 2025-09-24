@@ -65,6 +65,7 @@ const App: React.FC = () => {
         case 'text-cleaning':
         case 'ai-business-card':
         case 'sticker-generator':
+        case 'comic-restyler':
         case 'ui-clone':
         case 'favicon-distiller':
         case 'cover-crafter':
