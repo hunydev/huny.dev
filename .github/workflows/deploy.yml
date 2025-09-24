@@ -47,10 +47,20 @@ jobs:
       - name: Send webhook on success
         if: success()
         run: |
-          curl -X GET "${{ env.WEBHOOK_URL }}?title=success&message=deployed+successfully+at+$(date +'%Y-%m-%dT%H:%M:%SZ')"
+          curl -X GET \
+            -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36' \
+            -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9' \
+            -H 'Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7' \
+            -H 'Accept-Encoding: gzip, deflate, br' \
+            "${{ env.WEBHOOK_URL }}?title=success&message=deployed+successfully+at+$(date +'%Y-%m-%dT%H:%M:%SZ')"
       
       - name: Send webhook on failure
         if: failure()
         run: |
-          curl -X GET "${{ env.WEBHOOK_URL }}?title=failure&message=deploy+failed+at+$(date +'%Y-%m-%dT%H:%M:%SZ')"
+          curl -X GET \
+            -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36' \
+            -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9' \
+            -H 'Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7' \
+            -H 'Accept-Encoding: gzip, deflate, br' \
+            "${{ env.WEBHOOK_URL }}?title=failure&message=deploy+failed+at+$(date +'%Y-%m-%dT%H:%M:%SZ')"
         
