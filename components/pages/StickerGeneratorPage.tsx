@@ -1,5 +1,6 @@
 import React from 'react';
 import type { PageProps } from '../../types';
+import { Icon } from '../../constants';
 
 const StickerGeneratorPage: React.FC<PageProps> = () => {
   const [file, setFile] = React.useState<File | null>(null);
@@ -130,7 +131,7 @@ const StickerGeneratorPage: React.FC<PageProps> = () => {
       <header className="mb-6">
         <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
           <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-pink-300">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-6 h-6"><path fill="currentColor" d="M3 4h13l5 5v11a2 2 0 0 1-2 2H3zm2 2v14h14V10h-4a2 2 0 0 1-2-2V6zM6 12h6v2H6zm0 3h5v2H6z"/></svg>
+            <Icon name="stickerGenerator" className="w-6 h-6" />
           </span>
           Sticker Generator
         </h1>
