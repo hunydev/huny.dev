@@ -68,6 +68,7 @@ const App: React.FC = () => {
         case 'comic-restyler':
         case 'ui-clone':
         case 'favicon-distiller':
+        case 'avatar-distiller':
         case 'cover-crafter':
           return ViewId.Playground;
         // Explorer bucket: core files

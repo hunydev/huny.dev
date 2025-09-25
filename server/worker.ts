@@ -650,6 +650,109 @@ ${extraPrompt}` : undefined,
           });
         }
       }
+      if (url.pathname === '/api/avatar-distiller') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const form = await request.formData();
+          const imageFile = form.get('image');
+          if (!(imageFile instanceof File)) {
+            return new Response(JSON.stringify({ error: 'Missing image file' }), {
+              status: 400,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const styleRaw = String(form.get('style') || 'illustration').toLowerCase();
+          const style: 'illustration' | 'photoreal' = styleRaw === 'photoreal' ? 'photoreal' : 'illustration';
+          const extraPrompt = typeof form.get('prompt') === 'string' ? String(form.get('prompt')).trim() : '';
+
+          const sourceMime = imageFile.type && imageFile.type.startsWith('image/') ? imageFile.type : 'image/png';
+          const sourceBytes = new Uint8Array(await imageFile.arrayBuffer());
+          const sourceB64 = u8ToB64(sourceBytes);
+
+          const styleHint = style === 'photoreal'
+            ? 'Aim for a natural, photorealistic head-and-shoulders portrait with soft bokeh background and flattering, realistic lighting.'
+            : 'Aim for a clean, stylized illustration with smooth shading, clear edges, and a friendly, modern avatar look.';
+
+          const instructions = [
+            'You are an avatar designer. Optimize the provided image into a high-quality profile avatar while preserving identity.',
+            'Core requirements:',
+            '- Center the primary subject (usually the face) with a head-and-shoulders crop on a square canvas.',
+            '- Maintain original identity, skin tone, and key features. Avoid unrealistic alterations.',
+            '- Use balanced exposure and contrast. Clean up distracting artifacts or busy backgrounds.',
+            '- Compose for a circular crop (adequate headroom and margins).',
+            '- Background should be simple and consistent (soft bokeh or subtle gradient), not noisy.',
+            styleHint,
+            extraPrompt ? `Additional creative direction:\n${extraPrompt}` : undefined,
+            'Output one image only. Prefer PNG format. Keep the canvas square and ready for a round crop.',
+          ].filter(Boolean).join('\n');
+
+          const model = 'gemini-2.5-flash-image-preview';
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+          const parts: any[] = [
+            { text: instructions },
+            { inline_data: { mime_type: sourceMime, data: sourceB64 } },
+          ];
+          const aiRes = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': geminiKey,
+            },
+            body: JSON.stringify({ contents: [ { parts } ], generationConfig: { temperature: 0.25 } }),
+          });
+          const aiText = await aiRes.text();
+          if (!aiRes.ok) {
+            return new Response(JSON.stringify({ error: `Gemini error: ${aiRes.status} ${aiRes.statusText}`, detail: aiText }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          let aiJson: any = {};
+          try { aiJson = aiText ? JSON.parse(aiText) : {}; } catch { aiJson = {}; }
+          const candidates: any[] = Array.isArray(aiJson?.candidates) ? aiJson.candidates : [];
+          let base64Image = '';
+          let outMime = 'image/png';
+          for (const cand of candidates) {
+            const cparts = cand?.content?.parts || [];
+            for (const p of cparts) {
+              const data = p?.inline_data?.data || p?.inlineData?.data;
+              if (data) {
+                base64Image = String(data);
+                outMime = p?.inline_data?.mime_type || p?.inlineData?.mimeType || outMime;
+                break;
+              }
+            }
+            if (base64Image) break;
+          }
+
+          if (!base64Image) {
+            return new Response(JSON.stringify({ error: 'Gemini did not return an image.' }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const dataUrl = `data:${outMime};base64,${base64Image}`;
+          return new Response(JSON.stringify({ image: dataUrl, style }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
       // Text Cleaning: proofread typos/spacing/grammar while preserving meaning; return JSON only
       if (url.pathname === '/api/text-cleaning') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });

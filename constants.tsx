@@ -29,6 +29,7 @@ const StickerGeneratorPage = React.lazy(() => import('./components/pages/Sticker
 const ComicRestylerPage = React.lazy(() => import('./components/pages/ComicRestylerPage'));
 const FaviconDistillerPage = React.lazy(() => import('./components/pages/FaviconDistillerPage'));
 const CoverCrafterPage = React.lazy(() => import('./components/pages/CoverCrafterPage'));
+const AvatarDistillerPage = React.lazy(() => import('./components/pages/AvatarDistillerPage'));
 
 type IconDefinition = {
   viewBox: string;
@@ -109,6 +110,16 @@ const ICON_DEFS = {
       <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M2 8a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3zm4 2v4"/><path d="M11 10a2 2 0 1 0 0 4m3-2a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/></g>
     ),
     defaultClassName: 'w-4 h-4',
+  },
+  avatar: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <g fill="currentColor">
+        <path d="M12 2a5.5 5.5 0 1 1 0 11a5.5 5.5 0 0 1 0-11" />
+        <path d="M4 20.5C4 17.462 7.582 15 12 15s8 2.462 8 5.5V22H4z" opacity=".6" />
+      </g>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
   },
   globe: {
     viewBox: '0 0 24 24',
@@ -422,6 +433,11 @@ export const PAGES: {
     title: 'Favicon Distiller',
     component: FaviconDistillerPage,
     icon: <Icon name="favicon" className="mr-2" />,
+  },
+  'avatar-distiller': {
+    title: 'Avatar Distiller',
+    component: AvatarDistillerPage,
+    icon: <Icon name="avatar" className="mr-2" />,
   },
   'cover-crafter': {
     title: 'Cover Crafter',
