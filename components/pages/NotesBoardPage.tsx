@@ -15,6 +15,8 @@ import { decryptNoteText, encryptNoteText } from './notesCrypto';
 
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 
+const MIN_NOTE_WIDTH = 220;
+
 // Utilities to derive accessible foreground color for a given background
 const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
   try {
@@ -41,6 +43,123 @@ const getContrastColor = (hex: string): string => {
 const getToolbarIconColor = (hex: string): string => {
   const contrast = getContrastColor(hex);
   return contrast === '#fff' ? 'rgba(255,255,255,0.85)' : 'rgba(17,17,17,0.75)';
+};
+
+type PasswordModalMode = 'setSecret' | 'unlockSecret';
+
+interface PasswordModalState {
+  mode: PasswordModalMode;
+  title: string;
+  description?: string;
+  confirmLabel: string;
+  minLength?: number;
+}
+
+interface PasswordModalProps {
+  state: PasswordModalState;
+  onConfirm: (password: string) => void;
+  onCancel: () => void;
+}
+
+const PasswordModal: React.FC<PasswordModalProps> = ({ state, onConfirm, onCancel }) => {
+  const [password, setPassword] = React.useState('');
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
+
+  React.useEffect(() => {
+    setPassword('');
+    setShowPassword(false);
+    setError('');
+    const id = window.setTimeout(() => inputRef.current?.focus(), 0);
+    return () => window.clearTimeout(id);
+  }, [state]);
+
+  const minLength = state.minLength ?? 1;
+
+  const handleSubmit = () => {
+    const trimmed = password.trim();
+    if (trimmed.length < minLength) {
+      setError(`암호는 최소 ${minLength}자 이상이어야 합니다.`);
+      return;
+    }
+    setError('');
+    onConfirm(trimmed);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSubmit();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      onCancel();
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4"
+      role="dialog"
+      aria-modal="true"
+      onClick={() => onCancel()}
+    >
+      <div
+        className="w-full max-w-sm rounded-lg border border-white/15 bg-[#1f1f1f] p-5 shadow-2xl text-gray-200"
+        tabIndex={-1}
+        onKeyDown={handleKeyDown}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="text-lg font-semibold text-white">{state.title}</h3>
+        {state.description && (
+          <p className="mt-2 whitespace-pre-wrap text-sm text-gray-400">{state.description}</p>
+        )}
+        <div className="mt-4 space-y-2">
+          <label className="block text-xs font-medium uppercase tracking-wide text-gray-500" htmlFor="notes-password-input">
+            암호
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              ref={inputRef}
+              id="notes-password-input"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (error) setError('');
+              }}
+              className="flex-1 rounded border border-white/15 bg-black/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400/60"
+              placeholder="암호를 입력하세요"
+            />
+            <button
+              type="button"
+              className="rounded border border-white/15 px-2 py-1 text-xs text-gray-300 transition hover:bg-white/10"
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
+              {showPassword ? '숨기기' : '보기'}
+            </button>
+          </div>
+          {error && <p className="text-xs text-rose-300">{error}</p>}
+        </div>
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            type="button"
+            className="rounded border border-white/15 px-3 py-1.5 text-sm text-gray-300 transition hover:bg-white/10"
+            onClick={onCancel}
+          >
+            취소
+          </button>
+          <button
+            type="button"
+            className="rounded bg-rose-500/80 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-rose-500"
+            onClick={handleSubmit}
+          >
+            {state.confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const stopPointerPropagation = (e: React.PointerEvent) => {
@@ -81,6 +200,33 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
   const notesRef = React.useRef<StickyNote[]>([]);
   const unlockTimeoutsRef = React.useRef<Record<string, number>>({});
   const [colorFilters, setColorFilters] = React.useState<Partial<Record<string, boolean>>>({});
+  const [passwordModal, setPasswordModal] = React.useState<PasswordModalState | null>(null);
+  const passwordResolverRef = React.useRef<((value: string | null) => void) | null>(null);
+
+  const requestPassword = React.useCallback((config: PasswordModalState) => {
+    return new Promise<string | null>((resolve) => {
+      passwordResolverRef.current = resolve;
+      setPasswordModal(config);
+    });
+  }, []);
+
+  const closePasswordModal = React.useCallback((value: string | null) => {
+    const resolver = passwordResolverRef.current;
+    if (resolver) {
+      resolver(value);
+    }
+    passwordResolverRef.current = null;
+    setPasswordModal(null);
+  }, []);
+
+  React.useEffect(() => {
+    return () => {
+      if (passwordResolverRef.current) {
+        passwordResolverRef.current(null);
+        passwordResolverRef.current = null;
+      }
+    };
+  }, []);
   React.useEffect(() => {
     notesRef.current = notes;
   }, [notes]);
@@ -135,7 +281,7 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
       z,
       color,
       fontSize: 'md',
-      w: 240,
+      w: Math.max(240, MIN_NOTE_WIDTH),
       h: 128,
     };
     setNotes(prev => [...prev, newNote]);
@@ -290,7 +436,7 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
       const rect = board?.getBoundingClientRect();
       const note = notesRef.current.find(n => n.id === resizing.id);
       if (!note) return;
-      const minW = 160;
+      const minW = MIN_NOTE_WIDTH;
       const minH = 100;
       const maxW = rect ? Math.max(minW, rect.width - note.x - 8) : resizing.startW + dx;
       const maxH = rect ? Math.max(minH, rect.height - note.y - 8 - 36) : resizing.startH + dy;
@@ -329,6 +475,12 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
     };
   }, [clearAllUnlockTimeouts]);
 
+  React.useEffect(() => {
+    return () => {
+      passwordResolverRef.current = null;
+    };
+  }, []);
+
   if (!groupId) {
     return (
       <div className="text-gray-400">
@@ -352,11 +504,14 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
       return;
     }
 
-    const password = prompt('노트 암호를 입력하세요 (최소 4자 이상). 비밀 모드 활성화 시 필요합니다.');
-    if (!password || password.length < 4) {
-      alert('암호가 설정되지 않아 비밀 모드로 전환할 수 없습니다.');
-      return;
-    }
+    const password = await requestPassword({
+      mode: 'setSecret',
+      title: '비밀 노트 암호 설정',
+      description: '비밀 노트를 활성화하려면 최소 4자 이상의 암호를 설정해야 합니다.',
+      confirmLabel: '암호 설정',
+      minLength: 4,
+    });
+    if (!password) return;
     try {
       const plain = (note.text || '').slice(0, MAX_NOTE_LENGTH);
       const encrypted = await encryptNoteText(plain, password);
@@ -369,7 +524,13 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
 
   const handleUnlockSecretNote = async (note: StickyNote, { persistUnlock }: { persistUnlock?: boolean } = {}) => {
     if (!note.encrypted) return;
-    const password = prompt('비밀 노트 암호를 입력하세요');
+    const password = await requestPassword({
+      mode: 'unlockSecret',
+      title: '비밀 노트 열기',
+      description: '저장된 비밀 노트를 확인하려면 암호를 입력하세요.',
+      confirmLabel: persistUnlock ? '영구 해제' : '한 번 보기',
+      minLength: 1,
+    });
     if (!password) return;
     try {
       const plain = (await decryptNoteText(note.encrypted, password)).slice(0, MAX_NOTE_LENGTH);
@@ -442,6 +603,13 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
 
   return (
     <div className="flex flex-col gap-3 h-full min-h-[480px]">
+      {passwordModal && (
+        <PasswordModal
+          state={passwordModal}
+          onConfirm={(value) => closePasswordModal(value)}
+          onCancel={() => closePasswordModal(null)}
+        />
+      )}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center justify-center w-5 h-5 rounded-sm" style={{ background: group?.color || '#9ca3af' }} />
@@ -471,7 +639,7 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
                   style={{ background: color }}
                   aria-hidden
                 />
-                <span>{color}</span>
+                <span className="sr-only">{color}</span>
               </button>
             );
           })}
