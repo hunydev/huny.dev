@@ -43,66 +43,19 @@ const stopPointerPropagation = (e: React.PointerEvent) => {
 };
 
 const KeyIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.4}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M10.5 2.5a3.5 3.5 0 1 0 3.26 4.75H15v1.5h-1.5v1.5H12v1.5H9.75" />
-    <circle cx="10.5" cy="4.5" r="0.9" fill="currentColor" />
-  </svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={className}><path fill="currentColor" d="M7 14q-.825 0-1.412-.587T5 12t.588-1.412T7 10t1.413.588T9 12t-.587 1.413T7 14m0 4q-2.5 0-4.25-1.75T1 12t1.75-4.25T7 6q1.675 0 3.038.825T12.2 9H21l3 3l-4.5 4.5l-2-1.5l-2 1.5l-2.125-1.5H12.2q-.8 1.35-2.162 2.175T7 18m0-2q1.4 0 2.463-.85T10.875 13H14l1.45 1.025L17.5 12.5l1.775 1.375L21.15 12l-1-1h-9.275q-.35-1.3-1.412-2.15T7 8Q5.35 8 4.175 9.175T3 12t1.175 2.825T7 16"/></svg>
 );
 
 const LockIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.4}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <rect x="3" y="7" width="10" height="7" rx="1.5" />
-    <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" />
-    <path d="M8 10v2" />
-  </svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={className}><path fill="currentColor" d="M6 22q-.825 0-1.412-.587T4 20V10q0-.825.588-1.412T6 8h1V6q0-2.075 1.463-3.537T12 1t3.538 1.463T17 6v2h1q.825 0 1.413.588T20 10v10q0 .825-.587 1.413T18 22zm0-2h12V10H6zm6-3q.825 0 1.413-.587T14 15t-.587-1.412T12 13t-1.412.588T10 15t.588 1.413T12 17M9 8h6V6q0-1.25-.875-2.125T12 3t-2.125.875T9 6zM6 20V10z"/></svg>
 );
 
 const EyeIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg
-    viewBox="0 0 20 20"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.4}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M1.5 10s2.5-5.5 8.5-5.5S18.5 10 18.5 10s-2.5 5.5-8.5 5.5S1.5 10 1.5 10Z" />
-    <circle cx="10" cy="10" r="2.5" />
-  </svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={className}><path fill="currentColor" d="M12 9a3 3 0 0 1 3 3a3 3 0 0 1-3 3a3 3 0 0 1-3-3a3 3 0 0 1 3-3m0-4.5c5 0 9.27 3.11 11 7.5c-1.73 4.39-6 7.5-11 7.5S2.73 16.39 1 12c1.73-4.39 6-7.5 11-7.5M3.18 12a9.821 9.821 0 0 0 17.64 0a9.821 9.821 0 0 0-17.64 0"/></svg>
 );
 
 const EyeOffIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg
-    viewBox="0 0 20 20"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.4}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M4 4l12 12" />
-    <path d="M2.5 6.5S5.5 3 10 3c2.11 0 3.86.7 5.25 1.64" />
-    <path d="M17.5 13.5S14.5 17 10 17c-2.11 0-3.86-.7-5.25-1.64" />
-    <path d="M12.12 12.12a3 3 0 0 1-4.24-4.24" />
-  </svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={className}><path fill="currentColor" d="M2 5.27L3.28 4L20 20.72L18.73 22l-3.08-3.08c-1.15.38-2.37.58-3.65.58c-5 0-9.27-3.11-11-7.5c.69-1.76 1.79-3.31 3.19-4.54zM12 9a3 3 0 0 1 3 3a3 3 0 0 1-.17 1L11 9.17A3 3 0 0 1 12 9m0-4.5c5 0 9.27 3.11 11 7.5a11.8 11.8 0 0 1-4 5.19l-1.42-1.43A9.86 9.86 0 0 0 20.82 12A9.82 9.82 0 0 0 12 6.5c-1.09 0-2.16.18-3.16.5L7.3 5.47c1.44-.62 3.03-.97 4.7-.97M3.18 12A9.82 9.82 0 0 0 12 17.5c.69 0 1.37-.07 2-.21L11.72 15A3.064 3.064 0 0 1 9 12.28L5.6 8.87c-.99.85-1.82 1.91-2.42 3.13"/></svg>
 );
 
 const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
