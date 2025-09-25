@@ -68,6 +68,13 @@ npx wrangler deploy
   npx wrangler secret put OPENAI_API_KEY
   ```
 
+### 비밀키 관리 모범 사례
+- `.dev.vars`, `.env.local` 파일은 `.gitignore`에 등록되어 있으므로 Git에 커밋되지 않습니다. 팀 내 공유가 필요할 경우 값은 비밀 관리 도구(예: 1Password, Bitwarden)를 통해 전달하세요.
+- `wrangler.toml`의 `[vars]` 블록에는 민감 값 대신 공개 가능한 식별자(예: `NOTION_BOOKMARK_ID`)만 남기고, 비밀 키는 반드시 `wrangler secret put`으로 등록하세요.
+- Cloudflare Dashboard에서 Production/Preview 환경별로 Secrets를 분리하면 배포 환경에 따라 안전하게 키를 교체할 수 있습니다.
+- `server/worker.ts`의 `Env` 인터페이스를 수정해야 새 비밀을 사용할 수 있습니다. 키가 없을 때는 `errorJson()`이 500 응답만 반환하도록 되어 있으니, 상세 내부 정보가 노출되지 않습니다.
+- 로그 출력 시 민감 값이 찍히지 않도록 주의하세요. `console.error()`에는 토큰·암호를 포함하지 말고, 필요하면 마스킹 처리한 메시지만 남깁니다.
+
 ## 트러블슈팅
 - `Unknown command: "vite"` 오류가 발생하면 `npx vite ...` 형태로 실행하세요.
 - Cloudflare 배포 전에 로그인이 필요하면 `npx wrangler login`을 먼저 실행하세요.
