@@ -1,6 +1,6 @@
 import React from 'react';
 import { PageProps, ViewId } from '../../types';
-import { ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS, Icon } from '../../constants';
+import { ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS, Icon, PAGES } from '../../constants';
 import { DOCS } from './docsData';
 import { BOOKMARK_CATEGORIES, getBookmarkCountByCategory } from './bookmarksData';
 import { NOTE_GROUPS, getNoteCountByGroup } from './notesData';
@@ -24,11 +24,277 @@ const MEDIA_ITEMS = [
   { type: 'video' as const, name: 'flower.mp4', src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4' },
 ];
 
-const SitemapPage: React.FC<PageProps> = ({ onOpenFile }) => {
+const viewForTabId = (tabId: string): ViewId => {
+  try {
+    const idx = tabId.indexOf(':');
+    const base = idx > -1 ? tabId.slice(0, idx) : tabId;
+    switch (base) {
+      case 'docs':
+        return ViewId.Docs;
+      case 'apps':
+        return ViewId.Apps;
+      case 'bookmark':
+        return ViewId.Bookmark;
+      case 'notes':
+        return ViewId.Notes;
+      case 'media':
+        return ViewId.Media;
+      case 'split-speaker':
+      case 'bird-generator':
+      case 'multi-voice-reader':
+      case 'todo-generator':
+      case 'text-to-phoneme':
+      case 'web-worker':
+      case 'text-cleaning':
+      case 'ai-business-card':
+      case 'sticker-generator':
+      case 'comic-restyler':
+      case 'ui-clone':
+      case 'favicon-distiller':
+      case 'avatar-distiller':
+      case 'cover-crafter':
+        return ViewId.Playground;
+      case 'project':
+      case 'about':
+      case 'domain':
+      case 'works':
+      case 'stack':
+      case 'digital-shelf':
+      case 'mascot':
+      case 'welcome':
+      default:
+        return ViewId.Explorer;
+    }
+  } catch {
+    return ViewId.Explorer;
+  }
+};
+
+type PageSummary = {
+  id: string;
+  title: string;
+  icon?: React.ReactNode;
+};
+
+const SitemapPage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivityClick }) => {
   const openWelcome = () => onOpenFile('welcome');
 
+  const topItems = React.useMemo(
+    () => ACTIVITY_BAR_ITEMS.filter(item => item.section === 'top'),
+    []
+  );
+  const bottomItems = React.useMemo(
+    () => ACTIVITY_BAR_ITEMS.filter(item => item.section === 'bottom'),
+    []
+  );
 
-  const bottomItems = ACTIVITY_BAR_ITEMS.filter((i: any) => i.section === 'bottom');
+  const pageSummariesByView = React.useMemo(() => {
+    const map = new Map<ViewId, PageSummary[]>();
+    Object.entries(PAGES).forEach(([id, info]) => {
+      const view = viewForTabId(id);
+      const list = map.get(view) ?? [];
+      list.push({ id, title: info.title, icon: info.icon });
+      map.set(view, list);
+    });
+    return map;
+  }, []);
+
+  const handleActivateView = (viewId: ViewId) => {
+    setActiveView(viewId);
+    onActivityClick?.(viewId);
+  };
+
+  const renderViewContent = (viewId: ViewId) => {
+    switch (viewId) {
+      case ViewId.Explorer: {
+        const explorerPages = (pageSummariesByView.get(ViewId.Explorer) ?? []).filter(page => !page.id.includes(':'));
+        const orderedIds = ['welcome', 'project', 'works', 'about', 'stack', 'digital-shelf', 'mascot', 'domain'];
+        const sorted = explorerPages.sort((a, b) => {
+          const ai = orderedIds.indexOf(a.id);
+          const bi = orderedIds.indexOf(b.id);
+          if (ai === -1 && bi === -1) return a.title.localeCompare(b.title);
+          if (ai === -1) return 1;
+          if (bi === -1) return -1;
+          return ai - bi;
+        });
+        return (
+          <ul className="space-y-1 text-sm">
+            {sorted.map(page => (
+              <li key={page.id}>
+                <button
+                  onClick={() => onOpenFile(page.id)}
+                  className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left"
+                >
+                  <span className="inline-flex items-center justify-center w-5 h-5 text-gray-400">
+                    {page.icon ?? <Icon name="file" />}
+                  </span>
+                  <span>{page.title}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        );
+      }
+      case ViewId.Search:
+        return (
+          <div className="text-sm text-gray-400 space-y-3">
+            <p>전체 리소스를 빠르게 찾아보려면 검색 패널을 열어보세요.</p>
+            <button
+              onClick={() => handleActivateView(ViewId.Search)}
+              className="inline-flex items-center gap-2 rounded border border-white/20 px-3 py-1.5 text-white hover:border-white/40 hover:bg-white/10 text-sm"
+            >
+              <Icon name="search" className="w-4 h-4" aria-hidden />
+              검색 패널 열기
+            </button>
+          </div>
+        );
+      case ViewId.Docs:
+        return (
+          <ul className="space-y-1 text-sm max-h-48 overflow-auto pr-1">
+            {DOCS.map(doc => (
+              <li key={doc.slug}>
+                <button
+                  onClick={() => onOpenFile(`docs:${doc.slug}`)}
+                  className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left"
+                  title={`${doc.slug}.html`}
+                >
+                  <Icon name="file" className="mr-2" />
+                  <span className="truncate" title={doc.title}>{doc.title}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        );
+      case ViewId.Apps:
+        return (
+          <ul className="space-y-1 text-sm">
+            {CATEGORIES.map(cat => (
+              <li key={cat.id}>
+                <button
+                  onClick={() => onOpenFile(`apps:${cat.id}`)}
+                  className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left"
+                >
+                  {cat.iconUrl ? (
+                    <img src={cat.iconUrl} alt="" className="w-4 h-4 rounded-sm" loading="lazy" decoding="async" />
+                  ) : cat.emoji ? (
+                    <span className="text-base leading-4" aria-hidden>{cat.emoji}</span>
+                  ) : (
+                    <span className="w-4 h-4" />
+                  )}
+                  <span>{cat.name}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        );
+      case ViewId.Media:
+        return (
+          <ul className="space-y-1 text-sm">
+            {MEDIA_ITEMS.map(item => (
+              <li key={item.name}>
+                <button
+                  onClick={() => {
+                    try {
+                      const encoded = btoa(JSON.stringify(item));
+                      onOpenFile(`media:${encoded}`);
+                    } catch {}
+                  }}
+                  className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left"
+                  title={item.name}
+                >
+                  <span className="mr-1">
+                    {item.type === 'image' ? <Icon name="image" /> : <Icon name="video" />}
+                  </span>
+                  <span>{item.name}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        );
+      case ViewId.Playground: {
+        const playgroundPages = (pageSummariesByView.get(ViewId.Playground) ?? []).sort((a, b) => a.title.localeCompare(b.title));
+        return (
+          <ul className="space-y-1 text-sm max-h-48 overflow-auto pr-1">
+            {playgroundPages.map(page => (
+              <li key={page.id}>
+                <button
+                  onClick={() => onOpenFile(page.id)}
+                  className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left"
+                >
+                  <span className="inline-flex items-center justify-center w-5 h-5 text-gray-400">
+                    {page.icon ?? <Icon name="appsGrid" />}
+                  </span>
+                  <span>{page.title}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        );
+      }
+      case ViewId.Bookmark:
+        return (
+          <ul className="space-y-1 text-sm">
+            <li>
+              <button
+                onClick={() => onOpenFile('bookmark:all')}
+                className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left"
+              >
+                <span className="inline-flex items-center justify-center w-5 h-5">
+                  <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden>
+                    <path d="M4 2.5A1.5 1.5 0 0 1 5.5 1h5A1.5 1.5 0 0 1 12 2.5v11.086a.5.5 0 0 1-.777.416L8 11.972l-3.223 2.03A.5.5 0 0 1 4 13.586z" />
+                  </svg>
+                </span>
+                <span>All</span>
+                <span className="ml-auto text-xs text-gray-400">{getBookmarkCountByCategory('all')}</span>
+              </button>
+            </li>
+            {BOOKMARK_CATEGORIES.map(cat => (
+              <li key={cat.id}>
+                <button
+                  onClick={() => onOpenFile(`bookmark:${cat.id}`)}
+                  className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left"
+                >
+                  <span className="inline-flex items-center justify-center w-5 h-5">
+                    <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" style={{ color: cat.color }} aria-hidden>
+                      <path d="M4 2.5A1.5 1.5 0 0 1 5.5 1h5A1.5 1.5 0 0 1 12 2.5v11.086a.5.5 0 0 1-.777.416L8 11.972l-3.223 2.03A.5.5 0 0 1 4 13.586z" />
+                    </svg>
+                  </span>
+                  <span>{cat.name}</span>
+                  <span className="ml-auto text-xs text-gray-400">{getBookmarkCountByCategory(cat.id)}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        );
+      case ViewId.Notes:
+        return (
+          <ul className="space-y-1 text-sm">
+            {NOTE_GROUPS.map(group => (
+              <li key={group.id}>
+                <button
+                  onClick={() => onOpenFile(`notes:${group.id}`)}
+                  className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left"
+                >
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-sm" style={{ background: group.color }} />
+                  <span>{group.name}</span>
+                  <span className="ml-auto text-xs text-gray-400">{getNoteCountByGroup(group.id)}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        );
+      default:
+        return (
+          <div className="text-sm text-gray-500">
+            이 뷰는 사이트맵에서 표시할 항목이 없습니다. 활동 바에서 직접 확인해 보세요.
+          </div>
+        );
+    }
+  };
+
+  const hubIds = new Set<ViewId>([ViewId.Blog, ViewId.Apps, ViewId.Sites]);
+  const hubLinks = bottomItems.filter(item => hubIds.has(item.id as ViewId));
+  const socialLinks = bottomItems.filter(item => !hubIds.has(item.id as ViewId));
 
   return (
     <div className="max-w-6xl mx-auto px-4">
@@ -51,152 +317,56 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile }) => {
       {/* Middle: Sitemap */}
       <Section title="Sitemap">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {/* Explorer */}
-          <div>
-            <h3 className="text-sm font-semibold text-white mb-2">Explorer</h3>
-            <ul className="space-y-1 text-sm">
-              <li>
-                <button onClick={() => onOpenFile('welcome')} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left">
-                  <img src={welcomeIcon} alt="Welcome" className="w-4 h-4 mr-2 rounded-sm" decoding="async" />
-                  <span>Welcome</span>
+          {topItems.map(item => (
+            <div key={item.id}>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                  <span className="inline-flex items-center justify-center w-5 h-5 text-gray-300">{item.icon}</span>
+                  {item.title}
+                </h3>
+                <button
+                  onClick={() => handleActivateView(item.id as ViewId)}
+                  className="text-xs text-gray-400 hover:text-white"
+                >
+                  패널 이동
                 </button>
-              </li>
-              <li>
-                <button onClick={() => onOpenFile('works')} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left">
-                  <Icon name="file" className="mr-2" />
-                  <span>works.md</span>
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onOpenFile('about')} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left">
-                  <Icon name="file" className="mr-2" />
-                  <span>about.json</span>
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onOpenFile('stack')} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left">
-                  <Icon name="file" className="mr-2" />
-                  <span>stack-huny.dev</span>
-                </button>
-              </li>
-            </ul>
-          </div>
-
-          {/* Media */}
-          <div>
-            <h3 className="text-sm font-semibold text-white mb-2">Media <span className="text-xs text-gray-400">({MEDIA_ITEMS.length})</span></h3>
-            <ul className="space-y-1 text-sm">
-              {MEDIA_ITEMS.map(item => (
-                <li key={item.name}>
-                  <button
-                    onClick={() => {
-                      try {
-                        const encoded = btoa(JSON.stringify(item));
-                        onOpenFile(`media:${encoded}`);
-                      } catch {}
-                    }}
-                    className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left"
-                    title={item.name}
-                  >
-                    <span className="mr-1">
-                      {item.type === 'image' ? <Icon name="image" /> : <Icon name="video" />}
-                    </span>
-                    <span>{item.name}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Docs */}
-          <div>
-            <h3 className="text-sm font-semibold text-white mb-2">Docs <span className="text-xs text-gray-400">({DOCS.length})</span></h3>
-            <ul className="space-y-1 text-sm max-h-48 overflow-auto pr-1">
-              {DOCS.map(d => (
-                <li key={d.slug}>
-                  <button onClick={() => onOpenFile(`docs:${d.slug}`)} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left" title={`${d.slug}.html`}>
-                    <Icon name="file" className="mr-2" />
-                    <span className="truncate" title={d.title}>{d.title}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Apps */}
-          <div>
-            <h3 className="text-sm font-semibold text-white mb-2">Apps <span className="text-xs text-gray-400">({CATEGORIES.length})</span></h3>
-            <ul className="space-y-1 text-sm">
-              {CATEGORIES.map(c => (
-                <li key={c.id}>
-                  <button onClick={() => onOpenFile(`apps:${c.id}`)} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left">
-                    {c.iconUrl ? (
-                      <img src={c.iconUrl} alt="" className="w-4 h-4 rounded-sm" loading="lazy" decoding="async" />
-                    ) : c.emoji ? (
-                      <span className="text-base leading-4" aria-hidden>{c.emoji}</span>
-                    ) : (
-                      <span className="w-4 h-4" />
-                    )}
-                    <span>{c.name}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Bookmarks */}
-          <div>
-            <h3 className="text-sm font-semibold text-white mb-2">Bookmarks</h3>
-            <ul className="space-y-1 text-sm">
-              <li>
-                <button onClick={() => onOpenFile('bookmark:all')} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left">
-                  <span className="inline-flex items-center justify-center w-5 h-5">
-                    <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden>
-                      <path d="M4 2.5A1.5 1.5 0 0 1 5.5 1h5A1.5 1.5 0 0 1 12 2.5v11.086a.5.5 0 0 1-.777.416L8 11.972l-3.223 2.03A.5.5 0 0 1 4 13.586z" />
-                    </svg>
-                  </span>
-                  <span>All</span>
-                  <span className="ml-auto text-xs text-gray-400">{getBookmarkCountByCategory('all')}</span>
-                </button>
-              </li>
-              {BOOKMARK_CATEGORIES.map(c => (
-                <li key={c.id}>
-                  <button onClick={() => onOpenFile(`bookmark:${c.id}`)} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left">
-                    <span className="inline-flex items-center justify-center w-5 h-5">
-                      <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" style={{ color: c.color }} aria-hidden>
-                        <path d="M4 2.5A1.5 1.5 0 0 1 5.5 1h5A1.5 1.5 0 0 1 12 2.5v11.086a.5.5 0 0 1-.777.416L8 11.972l-3.223 2.03A.5.5 0 0 1 4 13.586z" />
-                      </svg>
-                    </span>
-                    <span>{c.name}</span>
-                    <span className="ml-auto text-xs text-gray-400">{getBookmarkCountByCategory(c.id)}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Notes */}
-          <div>
-            <h3 className="text-sm font-semibold text-white mb-2">Notes</h3>
-            <ul className="space-y-1 text-sm">
-              {NOTE_GROUPS.map(g => (
-                <li key={g.id}>
-                  <button onClick={() => onOpenFile(`notes:${g.id}`)} className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left">
-                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-sm" style={{ background: g.color }} />
-                    <span>{g.name}</span>
-                    <span className="ml-auto text-xs text-gray-400">{getNoteCountByGroup(g.id)}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+              </div>
+              {renderViewContent(item.id as ViewId)}
+            </div>
+          ))}
         </div>
       </Section>
 
-      {/* Bottom: SNS */}
+      {/* Hubs & SNS */}
+      {hubLinks.length > 0 && (
+        <Section title="Hub">
+          <ul className="flex flex-wrap gap-2">
+            {hubLinks.map(item => {
+              const link = EXTERNAL_LINKS[item.id as ViewId];
+              if (!link) return null;
+              const href = link.url;
+              const isMail = href.startsWith('mailto:');
+              return (
+                <li key={item.id}>
+                  <a
+                    href={href}
+                    target={isMail ? undefined : '_blank'}
+                    rel={isMail ? undefined : 'noopener'}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded bg-white/12 hover:bg-white/20 text-sm"
+                  >
+                    <span className="text-gray-300">{item.icon}</span>
+                    <span>{link.title}</span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </Section>
+      )}
+
       <Section title="SNS">
         <ul className="flex flex-wrap gap-2">
-          {bottomItems.map(item => {
+          {socialLinks.map(item => {
             const link = EXTERNAL_LINKS[item.id as ViewId];
             if (!link) return null;
             const href = link.url;
