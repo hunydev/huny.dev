@@ -8,6 +8,7 @@ import {
   getNotesByGroupId,
   saveNotesByGroupId,
   getNoteGroupById,
+  emitNotesChanged,
 } from './notesData';
 
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
@@ -35,6 +36,10 @@ const getContrastColor = (hex: string): string => {
   return luminance > 0.6 ? '#111' : '#fff';
 };
 
+const stopPointerPropagation = (e: React.PointerEvent) => {
+  e.stopPropagation();
+};
+
 const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
   const groupId = routeParams?.groupId || '';
   const group = getNoteGroupById(groupId);
@@ -51,6 +56,7 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
   } | null>(null);
   const boardRef = React.useRef<HTMLDivElement | null>(null);
   const notesRef = React.useRef<StickyNote[]>([]);
+  const [colorFilters, setColorFilters] = React.useState<Partial<Record<string, boolean>>>({});
   React.useEffect(() => {
     notesRef.current = notes;
   }, [notes]);
@@ -69,6 +75,31 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
     return () => window.clearTimeout(id);
   }, [groupId, notes]);
 
+  React.useEffect(() => {
+    if (!groupId) return;
+    emitNotesChanged(groupId, notes);
+    setColorFilters(prev => {
+      const colors = new Set<string>(notes.map(n => n.color));
+      let changed = false;
+      const next: Partial<Record<string, boolean>> = {};
+      colors.forEach((color: string) => {
+        if (!Object.prototype.hasOwnProperty.call(prev, color)) {
+          changed = true;
+          next[color] = true;
+        } else {
+          next[color] = prev[color];
+        }
+      });
+      Object.keys(prev).forEach((color: string) => {
+        if (!colors.has(color)) {
+          changed = true;
+        }
+      });
+      if (!changed) return prev;
+      return next;
+    });
+  }, [groupId, notes]);
+
   const addNote = () => {
     const z = nextZ(notes);
     const color = NOTE_COLORS[notes.length % NOTE_COLORS.length];
@@ -84,6 +115,13 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
       h: 128,
     };
     setNotes(prev => [...prev, newNote]);
+    setColorFilters(prev => {
+      const current = prev[newNote.color];
+      if (current === undefined || current === false) {
+        return { ...prev, [newNote.color]: true };
+      }
+      return prev;
+    });
   };
 
   const updateNote = (id: string, patch: Partial<StickyNote>) => {
@@ -114,6 +152,37 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
   const changeFontSize = (id: string, size: StickyNote['fontSize']) => {
     updateNote(id, { fontSize: size });
   };
+
+  const toggleColor = (color: string) => {
+    setColorFilters(prev => {
+      if (!Object.prototype.hasOwnProperty.call(prev, color)) return prev;
+      const enabledCount = Object.values(prev).filter((value): value is true => value === true).length;
+      if (prev[color] && enabledCount <= 1) {
+        return prev;
+      }
+      return { ...prev, [color]: !prev[color] };
+    });
+  };
+
+  const showAllColors = () => {
+    setColorFilters(prev => {
+      if (Object.values(prev).every(value => value === true)) return prev;
+      const next: Partial<Record<string, boolean>> = {};
+      Object.keys(prev).forEach((color: string) => {
+        next[color] = true;
+      });
+      return next;
+    });
+  };
+
+  const orderedNotes = React.useMemo(() => [...notes].sort((a, b) => a.z - b.z), [notes]);
+  const visibleNotes = React.useMemo(
+    () => orderedNotes.filter(n => {
+      const state = colorFilters[n.color];
+      return state === undefined ? true : state;
+    }),
+    [orderedNotes, colorFilters]
+  );
 
   const onNotePointerDown = (e: React.PointerEvent, id: string) => {
     // Allow touch/pen/mouse primary interactions. For mouse, restrict to left button.
@@ -231,11 +300,43 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
         </div>
       </div>
 
+      {Object.keys(colorFilters).length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 text-xs text-gray-300">
+          <span className="uppercase tracking-wider text-[10px] text-gray-500">Filters</span>
+          {Object.entries(colorFilters).map(([color, enabled]) => {
+            const isEnabled = enabled !== false;
+            return (
+              <button
+                key={color}
+                onClick={() => toggleColor(color)}
+                className={`flex items-center gap-2 px-2 py-1 rounded border transition-colors duration-150 ${
+                  isEnabled ? 'bg-white/10 border-white/25 text-white' : 'bg-transparent border-white/10 text-gray-400 opacity-70'
+                }`}
+                title={isEnabled ? '클릭하여 숨기기' : '클릭하여 표시'}
+              >
+                <span
+                  className="inline-block w-3 h-3 rounded-sm border border-black/30"
+                  style={{ background: color }}
+                  aria-hidden
+                />
+                <span>{color}</span>
+              </button>
+            );
+          })}
+          {Object.values(colorFilters).some(value => value === false) && (
+            <button
+              onClick={showAllColors}
+              className="px-2 py-1 rounded border border-white/20 text-white hover:bg-white/10"
+            >
+              전체 표시
+            </button>
+          )}
+        </div>
+      )}
+
       <div ref={boardRef} className="relative flex-1 min-h-[420px] rounded border border-black/30 bg-[#252526] overflow-auto">
         {/* Board content area; notes are absolutely positioned within this container */}
-        {notes
-          .sort((a, b) => a.z - b.z)
-          .map((n) => (
+        {visibleNotes.map((n) => (
             <div
               key={n.id}
               className="absolute shadow-md rounded p-2 select-none"
@@ -247,6 +348,7 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
               <div className="flex items-center justify-between gap-1 mb-1">
                 <div className="flex items-center gap-1 opacity-90">
                   <button
+                    onPointerDown={stopPointerPropagation}
                     onClick={(e) => {
                       e.stopPropagation();
                       cycleColor(n.id);
@@ -257,6 +359,7 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
                     aria-label="Change color"
                   />
                   <select
+                    onPointerDown={stopPointerPropagation}
                     className="text-xs rounded border px-1 py-0.5"
                     style={{ backgroundColor: getContrastColor(n.color) === '#fff' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)', borderColor: getContrastColor(n.color) === '#fff' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)' }}
                     value={n.fontSize}
@@ -275,6 +378,7 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
                 </div>
                 <div className="flex items-center gap-1 opacity-90">
                   <button
+                    onPointerDown={stopPointerPropagation}
                     onClick={(e) => {
                       e.stopPropagation();
                       sendToBack(n.id);
@@ -286,6 +390,7 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
                     Back
                   </button>
                   <button
+                    onPointerDown={stopPointerPropagation}
                     onClick={(e) => {
                       e.stopPropagation();
                       bringToFront(n.id);
@@ -297,6 +402,7 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
                     Front
                   </button>
                   <button
+                    onPointerDown={stopPointerPropagation}
                     onClick={(e) => {
                       e.stopPropagation();
                       const ok = confirm('Delete this note? This cannot be undone.');

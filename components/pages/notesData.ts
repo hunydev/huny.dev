@@ -16,6 +16,32 @@ export type StickyNote = {
   h: number; // text area height in px
 };
 
+export type NotesChangeEvent = {
+  groupId: string;
+  notes: StickyNote[];
+};
+
+const noteSubscribers = new Set<(event: NotesChangeEvent) => void>();
+
+export const subscribeNotes = (listener: (event: NotesChangeEvent) => void) => {
+  noteSubscribers.add(listener);
+  return () => {
+    noteSubscribers.delete(listener);
+  };
+};
+
+export const emitNotesChanged = (groupId: string, notes: StickyNote[]) => {
+  if (!noteSubscribers.size) return;
+  const event: NotesChangeEvent = { groupId, notes };
+  noteSubscribers.forEach(listener => {
+    try {
+      listener(event);
+    } catch {
+      // Ignore listener errors to avoid breaking emitters
+    }
+  });
+};
+
 export const NOTE_GROUPS: NoteGroup[] = [
   { id: 'personal', name: 'Personal', color: '#f59e0b' },
   { id: 'work', name: 'Work', color: '#60a5fa' },

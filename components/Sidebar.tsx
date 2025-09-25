@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ViewId } from '../types';
 import { Icon } from '../constants';
 import { BOOKMARK_CATEGORIES, BOOKMARKS, type Bookmark } from './pages/bookmarksData';
-import { NOTE_GROUPS, getNoteCountByGroup } from './pages/notesData';
+import { NOTE_GROUPS, getNoteCountByGroup, subscribeNotes } from './pages/notesData';
 import { CATEGORIES } from './pages/appsData';
 // DocsView now lists from R2 instead of local DOCS. The DocsPage can still use local data.
 // Avoid bundling large images into main chunk: use static paths so they load only when rendered
@@ -552,6 +552,21 @@ const BookmarkView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
 };
 
 const NotesView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
+  const [counts, setCounts] = React.useState<Record<string, number>>(() => {
+    const initial: Record<string, number> = {};
+    NOTE_GROUPS.forEach(group => {
+      initial[group.id] = getNoteCountByGroup(group.id);
+    });
+    return initial;
+  });
+
+  React.useEffect(() => {
+    const unsubscribe = subscribeNotes(({ groupId, notes }) => {
+      setCounts(prev => ({ ...prev, [groupId]: notes.length }));
+    });
+    return unsubscribe;
+  }, []);
+
   const Item: React.FC<{ id: string; name: string; color: string; count: number }>
     = ({ id, name, color, count }) => (
       <button
@@ -571,7 +586,7 @@ const NotesView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenF
       <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Notes</h2>
       <div className="flex flex-col gap-1">
         {NOTE_GROUPS.map(g => (
-          <Item key={g.id} id={g.id} name={g.name} color={g.color} count={getNoteCountByGroup(g.id)} />
+          <Item key={g.id} id={g.id} name={g.name} color={g.color} count={counts[g.id] ?? 0} />
         ))}
       </div>
     </div>
