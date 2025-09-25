@@ -31,6 +31,69 @@ type PageSummary = {
   icon?: React.ReactNode;
 };
 
+type LazySectionProps = {
+  item: (typeof ACTIVITY_BAR_ITEMS)[number];
+  index: number;
+  onActivate: () => void;
+  renderContent: () => React.ReactNode;
+};
+
+const SkeletonPlaceholder: React.FC = () => (
+  <div className="space-y-2 animate-pulse">
+    <div className="h-4 rounded bg-white/5" />
+    <div className="h-4 rounded bg-white/5 w-3/4" />
+    <div className="h-4 rounded bg-white/5 w-11/12" />
+    <div className="h-4 rounded bg-white/5 w-2/3" />
+  </div>
+);
+
+const LazyViewSection: React.FC<LazySectionProps> = ({ item, index, onActivate, renderContent }) => {
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const [shouldRender, setShouldRender] = React.useState(index < 2);
+
+  React.useEffect(() => {
+    if (shouldRender) return;
+    if (typeof window === 'undefined' || typeof IntersectionObserver === 'undefined') {
+      setShouldRender(true);
+      return;
+    }
+    const node = containerRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            setShouldRender(true);
+            observer.disconnect();
+          }
+        });
+      },
+      { rootMargin: '160px 0px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [shouldRender]);
+
+  const content = React.useMemo(() => (shouldRender ? renderContent() : null), [renderContent, shouldRender]);
+
+  return (
+    <div ref={containerRef}>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+          <span className="inline-flex items-center justify-center w-5 h-5 text-gray-300">
+            <Icon name={item.icon} aria-label={item.ariaLabel ?? item.title} />
+          </span>
+          {item.title}
+        </h3>
+        <button onClick={onActivate} className="text-xs text-gray-400 hover:text-white">
+          패널 이동
+        </button>
+      </div>
+      <div>{content ?? <SkeletonPlaceholder />}</div>
+    </div>
+  );
+};
+
 const SitemapPage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivityClick }) => {
   const openWelcome = () => onOpenFile('welcome');
 
@@ -272,24 +335,14 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
       {/* Middle: Sitemap */}
       <Section title="Sitemap">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {topItems.map(item => (
-            <div key={item.id}>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-                  <span className="inline-flex items-center justify-center w-5 h-5 text-gray-300">
-                    <Icon name={item.icon} aria-label={item.ariaLabel ?? item.title} />
-                  </span>
-                  {item.title}
-                </h3>
-                <button
-                  onClick={() => handleActivateView(item.id as ViewId)}
-                  className="text-xs text-gray-400 hover:text-white"
-                >
-                  패널 이동
-                </button>
-              </div>
-              {renderViewContent(item.id as ViewId)}
-            </div>
+          {topItems.map((item, index) => (
+            <LazyViewSection
+              key={item.id}
+              item={item}
+              index={index}
+              onActivate={() => handleActivateView(item.id as ViewId)}
+              renderContent={() => renderViewContent(item.id as ViewId)}
+            />
           ))}
         </div>
       </Section>
