@@ -486,7 +486,9 @@ const App: React.FC = () => {
                             rel={isMail ? undefined : 'noopener'}
                             className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-white/10"
                           >
-                            <span className="text-gray-300">{item.icon}</span>
+                            <span className="text-gray-300">
+                              <Icon name={item.icon} className="w-4 h-4" aria-label={item.ariaLabel ?? link.title} />
+                            </span>
                             <span>{link.title}</span>
                           </a>
                         </li>

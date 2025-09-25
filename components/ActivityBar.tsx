@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ViewId } from '../types';
-import { ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS } from '../constants';
+import { ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS, Icon } from '../constants';
 
 type ActivityBarProps = {
   activeView: ViewId;
@@ -155,9 +155,10 @@ const ActivityBar: React.FC<ActivityBarProps> = ({ activeView, setActiveView, is
                   isSidebarPinned && activeView === item.id ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/10'
                 }`}
                 title={item.title}
+                aria-label={item.ariaLabel ?? item.title}
               >
                 {isSidebarPinned && activeView === item.id && <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-500"></div>}
-                {item.icon}
+                <Icon name={item.icon} />
               </button>
             ))}
           </div>
@@ -178,8 +179,9 @@ const ActivityBar: React.FC<ActivityBarProps> = ({ activeView, setActiveView, is
                     rel={isMail ? undefined : 'noopener'}
                     className={`p-2 rounded-md transition-colors duration-200 relative text-gray-400 hover:text-white hover:bg-white/10`}
                     title={item.title}
+                    aria-label={item.ariaLabel ?? link.title}
                   >
-                    {item.icon}
+                    <Icon name={item.icon} />
                     <span className="sr-only">{link.title}</span>
                   </a>
                 );
@@ -199,8 +201,9 @@ const ActivityBar: React.FC<ActivityBarProps> = ({ activeView, setActiveView, is
                   }}
                   className={`p-2 rounded-md transition-colors duration-200 relative text-gray-400 hover:text-white hover:bg-white/10`}
                   title={item.title}
+                  aria-label={item.ariaLabel ?? link.title}
                 >
-                  {item.icon}
+                  <Icon name={item.icon} />
                 </button>
               );
             })}

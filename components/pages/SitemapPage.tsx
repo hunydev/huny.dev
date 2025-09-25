@@ -276,7 +276,9 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
             <div key={item.id}>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-                  <span className="inline-flex items-center justify-center w-5 h-5 text-gray-300">{item.icon}</span>
+                  <span className="inline-flex items-center justify-center w-5 h-5 text-gray-300">
+                    <Icon name={item.icon} aria-label={item.ariaLabel ?? item.title} />
+                  </span>
                   {item.title}
                 </h3>
                 <button
@@ -309,7 +311,9 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
                     rel={isMail ? undefined : 'noopener'}
                     className="flex items-center gap-2 px-3 py-1.5 rounded bg-white/12 hover:bg-white/20 text-sm"
                   >
-                    <span className="text-gray-300">{item.icon}</span>
+                    <span className="text-gray-300">
+                      <Icon name={item.icon} aria-label={item.ariaLabel ?? link.title} />
+                    </span>
                     <span>{link.title}</span>
                   </a>
                 </li>
@@ -334,7 +338,9 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
                   rel={isMail ? undefined : 'noopener'}
                   className="flex items-center gap-2 px-3 py-1.5 rounded bg-white/10 hover:bg-white/20 text-sm"
                 >
-                  <span className="text-gray-300">{item.icon}</span>
+                  <span className="text-gray-300">
+                    <Icon name={item.icon} aria-label={item.ariaLabel ?? link.title} />
+                  </span>
                   <span>{link.title}</span>
                 </a>
               </li>

@@ -206,7 +206,9 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
                                 className="aspect-square rounded-md bg-white/[0.03] hover:bg-white/10 transition flex flex-col items-center justify-center gap-1 text-gray-300"
                                 title={item.title}
                             >
-                                <span className="text-gray-200">{item.icon}</span>
+                                <span className="text-gray-200">
+                                    <Icon name={item.icon} aria-label={item.ariaLabel ?? item.title} />
+                                </span>
                                 <span className="text-xs text-gray-400">{item.title}</span>
                             </button>
                         ))}
