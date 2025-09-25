@@ -38,6 +38,11 @@ const getContrastColor = (hex: string): string => {
   return luminance > 0.6 ? '#111' : '#fff';
 };
 
+const getToolbarIconColor = (hex: string): string => {
+  const contrast = getContrastColor(hex);
+  return contrast === '#fff' ? 'rgba(255,255,255,0.85)' : 'rgba(17,17,17,0.75)';
+};
+
 const stopPointerPropagation = (e: React.PointerEvent) => {
   e.stopPropagation();
 };
@@ -498,7 +503,8 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
                     e.stopPropagation();
                     handleToggleSecret(n);
                   }}
-                  className="w-5 h-5 flex items-center justify-center text-white/80 hover:text-white"
+                  className="w-5 h-5 flex items-center justify-center"
+                  style={{ color: getToolbarIconColor(n.color) }}
                   title={n.isSecret ? '비밀 모드 해제' : '비밀 모드 설정'}
                   aria-label={n.isSecret ? 'Disable secret mode' : 'Enable secret mode'}
                 >
@@ -511,7 +517,8 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
                       e.stopPropagation();
                       await handleToggleSecretVisibility(n);
                     }}
-                    className="w-5 h-5 flex items-center justify-center text-white/70 hover:text-white"
+                    className="w-5 h-5 flex items-center justify-center"
+                    style={{ color: getToolbarIconColor(n.color) }}
                     title={n.isUnlocked ? '비밀 노트 숨기기' : '비밀 노트 보기'}
                     aria-label={n.isUnlocked ? 'Hide secret note' : 'Reveal secret note'}
                   >
