@@ -12,6 +12,7 @@ import { getDocBySlug } from './components/pages/docsData';
 import { extractBaseId, viewForTabId } from './utils/navigation';
 
 const TABS_STORAGE_KEY = 'app.openTabs.v1';
+const DEFAULT_TAB_IDS: readonly string[] = ['welcome', 'works', 'domain', 'about'];
 
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState<ViewId>(ViewId.Explorer);
@@ -164,8 +165,9 @@ const App: React.FC = () => {
         }
       }
     } catch {}
-    // Fallback: open Welcome if no saved state
-    handleOpenFile('welcome');
+    // Fallback: open default tabs if no saved state
+    DEFAULT_TAB_IDS.forEach(id => handleOpenFile(id));
+    setActiveTabId(DEFAULT_TAB_IDS[0]);
   }, [handleOpenFile]);
 
   // Keep left sidebar selection in sync with the active tab
