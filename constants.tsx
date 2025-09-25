@@ -331,7 +331,9 @@ interface IconProps extends React.SVGAttributes<SVGSVGElement> {
 export const Icon: React.FC<IconProps> = ({ name, className, ...rest }) => {
   const def = ICON_DEFS[name];
   if (!def) return null;
-  const mergedClass = className && className.trim().length > 0 ? className : def.defaultClassName;
+  const baseClass = typeof def.defaultClassName === 'string' ? def.defaultClassName.trim() : '';
+  const extraClass = typeof className === 'string' ? className.trim() : '';
+  const mergedClass = [baseClass, extraClass].filter(Boolean).join(' ');
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
