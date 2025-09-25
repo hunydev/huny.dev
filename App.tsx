@@ -9,6 +9,7 @@ import { getCategoryById } from './components/pages/bookmarksData';
 import { getNoteGroupById } from './components/pages/notesData';
 import { getAppCategoryById } from './components/pages/appsData';
 import { getDocBySlug } from './components/pages/docsData';
+import { extractBaseId, viewForTabId } from './utils/navigation';
 
 const TABS_STORAGE_KEY = 'app.openTabs.v1';
 
@@ -41,54 +42,6 @@ const App: React.FC = () => {
   const [apiNewOpenAI, setApiNewOpenAI] = useState<string>('');
 
   // Map a tab id (e.g., 'docs:intro', 'bookmark:all', 'split-speaker') to the corresponding left sidebar view
-  function viewForTabId(tabId: string): ViewId {
-    try {
-      const idx = tabId.indexOf(':');
-      const base = idx > -1 ? tabId.slice(0, idx) : tabId;
-      switch (base) {
-        case 'docs':
-          return ViewId.Docs;
-        case 'apps':
-          return ViewId.Apps;
-        case 'bookmark':
-          return ViewId.Bookmark;
-        case 'notes':
-          return ViewId.Notes;
-        case 'media':
-          return ViewId.Media;
-        case 'split-speaker':
-        case 'bird-generator':
-        case 'multi-voice-reader':
-        case 'todo-generator':
-        case 'text-to-phoneme':
-        case 'web-worker':
-        case 'text-cleaning':
-        case 'ai-business-card':
-        case 'sticker-generator':
-        case 'comic-restyler':
-        case 'ui-clone':
-        case 'favicon-distiller':
-        case 'avatar-distiller':
-        case 'cover-crafter':
-          return ViewId.Playground;
-        // Explorer bucket: core files
-        case 'welcome':
-        case 'project':
-        case 'about':
-        case 'domain':
-        case 'works':
-        case 'stack':
-        case 'digital-shelf':
-        case 'mascot':
-          return ViewId.Explorer;
-        default:
-          return ViewId.Explorer;
-      }
-    } catch {
-      return ViewId.Explorer;
-    }
-  }
-
   // Default: on small screens, start with sidebar unpinned for better mobile UX
   useEffect(() => {
     try {
@@ -104,10 +57,10 @@ const App: React.FC = () => {
     let arg: string | undefined;
 
     // Parse dynamic routes, e.g. bookmark:<categoryId>
-    const idx = fileId.indexOf(':');
-    if (idx > -1) {
-      baseId = fileId.slice(0, idx);
-      arg = fileId.slice(idx + 1);
+    const baseFromId = extractBaseId(fileId);
+    if (baseFromId !== fileId) {
+      baseId = baseFromId;
+      arg = fileId.slice(baseFromId.length + 1);
     }
 
     const pageInfo = PAGES[baseId] || PAGES[fileId];

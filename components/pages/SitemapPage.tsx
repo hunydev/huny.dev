@@ -8,6 +8,7 @@ import { CATEGORIES } from './appsData';
 import logoImg from '../../logo.png';
 import logo128 from '../../logo_128x128.png';
 import welcomeIcon from '../../icon_32x32.png';
+import { viewForTabId } from '../../utils/navigation';
 
 const Section: React.FC<{ title: string; children?: React.ReactNode }> = ({ title, children }) => (
   <section className="mb-6">
@@ -23,52 +24,6 @@ const MEDIA_ITEMS = [
   { type: 'image' as const, name: 'logo_128x128.png', src: logo128 },
   { type: 'video' as const, name: 'flower.mp4', src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4' },
 ];
-
-const viewForTabId = (tabId: string): ViewId => {
-  try {
-    const idx = tabId.indexOf(':');
-    const base = idx > -1 ? tabId.slice(0, idx) : tabId;
-    switch (base) {
-      case 'docs':
-        return ViewId.Docs;
-      case 'apps':
-        return ViewId.Apps;
-      case 'bookmark':
-        return ViewId.Bookmark;
-      case 'notes':
-        return ViewId.Notes;
-      case 'media':
-        return ViewId.Media;
-      case 'split-speaker':
-      case 'bird-generator':
-      case 'multi-voice-reader':
-      case 'todo-generator':
-      case 'text-to-phoneme':
-      case 'web-worker':
-      case 'text-cleaning':
-      case 'ai-business-card':
-      case 'sticker-generator':
-      case 'comic-restyler':
-      case 'ui-clone':
-      case 'favicon-distiller':
-      case 'avatar-distiller':
-      case 'cover-crafter':
-        return ViewId.Playground;
-      case 'project':
-      case 'about':
-      case 'domain':
-      case 'works':
-      case 'stack':
-      case 'digital-shelf':
-      case 'mascot':
-      case 'welcome':
-      default:
-        return ViewId.Explorer;
-    }
-  } catch {
-    return ViewId.Explorer;
-  }
-};
 
 type PageSummary = {
   id: string;

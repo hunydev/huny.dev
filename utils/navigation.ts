@@ -1,0 +1,45 @@
+import { ViewId } from '../types';
+
+const PLAYGROUND_BASE_IDS = new Set<string>([
+  'split-speaker',
+  'bird-generator',
+  'multi-voice-reader',
+  'todo-generator',
+  'text-to-phoneme',
+  'web-worker',
+  'text-cleaning',
+  'ai-business-card',
+  'sticker-generator',
+  'comic-restyler',
+  'ui-clone',
+  'favicon-distiller',
+  'avatar-distiller',
+  'cover-crafter',
+]);
+
+export const isPlaygroundBaseId = (baseId: string) => PLAYGROUND_BASE_IDS.has(baseId);
+
+const BASE_VIEW_MAP: Record<string, ViewId> = {
+  docs: ViewId.Docs,
+  apps: ViewId.Apps,
+  bookmark: ViewId.Bookmark,
+  notes: ViewId.Notes,
+  media: ViewId.Media,
+};
+
+export const extractBaseId = (tabId: string): string => {
+  try {
+    const idx = tabId.indexOf(':');
+    return idx > -1 ? tabId.slice(0, idx) : tabId;
+  } catch {
+    return tabId;
+  }
+};
+
+export const viewForTabId = (tabId: string): ViewId => {
+  const base = extractBaseId(tabId);
+  if (isPlaygroundBaseId(base)) {
+    return ViewId.Playground;
+  }
+  return BASE_VIEW_MAP[base] ?? ViewId.Explorer;
+};
