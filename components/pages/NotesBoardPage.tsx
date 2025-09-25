@@ -9,7 +9,9 @@ import {
   saveNotesByGroupId,
   getNoteGroupById,
   emitNotesChanged,
+  MAX_NOTE_LENGTH,
 } from './notesData';
+import { decryptNoteText, encryptNoteText } from './notesCrypto';
 
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 
@@ -40,6 +42,69 @@ const stopPointerPropagation = (e: React.PointerEvent) => {
   e.stopPropagation();
 };
 
+const KeyIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.4}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M10.5 2.5a3.5 3.5 0 1 0 3.26 4.75H15v1.5h-1.5v1.5H12v1.5H9.75" />
+    <circle cx="10.5" cy="4.5" r="0.9" fill="currentColor" />
+  </svg>
+);
+
+const LockIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.4}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <rect x="3" y="7" width="10" height="7" rx="1.5" />
+    <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" />
+    <path d="M8 10v2" />
+  </svg>
+);
+
+const EyeIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg
+    viewBox="0 0 20 20"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.4}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M1.5 10s2.5-5.5 8.5-5.5S18.5 10 18.5 10s-2.5 5.5-8.5 5.5S1.5 10 1.5 10Z" />
+    <circle cx="10" cy="10" r="2.5" />
+  </svg>
+);
+
+const EyeOffIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg
+    viewBox="0 0 20 20"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.4}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M4 4l12 12" />
+    <path d="M2.5 6.5S5.5 3 10 3c2.11 0 3.86.7 5.25 1.64" />
+    <path d="M17.5 13.5S14.5 17 10 17c-2.11 0-3.86-.7-5.25-1.64" />
+    <path d="M12.12 12.12a3 3 0 0 1-4.24-4.24" />
+  </svg>
+);
+
 const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
   const groupId = routeParams?.groupId || '';
   const group = getNoteGroupById(groupId);
@@ -56,6 +121,7 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
   } | null>(null);
   const boardRef = React.useRef<HTMLDivElement | null>(null);
   const notesRef = React.useRef<StickyNote[]>([]);
+  const unlockTimeoutsRef = React.useRef<Record<string, number>>({});
   const [colorFilters, setColorFilters] = React.useState<Partial<Record<string, boolean>>>({});
   React.useEffect(() => {
     notesRef.current = notes;
@@ -125,10 +191,22 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
   };
 
   const updateNote = (id: string, patch: Partial<StickyNote>) => {
-    setNotes(prev => prev.map(n => (n.id === id ? { ...n, ...patch } : n)));
+    setNotes(prev => prev.map(n => {
+      if (n.id !== id) return n;
+      const next = { ...n, ...patch };
+      if (typeof next.text === 'string') {
+        next.text = next.text.slice(0, MAX_NOTE_LENGTH);
+      }
+      return next;
+    }));
   };
 
   const deleteNote = (id: string) => {
+    const timeoutId = unlockTimeoutsRef.current[id];
+    if (timeoutId) {
+      window.clearTimeout(timeoutId);
+      delete unlockTimeoutsRef.current[id];
+    }
     setNotes(prev => prev.filter(n => n.id !== id));
   };
 
@@ -280,6 +358,19 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
     };
   }, [resizing]);
 
+  const clearAllUnlockTimeouts = React.useCallback(() => {
+    Object.values(unlockTimeoutsRef.current).forEach(timeoutId => {
+      window.clearTimeout(timeoutId as number);
+    });
+    unlockTimeoutsRef.current = {};
+  }, []);
+
+  React.useEffect(() => {
+    return () => {
+      clearAllUnlockTimeouts();
+    };
+  }, [clearAllUnlockTimeouts]);
+
   if (!groupId) {
     return (
       <div className="text-gray-400">
@@ -287,6 +378,109 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
       </div>
     );
   }
+
+  const hideSecretNote = (noteId: string) => {
+    const timeoutId = unlockTimeoutsRef.current[noteId];
+    if (timeoutId !== undefined) {
+      window.clearTimeout(timeoutId as number);
+      delete unlockTimeoutsRef.current[noteId];
+    }
+    updateNote(noteId, { text: '', isUnlocked: false });
+  };
+
+  const handleToggleSecret = async (note: StickyNote) => {
+    if (note.isSecret) {
+      await handlePermanentUnlock(note);
+      return;
+    }
+
+    const password = prompt('노트 암호를 입력하세요 (최소 4자 이상). 비밀 모드 활성화 시 필요합니다.');
+    if (!password || password.length < 4) {
+      alert('암호가 설정되지 않아 비밀 모드로 전환할 수 없습니다.');
+      return;
+    }
+    try {
+      const plain = (note.text || '').slice(0, MAX_NOTE_LENGTH);
+      const encrypted = await encryptNoteText(plain, password);
+      hideSecretNote(note.id);
+      updateNote(note.id, { isSecret: true, encrypted, text: '', isUnlocked: false });
+    } catch (error: any) {
+      alert(error?.message || '암호화에 실패했습니다.');
+    }
+  };
+
+  const handleUnlockSecretNote = async (note: StickyNote, { persistUnlock }: { persistUnlock?: boolean } = {}) => {
+    if (!note.encrypted) return;
+    const password = prompt('비밀 노트 암호를 입력하세요');
+    if (!password) return;
+    try {
+      const plain = (await decryptNoteText(note.encrypted, password)).slice(0, MAX_NOTE_LENGTH);
+      if (persistUnlock) {
+        updateNote(note.id, {
+          text: plain,
+          isSecret: false,
+          encrypted: null,
+          isUnlocked: false,
+        });
+        const existing = unlockTimeoutsRef.current[note.id];
+        if (existing !== undefined) {
+          window.clearTimeout(existing as number);
+          delete unlockTimeoutsRef.current[note.id];
+        }
+      } else {
+        updateNote(note.id, {
+          text: plain,
+          isUnlocked: true,
+        });
+        const existing = unlockTimeoutsRef.current[note.id];
+        if (existing !== undefined) {
+          window.clearTimeout(existing as number);
+        }
+        const timeoutId = window.setTimeout(() => {
+          hideSecretNote(note.id);
+        }, 1000 * 60 * 5); // 5분 후 자동 블라인드 처리
+        unlockTimeoutsRef.current[note.id] = timeoutId;
+      }
+    } catch {
+      alert('암호가 올바르지 않습니다.');
+    }
+  };
+
+  const handleRevealOnce = async (note: StickyNote) => {
+    if (!note.isSecret || note.isUnlocked) return;
+    await handleUnlockSecretNote(note);
+  };
+
+  const handlePermanentUnlock = async (note: StickyNote) => {
+    if (!note.isSecret) return;
+    if (note.isUnlocked) {
+      updateNote(note.id, { isSecret: false, encrypted: null, isUnlocked: false });
+      const timeoutId = unlockTimeoutsRef.current[note.id];
+      if (timeoutId !== undefined) {
+        window.clearTimeout(timeoutId as number);
+        delete unlockTimeoutsRef.current[note.id];
+      }
+      return;
+    }
+    await handleUnlockSecretNote(note, { persistUnlock: true });
+  };
+
+  const handleTextChange = (noteId: string, value: string) => {
+    updateNote(noteId, { text: value.slice(0, MAX_NOTE_LENGTH) });
+  };
+
+  const handleHideSecretNow = (note: StickyNote) => {
+    hideSecretNote(note.id);
+  };
+
+  const handleToggleSecretVisibility = async (note: StickyNote) => {
+    if (!note.isSecret) return;
+    if (note.isUnlocked) {
+      handleHideSecretNow(note);
+    } else {
+      await handleRevealOnce(note);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-3 h-full min-h-[480px]">
@@ -339,11 +533,40 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
         {visibleNotes.map((n) => (
             <div
               key={n.id}
-              className="absolute shadow-md rounded p-2 select-none"
+              className="absolute shadow-md rounded p-2 pb-6 select-none"
               style={{ left: n.x, top: n.y, zIndex: n.z, background: n.color, width: n.w, position: 'absolute', color: getContrastColor(n.color), touchAction: 'none' }}
               onPointerDown={(e) => onNotePointerDown(e, n.id)}
               role="group"
             >
+              <div className="absolute left-0.5 bottom-0.5 flex items-center gap-1">
+                <button
+                  onPointerDown={stopPointerPropagation}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleSecret(n);
+                  }}
+                  className="w-5 h-5 flex items-center justify-center text-white/80 hover:text-white"
+                  title={n.isSecret ? '비밀 모드 해제' : '비밀 모드 설정'}
+                  aria-label={n.isSecret ? 'Disable secret mode' : 'Enable secret mode'}
+                >
+                  {n.isSecret ? <LockIcon className="w-4 h-4" /> : <KeyIcon className="w-4 h-4" />}
+                </button>
+                {n.isSecret && (
+                  <button
+                    onPointerDown={stopPointerPropagation}
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      await handleToggleSecretVisibility(n);
+                    }}
+                    className="w-5 h-5 flex items-center justify-center text-white/70 hover:text-white"
+                    title={n.isUnlocked ? '비밀 노트 숨기기' : '비밀 노트 보기'}
+                    aria-label={n.isUnlocked ? 'Hide secret note' : 'Reveal secret note'}
+                  >
+                    {n.isUnlocked ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+                  </button>
+                )}
+              </div>
+
               {/* Toolbar */}
               <div className="flex items-center justify-between gap-1 mb-1">
                 <div className="flex items-center gap-1 opacity-90">
@@ -419,15 +642,37 @@ const NotesBoardPage: React.FC<PageProps> = ({ routeParams }) => {
               </div>
 
               {/* Text area */}
-              <textarea
-                className={`w-full rounded bg-transparent resize-none outline-none p-2 ${getContrastColor(n.color) === '#fff' ? 'text-white placeholder-white/70 caret-white' : 'text-black placeholder-black/50 caret-black'}`}
-                style={{ fontSize: FONT_SIZE_PX[n.fontSize], height: n.h, backgroundColor: 'transparent' }}
-                placeholder="Write something..."
-                value={n.text}
-                onChange={(e) => updateNote(n.id, { text: e.target.value })}
-                onMouseDown={(e) => e.stopPropagation()}
-                onPointerDown={(e) => e.stopPropagation()}
-              />
+              {n.isSecret && !n.isUnlocked ? (
+                <div
+                  className="relative w-full h-full rounded bg-black/35 border border-white/10 flex flex-col items-center justify-center gap-2 text-sm"
+                  style={{ height: n.h }}
+                  onPointerDown={stopPointerPropagation}
+                >
+                  <span className="text-white/70">비밀 노트</span>
+                  <span className="text-xs text-white/50">좌측 하단 눈 아이콘으로 열람</span>
+                </div>
+              ) : n.isSecret && n.isUnlocked ? (
+                <div
+                  className="relative w-full h-full rounded bg-black/15 border border-white/15 flex items-start justify-between gap-2 p-2 text-sm"
+                  style={{ height: n.h }}
+                  onPointerDown={stopPointerPropagation}
+                >
+                  <div className="flex-1 overflow-auto text-white/90 whitespace-pre-wrap break-words pr-1">
+                    {n.text || '(내용 없음)'}
+                  </div>
+                </div>
+              ) : (
+                <textarea
+                  className={`w-full rounded bg-transparent resize-none outline-none p-2 ${getContrastColor(n.color) === '#fff' ? 'text-white placeholder-white/70 caret-white' : 'text-black placeholder-black/50 caret-black'}`}
+                  style={{ fontSize: FONT_SIZE_PX[n.fontSize], height: n.h, backgroundColor: 'transparent' }}
+                  placeholder="Write something..."
+                  value={n.text}
+                  maxLength={MAX_NOTE_LENGTH}
+                  onChange={(e) => handleTextChange(n.id, e.target.value)}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                />
+              )}
 
               {/* Resize handle */}
               <div

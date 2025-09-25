@@ -4,6 +4,13 @@ export type NoteGroup = {
   color: string; // hex color for group accent
 };
 
+export type SecretNotePayload = {
+  ciphertext: string;
+  iv: string;
+  salt: string;
+  version?: number;
+};
+
 export type StickyNote = {
   id: string;
   text: string;
@@ -14,7 +21,13 @@ export type StickyNote = {
   fontSize: 'sm' | 'md' | 'lg';
   w: number; // width in px
   h: number; // text area height in px
+  isSecret?: boolean;
+  encrypted?: SecretNotePayload | null;
+  isUnlocked?: boolean; // runtime only
+  hasPendingEncryption?: boolean; // runtime flag
 };
+
+export const MAX_NOTE_LENGTH = 1000;
 
 export type NotesChangeEvent = {
   groupId: string;
@@ -63,7 +76,7 @@ export const getNotesByGroupId = (groupId: string): StickyNote[] => {
     if (Array.isArray(arr)) {
       return arr.map((n, idx) => ({
         id: n.id || `n-${Date.now()}-${idx}`,
-        text: n.text ?? '',
+        text: n.isSecret ? '' : (n.text ?? '').slice(0, MAX_NOTE_LENGTH),
         x: typeof n.x === 'number' ? n.x : 24,
         y: typeof n.y === 'number' ? n.y : 24,
         z: typeof n.z === 'number' ? n.z : 1,
@@ -71,6 +84,15 @@ export const getNotesByGroupId = (groupId: string): StickyNote[] => {
         fontSize: (n.fontSize as StickyNote['fontSize']) || 'md',
         w: typeof (n as any).w === 'number' ? (n as any).w : 240,
         h: typeof (n as any).h === 'number' ? (n as any).h : 128,
+        isSecret: !!n.isSecret,
+        encrypted: n.encrypted && typeof n.encrypted === 'object' ? {
+          ciphertext: (n.encrypted as SecretNotePayload).ciphertext || '',
+          iv: (n.encrypted as SecretNotePayload).iv || '',
+          salt: (n.encrypted as SecretNotePayload).salt || '',
+          version: (n.encrypted as SecretNotePayload).version,
+        } : null,
+        isUnlocked: false,
+        hasPendingEncryption: false,
       }));
     }
     return [];
@@ -81,10 +103,39 @@ export const getNotesByGroupId = (groupId: string): StickyNote[] => {
 
 export const saveNotesByGroupId = (groupId: string, notes: StickyNote[]) => {
   try {
-    localStorage.setItem(storageKey(groupId), JSON.stringify(notes));
+    const sanitized = notes.map(sanitizeNoteForSave);
+
+    localStorage.setItem(storageKey(groupId), JSON.stringify(sanitized));
   } catch {
     // noop
   }
+};
+
+export const sanitizeNoteForSave = (note: StickyNote) => {
+  const base: StickyNote = {
+    ...note,
+    text: (note.text ?? '').slice(0, MAX_NOTE_LENGTH),
+  };
+
+  if (base.isSecret) {
+    base.text = '';
+  }
+
+  const persistable: any = {
+    id: base.id,
+    text: base.text,
+    x: base.x,
+    y: base.y,
+    z: base.z,
+    color: base.color,
+    fontSize: base.fontSize,
+    w: base.w,
+    h: base.h,
+    isSecret: !!base.isSecret,
+    encrypted: base.isSecret ? base.encrypted || null : null,
+  };
+
+  return persistable;
 };
 
 export const getNoteCountByGroup = (groupId: string): number => {
