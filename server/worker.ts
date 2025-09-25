@@ -17,6 +17,67 @@ export interface Env {
   ENC_SECRET?: string;
 }
 
+const JSON_CONTENT_HEADER = { 'content-type': 'application/json; charset=UTF-8' } as const;
+const NO_STORE_CACHE_CONTROL = 'no-store';
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // 8 MiB
+const ALLOWED_IMAGE_MIME_TYPES = new Set<string>([
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'image/gif',
+  'image/svg+xml',
+]);
+
+type JsonResponseOptions = {
+  cacheControl?: string;
+};
+
+function jsonResponse(status: number, body: Record<string, unknown>, options?: JsonResponseOptions): Response {
+  const headers: Record<string, string> = { ...JSON_CONTENT_HEADER };
+  if (options?.cacheControl) {
+    headers['cache-control'] = options.cacheControl;
+  }
+  return new Response(JSON.stringify(body), { status, headers });
+}
+
+function errorJson(status: number, message: string, detail?: unknown): Response {
+  const payload: Record<string, unknown> = { error: message };
+  if (detail !== undefined) {
+    payload.detail = detail;
+  }
+  return jsonResponse(status, payload);
+}
+
+const toMiB = (bytes: number) => Math.round((bytes / (1024 * 1024)) * 10) / 10;
+
+function validateImageFile(
+  file: File,
+  { maxBytes = MAX_IMAGE_BYTES, allowedMimeTypes = ALLOWED_IMAGE_MIME_TYPES }: { maxBytes?: number; allowedMimeTypes?: Set<string> } = {},
+): string | undefined {
+  if (!file || typeof file.size !== 'number') {
+    return '이미지 파일을 찾을 수 없습니다.';
+  }
+  if (file.size === 0) {
+    return '이미지 파일이 비어 있습니다.';
+  }
+  if (file.size > maxBytes) {
+    return `이미지 파일 크기가 ${toMiB(maxBytes)}MB를 초과했습니다.`;
+  }
+  const mime = (file.type || '').toLowerCase();
+  if (mime && !allowedMimeTypes.has(mime)) {
+    return `지원하지 않는 이미지 형식입니다: ${mime}`;
+  }
+  return undefined;
+}
+
+async function safeJson<T = any>(request: Request, fallback: T): Promise<T> {
+  try {
+    return (await request.json()) as T;
+  } catch {
+    return fallback;
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
@@ -97,19 +158,18 @@ export default {
         try {
           const geminiKey = await getGeminiKeyFromRequest(request, env);
           if (!geminiKey) {
-            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
-              status: 500,
-              headers: { 'content-type': 'application/json; charset=UTF-8' },
-            });
+            return errorJson(500, 'GEMINI_API_KEY is not configured on the server.');
           }
 
           const form = await request.formData();
           const imageFile = form.get('image');
           if (!(imageFile instanceof File)) {
-            return new Response(JSON.stringify({ error: 'Missing image file' }), {
-              status: 400,
-              headers: { 'content-type': 'application/json; charset=UTF-8' },
-            });
+            return errorJson(400, '이미지 파일을 전달해 주세요.');
+          }
+
+          const validationError = validateImageFile(imageFile);
+          if (validationError) {
+            return errorJson(400, validationError);
           }
 
           const sizesRaw = typeof form.get('sizes') === 'string' ? String(form.get('sizes')) : '[]';
@@ -174,10 +234,7 @@ export default {
 
           const aiText = await aiRes.text();
           if (!aiRes.ok) {
-            return new Response(JSON.stringify({ error: `Gemini error: ${aiRes.status} ${aiRes.statusText}`, detail: aiText }), {
-              status: 502,
-              headers: { 'content-type': 'application/json; charset=UTF-8' },
-            });
+            return errorJson(502, `Gemini error: ${aiRes.status} ${aiRes.statusText}`, aiText);
           }
 
           let aiJson: any = {};
@@ -199,10 +256,7 @@ export default {
           }
 
           if (!base64Image) {
-            return new Response(JSON.stringify({ error: 'Gemini did not return an image.' }), {
-              status: 502,
-              headers: { 'content-type': 'application/json; charset=UTF-8' },
-            });
+            return errorJson(502, 'Gemini did not return an image.');
           }
 
           if (typeof createImageBitmap !== 'function') {
@@ -218,9 +272,7 @@ export default {
               ],
               message: 'createImageBitmap is not available in this runtime. Returned the simplified PNG only.',
             };
-            return new Response(JSON.stringify(responseBody), {
-              headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
-            });
+            return jsonResponse(200, responseBody, { cacheControl: NO_STORE_CACHE_CONTROL });
           }
 
           const simplifiedBytes = b64ToU8(base64Image);
@@ -292,18 +344,13 @@ export default {
               message: 'Favicon assets generated successfully.',
             };
 
-            return new Response(JSON.stringify(responseBody), {
-              headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
-            });
+            return jsonResponse(200, responseBody, { cacheControl: NO_STORE_CACHE_CONTROL });
           } finally {
             bitmap.close();
           }
         } catch (e: any) {
           console.error('favicon-distiller error', e);
-          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
-            status: 500,
-            headers: { 'content-type': 'application/json; charset=UTF-8' },
-          });
+          return errorJson(500, 'Internal error', String(e?.message || e));
         }
       }
 
@@ -312,29 +359,15 @@ export default {
         try {
           const geminiKey = await getGeminiKeyFromRequest(request, env);
           if (!geminiKey) {
-            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
-              status: 500,
-              headers: { 'content-type': 'application/json; charset=UTF-8' },
-            });
+            return errorJson(500, 'GEMINI_API_KEY is not configured on the server.');
           }
 
-          let payload: any = {};
-          try {
-            payload = await request.json();
-          } catch {
-            return new Response(JSON.stringify({ error: 'Invalid JSON payload' }), {
-              status: 400,
-              headers: { 'content-type': 'application/json; charset=UTF-8' },
-            });
-          }
+          const payload = await safeJson(request, {} as any);
 
           const rawText = typeof payload?.text === 'string' ? payload.text : '';
           const text = rawText.trim().slice(0, 5000);
           if (!text) {
-            return new Response(JSON.stringify({ error: '텍스트 본문을 1자 이상 전달해 주세요.' }), {
-              status: 400,
-              headers: { 'content-type': 'application/json; charset=UTF-8' },
-            });
+            return errorJson(400, '텍스트 본문을 1자 이상 전달해 주세요.');
           }
 
           const variant: 'cover' | 'thumbnail' = payload?.variant === 'thumbnail' ? 'thumbnail' : 'cover';
@@ -391,10 +424,7 @@ export default {
 
           const aiText = await aiRes.text();
           if (!aiRes.ok) {
-            return new Response(JSON.stringify({ error: `Gemini error: ${aiRes.status} ${aiRes.statusText}`, detail: aiText }), {
-              status: 502,
-              headers: { 'content-type': 'application/json; charset=UTF-8' },
-            });
+            return errorJson(502, `Gemini error: ${aiRes.status} ${aiRes.statusText}`, aiText);
           }
 
           let aiJson: any = {};
@@ -419,10 +449,7 @@ export default {
           }
 
           if (!imageData) {
-            return new Response(JSON.stringify({ error: 'Gemini did not return an image.' }), {
-              status: 502,
-              headers: { 'content-type': 'application/json; charset=UTF-8' },
-            });
+            return errorJson(502, 'Gemini did not return an image.');
           }
 
           const imageUrl = `data:${mime || 'image/png'};base64,${imageData}`;
@@ -435,15 +462,10 @@ export default {
             message: 'Cover Crafter 이미지가 생성되었습니다.',
           };
 
-          return new Response(JSON.stringify(responseBody), {
-            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
-          });
+          return jsonResponse(200, responseBody, { cacheControl: NO_STORE_CACHE_CONTROL });
         } catch (e: any) {
           console.error('cover-crafter error', e);
-          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
-            status: 500,
-            headers: { 'content-type': 'application/json; charset=UTF-8' },
-          });
+          return errorJson(500, 'Internal error', String(e?.message || e));
         }
       }
 
