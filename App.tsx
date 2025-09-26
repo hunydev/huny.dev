@@ -245,21 +245,21 @@ const App: React.FC = () => {
   }, [sidebarWidth]);
 
 
-  const handleCloseTab = (tabId: string) => {
-    const tabIndex = openTabs.findIndex(tab => tab.id === tabId);
-    const newTabs = openTabs.filter(tab => tab.id !== tabId);
-    setOpenTabs(newTabs);
+  const handleCloseTab = useCallback((tabId: string) => {
+    setOpenTabs(prevTabs => {
+      const tabIndex = prevTabs.findIndex(tab => tab.id === tabId);
+      if (tabIndex === -1) return prevTabs;
 
-    if (activeTabId === tabId) {
-      if (newTabs.length > 0) {
-        // Activate the previous tab or the first one
+      const newTabs = prevTabs.filter(tab => tab.id !== tabId);
+      setActiveTabId(currActive => {
+        if (currActive !== tabId) return currActive;
+        if (newTabs.length === 0) return '';
         const newActiveIndex = Math.max(0, tabIndex - 1);
-        setActiveTabId(newTabs[newActiveIndex].id);
-      } else {
-        setActiveTabId('');
-      }
-    }
-  };
+        return newTabs[newActiveIndex]?.id ?? '';
+      });
+      return newTabs;
+    });
+  }, []);
 
   const handleCloseAllTabs = useCallback(() => {
     setOpenTabs(prev => {
@@ -273,6 +273,35 @@ const App: React.FC = () => {
       return remaining;
     });
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!e.altKey || e.metaKey || e.ctrlKey) return;
+      const key = e.key?.toLowerCase();
+      if (key !== 'w') return;
+
+      const activeElement = document.activeElement as HTMLElement | null;
+      if (activeElement) {
+        const tagName = activeElement.tagName?.toLowerCase();
+        const isEditable = activeElement.isContentEditable;
+        if (isEditable || tagName === 'input' || tagName === 'textarea' || tagName === 'select') {
+          return;
+        }
+      }
+
+      e.preventDefault();
+      if (e.shiftKey) {
+        handleCloseAllTabs();
+      } else if (activeTabId) {
+        handleCloseTab(activeTabId);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleCloseAllTabs, handleCloseTab, activeTabId]);
 
   const handleActivityItemClick = (view: ViewId) => {
     if (isSidebarPinned) {
