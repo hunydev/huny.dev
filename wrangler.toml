@@ -3,6 +3,9 @@ main = "server/worker.ts"
 compatibility_date = "2025-02-15"
 workers_dev = true
 
+[observability]
+logs = { enabled = true }
+
 [assets]
 directory = "dist/client"
 # By default this binds to `env.ASSETS` in the Worker
