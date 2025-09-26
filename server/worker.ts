@@ -469,6 +469,190 @@ export default {
         }
       }
 
+      if (url.pathname === '/api/image-to-speech') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return errorJson(500, 'GEMINI_API_KEY is not configured on the server.');
+          }
+
+          const form = await request.formData();
+          const imageFile = form.get('image');
+          if (!(imageFile instanceof File)) {
+            return errorJson(400, '이미지 파일을 전달해 주세요.');
+          }
+
+          const validationError = validateImageFile(imageFile);
+          if (validationError) {
+            return errorJson(400, validationError);
+          }
+
+          const allowedModes = new Set(['simple', 'description', 'detail']);
+          const rawMode = typeof form.get('mode') === 'string' ? String(form.get('mode')).toLowerCase() : 'description';
+          const mode = (allowedModes.has(rawMode) ? rawMode : 'description') as 'simple' | 'description' | 'detail';
+
+          const rawLanguage = typeof form.get('language') === 'string' ? String(form.get('language')).trim() : 'ko-KR';
+          const language = rawLanguage || 'ko-KR';
+
+          const LANGUAGE_LABEL: Record<string, string> = {
+            'ko-KR': 'Korean',
+            'en-US': 'English (United States)',
+            'ja-JP': 'Japanese',
+            'zh-CN': 'Chinese',
+            'fr-FR': 'French',
+            'de-DE': 'German',
+            'es-ES': 'Spanish',
+          };
+
+          const MODE_INSTRUCTIONS: Record<typeof mode, string> = {
+            simple: 'Summarize the core subject of the image in a single concise sentence without embellishment.',
+            description: 'Describe the image in two or three sentences suitable for general narration. Mention the main subjects and their context.',
+            detail: 'Provide a richly detailed narration that would allow a blind listener to imagine the full scene, including background elements, colors, lighting, emotions, and any visible text. If there is text in the image, read it aloud within the narration.',
+          };
+
+          const analysisModel = 'gemini-2.0-flash-exp';
+          const sourceMime = imageFile.type && imageFile.type.startsWith('image/') ? imageFile.type : 'image/png';
+          const imageBytes = new Uint8Array(await imageFile.arrayBuffer());
+
+          const analysisPrompt = [
+            'You are an assistive narrator converting visual content into spoken-friendly descriptions.',
+            `Write the response in ${LANGUAGE_LABEL[language] ?? language}.`,
+            MODE_INSTRUCTIONS[mode],
+            'Use complete sentences only and avoid markdown or bullet lists.',
+            'Do not ask questions or make assumptions beyond what is visible. If uncertain, state that it is uncertain.',
+          ].join('\n');
+
+          const analysisUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(analysisModel)}:generateContent`;
+          const analysisRes = await fetch(analysisUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': geminiKey,
+            },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    { text: analysisPrompt },
+                    { inline_data: { mime_type: sourceMime, data: u8ToB64(imageBytes) } },
+                  ],
+                },
+              ],
+              generationConfig: { temperature: 0.2 },
+            }),
+          });
+
+          const analysisTextRaw = await analysisRes.text();
+          if (!analysisRes.ok) {
+            return errorJson(502, `Gemini analysis error: ${analysisRes.status} ${analysisRes.statusText}`, analysisTextRaw);
+          }
+
+          let analysisJson: any = {};
+          try { analysisJson = analysisTextRaw ? JSON.parse(analysisTextRaw) : {}; } catch { analysisJson = {}; }
+          const candidates: any[] = Array.isArray(analysisJson?.candidates) ? analysisJson.candidates : [];
+          let description = '';
+          for (const cand of candidates) {
+            const parts = cand?.content?.parts || [];
+            for (const p of parts) {
+              if (typeof p?.text === 'string' && p.text.trim()) {
+                description += (description ? '\n' : '') + p.text.trim();
+              }
+            }
+            if (description) break;
+          }
+
+          description = description.replace(/\s+/g, ' ').trim();
+          if (!description) {
+            return errorJson(502, 'Gemini did not return a description for the image.', analysisJson);
+          }
+
+          const VOICE_BY_LANGUAGE: Record<string, string> = {
+            'ko-KR': 'Gacrux',
+            'en-US': 'Puck',
+            'ja-JP': 'Aoede',
+            'zh-CN': 'Fenrir',
+            'fr-FR': 'Zephyr',
+            'de-DE': 'Achernar',
+            'es-ES': 'Laomedeia',
+          };
+          const voiceName = VOICE_BY_LANGUAGE[language] ?? 'Gacrux';
+
+          const ttsModel = 'gemini-2.5-flash-preview-tts';
+          const ttsUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(ttsModel)}:generateContent`;
+          const ttsRes = await fetch(ttsUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': geminiKey,
+            },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    { text: description },
+                  ],
+                },
+              ],
+              generationConfig: {
+                responseModalities: ['AUDIO'],
+                speechConfig: {
+                  voiceConfig: {
+                    prebuiltVoiceConfig: { voiceName },
+                  },
+                },
+              },
+              model: ttsModel,
+            }),
+          });
+
+          const ttsText = await ttsRes.text();
+          if (!ttsRes.ok) {
+            return errorJson(502, `Gemini TTS error: ${ttsRes.status} ${ttsRes.statusText}`, ttsText);
+          }
+
+          let ttsJson: any = {};
+          try { ttsJson = ttsText ? JSON.parse(ttsText) : {}; } catch { ttsJson = {}; }
+          let audioBase64 = '';
+          let audioMime = 'audio/mpeg';
+          const ttsCandidates: any[] = Array.isArray(ttsJson?.candidates) ? ttsJson.candidates : [];
+          for (const cand of ttsCandidates) {
+            const parts = cand?.content?.parts || [];
+            for (const p of parts) {
+              const data = p?.inline_data?.data || p?.inlineData?.data;
+              if (data) {
+                audioBase64 = String(data);
+                audioMime = p?.inline_data?.mime_type || p?.inlineData?.mimeType || audioMime;
+                break;
+              }
+            }
+            if (audioBase64) break;
+          }
+
+          if (!audioBase64) {
+            return errorJson(502, 'Gemini TTS did not return audio data.', ttsJson);
+          }
+
+          const responsePayload = {
+            description,
+            language,
+            mode,
+            audio: audioBase64,
+            mimeType: audioMime,
+            sampleRate: 24000,
+            usage: {
+              analysisTokens: analysisJson?.usageMetadata?.candidatesTokenCount ?? null,
+              ttsTokens: ttsJson?.usageMetadata?.candidatesTokenCount ?? null,
+            },
+          };
+
+          return jsonResponse(200, responsePayload, { cacheControl: NO_STORE_CACHE_CONTROL });
+        } catch (e: any) {
+          console.error('image-to-speech error', e);
+          return errorJson(500, 'Internal error', String(e?.message || e));
+        }
+      }
+
       // Sticker Generator: create a sticker sheet (multiple variations) from a user image
       if (url.pathname === '/api/sticker-generator') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });

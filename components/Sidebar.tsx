@@ -271,6 +271,21 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
         <span className="text-sm">MultiVoice Reader</span>
       </button>
       <button
+        onClick={() => onOpenFile('image-to-speech')}
+        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
+      >
+        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
+            <rect x="3" y="3" width="10" height="10" rx="2" />
+            <path d="m3 13 3-3 6 3" />
+            <circle cx="9" cy="7" r="1.5" />
+            <path d="M15 10v6a2 2 0 0 0 2 2h1.5" />
+            <path d="M15 14h2.5a2.5 2.5 0 0 0 0-5H15" />
+          </svg>
+        </span>
+        <span className="text-sm">Image to Speech</span>
+      </button>
+      <button
         onClick={() => onOpenFile('favicon-distiller')}
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >

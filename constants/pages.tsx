@@ -31,6 +31,7 @@ const ComicRestylerPage = React.lazy(() => import('../components/pages/ComicRest
 const FaviconDistillerPage = React.lazy(() => import('../components/pages/FaviconDistillerPage'));
 const CoverCrafterPage = React.lazy(() => import('../components/pages/CoverCrafterPage'));
 const AvatarDistillerPage = React.lazy(() => import('../components/pages/AvatarDistillerPage'));
+const ImageToSpeechPage = React.lazy(() => import('../components/pages/ImageToSpeechPage'));
 
 export type PageComponent =
   | React.ComponentType<PageProps>
@@ -136,6 +137,11 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     title: 'MultiVoice Reader',
     component: MultiVoiceReaderPage,
     icon: <Icon name="multiVoiceReader" className="mr-2" />,
+  },
+  'image-to-speech': {
+    title: 'Image to Speech',
+    component: ImageToSpeechPage,
+    icon: <Icon name="imageToSpeech" className="mr-2" />,
   },
   monitor: {
     title: 'monitor',

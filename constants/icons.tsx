@@ -388,6 +388,19 @@ const ICON_DEFS = {
     defaultClassName: 'w-4 h-4 text-gray-400',
     attrs: { fill: 'currentColor' },
   },
+  imageToSpeech: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
+        <rect x={3} y={3} width={10} height={10} rx={2} />
+        <path d="m3 13 3-3l6 3" />
+        <circle cx={9} cy={7} r={1.5} />
+        <path d="M15 10v6a2 2 0 0 0 2 2h1.5" />
+        <path d="M15 14h2.5a2.5 2.5 0 0 0 0-5H15" />
+      </g>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+  },
   monitor: {
     viewBox: '0 0 24 24',
     nodes: <path d="M20 3H4c-1.103 0-2 .897-2 2v11c0 1.103.897 2 2 2h7v2H8v2h8v-2h-3v-2h7c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2M4 14V5h16l.002 9z" />,
