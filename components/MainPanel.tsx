@@ -96,7 +96,7 @@ type MainPanelProps = {
   onTogglePin: (id: string) => void;
 };
 
-// Helper to support dynamic tab ids, e.g. `bookmark:<categoryId>` or `media:<base64JSON>`
+// Helper to support dynamic tab ids, e.g. `bookmark:<categoryId>`
 const parseTabRoute = (tabId: string): { baseId: string; routeParams?: Record<string, string> } => {
   const [baseId, arg] = tabId.split(':');
   if (baseId === 'bookmark') {
@@ -104,15 +104,6 @@ const parseTabRoute = (tabId: string): { baseId: string; routeParams?: Record<st
   }
   if (baseId === 'notes') {
     return { baseId, routeParams: { groupId: arg || '' } };
-  }
-  if (baseId === 'media') {
-    try {
-      const payload = arg ? JSON.parse(atob(arg)) as { type?: string; name?: string; src?: string } : null;
-      if (payload && payload.src) {
-        return { baseId, routeParams: { type: payload.type || '', name: payload.name || '', src: payload.src || '' } };
-      }
-    } catch {}
-    return { baseId };
   }
   if (baseId === 'apps') {
     return { baseId, routeParams: { categoryId: arg || 'huny' } };

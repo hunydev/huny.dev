@@ -78,14 +78,6 @@ const App: React.FC = () => {
       tabIcon = (
         <Icon name="bookmarkRibbon" className="w-4 h-4 mr-2" style={{ color }} />
       );
-    } else if (baseId === 'media' && arg) {
-      try {
-        const payload = JSON.parse(atob(arg)) as { type?: 'image' | 'video'; name?: string; src?: string };
-        const mType = payload?.type ?? 'image';
-        const mName = payload?.name ?? 'file';
-        tabTitle = `media (${mName})`;
-        tabIcon = mType === 'image' ? <Icon name="image" /> : <Icon name="video" />;
-      } catch { }
     }
     else if (baseId === 'notes' && arg) {
       const group = getNoteGroupById(arg);
