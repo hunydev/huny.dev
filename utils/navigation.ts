@@ -24,7 +24,7 @@ const BASE_VIEW_MAP: Record<string, ViewId> = {
   apps: ViewId.Apps,
   bookmark: ViewId.Bookmark,
   notes: ViewId.Notes,
-  media: ViewId.Media,
+  monitor: ViewId.Monitor,
 };
 
 export const extractBaseId = (tabId: string): string => {

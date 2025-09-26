@@ -4,6 +4,7 @@ import { Icon } from '../constants';
 import { BOOKMARK_CATEGORIES, BOOKMARKS, type Bookmark } from './pages/bookmarksData';
 import { NOTE_GROUPS, getNoteCountByGroup, subscribeNotes } from './pages/notesData';
 import { CATEGORIES } from './pages/appsData';
+import { MONITOR_GROUPS } from './pages/monitorData';
 // DocsView now lists from R2 instead of local DOCS. The DocsPage can still use local data.
 // Avoid bundling large images into main chunk: use static paths so they load only when rendered
 import welcomeIcon from '../icon_32x32.png';
@@ -388,98 +389,62 @@ const GenericView: React.FC<{ title: string; children?: React.ReactNode }> = ({ 
   </div>
 );
 
-type MediaNode =
-  | { type: 'folder'; name: string; children: MediaNode[] }
-  | { type: 'image' | 'video'; name: string; src: string };
+const MonitorView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
+  const [expanded, setExpanded] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    MONITOR_GROUPS.forEach(group => {
+      initial[group.id] = true;
+    });
+    return initial;
+  });
 
-const MEDIA_TREE: MediaNode[] = [
-  {
-    type: 'folder',
-    name: 'Images',
-    children: [
-      {
-        type: 'folder',
-        name: 'logos',
-        children: [
-          { type: 'image', name: 'logo.png', src: '/logo.png' },
-          { type: 'image', name: 'logo_128x128.png', src: '/logo_128x128.png' },
-        ],
-      },
-    ],
-  },
-  {
-    type: 'folder',
-    name: 'Videos',
-    children: [
-      { type: 'video', name: 'flower.mp4', src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4' },
-    ],
-  },
-];
-
-const MediaView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({ 'Images': true, 'Images/logos': true });
-
-  const toggle = (path: string) => setExpanded(prev => ({ ...prev, [path]: !prev[path] }));
-
-  const renderNode = (node: MediaNode, path: string, depth = 0): React.ReactNode => {
-    if (node.type === 'folder') {
-      const currPath = path ? `${path}/${node.name}` : node.name;
-      const isOpen = !!expanded[currPath];
-      return (
-        <div key={currPath}>
-          <button
-            onClick={() => toggle(currPath)}
-            className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-            style={{ paddingLeft: depth * 12 }}
-          >
-            <svg className={`w-3 h-3 mr-1 transition-transform ${isOpen ? 'rotate-90' : ''}`} viewBox="0 0 16 16" fill="currentColor">
-              <path fillRule="evenodd" d="M6 3l5 5-5 5V3z" />
-            </svg>
-            <span className="mr-2">
-              <svg className="w-4 h-4 inline text-gray-400" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M2 4a2 2 0 0 1 2-2h3l2 2h3a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4z" />
-              </svg>
-            </span>
-            <span className="text-sm">{node.name}</span>
-          </button>
-          {isOpen && (
-            <div>
-              {node.children.map((child) => renderNode(child, currPath, depth + 1))}
-            </div>
-          )}
-        </div>
-      );
-    } else {
-      const filePath = path ? `${path}/${node.name}` : node.name;
-      return (
-        <button
-          key={filePath}
-          onClick={() => {
-            try {
-              const payload = { type: node.type, name: node.name, src: node.src };
-              const encoded = btoa(JSON.stringify(payload));
-              onOpenFile(`media:${encoded}`);
-            } catch {
-              // noop
-            }
-          }}
-          className={`flex items-center text-left w-full rounded px-2 py-1 hover:bg-white/10`}
-          style={{ paddingLeft: depth * 12 + 12 }}
-        >
-          <span className="mr-2">
-            {node.type === 'image' ? <Icon name="image" /> : <Icon name="video" />}
-          </span>
-          <span className="text-sm">{node.name}</span>
-        </button>
-      );
-    }
-  };
+  const toggle = (groupId: string) => setExpanded(prev => ({ ...prev, [groupId]: !prev[groupId] }));
 
   return (
     <div className="p-2">
-      <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Media</h2>
-      <div className="flex flex-col gap-1">
-        {MEDIA_TREE.map((node) => renderNode(node, ''))}
+      <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Monitor</h2>
+      <div className="flex flex-col gap-2">
+        {MONITOR_GROUPS.map(group => {
+          const open = !!expanded[group.id];
+          return (
+            <div key={group.id}>
+              <button
+                onClick={() => toggle(group.id)}
+                className="flex items-start justify-between text-left w-full hover:bg-white/10 rounded px-2 py-1"
+              >
+                <span className="flex items-center gap-2">
+                  {group.icon ? (
+                    <Icon name={group.icon} className="w-4 h-4 text-gray-300" />
+                  ) : (
+                    <span className="inline-flex items-center justify-center w-4 h-4 text-gray-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
+                        <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m0 3a1 1 0 1 1 0 2a1 1 0 0 1 0-2m-1 3h2v6H7z" />
+                      </svg>
+                    </span>
+                  )}
+                  <span className="text-sm text-white">{group.name}</span>
+                </span>
+                <svg className={`w-3 h-3 ml-2 text-gray-400 transition-transform ${open ? 'rotate-90' : ''}`} viewBox="0 0 16 16" fill="currentColor">
+                  <path fillRule="evenodd" d="M6 3l5 5-5 5V3z" />
+                </svg>
+              </button>
+              {open && (
+                <div className="mt-1 ml-6 flex flex-col gap-1">
+                  {group.items.map(item => (
+                    <button
+                      key={item.id}
+                      onClick={() => onOpenFile(`monitor:${item.id}`)}
+                      className="flex flex-col gap-0.5 text-left w-full rounded px-2 py-1 hover:bg-white/10"
+                    >
+                      <span className="text-sm text-gray-200">{item.name}</span>
+                      <span className="text-xs text-gray-400 truncate">{item.statusLabel ?? item.summary}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -606,8 +571,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile, width = 256 }
         return <DocsView onOpenFile={onOpenFile} />;
       case ViewId.Apps:
         return <AppsView onOpenFile={onOpenFile} />;
-      case ViewId.Media:
-        return <MediaView onOpenFile={onOpenFile} />;
+      case ViewId.Monitor:
+        return <MonitorView onOpenFile={onOpenFile} />;
       case ViewId.Playground:
         return <PlaygroundView onOpenFile={onOpenFile} />;
       case ViewId.Bookmark:

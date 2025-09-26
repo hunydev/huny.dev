@@ -35,10 +35,10 @@ export const ACTIVITY_BAR_ITEMS: ActivityBarItem[] = [
     title: 'Apps',
   },
   {
-    id: ViewId.Media,
+    id: ViewId.Monitor,
     section: 'top',
-    icon: 'activityMedia',
-    title: 'Media',
+    icon: 'activityMonitor',
+    title: 'Monitor',
   },
   {
     id: ViewId.Playground,

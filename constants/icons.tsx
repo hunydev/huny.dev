@@ -50,12 +50,13 @@ const ICON_DEFS = {
     defaultClassName: 'w-7 h-7',
     attrs: { fill: 'none', stroke: 'currentColor', strokeWidth: 1.5 },
   },
-  activityMedia: {
+  activityMonitor: {
     viewBox: '0 0 24 24',
     nodes: (
       <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
-        <path d="M21 7.6v12.8a.6.6 0 0 1-.6.6H7.6a.6.6 0 0 1-.6-.6V7.6a.6.6 0 0 1 .6-.6h12.8a.6.6 0 0 1 .6.6" />
-        <path d="M18 4H4.6a.6.6 0 0 0-.6.6V18m3-1.2l5.444-1.8L21 18m-4.5-5a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3" />
+        <rect x={3} y={4} width={18} height={14} rx={2} />
+        <path d="M4 17l3-5l3.5 4.5l3.5-6.5l3 7h3" />
+        <path d="M10 22h4" />
       </g>
     ),
     defaultClassName: 'w-7 h-7',

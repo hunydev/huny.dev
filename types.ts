@@ -5,7 +5,7 @@ export enum ViewId {
   Search = 'SEARCH',
   Docs = 'DOCS',
   Apps = 'APPS',
-  Media = 'MEDIA',
+  Monitor = 'MONITOR',
   Playground = 'PLAYGROUND',
   Bookmark = 'BOOKMARK',
   Notes = 'NOTES',

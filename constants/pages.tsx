@@ -7,7 +7,7 @@ const WelcomePage = React.lazy(() => import('../components/pages/WelcomePage'));
 const ProjectPage = React.lazy(() => import('../components/pages/ProjectPage'));
 const AboutPage = React.lazy(() => import('../components/pages/AboutPage'));
 const BookmarkPage = React.lazy(() => import('../components/pages/BookmarkPage'));
-const MediaPreviewPage = React.lazy(() => import('../components/pages/MediaPreviewPage'));
+const MonitorPage = React.lazy(() => import('../components/pages/MonitorPage'));
 const NotesBoardPage = React.lazy(() => import('../components/pages/NotesBoardPage'));
 const DomainPage = React.lazy(() => import('../components/pages/DomainPage'));
 const AppsPage = React.lazy(() => import('../components/pages/AppsPage'));
@@ -137,19 +137,10 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     component: MultiVoiceReaderPage,
     icon: <Icon name="multiVoiceReader" className="mr-2" />,
   },
-  media: {
-    title: 'media',
-    component: MediaPreviewPage,
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 16 16"
-        fill="currentColor"
-        className="w-4 h-4 mr-2 text-gray-400"
-      >
-        <path d="M1.5 3A1.5 1.5 0 0 0 0 4.5v7A1.5 1.5 0 0 0 1.5 13h13a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 14.5 3h-13Zm2 2 3 4 2-2 4 5h-11l2-7Z" />
-      </svg>
-    ),
+  monitor: {
+    title: 'monitor',
+    component: MonitorPage,
+    icon: <Icon name="monitor" className="mr-2" />,
   },
   'split-speaker': {
     title: 'Split Speaker',
