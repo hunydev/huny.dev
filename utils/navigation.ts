@@ -15,6 +15,7 @@ const PLAYGROUND_BASE_IDS = new Set<string>([
   'favicon-distiller',
   'avatar-distiller',
   'cover-crafter',
+  'image-to-speech',
 ]);
 
 export const isPlaygroundBaseId = (baseId: string) => PLAYGROUND_BASE_IDS.has(baseId);
