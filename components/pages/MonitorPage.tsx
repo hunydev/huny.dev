@@ -1,7 +1,7 @@
 import React from 'react';
 import { PageProps } from '../../types';
 import { Icon } from '../../constants';
-import { MONITOR_GROUPS, getMonitorItemById, MonitorItem, MonitorMetric, MonitorIncident, MonitorWatcher } from './monitorData';
+import { getMonitorItemById, MonitorItem, MonitorMetric, MonitorIncident, MonitorWatcher } from './monitorData';
 
 const formatDateTime = (value: string) => {
   try {
@@ -110,90 +110,39 @@ const WatchersList: React.FC<{ watchers?: MonitorWatcher[] }> = ({ watchers }) =
   );
 };
 
-const MonitorPage: React.FC<PageProps> = ({ onOpenFile, routeParams }) => {
+const MonitorPage: React.FC<PageProps> = ({ routeParams }) => {
   const activeItemId = routeParams?.itemId ?? '';
-  const activeItem = activeItemId ? getMonitorItemById(activeItemId) : undefined;
-  const selectedItem = activeItem ?? MONITOR_GROUPS[0]?.items[0];
+  const selectedItem = activeItemId ? getMonitorItemById(activeItemId) : getMonitorItemById('huny-site-status');
+
+  if (!selectedItem) {
+    return (
+      <div className="text-sm text-gray-400">모니터링 항목이 없습니다.</div>
+    );
+  }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6">
-      <aside className="lg:w-72 flex-shrink-0 space-y-4">
-        <div className="rounded border border-white/10 bg-white/[0.02]">
-          <header className="px-4 py-3 border-b border-white/10 flex items-center gap-2">
-            <Icon name="monitor" className="w-5 h-5 text-blue-300" />
-            <div>
-              <h1 className="text-sm font-semibold text-white">Monitor</h1>
-              <p className="text-xs text-gray-400">다양한 모니터링 리소스를 모아 관리합니다.</p>
-            </div>
-          </header>
-          <div className="p-3 space-y-3">
-            <button
-              onClick={() => onOpenFile('monitor')}
-              className="w-full text-left px-3 py-2 rounded border border-white/10 bg-white/[0.04] hover:bg-white/10 text-xs text-gray-200"
-            >
-              전체 개요 보기
-            </button>
-            {MONITOR_GROUPS.map(group => (
-              <div key={group.id} className="space-y-2">
-                <div className="text-[11px] uppercase tracking-wide text-gray-400 flex items-center gap-1">
-                  {group.icon ? <Icon name={group.icon} className="w-3.5 h-3.5" /> : null}
-                  {group.name}
-                </div>
-                <div className="flex flex-col gap-1">
-                  {group.items.map(item => {
-                    const isActive = selectedItem?.id === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => onOpenFile(`monitor:${item.id}`)}
-                        className={`text-left px-3 py-1.5 rounded text-sm transition-colors ${
-                          isActive ? 'bg-white/15 text-white border border-white/20 shadow' : 'hover:bg-white/10 text-gray-300 border border-transparent'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="truncate">{item.name}</span>
-                          <StatusChip level={item.statusLevel} label={item.statusLabel} icon={item.statusIcon} />
-                        </div>
-                        <div className="text-xs text-gray-400 truncate">업데이트 {formatDateTime(item.updatedAt)}</div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
+    <div className="space-y-5">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold text-white">{selectedItem.name}</h2>
+          <p className="text-sm text-gray-300 max-w-3xl leading-relaxed">{selectedItem.summary}</p>
         </div>
-      </aside>
+        <div className="flex items-center gap-2 text-xs text-gray-400">
+          <StatusChip level={selectedItem.statusLevel} label={selectedItem.statusLabel} icon={selectedItem.statusIcon} />
+          <span>업데이트 {formatDateTime(selectedItem.updatedAt)}</span>
+        </div>
+      </div>
 
-      <main className="flex-1 min-w-0">
-        {selectedItem ? (
-          <div className="space-y-5">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-              <div>
-                <h2 className="text-xl font-semibold text-white">{selectedItem.name}</h2>
-                <p className="text-sm text-gray-300 max-w-3xl leading-relaxed">{selectedItem.summary}</p>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-gray-400">
-                <StatusChip level={selectedItem.statusLevel} label={selectedItem.statusLabel} icon={selectedItem.statusIcon} />
-                <span>업데이트 {formatDateTime(selectedItem.updatedAt)}</span>
-              </div>
-            </div>
+      <MetricsGrid metrics={selectedItem.metrics} />
+      <IncidentsList incidents={selectedItem.incidents} />
+      <WatchersList watchers={selectedItem.watchers} />
 
-            <MetricsGrid metrics={selectedItem.metrics} />
-            <IncidentsList incidents={selectedItem.incidents} />
-            <WatchersList watchers={selectedItem.watchers} />
-
-            {selectedItem.notes && (
-              <section className="rounded border border-white/10 bg-white/[0.02] p-4">
-                <h3 className="text-sm font-medium text-white mb-2">추가 메모</h3>
-                <p className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">{selectedItem.notes}</p>
-              </section>
-            )}
-          </div>
-        ) : (
-          <div className="text-sm text-gray-400">선택된 모니터 항목이 없습니다.</div>
-        )}
-      </main>
+      {selectedItem.notes && (
+        <section className="rounded border border-white/10 bg-white/[0.02] p-4">
+          <h3 className="text-sm font-medium text-white mb-2">추가 메모</h3>
+          <p className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">{selectedItem.notes}</p>
+        </section>
+      )}
     </div>
   );
 };
