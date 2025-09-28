@@ -52,7 +52,7 @@ jobs:
             -H "Authorization: Bearer $NTFY_ACCESS_TOKEN" \
             -H 'Title: Deploy Success' \
             -H 'Tags: white_check_mark,rocket' \
-            -d "huny.dev 배포가 완료되었습니다. 완료 시각(UTC): $(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+            -d "huny.dev 배포가 완료되었습니다. 완료 시각(KST): $(TZ='Asia/Seoul' date +'%Y-%m-%d %H:%M:%S')" \
             https://ntfy.sh/hunydev
 
       - name: Send ntfy alert on failure
@@ -64,5 +64,5 @@ jobs:
             -H "Authorization: Bearer $NTFY_ACCESS_TOKEN" \
             -H 'Title: Deploy Failure' \
             -H 'Tags: warning,x' \
-            -d "huny.dev 배포가 실패했습니다. 실패 시각(UTC): $(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+            -d "huny.dev 배포가 실패했습니다. 실패 시각(KST): $(TZ='Asia/Seoul' date +'%Y-%m-%d %H:%M:%S')" \
             https://ntfy.sh/hunydev
