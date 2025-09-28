@@ -9,6 +9,7 @@ import { getCategoryById } from './components/pages/bookmarksData';
 import { getNoteGroupById } from './components/pages/notesData';
 import { getAppCategoryById } from './components/pages/appsData';
 import { getDocBySlug } from './components/pages/docsData';
+import { MONITOR_GROUPS, getMonitorItemById } from './components/pages/monitorData';
 import { extractBaseId, viewForTabId } from './utils/navigation';
 
 const TABS_STORAGE_KEY = 'app.openTabs.v1';
@@ -103,6 +104,21 @@ const App: React.FC = () => {
       const title = doc?.title || slug || 'docs';
       tabTitle = `docs – ${title}`;
       tabIcon = <Icon name="file" />;
+    } else if (baseId === 'monitor') {
+      if (arg) {
+        const monitorItem = getMonitorItemById(arg);
+        if (monitorItem) {
+          const group = MONITOR_GROUPS.find(g => g.items.some(item => item.id === monitorItem.id));
+          tabTitle = `monitor – ${monitorItem.name}`;
+          if (group?.icon) {
+            tabIcon = <Icon name={group.icon} className="w-4 h-4 mr-2" />;
+          }
+        } else {
+          tabTitle = 'monitor – detail';
+        }
+      } else {
+        tabTitle = 'monitor overview';
+      }
     }
 
     setOpenTabs(prevTabs => {

@@ -251,6 +251,107 @@ const ICON_DEFS = {
     ),
     defaultClassName: 'w-4 h-4 text-gray-400',
   },
+  monitorStatus: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
+        <rect x={3} y={4} width={18} height={14} rx={2} />
+        <path d="M4 15.5 8.5 11l3 3l4-6L20 15.5" />
+        <path d="M10 22h4" />
+      </g>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+  },
+  monitorLatency: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
+        <path d="M4 5h16v9H4z" />
+        <path d="M4 12l4-3l4 4l3-5l5 6" />
+        <path d="M12 19v3" />
+        <path d="M9 22h6" />
+      </g>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+  },
+  monitorNews: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
+        <rect x={4} y={5} width={16} height={14} rx={2} />
+        <path d="M8 9h6" />
+        <path d="M8 13h8" />
+        <path d="M8 17h5" />
+        <circle cx={16.5} cy={9} r={2.5} />
+        <path d="M5 5V3" />
+        <path d="M19 5V3" />
+      </g>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+  },
+  monitorNewsletter: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
+        <path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" />
+        <path d="M6 7l6 4l6-4" />
+        <path d="M6 15h4" />
+        <path d="M6 11h4" />
+      </g>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+  },
+  monitorUsage: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
+        <path d="M4 19h16" />
+        <rect x={5} y={5} width={4} height={10} rx={1} />
+        <rect x={10} y={8} width={4} height={7} rx={1} />
+        <rect x={15} y={11} width={4} height={4} rx={1} />
+      </g>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+  },
+  monitorBilling: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
+        <circle cx={12} cy={12} r={8} />
+        <path d="M12 7v10" />
+        <path d="M9 9c.5-.667 1.5-1 3-1s2.5.333 3 1" />
+        <path d="M9 15c.5.667 1.5 1 3 1s2.5-.333 3-1" />
+      </g>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+  },
+  monitorSecurity: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
+        <path d="M12 2l7 3v6c0 5-3.5 9-7 11c-3.5-2-7-6-7-11V5z" />
+        <path d="M9.5 11.5l2 2l3-3" />
+      </g>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+  },
+  monitorAutomation: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
+        <circle cx={12} cy={12} r={3} />
+        <path d="M5.6 5.6l2.1 2.1" />
+        <path d="M16.3 16.3l2.1 2.1" />
+        <path d="M4 12h3" />
+        <path d="M17 12h3" />
+        <path d="M5.6 18.4l2.1-2.1" />
+        <path d="M16.3 7.7l2.1-2.1" />
+        <path d="M12 4V1.5" />
+        <path d="M12 22.5V20" />
+      </g>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+  },
   globe: {
     viewBox: '0 0 24 24',
     nodes: <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10s10-4.486 10-10S17.514 2 12 2m7.931 9h-2.764a14.7 14.7 0 0 0-1.792-6.243A8.01 8.01 0 0 1 19.931 11M12.53 4.027c1.035 1.364 2.427 3.78 2.627 6.973H9.03c.139-2.596.994-5.028 2.451-6.974c.172-.01.344-.026.519-.026c.179 0 .354.016.53.027m-3.842.7C7.704 6.618 7.136 8.762 7.03 11H4.069a8.01 8.01 0 0 1 4.619-6.273M4.069 13h2.974c.136 2.379.665 4.478 1.556 6.23A8.01 8.01 0 0 1 4.069 13m7.381 6.973C10.049 18.275 9.222 15.896 9.041 13h6.113c-.208 2.773-1.117 5.196-2.603 6.972c-.182.012-.364.028-.551.028c-.186 0-.367-.016-.55-.027m4.011-.772c.955-1.794 1.538-3.901 1.691-6.201h2.778a8 8 0 0 1-4.469 6.201" />,
