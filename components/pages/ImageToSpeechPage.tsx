@@ -47,23 +47,62 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
   const [description, setDescription] = React.useState('');
-  const [audioUrl, setAudioUrl] = React.useState('');
-  const [audioMime, setAudioMime] = React.useState('audio/mpeg');
+  const [audioInfo, setAudioInfo] = React.useState<{ mime: string; sampleRate?: number } | null>(null);
+  const [audioReady, setAudioReady] = React.useState(false);
+  const [audioError, setAudioError] = React.useState('');
+  const [playerState, setPlayerState] = React.useState<'idle' | 'loading' | 'playing' | 'paused' | 'stopped'>('idle');
   const [usage, setUsage] = React.useState<{ analysisTokens: number | null; ttsTokens: number | null } | null>(null);
+
+  const audioContextRef = React.useRef<AudioContext | null>(null);
+  const audioBufferRef = React.useRef<AudioBuffer | null>(null);
+  const sourceRef = React.useRef<AudioBufferSourceNode | null>(null);
+  const startTimeRef = React.useRef(0);
+  const offsetRef = React.useRef(0);
+  const endFlagsRef = React.useRef<{ pause: boolean; stop: boolean }>({ pause: false, stop: false });
+
+  const resetPlaybackState = React.useCallback((keepBuffer = false) => {
+    if (sourceRef.current) {
+      try {
+        sourceRef.current.onended = null;
+        sourceRef.current.stop();
+      } catch (_) {
+        // no-op
+      }
+      try {
+        sourceRef.current.disconnect();
+      } catch (_) {
+        // no-op
+      }
+      sourceRef.current = null;
+    }
+    endFlagsRef.current = { pause: false, stop: false };
+    offsetRef.current = 0;
+    startTimeRef.current = 0;
+    setPlayerState(keepBuffer && audioBufferRef.current ? 'stopped' : 'idle');
+    if (!keepBuffer) {
+      audioBufferRef.current = null;
+      setAudioReady(false);
+      setAudioInfo(null);
+    }
+  }, []);
 
   React.useEffect(() => {
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
-      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      resetPlaybackState();
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(() => undefined);
+        audioContextRef.current = null;
+      }
     };
-  }, [previewUrl, audioUrl]);
+  }, [previewUrl, resetPlaybackState]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError('');
     setDescription('');
     setUsage(null);
-    setAudioUrl('');
-    setAudioMime('audio/mpeg');
+    setAudioError('');
+    resetPlaybackState();
 
     const next = e.target.files?.[0];
     setFile(next ?? null);
@@ -88,8 +127,10 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
     setLoading(true);
     setError('');
     setDescription('');
-    setAudioUrl('');
     setUsage(null);
+    setAudioError('');
+    resetPlaybackState();
+    setPlayerState('loading');
 
     try {
       const formData = new FormData();
@@ -119,13 +160,115 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
       for (let i = 0; i < binary.length; i++) {
         bytes[i] = binary.charCodeAt(i);
       }
-      const blob = new Blob([bytes], { type: mime });
-      const url = URL.createObjectURL(blob);
+      const sampleRate = typeof json?.sampleRate === 'number' && Number.isFinite(json.sampleRate) ? json.sampleRate : undefined;
 
-      setAudioUrl(url);
-      setAudioMime(mime);
+      const ensureContext = async (): Promise<AudioContext> => {
+        let ctx = audioContextRef.current;
+        if (!ctx || ctx.state === 'closed') {
+          try {
+            ctx = sampleRate ? new AudioContext({ sampleRate }) : new AudioContext();
+          } catch {
+            ctx = new AudioContext();
+          }
+          audioContextRef.current = ctx;
+        }
+        if (ctx.state === 'suspended') {
+          await ctx.resume();
+        }
+        return ctx;
+      };
+
+      const loadBuffer = async () => {
+        const context = await ensureContext();
+        const arrayBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+        let decoded: AudioBuffer | null = null;
+        try {
+          decoded = await context.decodeAudioData(arrayBuffer.slice(0));
+        } catch (decodeErr) {
+          if (mime.toLowerCase().includes('pcm') || mime.toLowerCase().includes('raw')) {
+            if (!sampleRate) {
+              throw new Error('PCM 오디오를 해석하기 위한 샘플레이트 정보가 필요합니다.');
+            }
+            if (arrayBuffer.byteLength % 2 !== 0) {
+              throw new Error('PCM 오디오 데이터 길이가 올바르지 않습니다.');
+            }
+            const sampleCount = arrayBuffer.byteLength / 2;
+            decoded = context.createBuffer(1, sampleCount, sampleRate);
+            const view = new DataView(arrayBuffer);
+            const channelData = decoded.getChannelData(0);
+            for (let i = 0; i < sampleCount; i++) {
+              channelData[i] = view.getInt16(i * 2, true) / 32768;
+            }
+          } else {
+            throw decodeErr;
+          }
+        }
+
+        if (!decoded) {
+          throw new Error('오디오 버퍼를 준비할 수 없습니다.');
+        }
+
+        audioBufferRef.current = decoded;
+        offsetRef.current = 0;
+        startTimeRef.current = 0;
+        setAudioReady(true);
+        setPlayerState('stopped');
+      };
+
+      await loadBuffer();
+      setAudioInfo({ mime, sampleRate });
       setDescription(typeof json?.description === 'string' ? json.description : '');
       setUsage(json?.usage ?? null);
+
+      const startPlayback = async (offset: number) => {
+        const context = await ensureContext();
+        const buffer = audioBufferRef.current;
+        if (!buffer) return;
+        if (sourceRef.current) {
+          try {
+            sourceRef.current.stop();
+          } catch (_) {
+            // no-op
+          }
+          try {
+            sourceRef.current.disconnect();
+          } catch (_) {
+            // no-op
+          }
+        }
+        const source = context.createBufferSource();
+        source.buffer = buffer;
+        source.connect(context.destination);
+        endFlagsRef.current = { pause: false, stop: false };
+        startTimeRef.current = context.currentTime - offset;
+        offsetRef.current = offset;
+        source.onended = () => {
+          sourceRef.current = null;
+          if (endFlagsRef.current.pause) {
+            endFlagsRef.current.pause = false;
+            return;
+          }
+          if (endFlagsRef.current.stop) {
+            endFlagsRef.current.stop = false;
+            offsetRef.current = 0;
+            setPlayerState('stopped');
+            return;
+          }
+          offsetRef.current = 0;
+          setPlayerState('stopped');
+        };
+        sourceRef.current = source;
+        setPlayerState('playing');
+        source.start(0, offset);
+      };
+
+      try {
+        await startPlayback(0);
+      } catch (playErr) {
+        console.error(playErr);
+        setPlayerState('stopped');
+        setAudioError('자동 재생에 실패했습니다. 재생 버튼을 눌러 주세요.');
+      }
     } catch (err: any) {
       console.error(err);
       setError(err?.message || '처리 중 오류가 발생했습니다.');
@@ -134,7 +277,125 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
     }
   };
 
-  const hasResult = !!description || !!audioUrl;
+  const hasResult = !!description || audioReady;
+
+  const ensureContext = React.useCallback(async () => {
+    if (!audioBufferRef.current) {
+      throw new Error('오디오 버퍼가 준비되지 않았습니다.');
+    }
+    let ctx = audioContextRef.current;
+    if (!ctx || ctx.state === 'closed') {
+      try {
+        ctx = audioInfo?.sampleRate ? new AudioContext({ sampleRate: audioInfo.sampleRate }) : new AudioContext();
+      } catch {
+        ctx = new AudioContext();
+      }
+      audioContextRef.current = ctx;
+    }
+    if (ctx.state === 'suspended') {
+      await ctx.resume();
+    }
+    return ctx;
+  }, [audioInfo]);
+
+  const startPlayback = React.useCallback(async (offset: number) => {
+    const context = await ensureContext();
+    const buffer = audioBufferRef.current;
+    if (!buffer) return;
+    if (sourceRef.current) {
+      try {
+        sourceRef.current.stop();
+      } catch (_) {
+        // no-op
+      }
+      try {
+        sourceRef.current.disconnect();
+      } catch (_) {
+        // no-op
+      }
+    }
+    const source = context.createBufferSource();
+    source.buffer = buffer;
+    source.connect(context.destination);
+    endFlagsRef.current = { pause: false, stop: false };
+    startTimeRef.current = context.currentTime - offset;
+    offsetRef.current = offset;
+    source.onended = () => {
+      sourceRef.current = null;
+      if (endFlagsRef.current.pause) {
+        endFlagsRef.current.pause = false;
+        return;
+      }
+      if (endFlagsRef.current.stop) {
+        endFlagsRef.current.stop = false;
+        offsetRef.current = 0;
+        setPlayerState('stopped');
+        return;
+      }
+      offsetRef.current = 0;
+      setPlayerState('stopped');
+    };
+    sourceRef.current = source;
+    setPlayerState('playing');
+    source.start(0, offset);
+  }, [ensureContext]);
+
+  const handleTogglePlayPause = React.useCallback(async () => {
+    if (!audioBufferRef.current) return;
+    if (playerState === 'playing') {
+      const context = audioContextRef.current;
+      if (!context || !sourceRef.current) return;
+      const elapsed = context.currentTime - startTimeRef.current;
+      const duration = audioBufferRef.current.duration;
+      offsetRef.current = Math.min(elapsed, duration);
+      endFlagsRef.current.pause = true;
+      try {
+        sourceRef.current.stop();
+      } catch (_) {
+        // no-op
+      }
+      try {
+        sourceRef.current.disconnect();
+      } catch (_) {
+        // no-op
+      }
+      sourceRef.current = null;
+      setPlayerState('paused');
+      return;
+    }
+
+    const offset = playerState === 'paused' ? offsetRef.current : 0;
+    try {
+      await startPlayback(offset);
+      setAudioError('');
+    } catch (err) {
+      console.error(err);
+      setAudioError('오디오 재생에 실패했습니다.');
+    }
+  }, [playerState, startPlayback]);
+
+  const handleStopPlayback = React.useCallback(() => {
+    if (!audioBufferRef.current) return;
+    if (!sourceRef.current) {
+      offsetRef.current = 0;
+      setPlayerState('stopped');
+      return;
+    }
+    endFlagsRef.current.stop = true;
+    try {
+      sourceRef.current.stop();
+    } catch (_) {
+      // no-op
+    }
+    try {
+      sourceRef.current.disconnect();
+    } catch (_) {
+      // no-op
+    }
+    sourceRef.current = null;
+    offsetRef.current = 0;
+    setPlayerState('stopped');
+  }, []);
 
   return (
     <div className="text-gray-300 max-w-4xl mx-auto font-sans leading-relaxed">
@@ -260,11 +521,44 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
             </div>
           </div>
 
-          {audioUrl && (
+          {audioReady && (
             <div>
               <h2 className="text-sm font-medium text-white">오디오 미리듣기</h2>
-              <audio className="mt-2 w-full" controls src={audioUrl} preload="metadata" />
-              <p className="mt-2 text-xs text-gray-500">MIME: {audioMime}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleTogglePlayPause}
+                  disabled={playerState === 'loading' || !audioReady}
+                  className={`px-4 py-1.5 rounded text-sm font-medium ${
+                    playerState === 'loading' || !audioReady
+                      ? 'bg-blue-600/40 text-white/60 cursor-not-allowed'
+                      : 'bg-blue-600 hover:bg-blue-500 text-white'
+                  }`}
+                >
+                  {playerState === 'playing' ? '일시정지' : '재생'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleStopPlayback}
+                  disabled={playerState === 'loading' || !audioReady || playerState === 'stopped'}
+                  className={`px-4 py-1.5 rounded text-sm font-medium ${
+                    playerState === 'loading' || !audioReady || playerState === 'stopped'
+                      ? 'bg-gray-600/40 text-white/60 cursor-not-allowed'
+                      : 'bg-gray-600 hover:bg-gray-500 text-white'
+                  }`}
+                >
+                  중지
+                </button>
+                <span className="text-xs text-gray-500">
+                  상태: {playerState === 'playing' ? '재생 중' : playerState === 'paused' ? '일시정지' : playerState === 'stopped' ? '정지' : '대기'}
+                </span>
+              </div>
+              {audioInfo ? (
+                <p className="mt-2 text-xs text-gray-500">MIME: {audioInfo.mime}{audioInfo.sampleRate ? ` · 샘플레이트: ${audioInfo.sampleRate}Hz` : ''}</p>
+              ) : null}
+              {audioError ? (
+                <p className="mt-2 text-xs text-amber-300">{audioError}</p>
+              ) : null}
             </div>
           )}
         </section>
