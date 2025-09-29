@@ -32,6 +32,7 @@ const App: React.FC = () => {
   const signInModalRef = useRef<HTMLDivElement | null>(null);
   const restoredRef = useRef<boolean>(false);
   const restoringRef = useRef<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
 
   // Settings dropdown & API Key modal state
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
@@ -186,6 +187,19 @@ const App: React.FC = () => {
     const v = viewForTabId(activeTabId);
     setActiveView(v);
   }, [activeTabId]);
+
+  const handleLogoClick = useCallback(() => {
+    if (refreshing) return;
+    setRefreshing(true);
+    if (typeof window !== 'undefined') {
+      try {
+        window.location.reload();
+      } catch (err) {
+        console.error('logo refresh failed', err);
+        setTimeout(() => setRefreshing(false), 1200);
+      }
+    }
+  }, [refreshing]);
 
   // Keep session-based recent list in sync with last visited tab
   useEffect(() => {
@@ -436,7 +450,19 @@ const App: React.FC = () => {
     <div className="flex w-full flex-col bg-[#1e1e1e] text-gray-300 font-sans overflow-hidden" style={{ height: 'var(--app-height, 100vh)' }}>
       {/* Top title bar (VS Code style) */}
       <div className="h-8 bg-[#2d2d2d] border-b border-black/30 flex items-center px-2 shrink-0">
-        <img src={logo} alt="HunyDev logo" className="h-5 w-5" decoding="async" />
+        <button
+          type="button"
+          onClick={handleLogoClick}
+          className="flex items-center justify-center h-5 w-5 text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded"
+          aria-label="홈으로 이동 및 새로고침"
+        >
+          <img
+            src={logo}
+            alt="HunyDev logo"
+            className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`}
+            decoding="async"
+          />
+        </button>
         <div className="ml-auto flex items-center gap-1">
           <button
             type="button"
