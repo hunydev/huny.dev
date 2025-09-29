@@ -39,6 +39,17 @@ type ImageToSpeechResponse = {
   usage?: { analysisTokens: number | null; ttsTokens: number | null };
 };
 
+const formatTime = (seconds: number): string => {
+  if (!Number.isFinite(seconds) || seconds < 0) seconds = 0;
+  const totalSeconds = Math.floor(seconds);
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+};
+
+const isSeekControlKey = (key: string) =>
+  key.startsWith('Arrow') || key === 'Home' || key === 'End' || key === 'PageUp' || key === 'PageDown';
+
 const ImageToSpeechPage: React.FC<PageProps> = () => {
   const [mode, setMode] = React.useState<'simple' | 'description' | 'detail'>('description');
   const [language, setLanguage] = React.useState<string>('ko-KR');
@@ -51,6 +62,9 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
   const [audioReady, setAudioReady] = React.useState(false);
   const [audioError, setAudioError] = React.useState('');
   const [playerState, setPlayerState] = React.useState<'idle' | 'loading' | 'playing' | 'paused' | 'stopped'>('idle');
+  const [duration, setDuration] = React.useState(0);
+  const [trackPosition, setTrackPosition] = React.useState(0);
+  const [isSeeking, setIsSeeking] = React.useState(false);
   const [usage, setUsage] = React.useState<{ analysisTokens: number | null; ttsTokens: number | null } | null>(null);
 
   const audioContextRef = React.useRef<AudioContext | null>(null);
@@ -59,6 +73,47 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
   const startTimeRef = React.useRef(0);
   const offsetRef = React.useRef(0);
   const endFlagsRef = React.useRef<{ pause: boolean; stop: boolean }>({ pause: false, stop: false });
+  const rafRef = React.useRef<number | null>(null);
+  const playerStateRef = React.useRef(playerState);
+  const isSeekingRef = React.useRef(isSeeking);
+
+  React.useEffect(() => {
+    playerStateRef.current = playerState;
+  }, [playerState]);
+
+  React.useEffect(() => {
+    isSeekingRef.current = isSeeking;
+  }, [isSeeking]);
+
+  const stopProgressUpdate = React.useCallback(() => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+  }, []);
+
+  const scheduleProgressUpdate = React.useCallback(() => {
+    stopProgressUpdate();
+    const tick = () => {
+      const context = audioContextRef.current;
+      const buffer = audioBufferRef.current;
+      if (!context || !buffer) {
+        rafRef.current = null;
+        return;
+      }
+      const elapsed = context.currentTime - startTimeRef.current;
+      const clamped = Math.min(Math.max(elapsed, 0), buffer.duration);
+      if (!isSeekingRef.current) {
+        setTrackPosition(clamped);
+      }
+      if (playerStateRef.current === 'playing') {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        rafRef.current = null;
+      }
+    };
+    rafRef.current = requestAnimationFrame(tick);
+  }, [stopProgressUpdate]);
 
   const resetPlaybackState = React.useCallback((keepBuffer = false) => {
     if (sourceRef.current) {
@@ -78,13 +133,19 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
     endFlagsRef.current = { pause: false, stop: false };
     offsetRef.current = 0;
     startTimeRef.current = 0;
+    stopProgressUpdate();
+    setDuration(0);
+    setTrackPosition(0);
+    setIsSeeking(false);
     setPlayerState(keepBuffer && audioBufferRef.current ? 'stopped' : 'idle');
     if (!keepBuffer) {
       audioBufferRef.current = null;
       setAudioReady(false);
       setAudioInfo(null);
     }
-  }, []);
+    playerStateRef.current = keepBuffer && audioBufferRef.current ? 'stopped' : 'idle';
+    isSeekingRef.current = false;
+  }, [stopProgressUpdate]);
 
   React.useEffect(() => {
     return () => {
@@ -211,8 +272,12 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
         audioBufferRef.current = decoded;
         offsetRef.current = 0;
         startTimeRef.current = 0;
+        setDuration(decoded.duration);
+        setTrackPosition(0);
         setAudioReady(true);
         setPlayerState('stopped');
+        playerStateRef.current = 'stopped';
+        scheduleProgressUpdate();
       };
 
       await loadBuffer();
@@ -242,6 +307,9 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
         endFlagsRef.current = { pause: false, stop: false };
         startTimeRef.current = context.currentTime - offset;
         offsetRef.current = offset;
+        if (!isSeekingRef.current) {
+          setTrackPosition(offset);
+        }
         source.onended = () => {
           sourceRef.current = null;
           if (endFlagsRef.current.pause) {
@@ -256,10 +324,15 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
           }
           offsetRef.current = 0;
           setPlayerState('stopped');
+          playerStateRef.current = 'stopped';
+          setTrackPosition(0);
+          stopProgressUpdate();
         };
         sourceRef.current = source;
         setPlayerState('playing');
+        playerStateRef.current = 'playing';
         source.start(0, offset);
+        scheduleProgressUpdate();
       };
 
       try {
@@ -319,7 +392,10 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
     source.connect(context.destination);
     endFlagsRef.current = { pause: false, stop: false };
     startTimeRef.current = context.currentTime - offset;
-    offsetRef.current = offset;
+    offsetRef.current = Math.min(Math.max(offset, 0), buffer.duration);
+    if (!isSeekingRef.current) {
+      setTrackPosition(offsetRef.current);
+    }
     source.onended = () => {
       sourceRef.current = null;
       if (endFlagsRef.current.pause) {
@@ -330,15 +406,23 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
         endFlagsRef.current.stop = false;
         offsetRef.current = 0;
         setPlayerState('stopped');
+        playerStateRef.current = 'stopped';
+        setTrackPosition(0);
+        stopProgressUpdate();
         return;
       }
       offsetRef.current = 0;
       setPlayerState('stopped');
+      playerStateRef.current = 'stopped';
+      setTrackPosition(0);
+      stopProgressUpdate();
     };
     sourceRef.current = source;
     setPlayerState('playing');
-    source.start(0, offset);
-  }, [ensureContext]);
+    playerStateRef.current = 'playing';
+    source.start(0, offsetRef.current);
+    scheduleProgressUpdate();
+  }, [ensureContext, scheduleProgressUpdate, stopProgressUpdate]);
 
   const handleTogglePlayPause = React.useCallback(async () => {
     if (!audioBufferRef.current) return;
@@ -361,24 +445,33 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
       }
       sourceRef.current = null;
       setPlayerState('paused');
+      playerStateRef.current = 'paused';
+      setTrackPosition(offsetRef.current);
+      stopProgressUpdate();
       return;
     }
 
-    const offset = playerState === 'paused' ? offsetRef.current : 0;
+    const offset = playerState === 'paused' || playerState === 'stopped' ? offsetRef.current : 0;
     try {
       await startPlayback(offset);
       setAudioError('');
     } catch (err) {
       console.error(err);
       setAudioError('오디오 재생에 실패했습니다.');
+      setPlayerState('stopped');
+      playerStateRef.current = 'stopped';
+      stopProgressUpdate();
     }
-  }, [playerState, startPlayback]);
+  }, [playerState, startPlayback, stopProgressUpdate]);
 
   const handleStopPlayback = React.useCallback(() => {
     if (!audioBufferRef.current) return;
     if (!sourceRef.current) {
       offsetRef.current = 0;
       setPlayerState('stopped');
+      playerStateRef.current = 'stopped';
+      setTrackPosition(0);
+      stopProgressUpdate();
       return;
     }
     endFlagsRef.current.stop = true;
@@ -395,7 +488,86 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
     sourceRef.current = null;
     offsetRef.current = 0;
     setPlayerState('stopped');
+    playerStateRef.current = 'stopped';
+    setTrackPosition(0);
+    stopProgressUpdate();
+  }, [stopProgressUpdate]);
+
+  const handleSeekStart = React.useCallback(() => {
+    if (!audioBufferRef.current) return;
+    setIsSeeking(true);
+    isSeekingRef.current = true;
+    stopProgressUpdate();
+  }, [stopProgressUpdate]);
+
+  const handleSeekChange = React.useCallback((value: number) => {
+    if (!audioBufferRef.current) return;
+    const buffer = audioBufferRef.current;
+    const clamped = Math.min(Math.max(value, 0), buffer.duration);
+    setTrackPosition(clamped);
+    offsetRef.current = clamped;
   }, []);
+
+  const handleSeekCommit = React.useCallback(async (value: number) => {
+    if (!audioBufferRef.current) {
+      setIsSeeking(false);
+      isSeekingRef.current = false;
+      return;
+    }
+    const buffer = audioBufferRef.current;
+    const clamped = Math.min(Math.max(value, 0), buffer.duration);
+    setIsSeeking(false);
+    isSeekingRef.current = false;
+    offsetRef.current = clamped;
+    setTrackPosition(clamped);
+
+    if (playerState === 'playing') {
+      try {
+        await startPlayback(clamped);
+        setAudioError('');
+      } catch (err) {
+        console.error(err);
+        setAudioError('오디오 재생에 실패했습니다.');
+        setPlayerState('stopped');
+        playerStateRef.current = 'stopped';
+        stopProgressUpdate();
+      }
+      return;
+    }
+
+    const context = audioContextRef.current;
+    if (context && context.state !== 'closed') {
+      startTimeRef.current = context.currentTime - clamped;
+    }
+  }, [playerState, startPlayback, stopProgressUpdate]);
+
+  const handleRangeChange = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    handleSeekChange(Number(event.target.value));
+  }, [handleSeekChange]);
+
+  const handleRangePointerDown = React.useCallback(() => {
+    handleSeekStart();
+  }, [handleSeekStart]);
+
+  const handleRangePointerUp = React.useCallback((event: React.PointerEvent<HTMLInputElement>) => {
+    void handleSeekCommit(Number(event.currentTarget.value));
+  }, [handleSeekCommit]);
+
+  const handleRangePointerCancel = React.useCallback((event: React.PointerEvent<HTMLInputElement>) => {
+    void handleSeekCommit(Number(event.currentTarget.value));
+  }, [handleSeekCommit]);
+
+  const handleRangeKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (isSeekControlKey(event.key)) {
+      handleSeekStart();
+    }
+  }, [handleSeekStart]);
+
+  const handleRangeKeyUp = React.useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (isSeekControlKey(event.key)) {
+      void handleSeekCommit(Number(event.currentTarget.value));
+    }
+  }, [handleSeekCommit]);
 
   return (
     <div className="text-gray-300 max-w-4xl mx-auto font-sans leading-relaxed">
@@ -458,10 +630,8 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
                       className="mt-1"
                       disabled={loading}
                     />
-                    <span>
-                      <span className="text-gray-200 font-medium">{option.label}</span>
-                      <span className="block text-xs text-gray-400">{option.helper}</span>
-                    </span>
+                    <span className="text-gray-200 font-medium">{option.label}</span>
+                    <span className="block text-xs text-gray-400">{option.helper}</span>
                   </label>
                 ))}
               </div>
@@ -524,34 +694,56 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
           {audioReady && (
             <div>
               <h2 className="text-sm font-medium text-white">오디오 미리듣기</h2>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleTogglePlayPause}
-                  disabled={playerState === 'loading' || !audioReady}
-                  className={`px-4 py-1.5 rounded text-sm font-medium ${
-                    playerState === 'loading' || !audioReady
-                      ? 'bg-blue-600/40 text-white/60 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-500 text-white'
-                  }`}
-                >
-                  {playerState === 'playing' ? '일시정지' : '재생'}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleStopPlayback}
-                  disabled={playerState === 'loading' || !audioReady || playerState === 'stopped'}
-                  className={`px-4 py-1.5 rounded text-sm font-medium ${
-                    playerState === 'loading' || !audioReady || playerState === 'stopped'
-                      ? 'bg-gray-600/40 text-white/60 cursor-not-allowed'
-                      : 'bg-gray-600 hover:bg-gray-500 text-white'
-                  }`}
-                >
-                  중지
-                </button>
-                <span className="text-xs text-gray-500">
-                  상태: {playerState === 'playing' ? '재생 중' : playerState === 'paused' ? '일시정지' : playerState === 'stopped' ? '정지' : '대기'}
-                </span>
+              <div className="mt-2 space-y-3">
+                <div className="flex items-center gap-3 text-xs text-gray-400">
+                  <span className="tabular-nums">{formatTime(trackPosition)}</span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={Math.max(duration, 0.001)}
+                    step={Math.max(duration / 500, 0.01)}
+                    value={Number.isFinite(trackPosition) ? trackPosition : 0}
+                    onChange={handleRangeChange}
+                    onPointerDown={handleRangePointerDown}
+                    onPointerUp={handleRangePointerUp}
+                    onPointerCancel={handleRangePointerCancel}
+                    onKeyDown={handleRangeKeyDown}
+                    onKeyUp={handleRangeKeyUp}
+                    disabled={!audioReady || duration <= 0}
+                    aria-label="재생 위치"
+                    className="flex-1 h-1.5 cursor-pointer rounded-full bg-white/30 accent-blue-500 disabled:cursor-not-allowed"
+                  />
+                  <span className="tabular-nums">{formatTime(duration)}</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleTogglePlayPause}
+                    disabled={playerState === 'loading' || !audioReady}
+                    className={`px-4 py-1.5 rounded text-sm font-medium ${
+                      playerState === 'loading' || !audioReady
+                        ? 'bg-blue-600/40 text-white/60 cursor-not-allowed'
+                        : 'bg-blue-600 hover:bg-blue-500 text-white'
+                    }`}
+                  >
+                    {playerState === 'playing' ? '일시정지' : '재생'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleStopPlayback}
+                    disabled={playerState === 'loading' || !audioReady || playerState === 'stopped'}
+                    className={`px-4 py-1.5 rounded text-sm font-medium ${
+                      playerState === 'loading' || !audioReady || playerState === 'stopped'
+                        ? 'bg-gray-600/40 text-white/60 cursor-not-allowed'
+                        : 'bg-gray-600 hover:bg-gray-500 text-white'
+                    }`}
+                  >
+                    중지
+                  </button>
+                  <span className="text-xs text-gray-500">
+                    상태: {playerState === 'playing' ? '재생 중' : playerState === 'paused' ? '일시정지' : playerState === 'stopped' ? '정지' : '대기'}
+                  </span>
+                </div>
               </div>
               {audioInfo ? (
                 <p className="mt-2 text-xs text-gray-500">MIME: {audioInfo.mime}{audioInfo.sampleRate ? ` · 샘플레이트: ${audioInfo.sampleRate}Hz` : ''}</p>
