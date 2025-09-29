@@ -208,22 +208,18 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         );
       case ViewId.Monitor:
         return (
-          <div className="space-y-2">
+          <ul className="space-y-1 text-sm max-h-48 overflow-auto pr-1">
             {monitorList.map(entry => (
-              <button
-                key={entry.item.id}
-                onClick={() => onOpenFile(`monitor:${entry.item.id}`)}
-                className="w-full flex flex-col gap-1 px-2 py-1 rounded hover:bg-white/10 text-left"
-              >
-                <span className="text-xs uppercase text-gray-500 tracking-wide">{entry.groupName}</span>
-                <span className="flex items-center justify-between gap-2">
-                  <span className="text-sm text-gray-200">{entry.item.name}</span>
-                  <span className="text-xs text-gray-400">{entry.item.statusLabel ?? '상세 보기'}</span>
-                </span>
-                <span className="text-xs text-gray-500 truncate">{entry.item.summary}</span>
-              </button>
+              <li key={entry.item.id}>
+                <button
+                  onClick={() => onOpenFile(`monitor:${entry.item.id}`)}
+                  className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10 text-left"
+                >
+                  <span>{entry.item.name}</span>
+                </button>
+              </li>
             ))}
-          </div>
+          </ul>
         );
       case ViewId.Playground: {
         const playgroundPages = (pageSummariesByView.get(ViewId.Playground) ?? []).sort((a, b) => a.title.localeCompare(b.title));
