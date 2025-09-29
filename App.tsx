@@ -28,6 +28,8 @@ const App: React.FC = () => {
   const socialRef = useRef<HTMLDivElement | null>(null);
   const [ossOpen, setOssOpen] = useState<boolean>(false);
   const ossModalRef = useRef<HTMLDivElement | null>(null);
+  const [signInOpen, setSignInOpen] = useState<boolean>(false);
+  const signInModalRef = useRef<HTMLDivElement | null>(null);
   const restoredRef = useRef<boolean>(false);
   const restoringRef = useRef<boolean>(false);
 
@@ -356,6 +358,7 @@ const App: React.FC = () => {
         setSocialOpen(false);
         setOssOpen(false);
         setSettingsOpen(false);
+        setSignInOpen(false);
         setApiModalOpen(false);
       }
     };
@@ -567,7 +570,14 @@ const App: React.FC = () => {
               <div className="absolute right-0 top-full mt-1 w-40 bg-[#2d2d2d] border border-black/30 rounded shadow-lg z-50">
                 <ul className="py-1">
                   <li className="w-full">
-                    <button type="button" className="w-full text-left flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-white/10 text-gray-300" disabled>
+                    <button
+                      type="button"
+                      className="w-full text-left flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-white/10 text-gray-300"
+                      onClick={() => {
+                        setSettingsOpen(false);
+                        setSignInOpen(true);
+                      }}
+                    >
                       <span className="inline-flex w-4 h-4 items-center justify-center" aria-hidden>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M20 12a1 1 0 0 0-1-1h-7.59l2.3-2.29a1 1 0 1 0-1.42-1.42l-4 4a1 1 0 0 0-.21.33a1 1 0 0 0 0 .76a1 1 0 0 0 .21.33l4 4a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.42L11.41 13H19a1 1 0 0 0 1-1M17 2H7a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-3a1 1 0 0 0-2 0v3a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v3a1 1 0 0 0 2 0V5a3 3 0 0 0-3-3"/></svg>
                       </span>
@@ -649,6 +659,140 @@ const App: React.FC = () => {
           />
         )}
       </div>
+
+      {/* Open Source Notices Modal */}
+      {ossOpen && (
+        <div className="fixed inset-0 z-50" onClick={() => setOssOpen(false)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="oss-modal-title"
+            ref={ossModalRef}
+            className="relative mx-auto mt-24 w-[min(92vw,560px)] max-h-[80vh] overflow-hidden bg-[#252526] border border-white/10 rounded-lg shadow-xl p-4 text-gray-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-3 mb-3">
+              <div className="shrink-0 p-1.5 rounded bg-white/10">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-5 h-5"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2m0 18a8 8 0 1 1 8-8a8.009 8.009 0 0 1-8 8m0-13a1.25 1.25 0 1 1-1.25 1.25A1.25 1.25 0 0 1 12 7m1.5 10h-3v-1.5h1V11.5h-1V10h2v5.5h1z" /></svg>
+              </div>
+              <div className="min-w-0 flex-1">
+                <h2 id="oss-modal-title" className="text-lg font-semibold text-white">Open Source Notices</h2>
+                <p className="text-sm text-gray-400">huny.dev는 다음과 같은 오픈소스 프로젝트 위에서 동작합니다. 각 프로젝트의 라이선스를 준수하며 감사의 마음을 전합니다.</p>
+              </div>
+              <button onClick={() => setOssOpen(false)} className="ml-2 p-1.5 rounded hover:bg-white/10 text-gray-300" aria-label="닫기" title="닫기">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4"><path d="M3.72 3.22a.75.75 0 0 1 1.06 0L8 6.44l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 7.5l3.22 3.22a.75.75 0 0 1-1.06 1.06L8 8.56l-3.22 3.22a.75.75 0 1 1-1.06-1.06L6.94 7.5L3.72 4.28a.75.75 0 0 1 0-1.06Z" /></svg>
+              </button>
+            </div>
+
+            <div className="max-h-[55vh] overflow-y-auto pr-1 text-sm space-y-4">
+              <section>
+                <h3 className="text-sm font-semibold text-white mb-2">Frontend Runtime</h3>
+                <ul className="space-y-1 text-gray-300">
+                  <li><span className="font-medium text-white">React 19.1.1 / React DOM 19.1.1</span> — MIT License</li>
+                  <li><span className="font-medium text-white">highlight.js 11.9.0</span> — BSD 3-Clause License</li>
+                  <li><span className="font-medium text-white">Iconography & UI reference</span> — Inspired by VS Code (Microsoft)</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="text-sm font-semibold text-white mb-2">Build & Tooling</h3>
+                <ul className="space-y-1 text-gray-300">
+                  <li><span className="font-medium text-white">Vite 6.2.0</span> — MIT License</li>
+                  <li><span className="font-medium text-white">TypeScript ~5.8.2</span> — Apache-2.0 License</li>
+                  <li><span className="font-medium text-white">Tailwind CSS 3.4.17</span> — MIT License</li>
+                  <li><span className="font-medium text-white">PostCSS 8.4.40 / Autoprefixer 10.4.20</span> — MIT License</li>
+                  <li><span className="font-medium text-white">Wrangler 4.35.0</span> — Apache-2.0 License</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="text-sm font-semibold text-white mb-2">Runtime Infrastructure</h3>
+                <ul className="space-y-1 text-gray-300">
+                  <li><span className="font-medium text-white">Cloudflare Workers</span> — Terms of Service</li>
+                  <li><span className="font-medium text-white">@cloudflare/workers-types 4.20250204.0</span> — Apache-2.0 License</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="text-sm font-semibold text-white mb-2">소스 코드</h3>
+                <p className="text-gray-300">이 프로젝트의 맞춤형 코드와 에셋은 별도 고지되지 않은 한 MIT License로 배포됩니다. 자세한 내용은 <a href="https://github.com/hunydev/huny.dev" className="text-blue-300 hover:text-blue-200" target="_blank" rel="noopener noreferrer">GitHub 저장소</a>를 참고하세요.</p>
+              </section>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sign In Modal */}
+      {signInOpen && (
+        <div className="fixed inset-0 z-50" onClick={() => setSignInOpen(false)}>
+          <div className="absolute inset-0 bg-black/60" />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="signin-modal-title"
+            ref={signInModalRef}
+            className="relative mx-auto mt-24 w-[min(92vw,460px)] bg-[#252526] border border-white/10 rounded-lg shadow-xl p-5 text-gray-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-3 mb-4">
+              <div className="shrink-0 p-1.5 rounded bg-white/10">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-5 h-5"><path fill="currentColor" d="M12 2a5.5 5.5 0 1 1 0 11a5.5 5.5 0 0 1 0-11m0 13c3.866 0 7 2.239 7 5v.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 20.5V20c0-2.761 3.134-5 7-5"/></svg>
+              </div>
+              <div className="min-w-0 flex-1">
+                <h2 id="signin-modal-title" className="text-lg font-semibold text-white">Sign In</h2>
+                <p className="text-sm text-gray-400">계정 로그인 기능은 준비 중입니다. 아래 정보를 입력하고 필요한 경우 계정/비밀번호 찾기를 이용하세요.</p>
+              </div>
+              <button onClick={() => setSignInOpen(false)} className="ml-2 p-1.5 rounded hover:bg-white/10 text-gray-300" aria-label="닫기" title="닫기">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4"><path d="M3.72 3.22a.75.75 0 0 1 1.06 0L8 6.44l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 7.5l3.22 3.22a.75.75 0 0 1-1.06 1.06L8 8.56l-3.22 3.22a.75.75 0 1 1-1.06-1.06L6.94 7.5L3.72 4.28a.75.75 0 0 1 0-1.06Z" /></svg>
+              </button>
+            </div>
+
+            <form className="space-y-4 text-sm" onSubmit={(e) => e.preventDefault()}>
+              <div>
+                <label htmlFor="signin-email" className="block text-gray-300 mb-1">이메일</label>
+                <input
+                  id="signin-email"
+                  type="email"
+                  required
+                  placeholder="you@example.com"
+                  className="w-full px-3 py-2 rounded bg-black/40 border border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/60"
+                  autoComplete="email"
+                />
+              </div>
+              <div>
+                <label htmlFor="signin-password" className="block text-gray-300 mb-1">비밀번호</label>
+                <input
+                  id="signin-password"
+                  type="password"
+                  required
+                  placeholder="비밀번호"
+                  className="w-full px-3 py-2 rounded bg-black/40 border border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/60"
+                  autoComplete="current-password"
+                />
+              </div>
+
+              <div className="flex items-center justify-between gap-2 text-xs text-blue-300">
+                <button type="button" className="hover:text-blue-200" onClick={() => window.open('mailto:hi@huny.dev?subject=Account%20Help', '_blank')}>
+                  아이디 찾기
+                </button>
+                <button type="button" className="hover:text-blue-200" onClick={() => window.open('mailto:hi@huny.dev?subject=Password%20Reset', '_blank')}>
+                  비밀번호 찾기
+                </button>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button type="button" className="px-3 py-2 rounded text-sm border border-white/10 text-gray-300 hover:bg-white/10" onClick={() => setSignInOpen(false)}>
+                  취소
+                </button>
+                <button type="submit" className="px-3 py-2 rounded text-sm border border-white/10 text-white opacity-50 cursor-not-allowed" disabled>
+                  로그인 (준비 중)
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* API Key Modal */}
       {apiModalOpen && (
