@@ -862,13 +862,23 @@ export default {
           const imageBytes = new Uint8Array(await imageFile.arrayBuffer());
 
           const analysisPrompt = [
-            'You are analyzing an image from a cartoon or multi-character scene.',
-            'Identify every visible character, infer their likely gender, personality, and role if reasonably deducible.',
-            'Describe the scene and generate a plausible multi-speaker dialogue that fits what is shown.',
-            'Return a strict JSON object with keys: sceneSummary (string), characters (array), dialogue (array), notes (string, optional).',
-            'For each character item include name, gender (male/female/unknown), personality, role (if known), description.',
-            'For each dialogue entry include speaker (matching character name), line, emotion (optional), action (optional).',
-            'If no meaningful characters or dialogue can be inferred, set sceneSummary to an empty string and leave characters/dialogue empty to signal failure.',
+            '당신은 다중 등장인물이 있는 장면 이미지를 분석하는 한국어 해설가입니다.',
+            '이미지에 보이는 모든 인물을 식별하고 가능한 경우 성별, 성격, 역할, 외형 특징을 추론해 주세요.',
+            '장면 설명과 함께 등장인물이 나눌 법한 자연스러운 대사를 생성하되, 모든 설명과 대사는 반드시 한국어로 작성합니다.',
+            '응답은 아래 JSON 구조를 반드시 따르세요.',
+            '{',
+            '  "sceneSummary": string (장면 요약, 한국어),',
+            '  "characters": [',
+            '    { "name": string, "gender": "male" | "female" | "unknown", "personality"?: string, "role"?: string, "description"?: string }',
+            '  ],',
+            '  "dialogue": [',
+            '    { "speaker": string, "line": string, "emotion"?: string, "action"?: string }',
+            '  ],',
+            '  "notes"?: string',
+            '}',
+            '이름은 고유하게 지정하고, 모든 대사는 해당 인물 이름을 speaker 필드로 사용합니다.',
+            '대사가 2줄 이상이 되도록 구성해 주세요.',
+            '만약 이미지에서 캐릭터나 대사를 추론할 수 없다면 sceneSummary를 빈 문자열로, characters와 dialogue는 빈 배열로 반환합니다.',
           ].join('\n');
 
           const analysisUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(analysisModel)}:generateContent`;
@@ -920,14 +930,14 @@ export default {
             return errorJson(502, 'Gemini did not return a structured scene payload.', analysisJson);
           }
 
-          const characters: SceneCharacter[] = Array.isArray(payload.characters)
+          const characterCandidates: SceneCharacter[] = Array.isArray(payload.characters)
             ? payload.characters
                 .map((entry, idx) => ({
                   name: normalizeWhitespace(
                     (
                       (typeof entry?.name === 'string' && entry.name.trim())
                         ? entry.name
-                        : `Character ${idx + 1}`
+                        : `인물 ${idx + 1}`
                     ).trim(),
                   ),
                   gender: coerceGender(entry?.gender),
@@ -938,10 +948,18 @@ export default {
                 .filter(entry => entry.name)
             : [];
 
-          const dialogue: SceneDialogueLine[] = Array.isArray(payload.dialogue)
+          const uniqueCharacters: SceneCharacter[] = [];
+          const seenCharacterNames = new Set<string>();
+          for (const candidate of characterCandidates) {
+            if (seenCharacterNames.has(candidate.name)) continue;
+            uniqueCharacters.push(candidate);
+            seenCharacterNames.add(candidate.name);
+          }
+
+          const rawDialogue: SceneDialogueLine[] = Array.isArray(payload.dialogue)
             ? sanitizeDialogueLines(
                 payload.dialogue.map((line, idx) => ({
-                  speaker: String(line?.speaker ?? `Character ${idx + 1}`).trim(),
+                  speaker: String(line?.speaker ?? `인물 ${idx + 1}`).trim(),
                   line: String(line?.line ?? '').trim(),
                   emotion: line?.emotion ? String(line.emotion) : undefined,
                   action: line?.action ? String(line.action) : undefined,
@@ -949,24 +967,46 @@ export default {
               )
             : [];
 
-          if (characters.length === 0 || dialogue.length === 0) {
+          const knownSpeakers = new Set(uniqueCharacters.map(character => character.name));
+          const filteredDialogue: SceneDialogueLine[] = [];
+          for (const line of rawDialogue) {
+            if (!line.line) continue;
+            if (!line.speaker || !knownSpeakers.has(line.speaker)) {
+              let replacement = uniqueCharacters[0]?.name ?? line.speaker;
+              for (const character of uniqueCharacters) {
+                if (line.speaker && (line.speaker.includes(character.name) || character.name.includes(line.speaker))) {
+                  replacement = character.name;
+                  break;
+                }
+              }
+              line.speaker = replacement || '화자';
+            }
+            filteredDialogue.push(line);
+          }
+
+          if (uniqueCharacters.length === 0 || filteredDialogue.length === 0) {
             return errorJson(422, '이미지에서 다화자 대화를 추출할 수 없었습니다. 등장인물이 분명한 이미지를 사용해 주세요.', payload);
           }
 
-          const voiceAssignments = assignVoices(characters);
-          const conversationPrompt = buildConversationPrompt(dialogue, payload.sceneSummary);
+          const dialogueSpeakers = Array.from(new Set(filteredDialogue.map(line => line.speaker))).filter(Boolean);
+          const qualifiesForMultiSpeaker = dialogueSpeakers.length >= 2;
 
-          const speakerVoiceConfigs = Object.entries(voiceAssignments).map(([speaker, voiceName]) => ({
-            speaker,
-            voiceConfig: {
-              prebuiltVoiceConfig: {
-                voiceName,
-              },
-            },
-          }));
+          const voiceAssignments = assignVoices(uniqueCharacters);
+          const conversationPrompt = buildConversationPrompt(filteredDialogue, payload.sceneSummary);
+
+          const speakerVoiceConfigs = qualifiesForMultiSpeaker
+            ? dialogueSpeakers.map(speakerName => ({
+                speaker: speakerName,
+                voiceConfig: {
+                  prebuiltVoiceConfig: {
+                    voiceName: voiceAssignments[speakerName] ?? voiceAssignments[uniqueCharacters[0].name],
+                  },
+                },
+              }))
+            : [];
 
           const ttsUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(ttsModel)}:generateContent`;
-          const useMultiSpeaker = speakerVoiceConfigs.length >= 2;
+          const useMultiSpeaker = qualifiesForMultiSpeaker && speakerVoiceConfigs.length >= 2;
           const ttsPayload: any = {
             contents: [
               {
@@ -983,7 +1023,9 @@ export default {
                   }
                 : {
                     voiceConfig: {
-                      prebuiltVoiceConfig: { voiceName: Object.values(voiceAssignments)[0] },
+                      prebuiltVoiceConfig: {
+                        voiceName: voiceAssignments[filteredDialogue[0].speaker] ?? Object.values(voiceAssignments)[0],
+                      },
                     },
                   },
             },
@@ -1037,12 +1079,12 @@ export default {
 
           const responsePayload = {
             sceneSummary: payload.sceneSummary ? normalizeWhitespace(String(payload.sceneSummary)) : '',
-            characters: characters.map(character => ({
+            characters: uniqueCharacters.map(character => ({
               ...character,
               voice: voiceAssignments[character.name],
               trait: VOICE_TRAITS[voiceAssignments[character.name]] ?? '',
             })),
-            dialogue,
+            dialogue: filteredDialogue,
             notes: payload.notes ? normalizeWhitespace(String(payload.notes)) : undefined,
             audio: audioBase64,
             mimeType: audioMime,
