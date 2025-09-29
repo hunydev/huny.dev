@@ -545,13 +545,50 @@ const App: React.FC = () => {
 
   const checkForUpdates = useCallback(async () => {
     try {
-      const registration = swRegistrationRef.current;
+      const resolveRegistration = async (): Promise<ServiceWorkerRegistration | null> => {
+        let registration = swRegistrationRef.current;
+        if (registration) return registration;
+        try {
+          registration = await navigator.serviceWorker.ready;
+        } catch {}
+        if (!registration) {
+          try {
+            registration = await navigator.serviceWorker.getRegistration();
+          } catch {}
+        }
+        if (registration) {
+          swRegistrationRef.current = registration;
+        }
+        return registration;
+      };
+
+      const registration = await resolveRegistration();
       if (!registration) {
         showInfoToast('서비스 워커가 아직 초기화되지 않았습니다. 잠시 후 다시 시도하세요.', false);
         return;
       }
 
-      await registration.update();
+      try {
+        await registration.update();
+      } catch (updateError: any) {
+        if (updateError?.name === 'InvalidStateError') {
+          console.warn('Service worker registration invalid. attempting re-register.');
+          try {
+            const fresh = await navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
+            swRegistrationRef.current = fresh;
+            if (fresh.waiting) {
+              handleReloadForUpdate();
+              return;
+            }
+            showInfoToast('서비스 워커 구성을 새로 고쳤습니다. 잠시 후 다시 시도하세요.', false);
+            return;
+          } catch (reRegisterError) {
+            console.error('service worker re-registration failed', reRegisterError);
+            throw reRegisterError;
+          }
+        }
+        throw updateError;
+      }
 
       if (registration.waiting) {
         handleReloadForUpdate();
