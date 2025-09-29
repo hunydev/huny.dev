@@ -69,6 +69,31 @@ const ActivityBar: React.FC<ActivityBarProps> = ({ activeView, setActiveView, is
   }, [recalcHideBottom, recalcScroll]);
 
   React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!event.altKey || event.repeat) return;
+      const target = event.target as HTMLElement | null;
+      if (target) {
+        const tag = target.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || target.isContentEditable) {
+          return;
+        }
+      }
+      const digit = Number.parseInt(event.key, 10);
+      if (!Number.isInteger(digit) || digit < 1 || digit > topItems.length) return;
+      const item = topItems[digit - 1];
+      if (!item) return;
+      event.preventDefault();
+      if (isSidebarPinned) {
+        setActiveView(item.id);
+      } else {
+        onItemClick(item.id);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [topItems, isSidebarPinned, setActiveView, onItemClick]);
+
+  React.useEffect(() => {
     // Initial measurement after mount
     recalcAll();
     const ro = (window as any).ResizeObserver ? new ResizeObserver(recalcAll) : null;
