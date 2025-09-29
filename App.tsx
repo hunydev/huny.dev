@@ -39,6 +39,8 @@ const App: React.FC = () => {
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
   const [updateToastVisible, setUpdateToastVisible] = useState(false);
+  const [updateToastType, setUpdateToastType] = useState<'available' | 'info'>('available');
+  const [updateToastMessage, setUpdateToastMessage] = useState<string>('');
   const [updateCountdown, setUpdateCountdown] = useState<number>(0);
 
   // Settings dropdown & API Key modal state
@@ -52,6 +54,7 @@ const App: React.FC = () => {
   const [apiHasOpenAI, setApiHasOpenAI] = useState<boolean>(false);
   const [apiNewGemini, setApiNewGemini] = useState<string>('');
   const [apiNewOpenAI, setApiNewOpenAI] = useState<string>('');
+  const infoToastTimeoutRef = useRef<number | null>(null);
 
   // Map a tab id (e.g., 'docs:intro', 'bookmark:all', 'split-speaker') to the corresponding left sidebar view
   // Default: on small screens, start with sidebar unpinned for better mobile UX
@@ -64,8 +67,32 @@ const App: React.FC = () => {
   }, []);
 
   const handleDismissUpdateToast = useCallback(() => {
+    if (infoToastTimeoutRef.current) {
+      window.clearTimeout(infoToastTimeoutRef.current);
+      infoToastTimeoutRef.current = null;
+    }
     setUpdateToastVisible(false);
     setUpdateCountdown(0);
+    if (updateToastType === 'info') {
+      setUpdateToastMessage('');
+    }
+  }, [updateToastType]);
+
+  const showInfoToast = useCallback((message: string, autoDismiss: boolean = true) => {
+    if (infoToastTimeoutRef.current) {
+      window.clearTimeout(infoToastTimeoutRef.current);
+      infoToastTimeoutRef.current = null;
+    }
+    setUpdateToastType('info');
+    setUpdateToastMessage(message);
+    setUpdateCountdown(0);
+    setUpdateToastVisible(true);
+    if (autoDismiss) {
+      infoToastTimeoutRef.current = window.setTimeout(() => {
+        setUpdateToastVisible(false);
+        infoToastTimeoutRef.current = null;
+      }, 3200);
+    }
   }, []);
 
   useEffect(() => {
@@ -276,12 +303,18 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (!updateAvailable) return;
+    if (infoToastTimeoutRef.current) {
+      window.clearTimeout(infoToastTimeoutRef.current);
+      infoToastTimeoutRef.current = null;
+    }
+    setUpdateToastType('available');
+    setUpdateToastMessage('새로운 버전이 준비되었습니다.');
     setUpdateToastVisible(true);
     setUpdateCountdown(10);
   }, [updateAvailable]);
 
   useEffect(() => {
-    if (!updateToastVisible || !updateAvailable) return;
+    if (!updateToastVisible || updateToastType !== 'available') return;
     if (updateCountdown <= 0) return;
     const timer = window.setTimeout(() => {
       setUpdateCountdown(prev => {
@@ -293,7 +326,7 @@ const App: React.FC = () => {
       });
     }, 1000);
     return () => clearTimeout(timer);
-  }, [updateToastVisible, updateAvailable, updateCountdown, handleReloadForUpdate]);
+  }, [updateToastVisible, updateToastType, updateCountdown, handleReloadForUpdate]);
 
   // Keep left sidebar selection in sync with the active tab
   useEffect(() => {
@@ -510,6 +543,40 @@ const App: React.FC = () => {
     } catch {}
   }, []);
 
+  const checkForUpdates = useCallback(async () => {
+    try {
+      const registration = swRegistrationRef.current;
+      if (!registration) {
+        showInfoToast('서비스 워커가 아직 초기화되지 않았습니다. 잠시 후 다시 시도하세요.', false);
+        return;
+      }
+
+      await registration.update();
+
+      if (registration.waiting) {
+        handleReloadForUpdate();
+        return;
+      }
+
+      const installing = registration.installing;
+      if (installing) {
+        const onStateChange = () => {
+          if (registration.waiting) {
+            installing.removeEventListener('statechange', onStateChange);
+            handleReloadForUpdate();
+          }
+        };
+        installing.addEventListener('statechange', onStateChange);
+        return;
+      }
+
+      showInfoToast('현재 최신 버전입니다.');
+    } catch (err) {
+      console.error('manual update check failed', err);
+      showInfoToast('업데이트 확인에 실패했습니다. 콘솔을 확인하세요.', false);
+    }
+  }, [handleReloadForUpdate, showInfoToast]);
+
   const openApiKeyModal = () => {
     setApiError('');
     setApiNewGemini('');
@@ -567,7 +634,7 @@ const App: React.FC = () => {
           <span>현재 오프라인입니다. 연결이 복구되면 자동으로 다시 시도합니다.</span>
         </div>
       )}
-      {updateToastVisible && updateAvailable && (
+      {updateToastVisible && (
         <div
           className="fixed bottom-4 right-4 z-50 max-w-sm rounded-md border border-amber-500/70 bg-[#1e1e1e] shadow-lg text-amber-100 p-4 flex flex-col gap-3"
           role="alert"
@@ -575,32 +642,54 @@ const App: React.FC = () => {
         >
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 mt-0.5">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
-                <path d="M12 9v4m0 4h.01" />
-                <path d="M10.29 3.86 1.82 18a1 1 0 0 0 .86 1.5h18.64a1 1 0 0 0 .86-1.5L13.11 3.86a1 1 0 0 0-1.72 0z" />
-              </svg>
+              {updateToastType === 'available' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
+                  <path d="M12 9v4m0 4h.01" />
+                  <path d="M10.29 3.86 1.82 18a1 1 0 0 0 .86 1.5h18.64a1 1 0 0 0 .86-1.5L13.11 3.86a1 1 0 0 0-1.72 0z" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
+                  <path d="M12 5a7 7 0 1 0 7 7a7 7 0 0 0-7-7m0 3a1 1 0 1 1-1 1a1 1 0 0 1 1-1m1 4.5V17h-2v-4.5z" />
+                </svg>
+              )}
             </div>
             <div className="flex-1 text-sm leading-5">
-              <p className="font-semibold text-amber-300">새로운 버전이 준비되었습니다.</p>
-              <p className="mt-1 text-amber-100/80">{updateCountdown > 0 ? `${updateCountdown}초 후 자동으로 새로고침됩니다.` : '잠시 후 자동으로 새로고침됩니다.'}</p>
+              <p className="font-semibold text-amber-300">{updateToastType === 'available' ? '새로운 버전이 준비되었습니다.' : '업데이트 확인'}</p>
+              <p className="mt-1 text-amber-100/80">
+                {updateToastType === 'available'
+                  ? (updateCountdown > 0 ? `${updateCountdown}초 후 자동으로 새로고침됩니다.` : '잠시 후 자동으로 새로고침됩니다.')
+                  : (updateToastMessage || '현재 최신 버전입니다.')}
+              </p>
             </div>
           </div>
-          <div className="flex items-center justify-end gap-2 text-xs">
-            <button
-              type="button"
-              onClick={handleDismissUpdateToast}
-              className="px-3 py-1 rounded border border-amber-400/60 text-amber-200 hover:bg-amber-500/10"
-            >
-              나중에 알림 숨기기
-            </button>
-            <button
-              type="button"
-              onClick={handleReloadForUpdate}
-              className="px-3 py-1 rounded bg-amber-400 text-black font-semibold hover:bg-amber-300"
-            >
-              지금 업데이트
-            </button>
-          </div>
+          {updateToastType === 'available' ? (
+            <div className="flex items-center justify-end gap-2 text-xs">
+              <button
+                type="button"
+                onClick={handleDismissUpdateToast}
+                className="px-3 py-1 rounded border border-amber-400/60 text-amber-200 hover:bg-amber-500/10"
+              >
+                나중에 알림 숨기기
+              </button>
+              <button
+                type="button"
+                onClick={handleReloadForUpdate}
+                className="px-3 py-1 rounded bg-amber-400 text-black font-semibold hover:bg-amber-300"
+              >
+                지금 업데이트
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-end gap-2 text-xs">
+              <button
+                type="button"
+                onClick={handleDismissUpdateToast}
+                className="px-3 py-1 rounded border border-amber-400/60 text-amber-200 hover:bg-amber-500/10"
+              >
+                닫기
+              </button>
+            </div>
+          )}
         </div>
       )}
       {/* Top title bar (VS Code style) */}
