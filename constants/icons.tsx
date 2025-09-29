@@ -489,6 +489,19 @@ const ICON_DEFS = {
     defaultClassName: 'w-4 h-4 text-gray-400',
     attrs: { fill: 'currentColor' },
   },
+  sceneToScript: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
+        <rect x={3} y={3} width={18} height={18} rx={2} />
+        <path d="M7 8h7" />
+        <path d="M7 12h4" />
+        <path d="M7 16h5" />
+        <path d="M16 10c1.105 0 2 .672 2 1.5S17.105 13 16 13m0 0v3m0-3l1.5-1.5" />
+      </g>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+  },
   imageToSpeech: {
     viewBox: '0 0 24 24',
     nodes: (

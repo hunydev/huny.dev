@@ -28,6 +28,77 @@ const ALLOWED_IMAGE_MIME_TYPES = new Set<string>([
   'image/svg+xml',
 ]);
 
+const FEMALE_VOICES = [
+  'Zephyr',
+  'Kore',
+  'Leda',
+  'Aoede',
+  'Callirrhoe',
+  'Autonoe',
+  'Despina',
+  'Erinome',
+  'Laomedeia',
+  'Achernar',
+  'Gacrux',
+  'Pulcherrima',
+  'Vindemiatrix',
+  'Sulafat',
+] as const;
+
+const MALE_VOICES = [
+  'Puck',
+  'Charon',
+  'Fenrir',
+  'Orus',
+  'Enceladus',
+  'Iapetus',
+  'Umbriel',
+  'Algieba',
+  'Algenib',
+  'Rasalgethi',
+  'Alnilam',
+  'Schedar',
+  'Achird',
+  'Zubenelgenubi',
+  'Sadachbia',
+  'Sadaltager',
+] as const;
+
+const ALL_VOICES: readonly string[] = Array.from(new Set<string>([...FEMALE_VOICES, ...MALE_VOICES]));
+
+const VOICE_TRAITS: Record<string, string> = {
+  Zephyr: 'Bright and uplifting',
+  Kore: 'Firm and resolute',
+  Leda: 'Youthful and energetic',
+  Aoede: 'Breezy and light-hearted',
+  Callirrhoe: 'Laid-back and relaxed',
+  Autonoe: 'Cheerful and sunny',
+  Despina: 'Smooth and composed',
+  Erinome: 'Clear and radiant',
+  Laomedeia: 'Bubbly and exciting',
+  Achernar: 'Soft and gentle',
+  Gacrux: 'Mature and confident',
+  Pulcherrima: 'Forward and expressive',
+  Vindemiatrix: 'Gentle and kind',
+  Sulafat: 'Warm and comforting',
+  Puck: 'Playful and upbeat',
+  Charon: 'Informative and guiding',
+  Fenrir: 'Excitable and animated',
+  Orus: 'Firm and authoritative',
+  Enceladus: 'Breathy and intimate',
+  Iapetus: 'Clear and articulate',
+  Umbriel: 'Relaxed and easygoing',
+  Algieba: 'Smooth and polished',
+  Algenib: 'Gravelly and textured',
+  Rasalgethi: 'Helpful and informative',
+  Alnilam: 'Grounded and firm',
+  Schedar: 'Even and measured',
+  Achird: 'Friendly and approachable',
+  Zubenelgenubi: 'Casual and conversational',
+  Sadachbia: 'Lively and energetic',
+  Sadaltager: 'Knowledgeable and erudite',
+};
+
 type JsonResponseOptions = {
   cacheControl?: string;
 };
@@ -77,6 +148,119 @@ async function safeJson<T = any>(request: Request, fallback: T): Promise<T> {
     return fallback;
   }
 }
+
+type SceneCharacter = {
+  name: string;
+  gender: 'male' | 'female' | 'unknown';
+  personality?: string;
+  role?: string;
+  description?: string;
+};
+
+type SceneDialogueLine = {
+  speaker: string;
+  line: string;
+  emotion?: string;
+  action?: string;
+};
+
+type SceneToScriptPayload = {
+  sceneSummary?: string;
+  characters?: Array<Partial<SceneCharacter>>;
+  dialogue?: Array<Partial<SceneDialogueLine>>;
+  notes?: string;
+};
+
+const normalizeWhitespace = (value: string) => value.replace(/\s+/g, ' ').trim();
+
+const coerceGender = (value: unknown): SceneCharacter['gender'] => {
+  const normalized = String(value ?? '').trim().toLowerCase();
+  if (normalized.startsWith('f')) return 'female';
+  if (normalized.startsWith('w')) return 'female';
+  if (normalized.startsWith('m')) return 'male';
+  if (normalized.startsWith('man')) return 'male';
+  return 'unknown';
+};
+
+const extractFirstJsonObject = (text: string): SceneToScriptPayload | null => {
+  if (!text) return null;
+  // Attempt quick parse if entire string is JSON
+  try {
+    if (text.trim().startsWith('{')) {
+      return JSON.parse(text.trim());
+    }
+  } catch {
+    // fallthrough to regex extraction
+  }
+  const jsonRegex = /\{[\s\S]*\}/g;
+  const match = jsonRegex.exec(text);
+  if (!match) return null;
+  const snippet = match[0];
+  try {
+    return JSON.parse(snippet);
+  } catch {
+    return null;
+  }
+};
+
+const assignVoices = (characters: SceneCharacter[]): Record<string, string> => {
+  const used = new Set<string>();
+  const assignments: Record<string, string> = {};
+
+  const pickFromPool = (pool: readonly string[]): string => {
+    for (const voice of pool) {
+      if (!used.has(voice)) {
+        used.add(voice);
+        return voice;
+      }
+    }
+    // fallback: allow reuse if pool exhausted
+    const fallback = pool[0] ?? ALL_VOICES[0];
+    used.add(fallback);
+    return fallback;
+  };
+
+  const ensureVoice = (character: SceneCharacter): string => {
+    const base = character.gender === 'female' ? FEMALE_VOICES : character.gender === 'male' ? MALE_VOICES : ALL_VOICES;
+    const voice = pickFromPool(base);
+    assignments[character.name] = voice;
+    return voice;
+  };
+
+  characters.forEach(character => {
+    if (!assignments[character.name]) {
+      ensureVoice(character);
+    }
+  });
+
+  return assignments;
+};
+
+const sanitizeDialogueLines = (lines: Array<SceneDialogueLine>): Array<SceneDialogueLine> => {
+  return lines
+    .map(line => ({
+      speaker: normalizeWhitespace(line.speaker),
+      line: normalizeWhitespace(line.line),
+      emotion: line.emotion ? normalizeWhitespace(line.emotion) : undefined,
+      action: line.action ? normalizeWhitespace(line.action) : undefined,
+    }))
+    .filter(line => line.speaker && line.line);
+};
+
+const buildConversationPrompt = (dialogue: Array<SceneDialogueLine>, summary?: string): string => {
+  const uniqueSpeakers = Array.from(new Set(dialogue.map(line => line.speaker))).filter(Boolean);
+  const intro = summary
+    ? `TTS the following conversation between ${uniqueSpeakers.join(', ')} based on the described scene: ${summary}`
+    : `TTS the following conversation between ${uniqueSpeakers.join(', ')}.`;
+  const body = dialogue
+    .map(line => {
+      const emotionPart = line.emotion ? ` (${line.emotion})` : '';
+      const actionPart = line.action ? ` [${line.action}]` : '';
+      return `${line.speaker}:${emotionPart}${actionPart} ${line.line}`.trim();
+    })
+    .join('\n');
+  return `${intro}\n${body}`;
+};
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -649,6 +833,212 @@ export default {
           return jsonResponse(200, responsePayload, { cacheControl: NO_STORE_CACHE_CONTROL });
         } catch (e: any) {
           console.error('image-to-speech error', e);
+          return errorJson(500, 'Internal error', String(e?.message || e));
+        }
+      }
+
+      if (url.pathname === '/api/scene-to-script') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return errorJson(500, 'GEMINI_API_KEY is not configured on the server.');
+          }
+
+          const form = await request.formData();
+          const imageFile = form.get('image');
+          if (!(imageFile instanceof File)) {
+            return errorJson(400, '이미지 파일을 전달해 주세요.');
+          }
+
+          const validationError = validateImageFile(imageFile);
+          if (validationError) {
+            return errorJson(400, validationError);
+          }
+
+          const analysisModel = 'gemini-2.0-flash-exp';
+          const ttsModel = 'gemini-2.5-flash-preview-tts';
+          const sourceMime = imageFile.type && imageFile.type.startsWith('image/') ? imageFile.type : 'image/png';
+          const imageBytes = new Uint8Array(await imageFile.arrayBuffer());
+
+          const analysisPrompt = [
+            'You are analyzing an image from a cartoon or multi-character scene.',
+            'Identify every visible character, infer their likely gender, personality, and role if reasonably deducible.',
+            'Describe the scene and generate a plausible multi-speaker dialogue that fits what is shown.',
+            'Return a strict JSON object with keys: sceneSummary (string), characters (array), dialogue (array), notes (string, optional).',
+            'For each character item include name, gender (male/female/unknown), personality, role (if known), description.',
+            'For each dialogue entry include speaker (matching character name), line, emotion (optional), action (optional).',
+            'If no meaningful characters or dialogue can be inferred, set sceneSummary to an empty string and leave characters/dialogue empty to signal failure.',
+          ].join('\n');
+
+          const analysisUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(analysisModel)}:generateContent`;
+          const analysisRes = await fetch(analysisUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': geminiKey,
+            },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    { text: analysisPrompt },
+                    { inline_data: { mime_type: sourceMime, data: u8ToB64(imageBytes) } },
+                  ],
+                },
+              ],
+              generationConfig: { temperature: 0.4 },
+            }),
+          });
+
+          const analysisTextRaw = await analysisRes.text();
+          if (!analysisRes.ok) {
+            return errorJson(502, `Gemini scene analysis error: ${analysisRes.status} ${analysisRes.statusText}`, analysisTextRaw);
+          }
+
+          let analysisJson: any = {};
+          try { analysisJson = analysisTextRaw ? JSON.parse(analysisTextRaw) : {}; } catch { analysisJson = {}; }
+          const analysisCandidates: any[] = Array.isArray(analysisJson?.candidates) ? analysisJson.candidates : [];
+          let payload: SceneToScriptPayload | null = null;
+          let rawNarrative = '';
+          for (const cand of analysisCandidates) {
+            const parts = cand?.content?.parts || [];
+            for (const p of parts) {
+              if (typeof p?.text === 'string' && p.text.trim()) {
+                rawNarrative += (rawNarrative ? '\n' : '') + p.text.trim();
+                const extracted = extractFirstJsonObject(p.text);
+                if (extracted) {
+                  payload = extracted;
+                  break;
+                }
+              }
+            }
+            if (payload) break;
+          }
+
+          if (!payload) {
+            return errorJson(502, 'Gemini did not return a structured scene payload.', analysisJson);
+          }
+
+          const characters: SceneCharacter[] = Array.isArray(payload.characters)
+            ? payload.characters
+                .map((entry, idx) => ({
+                  name: normalizeWhitespace(
+                    (
+                      (typeof entry?.name === 'string' && entry.name.trim())
+                        ? entry.name
+                        : `Character ${idx + 1}`
+                    ).trim(),
+                  ),
+                  gender: coerceGender(entry?.gender),
+                  personality: entry?.personality ? normalizeWhitespace(String(entry.personality)) : undefined,
+                  role: entry?.role ? normalizeWhitespace(String(entry.role)) : undefined,
+                  description: entry?.description ? normalizeWhitespace(String(entry.description)) : undefined,
+                }))
+                .filter(entry => entry.name)
+            : [];
+
+          const dialogue: SceneDialogueLine[] = Array.isArray(payload.dialogue)
+            ? sanitizeDialogueLines(
+                payload.dialogue.map((line, idx) => ({
+                  speaker: String(line?.speaker ?? `Character ${idx + 1}`).trim(),
+                  line: String(line?.line ?? '').trim(),
+                  emotion: line?.emotion ? String(line.emotion) : undefined,
+                  action: line?.action ? String(line.action) : undefined,
+                })),
+              )
+            : [];
+
+          if (characters.length === 0 || dialogue.length === 0) {
+            return errorJson(422, '이미지에서 다화자 대화를 추출할 수 없었습니다. 등장인물이 분명한 이미지를 사용해 주세요.', payload);
+          }
+
+          const voiceAssignments = assignVoices(characters);
+          const conversationPrompt = buildConversationPrompt(dialogue, payload.sceneSummary);
+
+          const speakerVoiceConfigs = Object.entries(voiceAssignments).map(([speaker, voiceName]) => ({
+            speaker,
+            voiceConfig: {
+              prebuiltVoiceConfig: {
+                voiceName,
+              },
+            },
+          }));
+
+          const ttsUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(ttsModel)}:generateContent`;
+          const ttsRes = await fetch(ttsUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': geminiKey,
+            },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    { text: conversationPrompt },
+                  ],
+                },
+              ],
+              generationConfig: {
+                responseModalities: ['AUDIO'],
+                speechConfig: {
+                  multiSpeakerVoiceConfig: { speakerVoiceConfigs },
+                },
+              },
+              model: ttsModel,
+            }),
+          });
+
+          const ttsText = await ttsRes.text();
+          if (!ttsRes.ok) {
+            return errorJson(502, `Gemini multi-speaker TTS error: ${ttsRes.status} ${ttsRes.statusText}`, ttsText);
+          }
+
+          let ttsJson: any = {};
+          try { ttsJson = ttsText ? JSON.parse(ttsText) : {}; } catch { ttsJson = {}; }
+          let audioBase64 = '';
+          let audioMime = 'audio/mpeg';
+          const ttsCandidates: any[] = Array.isArray(ttsJson?.candidates) ? ttsJson.candidates : [];
+          for (const cand of ttsCandidates) {
+            const parts = cand?.content?.parts || [];
+            for (const p of parts) {
+              const data = p?.inline_data?.data || p?.inlineData?.data;
+              if (data) {
+                audioBase64 = String(data);
+                audioMime = p?.inline_data?.mime_type || p?.inlineData?.mimeType || audioMime;
+                break;
+              }
+            }
+            if (audioBase64) break;
+          }
+
+          if (!audioBase64) {
+            return errorJson(502, 'Gemini multi-speaker TTS did not return audio data.', ttsJson);
+          }
+
+          const responsePayload = {
+            sceneSummary: payload.sceneSummary ? normalizeWhitespace(String(payload.sceneSummary)) : '',
+            characters: characters.map(character => ({
+              ...character,
+              voice: voiceAssignments[character.name],
+              trait: VOICE_TRAITS[voiceAssignments[character.name]] ?? '',
+            })),
+            dialogue,
+            notes: payload.notes ? normalizeWhitespace(String(payload.notes)) : undefined,
+            audio: audioBase64,
+            mimeType: audioMime,
+            sampleRate: 24000,
+            usage: {
+              analysisTokens: analysisJson?.usageMetadata?.candidatesTokenCount ?? null,
+              ttsTokens: ttsJson?.usageMetadata?.candidatesTokenCount ?? null,
+            },
+            rawNarrative,
+          };
+
+          return jsonResponse(200, responsePayload, { cacheControl: NO_STORE_CACHE_CONTROL });
+        } catch (e: any) {
+          console.error('scene-to-script error', e);
           return errorJson(500, 'Internal error', String(e?.message || e));
         }
       }

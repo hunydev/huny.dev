@@ -32,6 +32,7 @@ const FaviconDistillerPage = React.lazy(() => import('../components/pages/Favico
 const CoverCrafterPage = React.lazy(() => import('../components/pages/CoverCrafterPage'));
 const AvatarDistillerPage = React.lazy(() => import('../components/pages/AvatarDistillerPage'));
 const ImageToSpeechPage = React.lazy(() => import('../components/pages/ImageToSpeechPage'));
+const SceneToScriptPage = React.lazy(() => import('../components/pages/SceneToScriptPage'));
 
 export type PageComponent =
   | React.ComponentType<PageProps>
@@ -142,6 +143,11 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     title: 'Image to Speech',
     component: ImageToSpeechPage,
     icon: <Icon name="imageToSpeech" className="mr-2" />,
+  },
+  'scene-to-script': {
+    title: 'Scene to Script',
+    component: SceneToScriptPage,
+    icon: <Icon name="sceneToScript" className="mr-2" />,
   },
   monitor: {
     title: 'monitor',
