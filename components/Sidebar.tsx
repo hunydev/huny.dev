@@ -1,10 +1,11 @@
 import React from 'react';
 import { ViewId } from '../types';
-import { Icon } from '../constants';
+import { Icon, PAGES } from '../constants';
 import { BOOKMARK_CATEGORIES, BOOKMARKS, type Bookmark } from './pages/bookmarksData';
 import { NOTE_GROUPS, getNoteCountByGroup, subscribeNotes } from './pages/notesData';
 import { CATEGORIES } from './pages/appsData';
 import { MONITOR_GROUPS } from './pages/monitorData';
+import { DOCS } from './pages/docsData';
 // DocsView now lists from R2 instead of local DOCS. The DocsPage can still use local data.
 // Avoid bundling large images into main chunk: use static paths so they load only when rendered
 import welcomeIcon from '../icon_32x32.png';
@@ -400,6 +401,157 @@ const GenericView: React.FC<{ title: string; children?: React.ReactNode }> = ({ 
   </div>
 );
 
+type SearchEntry = {
+  id: string;
+  group: string;
+  label: string;
+  description?: string;
+  searchText: string;
+  open: () => void;
+};
+
+const SearchView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
+  const [query, setQuery] = React.useState('');
+
+  const entries = React.useMemo<SearchEntry[]>(() => {
+    const list: SearchEntry[] = [];
+
+    Object.entries(PAGES).forEach(([id, info]) => {
+      list.push({
+        id: `page:${id}`,
+        group: 'Pages',
+        label: info.title,
+        searchText: `${info.title} ${id}`.toLowerCase(),
+        open: () => onOpenFile(id),
+      });
+    });
+
+    BOOKMARK_CATEGORIES.forEach(cat => {
+      list.push({
+        id: `bookmark-category:${cat.id}`,
+        group: 'Bookmarks',
+        label: cat.name,
+        description: '북마크 카테고리',
+        searchText: `${cat.name} bookmark ${cat.id}`.toLowerCase(),
+        open: () => onOpenFile(`bookmark:${cat.id}`),
+      });
+    });
+
+    NOTE_GROUPS.forEach(group => {
+      list.push({
+        id: `note-group:${group.id}`,
+        group: 'Notes',
+        label: group.name,
+        description: '노트 그룹',
+        searchText: `${group.name} note ${group.id}`.toLowerCase(),
+        open: () => onOpenFile(`notes:${group.id}`),
+      });
+    });
+
+    CATEGORIES.forEach(cat => {
+      list.push({
+        id: `apps-category:${cat.id}`,
+        group: 'Apps',
+        label: cat.name,
+        description: '앱 카테고리',
+        searchText: `${cat.name} apps ${cat.id}`.toLowerCase(),
+        open: () => onOpenFile(`apps:${cat.id}`),
+      });
+    });
+
+    MONITOR_GROUPS.forEach(group => {
+      group.items.forEach(item => {
+        list.push({
+          id: `monitor-item:${item.id}`,
+          group: 'Monitor',
+          label: item.name,
+          description: group.name,
+          searchText: `${item.name} ${group.name}`.toLowerCase(),
+          open: () => onOpenFile(`monitor:${item.id}`),
+        });
+      });
+    });
+
+    DOCS.forEach(doc => {
+      list.push({
+        id: `docs:${doc.slug}`,
+        group: 'Docs',
+        label: doc.title,
+        description: doc.slug,
+        searchText: `${doc.title} ${doc.slug}`.toLowerCase(),
+        open: () => onOpenFile(`docs:${doc.slug}`),
+      });
+    });
+
+    return list;
+  }, [onOpenFile]);
+
+  const normalized = query.trim().toLowerCase();
+  const filtered = React.useMemo(() => {
+    if (!normalized) {
+      return entries.slice(0, 30);
+    }
+    return entries.filter(item => item.searchText.includes(normalized)).slice(0, 60);
+  }, [entries, normalized]);
+
+  const grouped = React.useMemo(() => {
+    const map = new Map<string, SearchEntry[]>();
+    filtered.forEach(item => {
+      const bucket = map.get(item.group);
+      if (bucket) {
+        bucket.push(item);
+      } else {
+        map.set(item.group, [item]);
+      }
+    });
+    return Array.from(map.entries());
+  }, [filtered]);
+
+  return (
+    <div className="p-2">
+      <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Search</h2>
+      <div>
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="검색어를 입력하세요"
+          className="w-full px-3 py-2 rounded bg-black/30 border border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/60"
+        />
+      </div>
+
+      <div className="mt-3 max-h-[calc(100vh-220px)] overflow-auto pr-1">
+        {filtered.length === 0 ? (
+          <p className="text-sm text-gray-500 mt-4">검색 결과가 없습니다.</p>
+        ) : (
+          <div className="space-y-4">
+            {grouped.map(([group, items]) => (
+              <div key={group}>
+                <h3 className="text-xs uppercase text-gray-500 tracking-wider mb-1">{group}</h3>
+                <ul className="space-y-1">
+                  {items.map(item => (
+                    <li key={item.id}>
+                      <button
+                        onClick={item.open}
+                        className="w-full flex flex-col items-start gap-0.5 px-2 py-1 rounded hover:bg-white/10 text-left"
+                      >
+                        <span className="text-sm text-gray-100">{item.label}</span>
+                        {item.description ? (
+                          <span className="text-xs text-gray-500">{item.description}</span>
+                        ) : null}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const MonitorView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
   const entries = React.useMemo(() => (
     MONITOR_GROUPS.map(group => {
@@ -548,7 +700,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile, width = 256 }
       case ViewId.Explorer:
         return <ExplorerView onOpenFile={onOpenFile} />;
       case ViewId.Search:
-        return <GenericView title="Search"><p className="text-sm text-gray-400">Search functionality coming soon.</p></GenericView>;
+        return <SearchView onOpenFile={onOpenFile} />;
       case ViewId.Docs:
         return <DocsView onOpenFile={onOpenFile} />;
       case ViewId.Apps:
