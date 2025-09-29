@@ -966,33 +966,51 @@ export default {
           }));
 
           const ttsUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(ttsModel)}:generateContent`;
+          const useMultiSpeaker = speakerVoiceConfigs.length >= 2;
+          const ttsPayload: any = {
+            contents: [
+              {
+                parts: [
+                  { text: conversationPrompt },
+                ],
+              },
+            ],
+            generationConfig: {
+              responseModalities: ['AUDIO'],
+              speechConfig: useMultiSpeaker
+                ? {
+                    multiSpeakerVoiceConfig: { speakerVoiceConfigs },
+                  }
+                : {
+                    voiceConfig: {
+                      prebuiltVoiceConfig: { voiceName: Object.values(voiceAssignments)[0] },
+                    },
+                  },
+            },
+            model: ttsModel,
+          };
+
           const ttsRes = await fetch(ttsUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'X-goog-api-key': geminiKey,
             },
-            body: JSON.stringify({
-              contents: [
-                {
-                  parts: [
-                    { text: conversationPrompt },
-                  ],
-                },
-              ],
-              generationConfig: {
-                responseModalities: ['AUDIO'],
-                speechConfig: {
-                  multiSpeakerVoiceConfig: { speakerVoiceConfigs },
-                },
-              },
-              model: ttsModel,
-            }),
+            body: JSON.stringify(ttsPayload),
           });
 
           const ttsText = await ttsRes.text();
           if (!ttsRes.ok) {
-            return errorJson(502, `Gemini multi-speaker TTS error: ${ttsRes.status} ${ttsRes.statusText}`, ttsText);
+            let detail: any = ttsText;
+            try {
+              detail = ttsText ? JSON.parse(ttsText) : undefined;
+            } catch {
+              detail = ttsText;
+            }
+            if (detail?.error?.message) {
+              return errorJson(502, `Gemini TTS 실패: ${detail.error.message}`, detail);
+            }
+            return errorJson(502, `Gemini multi-speaker TTS error: ${ttsRes.status} ${ttsRes.statusText}`, detail);
           }
 
           let ttsJson: any = {};
