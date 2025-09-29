@@ -1,7 +1,9 @@
 const CACHE_VERSION = 'hunydev-cache-v1';
+const OFFLINE_URL = '/offline.html';
 const PRECACHE_URLS = [
   '/',
   '/index.css',
+  OFFLINE_URL,
   '/site.webmanifest',
   '/icons/notebook_128x128.png',
   '/icons/notebook_192x192.png',
@@ -32,6 +34,12 @@ self.addEventListener('activate', event => {
   );
 });
 
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') {
     return;
@@ -45,13 +53,23 @@ self.addEventListener('fetch', event => {
 
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_VERSION).then(cache => cache.put(event.request, copy));
-          return response;
-        })
-        .catch(() => caches.match(event.request).then(match => match || caches.match('/'))),
+      (async () => {
+        try {
+          const networkResponse = await fetch(event.request);
+          const cache = await caches.open(CACHE_VERSION);
+          cache.put(event.request, networkResponse.clone());
+          return networkResponse;
+        } catch (error) {
+          const cached = await caches.match(event.request);
+          if (cached) return cached;
+          const offline = await caches.match(OFFLINE_URL);
+          if (offline) return offline;
+          return new Response('오프라인 상태입니다.', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain; charset=UTF-8' },
+          });
+        }
+      })(),
     );
     return;
   }

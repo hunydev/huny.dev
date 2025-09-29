@@ -34,6 +34,8 @@ const App: React.FC = () => {
   const restoringRef = useRef<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const swRegistrationRef = useRef<ServiceWorkerRegistration | null>(null);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
 
   // Settings dropdown & API Key modal state
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
@@ -67,13 +69,49 @@ const App: React.FC = () => {
         });
         swRegistrationRef.current = registration;
         if (registration.waiting) {
-          registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+          setUpdateAvailable(true);
         }
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          if (!newWorker) return;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              setUpdateAvailable(true);
+            }
+          });
+        });
       } catch (err) {
         console.error('service worker registration failed', err);
       }
     };
     registerServiceWorker();
+    const offlineHandler = () => setIsOffline(true);
+    const onlineHandler = () => setIsOffline(false);
+    window.addEventListener('offline', offlineHandler);
+    window.addEventListener('online', onlineHandler);
+    return () => {
+      window.removeEventListener('offline', offlineHandler);
+      window.removeEventListener('online', onlineHandler);
+    };
+  }, []);
+
+  const handleReloadForUpdate = useCallback(() => {
+    const registration = swRegistrationRef.current;
+    if (!registration) {
+      window.location.reload();
+      return;
+    }
+    if (registration.waiting) {
+      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      registration.waiting.addEventListener('statechange', (event) => {
+        const target = event.target as ServiceWorker;
+        if (target.state === 'activated') {
+          window.location.reload();
+        }
+      });
+    } else {
+      window.location.reload();
+    }
   }, []);
 
   const handleOpenFile = useCallback((fileId: string) => {
@@ -468,6 +506,24 @@ const App: React.FC = () => {
 
   return (
     <div className="flex w-full flex-col bg-[#1e1e1e] text-gray-300 font-sans overflow-hidden" style={{ height: 'var(--app-height, 100vh)' }}>
+      {(isOffline || updateAvailable) && (
+        <div className="bg-amber-500/90 text-black text-sm px-3 py-2 flex items-center justify-between">
+          <span>
+            {isOffline
+              ? '현재 오프라인입니다. 연결이 복구되면 자동으로 다시 시도합니다.'
+              : '새로운 버전이 준비되었습니다. 새로고침하여 업데이트를 적용하세요.'}
+          </span>
+          {!isOffline && updateAvailable && (
+            <button
+              type="button"
+              onClick={handleReloadForUpdate}
+              className="ml-3 rounded bg-black/70 text-amber-200 px-2 py-1 text-xs hover:bg-black/80"
+            >
+              업데이트 적용
+            </button>
+          )}
+        </div>
+      )}
       {/* Top title bar (VS Code style) */}
       <div className="h-8 bg-[#2d2d2d] border-b border-black/30 flex items-center px-2 shrink-0">
         <button
