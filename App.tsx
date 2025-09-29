@@ -837,8 +837,40 @@ const App: React.FC = () => {
               </svg>
             </button>
             {settingsOpen && (
-              <div className="absolute right-0 top-full mt-1 w-40 bg-[#2d2d2d] border border-black/30 rounded shadow-lg z-50">
+              <div className="absolute right-0 top-full mt-1 w-44 bg-[#2d2d2d] border border-black/30 rounded shadow-lg z-50">
                 <ul className="py-1">
+                  <li className="w-full">
+                    {updateAvailable ? (
+                      <button
+                        type="button"
+                        className="w-full text-left flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-white/10 text-amber-200"
+                        onClick={() => {
+                          setSettingsOpen(false);
+                          handleReloadForUpdate();
+                        }}
+                      >
+                        <span className="inline-flex w-4 h-4 items-center justify-center" aria-hidden>
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M12 6a1 1 0 0 1 1 1v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 0 1-2 0v-3H8a1 1 0 1 1 0-2h3V7a1 1 0 0 1 1-1Z"/><path d="M4.222 4.222a1 1 0 0 1 1.414 0L7.05 5.636A7 7 0 0 1 18 9a1 1 0 1 1-2 0a5 5 0 0 0-8.536-3.536l1.414 1.414a1 1 0 0 1-1.414 1.414L4.222 5.636a1 1 0 0 1 0-1.414Zm15.556 15.556a1 1 0 0 1-1.414 0L16.95 18.364A7 7 0 0 1 6 15a1 1 0 1 1 2 0a5 5 0 0 0 8.536 3.536l-1.414-1.414a1 1 0 0 1 1.414-1.414l2.828 2.828a1 1 0 0 1 0 1.414Z"/></svg>
+                        </span>
+                        <span>지금 업데이트</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="w-full text-left flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-white/10 text-gray-300"
+                        onClick={() => {
+                          setSettingsOpen(false);
+                          checkForUpdates();
+                        }}
+                      >
+                        <span className="inline-flex w-4 h-4 items-center justify-center" aria-hidden>
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M12 5c-.795 0-1.559.118-2.28.337l.915-.916L9.22 3l-3.01 3.011l3.01 3.01l1.415-1.414l-.845-.844A6.973 6.973 0 0 1 12 7c3.86 0 7 3.14 7 7a7 7 0 0 1-7 7a7.003 7.003 0 0 1-6.934-6H4a9 9 0 0 0 9 9a9 9 0 0 0 9-9a9 9 0 0 0-9-9Zm0 5a1 1 0 0 0-1 1v3.586l-1.293-1.293l-1.414 1.414L12 17.414l3.707-3.707l-1.414-1.414L13 14.586V11a1 1 0 0 0-1-1Z"/></svg>
+                        </span>
+                        <span>업데이트 확인</span>
+                      </button>
+                    )}
+                  </li>
+                  <li role="separator" aria-hidden className="my-1 border-t border-white/10" />
                   <li className="w-full">
                     <button
                       type="button"
