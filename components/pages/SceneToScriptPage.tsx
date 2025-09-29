@@ -47,17 +47,99 @@ const SceneToScriptPage: React.FC<PageProps> = () => {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
   const [result, setResult] = React.useState<SceneToScriptResponse | null>(null);
-  const [audioUrl, setAudioUrl] = React.useState('');
-  const audioRef = React.useRef<HTMLAudioElement | null>(null);
+  const [audioInfo, setAudioInfo] = React.useState<{ mime: string; sampleRate?: number } | null>(null);
+  const [audioReady, setAudioReady] = React.useState(false);
+  const [audioError, setAudioError] = React.useState('');
+  const [playerState, setPlayerState] = React.useState<'idle' | 'loading' | 'playing' | 'paused' | 'stopped'>('idle');
+  const [duration, setDuration] = React.useState(0);
+  const [trackPosition, setTrackPosition] = React.useState(0);
+  const [isSeeking, setIsSeeking] = React.useState(false);
+
+  const audioContextRef = React.useRef<AudioContext | null>(null);
+  const audioBufferRef = React.useRef<AudioBuffer | null>(null);
+  const sourceRef = React.useRef<AudioBufferSourceNode | null>(null);
+  const startTimeRef = React.useRef(0);
+  const offsetRef = React.useRef(0);
+  const endFlagsRef = React.useRef<{ pause: boolean; stop: boolean }>({ pause: false, stop: false });
+  const rafRef = React.useRef<number | null>(null);
+  const playerStateRef = React.useRef(playerState);
+  const isSeekingRef = React.useRef(isSeeking);
+
+  React.useEffect(() => {
+    playerStateRef.current = playerState;
+  }, [playerState]);
+
+  React.useEffect(() => {
+    isSeekingRef.current = isSeeking;
+  }, [isSeeking]);
+
+  const stopProgressUpdate = React.useCallback(() => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+  }, []);
+
+  const scheduleProgressUpdate = React.useCallback(() => {
+    stopProgressUpdate();
+    const tick = () => {
+      const context = audioContextRef.current;
+      const buffer = audioBufferRef.current;
+      if (!context || !buffer) {
+        rafRef.current = null;
+        return;
+      }
+      const elapsed = context.currentTime - startTimeRef.current;
+      const clamped = Math.min(Math.max(elapsed, 0), buffer.duration);
+      if (!isSeekingRef.current) {
+        setTrackPosition(clamped);
+      }
+      if (playerStateRef.current === 'playing') {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        rafRef.current = null;
+      }
+    };
+    rafRef.current = requestAnimationFrame(tick);
+  }, [stopProgressUpdate]);
+
+  const resetPlaybackState = React.useCallback((keepBuffer = false) => {
+    if (sourceRef.current) {
+      try {
+        sourceRef.current.onended = null;
+        sourceRef.current.stop();
+      } catch {
+        // no-op
+      }
+      try {
+        sourceRef.current.disconnect();
+      } catch {
+        // no-op
+      }
+      sourceRef.current = null;
+    }
+    endFlagsRef.current = { pause: false, stop: false };
+    offsetRef.current = 0;
+    startTimeRef.current = 0;
+    stopProgressUpdate();
+    setDuration(0);
+    setTrackPosition(0);
+    setIsSeeking(false);
+    setPlayerState(keepBuffer && audioBufferRef.current ? 'stopped' : 'idle');
+    playerStateRef.current = keepBuffer && audioBufferRef.current ? 'stopped' : 'idle';
+    if (!keepBuffer) {
+      audioBufferRef.current = null;
+      setAudioReady(false);
+      setAudioInfo(null);
+    }
+    isSeekingRef.current = false;
+  }, [stopProgressUpdate]);
 
   const resetState = React.useCallback(() => {
     setResult(null);
-    setAudioUrl('');
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-  }, []);
+    setAudioError('');
+    resetPlaybackState();
+  }, [resetPlaybackState]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError('');
@@ -84,6 +166,13 @@ const SceneToScriptPage: React.FC<PageProps> = () => {
     setLoading(true);
     setError('');
     resetState();
+    setAudioInfo(null);
+    setAudioReady(false);
+    setAudioError('');
+    setPlayerState('loading');
+    setDuration(0);
+    setTrackPosition(0);
+    setIsSeeking(false);
 
     try {
       const formData = new FormData();
@@ -111,10 +200,46 @@ const SceneToScriptPage: React.FC<PageProps> = () => {
         return;
       }
 
+      if (!data.audio) {
+        setError('오디오 데이터가 포함되어 있지 않습니다.');
+        return;
+      }
+
+      const mime = data.mimeType && data.mimeType.trim() ? data.mimeType : 'audio/mpeg';
+      const base64 = data.audio;
+      let bytes: Uint8Array;
+      try {
+        const binary = atob(base64);
+        bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+      } catch (decodeErr) {
+        console.error(decodeErr);
+        setError('오디오 데이터를 해석할 수 없습니다.');
+        return;
+      }
+
+      try {
+        await initializeBuffer(bytes, mime, data.sampleRate);
+      } catch (initErr: any) {
+        console.error(initErr);
+        setAudioError(initErr?.message ?? '오디오 버퍼를 준비하는 중 문제가 발생했습니다.');
+        setPlayerState('stopped');
+        playerStateRef.current = 'stopped';
+      }
+
+      setAudioInfo({ mime, sampleRate: data.sampleRate });
       setResult(data);
-      if (data.audio) {
-        const mime = data.mimeType && data.mimeType.trim() ? data.mimeType : 'audio/mpeg';
-        setAudioUrl(`data:${mime};base64,${data.audio}`);
+      if (audioBufferRef.current) {
+        try {
+          await startPlayback(0);
+        } catch (playErr) {
+          console.error(playErr);
+          setPlayerState('stopped');
+          playerStateRef.current = 'stopped';
+          setAudioError('자동 재생에 실패했습니다. 재생 버튼을 눌러 주세요.');
+        }
       }
     } catch (err: any) {
       setError(err?.message ?? '요청 중 오류가 발생했습니다.');
@@ -126,8 +251,222 @@ const SceneToScriptPage: React.FC<PageProps> = () => {
   React.useEffect(() => {
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
+      resetPlaybackState();
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(() => undefined);
+        audioContextRef.current = null;
+      }
     };
-  }, [previewUrl]);
+  }, [previewUrl, resetPlaybackState]);
+
+  const ensureContext = React.useCallback(async () => {
+    let ctx = audioContextRef.current;
+    const requestedRate = audioInfo?.sampleRate;
+    if (!ctx || ctx.state === 'closed') {
+      try {
+        ctx = requestedRate ? new AudioContext({ sampleRate: requestedRate }) : new AudioContext();
+      } catch {
+        ctx = new AudioContext();
+      }
+      audioContextRef.current = ctx;
+    }
+    if (ctx.state === 'suspended') {
+      await ctx.resume();
+    }
+    return ctx;
+  }, [audioInfo?.sampleRate]);
+
+  const initializeBuffer = React.useCallback(
+    async (bytes: Uint8Array, mime: string, sampleRate?: number) => {
+      const context = await ensureContext();
+      const arrayBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+      let decoded: AudioBuffer | null = null;
+      try {
+        decoded = await context.decodeAudioData(arrayBuffer.slice(0));
+      } catch (decodeError) {
+        const normalizedMime = mime.toLowerCase();
+        if (normalizedMime.includes('pcm') || normalizedMime.includes('raw')) {
+          if (!sampleRate || !Number.isFinite(sampleRate)) {
+            throw new Error('PCM 오디오를 디코딩하려면 샘플레이트 정보가 필요합니다.');
+          }
+          if (arrayBuffer.byteLength % 2 !== 0) {
+            throw new Error('PCM 오디오 데이터 길이가 올바르지 않습니다.');
+          }
+          const frameCount = arrayBuffer.byteLength / 2;
+          decoded = context.createBuffer(1, frameCount, sampleRate);
+          const view = new DataView(arrayBuffer);
+          const channel = decoded.getChannelData(0);
+          for (let i = 0; i < frameCount; i++) {
+            channel[i] = view.getInt16(i * 2, true) / 32768;
+          }
+        } else {
+          throw decodeError;
+        }
+      }
+
+      if (!decoded) {
+        throw new Error('오디오 버퍼를 준비하지 못했습니다.');
+      }
+
+      audioBufferRef.current = decoded;
+      offsetRef.current = 0;
+      startTimeRef.current = 0;
+      setDuration(decoded.duration);
+      setTrackPosition(0);
+      setAudioReady(true);
+      setPlayerState('stopped');
+      playerStateRef.current = 'stopped';
+      scheduleProgressUpdate();
+    },
+    [ensureContext, scheduleProgressUpdate],
+  );
+
+  const startPlayback = React.useCallback(
+    async (offset: number) => {
+      const context = await ensureContext();
+      const buffer = audioBufferRef.current;
+      if (!buffer) {
+        throw new Error('오디오 버퍼가 준비되지 않았습니다.');
+      }
+
+      if (sourceRef.current) {
+        try {
+          sourceRef.current.stop();
+        } catch {
+          // no-op
+        }
+        try {
+          sourceRef.current.disconnect();
+        } catch {
+          // no-op
+        }
+      }
+
+      const source = context.createBufferSource();
+      source.buffer = buffer;
+      source.connect(context.destination);
+      endFlagsRef.current = { pause: false, stop: false };
+      const clampedOffset = Math.min(Math.max(offset, 0), buffer.duration);
+      startTimeRef.current = context.currentTime - clampedOffset;
+      offsetRef.current = clampedOffset;
+      if (!isSeekingRef.current) {
+        setTrackPosition(clampedOffset);
+      }
+      source.onended = () => {
+        sourceRef.current = null;
+        if (endFlagsRef.current.pause) {
+          endFlagsRef.current.pause = false;
+          return;
+        }
+        if (endFlagsRef.current.stop) {
+          endFlagsRef.current.stop = false;
+          offsetRef.current = 0;
+          setPlayerState('stopped');
+          playerStateRef.current = 'stopped';
+          setTrackPosition(0);
+          stopProgressUpdate();
+          return;
+        }
+        offsetRef.current = 0;
+        setPlayerState('stopped');
+        playerStateRef.current = 'stopped';
+        setTrackPosition(0);
+        stopProgressUpdate();
+      };
+
+      sourceRef.current = source;
+      setPlayerState('playing');
+      playerStateRef.current = 'playing';
+      source.start(0, clampedOffset);
+      scheduleProgressUpdate();
+    },
+    [ensureContext, scheduleProgressUpdate, stopProgressUpdate],
+  );
+
+  const handlePause = React.useCallback(async () => {
+    if (playerStateRef.current !== 'playing') return;
+    const context = await ensureContext();
+    if (sourceRef.current) {
+      endFlagsRef.current.pause = true;
+      offsetRef.current = Math.min(Math.max(context.currentTime - startTimeRef.current, 0), duration);
+      try {
+        sourceRef.current.stop();
+      } catch {
+        // ignore
+      }
+      try {
+        sourceRef.current.disconnect();
+      } catch {
+        // ignore
+      }
+      sourceRef.current = null;
+    }
+    setPlayerState('paused');
+    playerStateRef.current = 'paused';
+  }, [duration, ensureContext]);
+
+  const handleStop = React.useCallback(async () => {
+    if (!audioBufferRef.current) return;
+    if (sourceRef.current) {
+      endFlagsRef.current.stop = true;
+      try {
+        sourceRef.current.stop();
+      } catch {
+        // ignore
+      }
+      try {
+        sourceRef.current.disconnect();
+      } catch {
+        // ignore
+      }
+      sourceRef.current = null;
+    }
+    offsetRef.current = 0;
+    setPlayerState('stopped');
+    playerStateRef.current = 'stopped';
+    setTrackPosition(0);
+    stopProgressUpdate();
+  }, [stopProgressUpdate]);
+
+  const handleSeek = React.useCallback(
+    async (value: number) => {
+      if (!audioBufferRef.current) return;
+      const clamped = Math.min(Math.max(value, 0), audioBufferRef.current.duration);
+      setTrackPosition(clamped);
+      offsetRef.current = clamped;
+      if (playerStateRef.current === 'playing') {
+        await startPlayback(clamped);
+      }
+    },
+    [startPlayback],
+  );
+
+  const togglePlay = React.useCallback(async () => {
+    if (!audioBufferRef.current) {
+      setAudioError('오디오 버퍼가 준비되지 않았습니다.');
+      return;
+    }
+
+    if (playerStateRef.current === 'playing') {
+      await handlePause();
+      return;
+    }
+
+    try {
+      await startPlayback(offsetRef.current || 0);
+    } catch (err) {
+      console.error(err);
+      setAudioError('재생을 시작하는 중 문제가 발생했습니다.');
+    }
+  }, [handlePause, startPlayback]);
+
+  const formatTime = React.useCallback((seconds: number): string => {
+    if (!Number.isFinite(seconds) || seconds < 0) seconds = 0;
+    const totalSeconds = Math.floor(seconds);
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }, []);
 
   return (
     <div className="text-gray-300 max-w-5xl mx-auto font-sans leading-relaxed">
@@ -263,15 +602,71 @@ const SceneToScriptPage: React.FC<PageProps> = () => {
             </div>
           </div>
 
-          <div className="rounded-md border border-white/10 bg-white/[0.03] p-4 space-y-3">
+          <div className="rounded-md border border-white/10 bg-white/[0.03] p-4 space-y-4">
             <h2 className="text-sm font-medium text-white">합성 오디오</h2>
-            {audioUrl ? (
-              <audio ref={audioRef} controls className="w-full">
-                <source src={audioUrl} type={result.mimeType || 'audio/mpeg'} />
-                브라우저가 오디오 태그를 지원하지 않습니다.
-              </audio>
+            {audioReady ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={togglePlay}
+                    className={`px-4 py-2 rounded text-sm font-medium ${
+                      playerState === 'playing'
+                        ? 'bg-rose-600 hover:bg-rose-500 text-white'
+                        : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                    }`}
+                  >
+                    {playerState === 'playing' ? '일시 정지' : '재생'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleStop}
+                    className="px-4 py-2 rounded text-sm font-medium bg-gray-700 hover:bg-gray-600 text-white"
+                  >
+                    정지
+                  </button>
+                  <div className="text-xs text-gray-400">
+                    {formatTime(trackPosition)} / {formatTime(duration)}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min={0}
+                    max={duration || 0}
+                    value={trackPosition}
+                    step={0.01}
+                    onChange={async event => {
+                      const value = Number(event.target.value);
+                      if (Number.isFinite(value)) {
+                        await handleSeek(value);
+                      }
+                    }}
+                    onMouseDown={() => setIsSeeking(true)}
+                    onMouseUp={() => {
+                      setIsSeeking(false);
+                      isSeekingRef.current = false;
+                    }}
+                    onTouchStart={() => setIsSeeking(true)}
+                    onTouchEnd={() => {
+                      setIsSeeking(false);
+                      isSeekingRef.current = false;
+                    }}
+                    className="flex-1"
+                  />
+                </div>
+                {audioInfo ? (
+                  <div className="text-xs text-gray-500 flex flex-wrap gap-4">
+                    <span>포맷: {audioInfo.mime}</span>
+                    <span>샘플레이트: {audioInfo.sampleRate ?? '미상'} Hz</span>
+                  </div>
+                ) : null}
+                {audioError ? (
+                  <div className="text-xs text-rose-300 whitespace-pre-wrap">{audioError}</div>
+                ) : null}
+              </div>
             ) : (
-              <p className="text-sm text-gray-500">오디오 데이터가 제공되지 않았습니다.</p>
+              <p className="text-sm text-gray-500">오디오 데이터가 준비되지 않았습니다.</p>
             )}
             {result.usage ? (
               <div className="text-xs text-gray-500 flex flex-wrap gap-3">
