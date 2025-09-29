@@ -38,6 +38,8 @@ const App: React.FC = () => {
   const swRegistrationRef = useRef<ServiceWorkerRegistration | null>(null);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
+  const [updateToastVisible, setUpdateToastVisible] = useState(false);
+  const [updateCountdown, setUpdateCountdown] = useState<number>(0);
 
   // Settings dropdown & API Key modal state
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
@@ -59,6 +61,11 @@ const App: React.FC = () => {
         setIsSidebarPinned(false);
       }
     } catch {}
+  }, []);
+
+  const handleDismissUpdateToast = useCallback(() => {
+    setUpdateToastVisible(false);
+    setUpdateCountdown(0);
   }, []);
 
   useEffect(() => {
@@ -266,6 +273,27 @@ const App: React.FC = () => {
       setActiveTabId(DEFAULT_TAB_IDS[0]);
     }
   }, [handleOpenFile]);
+
+  useEffect(() => {
+    if (!updateAvailable) return;
+    setUpdateToastVisible(true);
+    setUpdateCountdown(10);
+  }, [updateAvailable]);
+
+  useEffect(() => {
+    if (!updateToastVisible || !updateAvailable) return;
+    if (updateCountdown <= 0) return;
+    const timer = window.setTimeout(() => {
+      setUpdateCountdown(prev => {
+        if (prev <= 1) {
+          handleReloadForUpdate();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [updateToastVisible, updateAvailable, updateCountdown, handleReloadForUpdate]);
 
   // Keep left sidebar selection in sync with the active tab
   useEffect(() => {
@@ -534,22 +562,45 @@ const App: React.FC = () => {
 
   return (
     <div className="flex w-full flex-col bg-[#1e1e1e] text-gray-300 font-sans overflow-hidden" style={{ height: 'var(--app-height, 100vh)' }}>
-      {(isOffline || updateAvailable) && (
+      {isOffline && (
         <div className="bg-amber-500/90 text-black text-sm px-3 py-2 flex items-center justify-between">
-          <span>
-            {isOffline
-              ? '현재 오프라인입니다. 연결이 복구되면 자동으로 다시 시도합니다.'
-              : '새로운 버전이 준비되었습니다. 새로고침하여 업데이트를 적용하세요.'}
-          </span>
-          {!isOffline && updateAvailable && (
+          <span>현재 오프라인입니다. 연결이 복구되면 자동으로 다시 시도합니다.</span>
+        </div>
+      )}
+      {updateToastVisible && updateAvailable && (
+        <div
+          className="fixed bottom-4 right-4 z-50 max-w-sm rounded-md border border-amber-500/70 bg-[#1e1e1e] shadow-lg text-amber-100 p-4 flex flex-col gap-3"
+          role="alert"
+          aria-live="assertive"
+        >
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
+                <path d="M12 9v4m0 4h.01" />
+                <path d="M10.29 3.86 1.82 18a1 1 0 0 0 .86 1.5h18.64a1 1 0 0 0 .86-1.5L13.11 3.86a1 1 0 0 0-1.72 0z" />
+              </svg>
+            </div>
+            <div className="flex-1 text-sm leading-5">
+              <p className="font-semibold text-amber-300">새로운 버전이 준비되었습니다.</p>
+              <p className="mt-1 text-amber-100/80">{updateCountdown > 0 ? `${updateCountdown}초 후 자동으로 새로고침됩니다.` : '잠시 후 자동으로 새로고침됩니다.'}</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-2 text-xs">
+            <button
+              type="button"
+              onClick={handleDismissUpdateToast}
+              className="px-3 py-1 rounded border border-amber-400/60 text-amber-200 hover:bg-amber-500/10"
+            >
+              나중에 알림 숨기기
+            </button>
             <button
               type="button"
               onClick={handleReloadForUpdate}
-              className="ml-3 rounded bg-black/70 text-amber-200 px-2 py-1 text-xs hover:bg-black/80"
+              className="px-3 py-1 rounded bg-amber-400 text-black font-semibold hover:bg-amber-300"
             >
-              업데이트 적용
+              지금 업데이트
             </button>
-          )}
+          </div>
         </div>
       )}
       {/* Top title bar (VS Code style) */}
