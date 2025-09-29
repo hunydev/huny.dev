@@ -247,15 +247,13 @@ const sanitizeDialogueLines = (lines: Array<SceneDialogueLine>): Array<SceneDial
     .filter(line => line.speaker && line.line);
 };
 
-const buildConversationPrompt = (dialogue: Array<SceneDialogueLine>, summary?: string): string => {
+const buildConversationPrompt = (dialogue: Array<SceneDialogueLine>): string => {
   const uniqueSpeakers = Array.from(new Set(dialogue.map(line => line.speaker))).filter(Boolean);
-  const intro = summary
-    ? `TTS the following conversation between ${uniqueSpeakers.join(', ')} based on the described scene: ${summary}`
-    : `TTS the following conversation between ${uniqueSpeakers.join(', ')}.`;
+  const intro = `아래는 ${uniqueSpeakers.join(', ')} 사이의 대화입니다. 등장인물의 이름과 한국어 대사만 자연스럽게 읽어 주세요.`;
   const body = dialogue
     .map(line => {
-      const emotionPart = line.emotion ? ` (${line.emotion})` : '';
-      const actionPart = line.action ? ` [${line.action}]` : '';
+      const emotionPart = line.emotion ? ` (감정: ${line.emotion})` : '';
+      const actionPart = line.action ? ` [동작: ${line.action}]` : '';
       return `${line.speaker}:${emotionPart}${actionPart} ${line.line}`.trim();
     })
     .join('\n');
@@ -992,7 +990,7 @@ export default {
           const qualifiesForMultiSpeaker = dialogueSpeakers.length >= 2;
 
           const voiceAssignments = assignVoices(uniqueCharacters);
-          const conversationPrompt = buildConversationPrompt(filteredDialogue, payload.sceneSummary);
+          const conversationPrompt = buildConversationPrompt(filteredDialogue);
 
           const speakerVoiceConfigs = qualifiesForMultiSpeaker
             ? dialogueSpeakers.map(speakerName => ({
