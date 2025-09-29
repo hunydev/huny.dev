@@ -33,6 +33,7 @@ const App: React.FC = () => {
   const restoredRef = useRef<boolean>(false);
   const restoringRef = useRef<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const swRegistrationRef = useRef<ServiceWorkerRegistration | null>(null);
 
   // Settings dropdown & API Key modal state
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
@@ -54,6 +55,25 @@ const App: React.FC = () => {
         setIsSidebarPinned(false);
       }
     } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!('serviceWorker' in navigator)) return;
+    const registerServiceWorker = async () => {
+      try {
+        const registration = await navigator.serviceWorker.register('/service-worker.js', {
+          scope: '/',
+        });
+        swRegistrationRef.current = registration;
+        if (registration.waiting) {
+          registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+      } catch (err) {
+        console.error('service worker registration failed', err);
+      }
+    };
+    registerServiceWorker();
   }, []);
 
   const handleOpenFile = useCallback((fileId: string) => {
