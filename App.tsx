@@ -32,6 +32,8 @@ const App: React.FC = () => {
   const signInModalRef = useRef<HTMLDivElement | null>(null);
   const restoredRef = useRef<boolean>(false);
   const restoringRef = useRef<boolean>(false);
+  const shortcutHandledRef = useRef<boolean>(false);
+  const initialShortcutIdRef = useRef<string | null>(null);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const swRegistrationRef = useRef<ServiceWorkerRegistration | null>(null);
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -205,6 +207,17 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const openId = params.get('open');
+    if (!openId) return;
+    if (!PAGES[openId]) return;
+    shortcutHandledRef.current = true;
+    initialShortcutIdRef.current = openId;
+    handleOpenFile(openId);
+  }, [handleOpenFile]);
+
+  useEffect(() => {
     // Restore tabs from localStorage on initial load; fallback to Welcome
     if (restoredRef.current) return;
     restoredRef.current = true;
@@ -234,9 +247,14 @@ const App: React.FC = () => {
         }
       }
     } catch {}
-    // Fallback: open default tabs if no saved state
-    DEFAULT_TAB_IDS.forEach(id => handleOpenFile(id));
-    setActiveTabId(DEFAULT_TAB_IDS[0]);
+    if (!shortcutHandledRef.current) {
+      // Fallback: open default tabs if no saved state or shortcut
+      DEFAULT_TAB_IDS.forEach(id => handleOpenFile(id));
+      setActiveTabId(DEFAULT_TAB_IDS[0]);
+    } else if (initialShortcutIdRef.current) {
+      setActiveTabId(initialShortcutIdRef.current);
+      initialShortcutIdRef.current = null;
+    }
   }, [handleOpenFile]);
 
   // Keep left sidebar selection in sync with the active tab

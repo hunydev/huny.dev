@@ -24,5 +24,20 @@
       "sizes": "512x512",
       "type": "image/png"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Cover Crafter",
+      "short_name": "Cover Crafter",
+      "description": "커버 이미지를 생성하는 Playground",
+      "url": "/?open=cover-crafter",
+      "icons": [
+        {
+          "src": "/icons/cover-crafter.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }

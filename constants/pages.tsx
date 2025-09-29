@@ -69,16 +69,6 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     component: DigitalShelfPage,
     icon: <Icon name="file" className="mr-2" />,
   },
-  mascot: {
-    title: 'mascot.gallery',
-    component: MascotGalleryPage,
-    icon: <Icon name="file" className="mr-2" />,
-  },
-  apps: {
-    title: 'apps',
-    component: AppsPage,
-    icon: <Icon name="appsGrid" className="mr-2" />,
-  },
   'todo-generator': {
     title: 'To-do Generator',
     component: ToDoGeneratorPage,
