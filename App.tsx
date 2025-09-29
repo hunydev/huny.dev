@@ -33,7 +33,7 @@ const App: React.FC = () => {
   const restoredRef = useRef<boolean>(false);
   const restoringRef = useRef<boolean>(false);
   const shortcutHandledRef = useRef<boolean>(false);
-  const initialShortcutIdRef = useRef<string | null>(null);
+  const initialShortcutIdsRef = useRef<string[]>([]);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const swRegistrationRef = useRef<ServiceWorkerRegistration | null>(null);
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -209,19 +209,32 @@ const App: React.FC = () => {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
-    const openId = params.get('open');
-    if (!openId) return;
-    if (!PAGES[openId]) return;
+    const openParams = params.getAll('open');
+    if (openParams.length === 0) return;
+    const ids = openParams
+      .flatMap(value => value.split(','))
+      .map(id => id.trim())
+      .filter(Boolean)
+      .filter(id => Boolean(PAGES[id]));
+    const uniqueIds = Array.from(new Set(ids));
+    if (uniqueIds.length === 0) return;
     shortcutHandledRef.current = true;
-    initialShortcutIdRef.current = openId;
-    handleOpenFile(openId);
-  }, [handleOpenFile]);
+    initialShortcutIdsRef.current = uniqueIds;
+  }, []);
 
   useEffect(() => {
     // Restore tabs from localStorage on initial load; fallback to Welcome
     if (restoredRef.current) return;
     restoredRef.current = true;
     try {
+      if (shortcutHandledRef.current) {
+        const ids = initialShortcutIdsRef.current ?? [];
+        if (ids.length > 0) {
+          ids.forEach(id => handleOpenFile(id));
+          setActiveTabId(ids[ids.length - 1]);
+        }
+        return;
+      }
       const raw = localStorage.getItem(TABS_STORAGE_KEY);
       if (raw) {
         const saved = JSON.parse(raw) as { tabs?: Array<{ id: string; pinned?: boolean }>; activeTabId?: string };
@@ -251,9 +264,6 @@ const App: React.FC = () => {
       // Fallback: open default tabs if no saved state or shortcut
       DEFAULT_TAB_IDS.forEach(id => handleOpenFile(id));
       setActiveTabId(DEFAULT_TAB_IDS[0]);
-    } else if (initialShortcutIdRef.current) {
-      setActiveTabId(initialShortcutIdRef.current);
-      initialShortcutIdRef.current = null;
     }
   }, [handleOpenFile]);
 
