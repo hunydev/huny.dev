@@ -9,6 +9,7 @@ export type LoadingButtonProps = {
   variant?: 'primary' | 'secondary' | 'blue' | 'emerald' | 'indigo';
   className?: string;
   children?: React.ReactNode;
+  type?: 'button' | 'submit' | 'reset';
 };
 
 /**
@@ -25,6 +26,7 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
   variant = 'primary',
   className,
   children,
+  type = 'button',
 }) => {
   const baseClass = 'px-3 py-2 rounded text-sm border border-white/10 transition';
   
@@ -46,7 +48,7 @@ export const LoadingButton: React.FC<LoadingButtonProps> = ({
 
   return (
     <button
-      type="button"
+      type={type}
       onClick={onClick}
       disabled={disabled || loading}
       className={finalClassName}
