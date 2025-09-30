@@ -1,4 +1,5 @@
-const CACHE_VERSION = 'hunydev-cache-v1';
+const APP_VERSION = '2025.09.30.1';
+const CACHE_VERSION = `hunydev-cache-v1-${APP_VERSION}`;
 const OFFLINE_URL = '/offline.html';
 const PRECACHE_URLS = [
   '/',
@@ -37,6 +38,11 @@ self.addEventListener('activate', event => {
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
+  } else if (event.data && event.data.type === 'GET_VERSION') {
+    event.ports?.[0]?.postMessage?.({ version: APP_VERSION });
+    if (!event.ports || event.ports.length === 0) {
+      event.source?.postMessage?.({ type: 'VERSION_INFO', version: APP_VERSION });
+    }
   }
 });
 

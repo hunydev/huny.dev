@@ -12,6 +12,8 @@ import { getDocBySlug } from './components/pages/docsData';
 import { MONITOR_GROUPS, getMonitorItemById } from './components/pages/monitorData';
 import { extractBaseId, viewForTabId } from './utils/navigation';
 
+const APP_VERSION = '2025.09.30.1';
+
 const TABS_STORAGE_KEY = 'app.openTabs.v1';
 const DEFAULT_TAB_IDS: readonly string[] = ['welcome', 'works', 'domain', 'about'];
 
@@ -876,6 +878,10 @@ const App: React.FC = () => {
             {settingsOpen && (
               <div className="absolute right-0 top-full mt-1 w-44 bg-[#2d2d2d] border border-black/30 rounded shadow-lg z-50">
                 <ul className="py-1">
+                  <li className="w-full px-3 py-1.5 text-xs uppercase tracking-wide text-gray-400 font-semibold select-none pointer-events-none">
+                    버전 {APP_VERSION}
+                  </li>
+                  <li role="separator" aria-hidden className="my-1 border-t border-white/10" />
                   <li className="w-full">
                     {updateAvailable ? (
                       <button
