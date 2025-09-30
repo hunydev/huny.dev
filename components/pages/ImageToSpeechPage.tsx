@@ -570,7 +570,7 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
   }, [handleSeekCommit]);
 
   return (
-    <div className="text-gray-300 max-w-4xl mx-auto font-sans leading-relaxed">
+    <div className="text-gray-300 max-w-6xl mx-auto font-sans leading-relaxed">
       <header className="mb-6">
         <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
           <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-blue-300">
