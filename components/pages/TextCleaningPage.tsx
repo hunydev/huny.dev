@@ -1,5 +1,6 @@
 import React from 'react';
 import type { PageProps } from '../../types';
+import { ErrorMessage, LoadingButton, Badge } from '../ui';
 
 // Simple tokenizer: split into whitespace, punctuation, and other runs
 function tokenize(s: string): string[] {
@@ -45,10 +46,6 @@ function diffTokens(a: string[], b: string[]): Op[] {
   while (j < m) { if (ops.length && ops[ops.length - 1].type === 'insert') ops[ops.length - 1].tokens.push(b[j]); else ops.push({ type: 'insert', tokens: [b[j]] }); j++; }
   return ops;
 }
-
-const Badge: React.FC<{ colorClass: string; label: string }> = ({ colorClass, label }) => (
-  <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] ${colorClass}`}>{label}</span>
-);
 
 const TextCleaningPage: React.FC<PageProps> = () => {
   const inputRef = React.useRef<HTMLDivElement | null>(null);
@@ -155,20 +152,23 @@ const TextCleaningPage: React.FC<PageProps> = () => {
             suppressContentEditableWarning
           />
           <div className="mt-2 flex items-center gap-2">
-            <button
-              onClick={runClean}
+            <LoadingButton
+              loading={loading}
               disabled={loading || !rawText.trim()}
-              className={`px-3 py-2 rounded text-sm border border-white/10 ${loading ? 'opacity-70' : 'hover:bg-white/10'} ${rawText.trim() ? 'text-white' : 'text-gray-400'}`}
-            >{loading ? 'Cleaning…' : 'Clean'}</button>
-            {error && <span className="text-xs text-amber-300 truncate">{error}</span>}
+              onClick={runClean}
+              loadingText="Cleaning…"
+              idleText="Clean"
+              variant="primary"
+            />
+            <ErrorMessage error={error} />
           </div>
         </div>
 
         {/* Legend */}
         <div className="text-xs text-gray-400 flex items-center gap-2">
           <span className="mr-2">표기:</span>
-          <Badge colorClass="bg-red-500/15 text-red-300" label="원문에서 제거/변경" />
-          <Badge colorClass="bg-green-500/15 text-green-300" label="정제본에서 추가/변경" />
+          <Badge variant="colored" colorClass="bg-red-500/15 text-red-300">원문에서 제거/변경</Badge>
+          <Badge variant="colored" colorClass="bg-green-500/15 text-green-300">정제본에서 추가/변경</Badge>
         </div>
 
         {/* Compare */}

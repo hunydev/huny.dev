@@ -1,5 +1,6 @@
 import React from 'react';
 import type { PageProps } from '../../types';
+import { ErrorMessage, LoadingButton } from '../ui';
 
 const UIClonePage: React.FC<PageProps> = () => {
   const [file, setFile] = React.useState<File | null>(null);
@@ -152,18 +153,23 @@ const UIClonePage: React.FC<PageProps> = () => {
           )}
         </div>
         <div className="mt-3 flex items-center gap-2">
-          <button
-            type="button"
-            className={`px-3 py-2 rounded text-sm border border-white/10 ${file && !loading ? 'hover:bg-white/10 text-white' : 'text-gray-400'} ${loading ? 'opacity-70' : ''}`}
-            onClick={generate}
+          <LoadingButton
+            loading={loading}
             disabled={!file || loading}
-          >{loading ? '생성 중…' : '생성'}</button>
-          <button
-            type="button"
-            className="px-3 py-2 rounded text-sm border border-white/10 text-gray-300 hover:bg-white/10"
+            onClick={generate}
+            loadingText="생성 중…"
+            idleText="생성"
+            variant="primary"
+            className={`px-3 py-2 rounded text-sm border border-white/10 ${file && !loading ? 'hover:bg-white/10 text-white' : 'text-gray-400'} ${loading ? 'opacity-70' : ''}`}
+          />
+          <LoadingButton
+            loading={false}
             onClick={resetAll}
-          >초기화</button>
-          {error && <span className="text-xs text-amber-300 truncate">{error}</span>}
+            loadingText=""
+            idleText="초기화"
+            variant="secondary"
+          />
+          <ErrorMessage error={error} />
         </div>
       </section>
 

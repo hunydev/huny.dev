@@ -1,5 +1,6 @@
 import React from 'react';
 import type { PageProps } from '../../types';
+import { ErrorMessage, LoadingButton } from '../ui';
 import { Icon } from '../../constants';
 
 const TextToPhonemePage: React.FC<PageProps> = () => {
@@ -60,13 +61,15 @@ const TextToPhonemePage: React.FC<PageProps> = () => {
             className="w-full resize-y px-3 py-2 rounded bg-[#1e1e1e] border border-white/10 text-gray-200 placeholder:text-gray-500"
           />
           <div className="mt-2 flex items-center gap-2">
-            <button
-              onClick={run}
+            <LoadingButton
+              loading={loading}
               disabled={loading || !text.trim()}
-              className={`px-3 py-2 rounded text-sm border border-white/10 ${loading ? 'opacity-70' : 'hover:bg-white/10'} ${text.trim() ? 'text-white' : 'text-gray-400'}`}
-              title={loading ? '변환 중…' : '변환 실행'}
-            >{loading ? '변환 중…' : '변환'}</button>
-            {error && <span className="text-xs text-amber-300 truncate">{error}</span>}
+              onClick={run}
+              loadingText="변환 중…"
+              idleText="변환"
+              variant="primary"
+            />
+            <ErrorMessage error={error} />
           </div>
         </div>
 

@@ -1,6 +1,8 @@
 import React from 'react';
 import type { PageProps } from '../../types';
 import { Icon } from '../../constants';
+import { ErrorMessage, LoadingButton } from '../ui';
+import { downloadFromUrl } from '../../utils/download';
 
 const STYLE_OPTIONS: Array<{ id: 'illustration' | 'photoreal'; label: string; description: string }> = [
   {
@@ -111,14 +113,7 @@ const ComicRestylerPage: React.FC<PageProps> = () => {
   const downloadImage = async () => {
     if (!resultUrl) return;
     try {
-      const response = await fetch(resultUrl);
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `comic-restyled-${styleId}.png`;
-      a.click();
-      URL.revokeObjectURL(url);
+      await downloadFromUrl(resultUrl, `comic-restyled-${styleId}.png`);
     } catch {}
   };
 
@@ -195,15 +190,17 @@ const ComicRestylerPage: React.FC<PageProps> = () => {
               컷의 가로세로 비율, 순서, 말풍선 위치와 대사는 그대로 보존하면서 캐릭터와 배경의 디테일을 업그레이드합니다. 컷이 잘리지 않도록 여백이 아주 많은 이미지는 미리 잘라서 업로드하는 것이 좋습니다.
             </div>
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                className={`px-3 py-2 rounded text-sm border border-white/10 ${file && !loading ? 'hover:bg-white/10 text-white' : 'text-gray-400'} ${loading ? 'opacity-70' : ''}`}
-                onClick={generate}
+              <LoadingButton
+                loading={loading}
                 disabled={!file || loading}
-              >{loading ? '변환 중…' : '변환 실행'}</button>
-              <button
-                type="button"
-                className="px-3 py-2 rounded text-sm border border-white/10 text-gray-300 hover:bg-white/10"
+                onClick={generate}
+                loadingText="변환 중…"
+                idleText="변환 실행"
+                variant="primary"
+                className={`px-3 py-2 rounded text-sm border border-white/10 ${file && !loading ? 'hover:bg-white/10 text-white' : 'text-gray-400'} ${loading ? 'opacity-70' : ''}`}
+              />
+              <LoadingButton
+                loading={false}
                 onClick={() => {
                   if (previewUrl) URL.revokeObjectURL(previewUrl);
                   setFile(null);
@@ -211,8 +208,11 @@ const ComicRestylerPage: React.FC<PageProps> = () => {
                   setResultUrl('');
                   setError('');
                 }}
-              >초기화</button>
-              {error && <span className="text-xs text-amber-300 truncate" title={error}>{error}</span>}
+                loadingText=""
+                idleText="초기화"
+                variant="secondary"
+              />
+              <ErrorMessage error={error} className="text-xs text-amber-300 truncate" />
             </div>
           </div>
         </div>

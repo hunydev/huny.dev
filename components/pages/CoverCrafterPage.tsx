@@ -1,5 +1,7 @@
 import React from 'react';
 import type { PageProps } from '../../types';
+import { ErrorMessage, LoadingButton } from '../ui';
+import { downloadFromUrl } from '../../utils/download';
 import { Icon } from '../../constants';
 
 const VARIANT_OPTIONS: Array<{ value: 'cover' | 'thumbnail'; label: string; description: string }> = [
@@ -72,26 +74,16 @@ const CoverCrafterPage: React.FC<PageProps> = () => {
       if (data?.prompt) setPromptSummary(String(data.prompt));
     } catch (e: any) {
       setError(e?.message || '이미지 생성 중 문제가 발생했습니다.');
-    } finally {
       setLoading(false);
     }
   };
 
   const handleDownload = async () => {
+    if (!imageUrl) return;
     try {
-      if (!imageUrl) return;
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      const suffix = variant === 'thumbnail' ? 'thumbnail' : 'cover';
-      a.download = `covercrafter-${suffix}.png`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (e: any) {
-      setError(e?.message || '이미지 다운로드에 실패했습니다.');
-    }
+      const title = scriptText.trim().replace(/\s/g, '-').slice(0, 20);
+      await downloadFromUrl(imageUrl, `cover-${title || 'untitled'}.png`);
+    } catch {}
   };
 
   return (

@@ -1,6 +1,8 @@
 import React from 'react';
 import type { PageProps } from '../../types';
 import { Icon } from '../../constants';
+import { ErrorMessage, LoadingButton } from '../ui';
+import { downloadFromUrl } from '../../utils/download';
 
 const StickerGeneratorPage: React.FC<PageProps> = () => {
   const [file, setFile] = React.useState<File | null>(null);
@@ -109,16 +111,9 @@ const StickerGeneratorPage: React.FC<PageProps> = () => {
   };
 
   const downloadPng = async () => {
+    if (!outUrl) return;
     try {
-      if (!outUrl) return;
-      const resp = await fetch(outUrl);
-      const blob = await resp.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'sticker-sheet.png';
-      a.click();
-      URL.revokeObjectURL(url);
+      await downloadFromUrl(outUrl, 'sticker-sheet.png');
     } catch {}
   };
 
@@ -195,18 +190,23 @@ const StickerGeneratorPage: React.FC<PageProps> = () => {
               />
             </div>
             <div className="flex items-center gap-2 mt-3">
-              <button
-                type="button"
-                className={`px-3 py-2 rounded text-sm border border-white/10 ${file && !loading ? 'hover:bg-white/10 text-white' : 'text-gray-400'} ${loading ? 'opacity-70' : ''}`}
-                onClick={generate}
+              <LoadingButton
+                loading={loading}
                 disabled={!file || loading}
-              >{loading ? '생성 중…' : '생성'}</button>
-              <button
-                type="button"
-                className="px-3 py-2 rounded text-sm border border-white/10 text-gray-300 hover:bg-white/10"
+                onClick={generate}
+                loadingText="생성 중…"
+                idleText="생성"
+                variant="primary"
+                className={`px-3 py-2 rounded text-sm border border-white/10 ${file && !loading ? 'hover:bg-white/10 text-white' : 'text-gray-400'} ${loading ? 'opacity-70' : ''}`}
+              />
+              <LoadingButton
+                loading={false}
                 onClick={resetAll}
-              >초기화</button>
-              {error && <span className="text-xs text-amber-300 truncate">{error}</span>}
+                loadingText=""
+                idleText="초기화"
+                variant="secondary"
+              />
+              <ErrorMessage error={error} />
             </div>
           </div>
         </div>

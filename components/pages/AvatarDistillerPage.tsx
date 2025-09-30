@@ -1,5 +1,7 @@
 import React from 'react';
 import type { PageProps } from '../../types';
+import { ErrorMessage, LoadingButton } from '../ui';
+import { downloadFromUrl } from '../../utils/download';
 import { Icon } from '../../constants';
 
 const AvatarDistillerPage: React.FC<PageProps> = () => {
@@ -72,14 +74,7 @@ const AvatarDistillerPage: React.FC<PageProps> = () => {
   const download = async () => {
     if (!resultUrl) return;
     try {
-      const response = await fetch(resultUrl);
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `avatar-${styleId}.png`;
-      a.click();
-      URL.revokeObjectURL(url);
+      await downloadFromUrl(resultUrl, `avatar-${styleId}.png`);
     } catch {}
   };
 
