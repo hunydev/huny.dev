@@ -9,3 +9,5 @@ export type { ErrorMessageProps } from './ErrorMessage';
 
 export { LoadingButton } from './LoadingButton';
 export type { LoadingButtonProps } from './LoadingButton';
+
+export { FileDropZone } from './FileDropZone';

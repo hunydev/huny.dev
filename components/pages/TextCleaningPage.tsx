@@ -1,6 +1,7 @@
 import React from 'react';
 import type { PageProps } from '../../types';
 import { ErrorMessage, LoadingButton, Badge } from '../ui';
+import { useApiCall } from '../../hooks/useApiCall';
 
 // Simple tokenizer: split into whitespace, punctuation, and other runs
 function tokenize(s: string): string[] {
@@ -52,8 +53,15 @@ const TextCleaningPage: React.FC<PageProps> = () => {
   const [rawText, setRawText] = React.useState('');
   const [baseline, setBaseline] = React.useState(''); // captured when Clean runs
   const [cleaned, setCleaned] = React.useState('');
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState('');
+
+  type CleanResponse = { cleaned: string };
+  const api = useApiCall<CleanResponse>({
+    url: '/api/text-cleaning',
+    method: 'POST',
+    onSuccess: (data) => {
+      if (data?.cleaned) setCleaned(data.cleaned);
+    },
+  });
 
   const onInput = () => {
     const t = inputRef.current?.innerText ?? '';
@@ -62,27 +70,11 @@ const TextCleaningPage: React.FC<PageProps> = () => {
 
   const runClean = async () => {
     if (!rawText.trim()) return;
-    setLoading(true);
-    setError('');
     setCleaned('');
     setBaseline(rawText);
-    try {
-      const res = await fetch('/api/text-cleaning', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ text: rawText })
-      });
-      const text = await res.text();
-      if (!res.ok) throw new Error(text || `Failed: ${res.status}`);
-      let js: any = {};
-      try { js = text ? JSON.parse(text) : {}; } catch {}
-      const out: string = typeof js?.cleaned === 'string' ? js.cleaned : '';
-      setCleaned(out);
-    } catch (e: any) {
-      setError(e?.message || String(e));
-    } finally {
-      setLoading(false);
-    }
+    await api.execute({
+      body: { text: rawText },
+    });
   };
 
   const originalTokens = React.useMemo(() => tokenize(baseline), [baseline]);
@@ -153,14 +145,14 @@ const TextCleaningPage: React.FC<PageProps> = () => {
           />
           <div className="mt-2 flex items-center gap-2">
             <LoadingButton
-              loading={loading}
-              disabled={loading || !rawText.trim()}
+              loading={api.loading}
+              disabled={!rawText.trim()}
               onClick={runClean}
               loadingText="Cleaning…"
               idleText="Clean"
               variant="primary"
             />
-            <ErrorMessage error={error} />
+            <ErrorMessage error={api.error} />
           </div>
         </div>
 
