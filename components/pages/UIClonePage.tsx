@@ -1,103 +1,52 @@
 import React from 'react';
 import type { PageProps } from '../../types';
-import { ErrorMessage, LoadingButton } from '../ui';
+import { ErrorMessage, LoadingButton, FileDropZone } from '../ui';
+import { useApiCall } from '../../hooks/useApiCall';
+import { useFileUpload } from '../../hooks/useFileUpload';
 
 const UIClonePage: React.FC<PageProps> = () => {
-  const [file, setFile] = React.useState<File | null>(null);
-  const [imageUrl, setImageUrl] = React.useState<string>('');
   const [html, setHtml] = React.useState<string>('');
-  const [loading, setLoading] = React.useState<boolean>(false);
-  const [error, setError] = React.useState<string>('');
+
+  const fileUpload = useFileUpload({
+    accept: 'image/*',
+    maxSize: 10 * 1024 * 1024,
+  });
+
+  type UICloneResponse = { html: string };
+  const api = useApiCall<UICloneResponse>({
+    url: '/api/ui-clone',
+    method: 'POST',
+    onSuccess: (data) => {
+      const outHtml = data?.html || '';
+      if (!outHtml) {
+        api.setError('서버가 유효한 HTML을 반환하지 않았습니다.');
+        return;
+      }
+      setHtml(outHtml);
+    },
+  });
 
   // Handle paste (global on this page)
   React.useEffect(() => {
-    const onPaste = async (e: ClipboardEvent) => {
-      try {
-        const items = e.clipboardData?.items || [];
-        for (const it of items as any) {
-          const type = it.type || '';
-          if (type.startsWith('image/')) {
-            const f = it.getAsFile();
-            if (f) {
-              setFile(f);
-              const url = URL.createObjectURL(f);
-              setImageUrl(url);
-              setHtml('');
-              setError('');
-              break;
-            }
-          }
-        }
-      } catch {}
-    };
-    window.addEventListener('paste', onPaste as any);
-    return () => window.removeEventListener('paste', onPaste as any);
-  }, []);
-
-  const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (f) {
-      setFile(f);
-      const url = URL.createObjectURL(f);
-      setImageUrl(url);
-      setHtml('');
-      setError('');
-    }
-  };
-
-  const onDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    try {
-      const f = e.dataTransfer.files?.[0];
-      if (f && f.type.startsWith('image/')) {
-        setFile(f);
-        const url = URL.createObjectURL(f);
-        setImageUrl(url);
-        setHtml('');
-        setError('');
-      }
-    } catch {}
-  };
-
-  const onDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
+    window.addEventListener('paste', fileUpload.onPaste);
+    return () => window.removeEventListener('paste', fileUpload.onPaste);
+  }, [fileUpload.onPaste]);
 
   const resetAll = () => {
-    if (imageUrl) URL.revokeObjectURL(imageUrl);
-    setFile(null);
-    setImageUrl('');
+    fileUpload.reset();
     setHtml('');
-    setError('');
   };
 
   const generate = async () => {
-    if (!file) {
-      setError('이미지를 업로드하거나 붙여넣어 주세요.');
+    if (!fileUpload.file) {
+      api.setError('이미지를 업로드하거나 붙여넣어 주세요.');
       return;
     }
-    setLoading(true);
-    setError('');
     setHtml('');
-    try {
-      const fd = new FormData();
-      fd.append('image', file);
-      // Optional: hints
-      fd.append('constraints', 'single-file html with inline <style>; no external fetch; semantic structure; minimal JS if needed; responsive when possible');
-
-      const res = await fetch('/api/ui-clone', { method: 'POST', body: fd });
-      const text = await res.text();
-      if (!res.ok) throw new Error(text || `Failed: ${res.status}`);
-      let js: any = {};
-      try { js = text ? JSON.parse(text) : {}; } catch {}
-      const outHtml: string = typeof js?.html === 'string' ? js.html : '';
-      if (!outHtml) throw new Error('서버가 유효한 HTML을 반환하지 않았습니다.');
-      setHtml(outHtml);
-    } catch (e: any) {
-      setError(e?.message || String(e));
-    } finally {
-      setLoading(false);
-    }
+    const fd = new FormData();
+    fd.append('image', fileUpload.file);
+    fd.append('constraints', 'single-file html with inline <style>; no external fetch; semantic structure; minimal JS if needed; responsive when possible');
+    await api.execute({ body: fd });
   };
 
   const downloadHtml = () => {
@@ -134,33 +83,30 @@ const UIClonePage: React.FC<PageProps> = () => {
 
       <section className="rounded-md border border-white/10 bg-white/[0.03] p-3 md:p-4">
         <h2 className="text-sm font-medium text-white mb-2">입력 이미지</h2>
-        <div
-          className={`relative rounded border border-dashed ${file ? 'border-white/10 bg-black/30' : 'border-white/20 bg-black/20'} p-4 flex flex-col items-center justify-center text-center min-h-[180px]`}
-          onDrop={onDrop}
-          onDragOver={onDragOver}
-        >
-          {imageUrl ? (
-            <img src={imageUrl} alt="screenshot" className="max-h-64 object-contain rounded" />
-          ) : (
-            <>
-              <p className="text-sm text-gray-400">이미지를 드래그&드롭하거나 클릭하여 업로드, 또는 페이지에서 직접 붙여넣기(Ctrl/Cmd + V)</p>
-              <label className="mt-3 inline-flex items-center gap-2 px-3 py-2 rounded border border-white/10 text-gray-200 hover:bg-white/10 cursor-pointer">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M19 21H8V7h11m0-2H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2m-3-4H4a2 2 0 0 0-2 2v14h2V3h12z"/></svg>
-                <span>이미지 선택</span>
-                <input type="file" accept="image/*" className="hidden" onChange={onPick} />
-              </label>
-            </>
-          )}
-        </div>
+        <FileDropZone
+          file={fileUpload.file}
+          previewUrl={fileUpload.previewUrl}
+          error={fileUpload.error}
+          isDragging={fileUpload.isDragging}
+          accept="image/*"
+          onDrop={fileUpload.onDrop}
+          onDragOver={fileUpload.onDragOver}
+          onDragEnter={fileUpload.onDragEnter}
+          onDragLeave={fileUpload.onDragLeave}
+          onInputChange={fileUpload.onInputChange}
+          onReset={resetAll}
+          label="이미지를 드래그&드롭하거나 클릭하여 업로드, 또는 페이지에서 직접 붙여넣기(Ctrl/Cmd + V)"
+          previewClassName="max-h-64 object-contain"
+        />
         <div className="mt-3 flex items-center gap-2">
           <LoadingButton
-            loading={loading}
-            disabled={!file || loading}
+            loading={api.loading}
+            disabled={!fileUpload.file}
             onClick={generate}
             loadingText="생성 중…"
             idleText="생성"
             variant="primary"
-            className={`px-3 py-2 rounded text-sm border border-white/10 ${file && !loading ? 'hover:bg-white/10 text-white' : 'text-gray-400'} ${loading ? 'opacity-70' : ''}`}
+            className="px-3 py-2 text-sm"
           />
           <LoadingButton
             loading={false}
@@ -169,7 +115,7 @@ const UIClonePage: React.FC<PageProps> = () => {
             idleText="초기화"
             variant="secondary"
           />
-          <ErrorMessage error={error} />
+          <ErrorMessage error={api.error || fileUpload.error} />
         </div>
       </section>
 
