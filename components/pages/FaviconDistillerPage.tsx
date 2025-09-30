@@ -3,6 +3,8 @@ import type { PageProps } from '../../types';
 import { Icon } from '../../constants';
 import { ErrorMessage, LoadingButton } from '../ui';
 import { downloadFromUrl } from '../../utils/download';
+import { useApiCall } from '../../hooks/useApiCall';
+import { useFileUpload } from '../../hooks/useFileUpload';
 
 const AVAILABLE_SIZES = [32, 48, 64, 96, 128, 192, 256];
 
@@ -43,58 +45,47 @@ const ensureDataUrl = (maybeBase64: string, format: string) => {
 };
 
 const FaviconDistillerPage: React.FC<PageProps> = () => {
-  const [file, setFile] = React.useState<File | null>(null);
-  const [localPreview, setLocalPreview] = React.useState<string>('');
   const [selectedSizes, setSelectedSizes] = React.useState<Set<number>>(() => new Set([32, 64, 128]));
   const [includeIco, setIncludeIco] = React.useState(true);
   const [transparent, setTransparent] = React.useState(true);
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState('');
   const [assets, setAssets] = React.useState<GeneratedAsset[]>([]);
   const [remotePreview, setRemotePreview] = React.useState<string>('');
   const [jobId, setJobId] = React.useState<string>('');
   const [message, setMessage] = React.useState<string>('');
 
-  const revokeLocalPreview = React.useCallback(() => {
-    if (localPreview && localPreview.startsWith('blob:')) {
-      URL.revokeObjectURL(localPreview);
-    }
-  }, [localPreview]);
+  const fileUpload = useFileUpload({
+    accept: 'image/*',
+    maxSize: 10 * 1024 * 1024,
+  });
 
-  React.useEffect(() => () => revokeLocalPreview(), [revokeLocalPreview]);
+  const api = useApiCall<ApiResponse>({
+    url: '/api/favicon-distiller',
+    method: 'POST',
+    onSuccess: (data) => {
+      const parsedAssets = parseAssets(data);
+      if (parsedAssets.length === 0) {
+        throw new Error('생성된 파비콘을 확인할 수 없습니다. 응답 형식을 확인해 주세요.');
+      }
+      setAssets(parsedAssets);
+      if (data.preview) setRemotePreview(ensureDataUrl(data.preview, 'png'));
+      if (data.source) setRemotePreview(prev => prev || ensureDataUrl(data.source!, 'png'));
+      if (data.jobId) setJobId(data.jobId);
+      if (data.message) setMessage(data.message);
+    },
+  });
 
-  const onFileChange = (nextFile: File | null) => {
-    revokeLocalPreview();
-    setFile(nextFile);
+  const resetResults = () => {
     setAssets([]);
     setRemotePreview('');
     setJobId('');
     setMessage('');
-    if (nextFile) {
-      const url = URL.createObjectURL(nextFile);
-      setLocalPreview(url);
-      setError('');
-    } else {
-      setLocalPreview('');
-    }
   };
 
-  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (f) {
-      onFileChange(f);
+  React.useEffect(() => {
+    if (fileUpload.file) {
+      resetResults();
     }
-  };
-
-  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const f = e.dataTransfer.files?.[0];
-    if (f) {
-      onFileChange(f);
-    }
-  };
-
-  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => e.preventDefault();
+  }, [fileUpload.file]);
 
   const toggleSize = (size: number) => {
     setSelectedSizes(prev => {
@@ -131,67 +122,31 @@ const FaviconDistillerPage: React.FC<PageProps> = () => {
   };
 
   const handleGenerate = async () => {
-    if (!file) {
-      setError('아이콘에 사용할 이미지를 먼저 업로드해 주세요.');
+    if (!fileUpload.file) {
+      api.setError('아이콘에 사용할 이미지를 먼저 업로드해 주세요.');
       return;
     }
     if (selectedSizes.size === 0 && !includeIco) {
-      setError('출력할 크기 또는 ICO 포맷을 하나 이상 선택해 주세요.');
+      api.setError('출력할 크기 또는 ICO 포맷을 하나 이상 선택해 주세요.');
       return;
     }
-    setLoading(true);
-    setError('');
-    setAssets([]);
-    setRemotePreview('');
-    setJobId('');
-    setMessage('');
-    try {
-      const fd = new FormData();
-      fd.append('image', file);
-      fd.append('sizes', JSON.stringify(Array.from(selectedSizes.values())));
-      fd.append('formats', includeIco ? 'png,ico' : 'png');
-      fd.append('transparent', transparent ? '1' : '0');
-      fd.append('simplifyLevel', 'auto');
+    resetResults();
+    
+    const fd = new FormData();
+    fd.append('image', fileUpload.file);
+    fd.append('sizes', JSON.stringify(Array.from(selectedSizes.values())));
+    fd.append('formats', includeIco ? 'png,ico' : 'png');
+    fd.append('transparent', transparent ? '1' : '0');
+    fd.append('simplifyLevel', 'auto');
 
-      const res = await fetch('/api/favicon-distiller', {
-        method: 'POST',
-        body: fd,
-      });
-
-      const text = await res.text();
-      let data: ApiResponse = {};
-      try {
-        data = text ? (JSON.parse(text) as ApiResponse) : {};
-      } catch {
-        data = { message: text };
-      }
-
-      if (!res.ok) {
-        throw new Error(data.error || data.message || `Gemini 변환 실패 (${res.status})`);
-      }
-
-      const parsedAssets = parseAssets(data);
-      if (parsedAssets.length === 0) {
-        throw new Error('생성된 파비콘을 확인할 수 없습니다. 응답 형식을 확인해 주세요.');
-      }
-
-      setAssets(parsedAssets);
-      if (data.preview) setRemotePreview(ensureDataUrl(data.preview, 'png'));
-      if (data.source) setRemotePreview(prev => prev || ensureDataUrl(data.source!, 'png'));
-      if (data.jobId) setJobId(data.jobId);
-      if (data.message) setMessage(data.message);
-    } catch (e: any) {
-      setError(e?.message || String(e));
-    } finally {
-      setLoading(false);
-    }
+    await api.execute({ body: fd });
   };
 
   const downloadAsset = async (asset: GeneratedAsset) => {
     try {
       await downloadFromUrl(asset.url, formatDownloadName(asset.size, asset.format));
     } catch (e: any) {
-      setError(e?.message || '다운로드에 실패했습니다.');
+      api.setError(e?.message || '다운로드에 실패했습니다.');
     }
   };
 
@@ -214,19 +169,19 @@ const FaviconDistillerPage: React.FC<PageProps> = () => {
       <section className="grid gap-4 md:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-4">
           <div
-            className={`border border-dashed rounded-lg p-5 text-center transition ${file ? 'border-sky-400/40 bg-sky-400/5' : 'border-white/15 bg-black/20 hover:border-white/30'}`}
-            onDrop={onDrop}
-            onDragOver={onDragOver}
+            className={`border border-dashed rounded-lg p-5 text-center transition ${fileUpload.file ? 'border-sky-400/40 bg-sky-400/5' : 'border-white/15 bg-black/20 hover:border-white/30'}`}
+            onDrop={fileUpload.onDrop}
+            onDragOver={fileUpload.onDragOver}
           >
-            {file ? (
+            {fileUpload.file ? (
               <div className="space-y-3">
                 <p className="text-sm text-gray-400">업로드한 원본 이미지</p>
-                <img src={localPreview} alt="원본 미리보기" className="max-h-64 mx-auto rounded border border-white/10" />
-                <div className="text-xs text-gray-500">{file.name} · {(file.size / 1024).toFixed(1)} KB</div>
+                <img src={fileUpload.previewUrl} alt="원본 미리보기" className="max-h-64 mx-auto rounded border border-white/10" />
+                <div className="text-xs text-gray-500">{fileUpload.file.name} · {(fileUpload.file.size / 1024).toFixed(1)} KB</div>
                 <button
                   type="button"
                   className="px-3 py-1.5 text-sm rounded border border-white/15 text-gray-200 hover:bg-white/10"
-                  onClick={() => onFileChange(null)}
+                  onClick={fileUpload.reset}
                 >
                   다른 이미지 선택
                 </button>
@@ -235,7 +190,7 @@ const FaviconDistillerPage: React.FC<PageProps> = () => {
               <div className="space-y-3">
                 <p className="text-sm text-gray-400">이미지를 드롭하거나 클릭하여 업로드해 주세요.</p>
                 <label className="inline-flex items-center gap-2 px-3 py-2 rounded border border-white/15 text-gray-200 hover:bg-white/10 cursor-pointer">
-                  <input type="file" accept="image/*" className="hidden" onChange={onInputChange} />
+                  <input type="file" accept="image/*" className="hidden" onChange={fileUpload.onInputChange} />
                   <Icon name="addSquare" className="w-4 h-4" aria-hidden />
                   <span>이미지 선택</span>
                 </label>
@@ -299,15 +254,15 @@ const FaviconDistillerPage: React.FC<PageProps> = () => {
 
             <LoadingButton
               onClick={handleGenerate}
-              loading={loading}
+              loading={api.loading}
               loadingText="Gemini 변환 중…"
               idleText="Gemini로 파비콘 생성"
               variant="info"
               className="w-full px-4 py-2 text-sm font-medium"
             />
-            <ErrorMessage error={error} />
-            {!error && message && <p className="text-xs text-gray-500">{message}</p>}
-            {!error && !loading && uds.length > 0 && (
+            <ErrorMessage error={api.error || fileUpload.error} />
+            {!api.error && !fileUpload.error && message && <p className="text-xs text-gray-500">{message}</p>}
+            {!api.error && !fileUpload.error && !api.loading && uds.length > 0 && (
               <p className="text-xs text-gray-500">선택된 해상도: {uds.map(size => `${size}px`).join(', ')}{includeIco ? ' · ICO 포함' : ''}</p>
             )}
             {jobId && (
@@ -323,8 +278,8 @@ const FaviconDistillerPage: React.FC<PageProps> = () => {
               결과 미리보기
             </h2>
             <div className="mt-3 space-y-3">
-              {(remotePreview || localPreview) ? (
-                <img src={remotePreview || localPreview} alt="파비콘 미리보기" className="w-32 h-32 object-contain mx-auto rounded border border-white/10 bg-black/40" />
+              {(remotePreview || fileUpload.previewUrl) ? (
+                <img src={remotePreview || fileUpload.previewUrl} alt="파비콘 미리보기" className="w-32 h-32 object-contain mx-auto rounded border border-white/10 bg-black/40" />
               ) : (
                 <div className="w-32 h-32 mx-auto rounded border border-dashed border-white/10 flex items-center justify-center text-xs text-gray-500">
                   변환 대기 중

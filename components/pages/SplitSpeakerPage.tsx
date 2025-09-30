@@ -69,6 +69,10 @@ const SplitSpeakerPage: React.FC<PageProps> = () => {
   const canRun = !loading && text.trim().length > 0;
 
   const onRun = async () => {
+    if (!text.trim()) {
+      setError('텍스트를 입력해 주세요.');
+      return;
+    }
     setError('');
     setResult(null);
     setLoading(true);

@@ -1,10 +1,16 @@
 import React from 'react';
 import { PageProps } from '../../types';
 import { ErrorMessage, LoadingButton } from '../ui';
+import { useApiCall } from '../../hooks/useApiCall';
 
 import sideImg from '../../extra/mascot/images/side.png';
 import frontImg from '../../extra/mascot/images/front.png';
 import rearImg from '../../extra/mascot/images/rear.png';
+
+type BirdGeneratorResponse = {
+  urls?: string[];
+  [k: string]: any;
+};
 
 const BirdGeneratorPage: React.FC<PageProps> = () => {
   const [model, setModel] = React.useState<'gpt-image-1' | 'dall-e-2'>('gpt-image-1');
@@ -14,16 +20,20 @@ const BirdGeneratorPage: React.FC<PageProps> = () => {
   const [n, setN] = React.useState<number>(1);
   const [outputFormat, setOutputFormat] = React.useState<'png' | 'jpeg' | 'webp'>('png');
   const [size, setSize] = React.useState<'1024x1024' | '1536x1024' | '1024x1536' | 'auto' | '256x256' | '512x512'>('1024x1024');
-  const [loading, setLoading] = React.useState<boolean>(false);
-  const [error, setError] = React.useState<string>('');
   const [results, setResults] = React.useState<{ urls: string[]; meta?: any } | null>(null);
 
-  const canRun = !loading && prompt.trim().length > 0;
+  const api = useApiCall<BirdGeneratorResponse>({
+    url: '/api/bird-generator',
+    method: 'POST',
+    onSuccess: (data) => {
+      setResults({ urls: Array.isArray(data?.urls) ? data.urls : [], meta: data });
+    },
+  });
+
+  const canRun = !api.loading && prompt.trim().length > 0;
 
   const handleGenerate = async () => {
-    setError('');
     setResults(null);
-    setLoading(true);
     try {
       // Fetch imported images as blobs, then send to Worker as multipart/form-data
       const fetchAsFile = async (src: string, name: string) => {
@@ -31,7 +41,7 @@ const BirdGeneratorPage: React.FC<PageProps> = () => {
         if (!res.ok) throw new Error(`이미지 로드 실패: ${name}`);
         const blob = await res.blob();
         return new File([blob], name, { type: blob.type || 'image/png' });
-        };
+      };
 
       const files = await Promise.all([
         fetchAsFile(sideImg, 'side.png'),
@@ -59,20 +69,9 @@ const BirdGeneratorPage: React.FC<PageProps> = () => {
       fd.append('output_format', outputFormat);
       fd.append('size', size);
 
-      const res = await fetch('/api/bird-generator', {
-        method: 'POST',
-        body: fd,
-      });
-      if (!res.ok) {
-        const msg = await res.text().catch(() => '');
-        throw new Error(`서버 오류: ${res.status} ${res.statusText}${msg ? '\n' + msg : ''}`);
-      }
-      const data: { urls?: string[]; [k: string]: any } = await res.json();
-      setResults({ urls: Array.isArray(data?.urls) ? data.urls : [], meta: data });
+      await api.execute({ body: fd });
     } catch (e: any) {
-      setError(e?.message || String(e));
-    } finally {
-      setLoading(false);
+      api.setError(e?.message || String(e));
     }
   };
 
@@ -205,14 +204,14 @@ const BirdGeneratorPage: React.FC<PageProps> = () => {
           <LoadingButton
             onClick={handleGenerate}
             disabled={!canRun}
-            loading={loading}
+            loading={api.loading}
             loadingText="생성 중…"
             idleText="생성"
             variant="success"
             className="px-4 py-2 text-sm"
           />
         </div>
-        <ErrorMessage error={error} className="mt-3" />
+        <ErrorMessage error={api.error} className="mt-3" />
       </section>
 
       {/* Results */}

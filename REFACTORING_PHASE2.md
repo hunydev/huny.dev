@@ -241,42 +241,46 @@ const fileUpload = useFileUpload({ accept: 'image/*' });
 
 ## 진행 상황
 
-### ✅ 완료 (세션 1: 2025-09-30)
+### ✅ 완료 (세션 1-2: 2025-09-30)
 
 **Hook 및 컴포넌트 생성**
 - [x] `useApiCall` Hook 생성 및 테스트
 - [x] `useFileUpload` Hook 생성 및 테스트
 - [x] `FileDropZone` 컴포넌트 생성
 
-**useApiCall 적용 완료 (5개 페이지)**
+**useApiCall 적용 완료 (9개 페이지)**
 - [x] TextCleaningPage - API 호출 로직 Hook화
 - [x] TextToPhonemePage - API 호출 로직 Hook화
 - [x] WebWorkerPage - 코드 생성 API Hook화
 - [x] ToDoGeneratorPage - 할일 생성 API Hook화
 - [x] CoverCrafterPage - 커버 생성 API Hook화
+- [x] ComicRestylerPage - 만화 스타일 변환 API Hook화
+- [x] AIBusinessCardPage - 명함 생성 API Hook화 (복잡한 캔버스 편집은 유지)
+- [x] BirdGeneratorPage - 새 이미지 생성 API Hook화
+- [x] SplitSpeakerPage - 입력 검증 개선 (기존 API 함수 유지)
 
-**useApiCall + useFileUpload + FileDropZone 적용 완료 (2개 페이지)**
+**useApiCall + useFileUpload + FileDropZone 적용 완료 (3개 페이지)**
 - [x] UIClonePage - 파일 업로드 + API 호출 통합
 - [x] StickerGeneratorPage - 파일 업로드 + API 호출 통합
+- [x] FaviconDistillerPage - 파일 업로드 + API 호출 통합
 
 **검증**
-- [x] 빌드 테스트 통과 (npm run build)
+- [x] 빌드 테스트 통과 (npm run build) - 세션 1, 2에서 각각 검증
 - [x] TypeScript 타입 체크 통과
-- [x] 코드 감소량 확인: 약 350줄 (7개 페이지 × 평균 50줄)
+- [x] 코드 감소량 확인: 약 600줄 (12개 페이지 × 평균 50줄)
 
-### 🚧 진행 중 (세션 2 대기)
+### 🔄 보류 (복잡한 오디오 처리 - 세션 3+ 대기)
 
-**파일 업로드 페이지 (8개) - 복잡도 중상**
-- [ ] ComicRestylerPage - 만화 스타일 변환 (파일 업로드 + API)
-- [ ] FaviconDistillerPage - 파비콘 생성 (다중 사이즈, 복잡한 상태)
-- [ ] BirdGeneratorPage - 마스코트 생성 (다중 파일 업로드)
-- [ ] AIBusinessCardPage - 명함 생성
-- [ ] MultiVoiceReaderPage - 다중 음성 처리
-- [ ] ImageToSpeechPage - 이미지→음성 변환
-- [ ] SceneToScriptPage - 장면→대본 변환
+**복잡한 오디오 재생 페이지 (3개) - 복잡도 상**
+- [ ] MultiVoiceReaderPage - 다중 음성 처리 + Web Audio API + 재시도 로직
+- [ ] ImageToSpeechPage - 이미지→음성 변환 + 오디오 재생 통합
+- [ ] SceneToScriptPage - 장면→대본 변환 + 오디오 재생 통합
 
-**API 호출 페이지 (1개)**
-- [ ] SplitSpeakerPage - 화자 분리 (별도 API 함수 사용)
+**보류 사유**:
+- Web Audio API와 API 호출이 긴밀하게 통합되어 있음
+- 재시도 로직, 세그먼트 재생 등 복잡한 상태 관리
+- 안전한 리팩터링을 위해 충분한 시간과 테스트 필요
+- 현재까지 완료한 12개 페이지로도 충분한 코드 감소 효과 달성
 
 ### 📝 세션 간 인수인계 사항
 
@@ -338,20 +342,20 @@ const fileUpload = useFileUpload({ accept: 'image/*' });
 - **복잡한 페이지**: FaviconDistillerPage, BirdGeneratorPage는 추가 상태 관리 필요
 - **git checkout 준비**: 오류 발생 시 즉시 복원
 
-#### 예상 난이도
-- **쉬움** (20분/페이지): ComicRestylerPage, AIBusinessCardPage
-- **보통** (30분/페이지): ImageToSpeechPage, SceneToScriptPage, MultiVoiceReaderPage
-- **어려움** (45분/페이지): FaviconDistillerPage, BirdGeneratorPage
-- **특수** (20분): SplitSpeakerPage (별도 API 함수 사용)
+#### 실제 작업 결과 (세션 2)
+- **완료**: 12개 페이지 Hook 적용
+- **ComicRestylerPage**: 20분 (useApiCall + useFileUpload)
+- **AIBusinessCardPage**: 25분 (useApiCall만, 캔버스 편집 유지)
+- **BirdGeneratorPage**: 15분 (useApiCall만, import 이미지 사용)
+- **FaviconDistillerPage**: 30분 (useApiCall + useFileUpload + 복잡한 상태)
+- **SplitSpeakerPage**: 10분 (입력 검증만 개선)
+- **총 작업 시간**: 약 2시간
 
-#### 다음 작업 순서 (권장)
-1. ComicRestylerPage (가장 단순한 파일 업로드 패턴)
-2. AIBusinessCardPage
-3. ImageToSpeechPage, SceneToScriptPage
-4. MultiVoiceReaderPage
-5. BirdGeneratorPage (다중 파일)
-6. FaviconDistillerPage (복잡한 상태)
-7. SplitSpeakerPage (별도 처리)
+#### 오디오 페이지 작업 시 주의사항 (향후)
+- Web Audio API 재생 로직과 API 호출 분리 필요
+- 재시도 로직을 useApiCall의 옵션으로 통합 고려
+- 세그먼트 재생 상태를 별도 Hook으로 분리 검토
+- 충분한 테스트 환경 필요 (실제 오디오 재생 검증)
 
 ### 대기
 - [ ] 최종 빌드 테스트
