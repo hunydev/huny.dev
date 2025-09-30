@@ -1,5 +1,6 @@
 import React from 'react';
 import { PageProps } from '../../types';
+import { ErrorMessage, LoadingButton } from '../ui';
 
 const genderLabel = (gender: 'male' | 'female' | 'unknown') => {
   switch (gender) {
@@ -518,24 +519,20 @@ const SceneToScriptPage: React.FC<PageProps> = () => {
             <div className="text-xs text-gray-500">
               합성에는 다화자 TTS가 사용됩니다. 등장인물이 없거나 대사 추론이 불가능하면 실패할 수 있습니다.
             </div>
-            <button
+            <LoadingButton
               type="submit"
-              disabled={loading || !file}
-              className={`px-5 py-2 rounded text-sm font-medium ${
-                loading || !file ? 'bg-blue-600/40 text-white/70 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white'
-              }`}
-            >
-              {loading ? '분석 중…' : '장면 분석'}
-            </button>
+              disabled={!file}
+              loading={loading}
+              loadingText="분석 중…"
+              idleText="장면 분석"
+              variant="primary"
+              className="px-5 py-2 text-sm font-medium"
+            />
           </div>
         </section>
       </form>
 
-      {error && (
-        <div className="mt-4 rounded border border-rose-500/40 bg-rose-500/10 p-3 text-sm text-rose-200 whitespace-pre-wrap">
-          {error}
-        </div>
-      )}
+      <ErrorMessage error={error} className="mt-4" />
 
       {result && (
         <section className="mt-6 space-y-4">
@@ -661,9 +658,7 @@ const SceneToScriptPage: React.FC<PageProps> = () => {
                     <span>샘플레이트: {audioInfo.sampleRate ?? '미상'} Hz</span>
                   </div>
                 ) : null}
-                {audioError ? (
-                  <div className="text-xs text-rose-300 whitespace-pre-wrap">{audioError}</div>
-                ) : null}
+                <ErrorMessage error={audioError} variant="warning" />
               </div>
             ) : (
               <p className="text-sm text-gray-500">오디오 데이터가 준비되지 않았습니다.</p>

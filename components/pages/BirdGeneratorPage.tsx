@@ -1,5 +1,6 @@
 import React from 'react';
 import { PageProps } from '../../types';
+import { ErrorMessage, LoadingButton } from '../ui';
 
 import sideImg from '../../extra/mascot/images/side.png';
 import frontImg from '../../extra/mascot/images/front.png';
@@ -201,16 +202,17 @@ const BirdGeneratorPage: React.FC<PageProps> = () => {
           />
         </div>
         <div className="mt-3 flex items-center justify-center">
-          <button
-            type="button"
+          <LoadingButton
             onClick={handleGenerate}
-            className={`px-4 py-2 rounded text-sm ${canRun ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-emerald-600/40 text-white/70 cursor-not-allowed'}`}
             disabled={!canRun}
-          >
-            {loading ? '생성 중…' : '생성'}
-          </button>
+            loading={loading}
+            loadingText="생성 중…"
+            idleText="생성"
+            variant="success"
+            className="px-4 py-2 text-sm"
+          />
         </div>
-        {error && <div className="mt-3 text-sm text-red-300 whitespace-pre-wrap">{error}</div>}
+        <ErrorMessage error={error} className="mt-3" />
       </section>
 
       {/* Results */}

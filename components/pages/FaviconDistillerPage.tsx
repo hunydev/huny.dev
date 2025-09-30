@@ -1,6 +1,8 @@
 import React from 'react';
 import type { PageProps } from '../../types';
 import { Icon } from '../../constants';
+import { ErrorMessage, LoadingButton } from '../ui';
+import { downloadFromUrl } from '../../utils/download';
 
 const AVAILABLE_SIZES = [32, 48, 64, 96, 128, 192, 256];
 
@@ -187,14 +189,7 @@ const FaviconDistillerPage: React.FC<PageProps> = () => {
 
   const downloadAsset = async (asset: GeneratedAsset) => {
     try {
-      const response = await fetch(asset.url);
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = formatDownloadName(asset.size, asset.format);
-      a.click();
-      URL.revokeObjectURL(url);
+      await downloadFromUrl(asset.url, formatDownloadName(asset.size, asset.format));
     } catch (e: any) {
       setError(e?.message || '다운로드에 실패했습니다.');
     }
@@ -302,15 +297,15 @@ const FaviconDistillerPage: React.FC<PageProps> = () => {
               </div>
             </div>
 
-            <button
-              type="button"
+            <LoadingButton
               onClick={handleGenerate}
-              disabled={loading}
-              className={`w-full px-4 py-2 rounded text-sm font-medium transition ${loading ? 'bg-sky-500/20 text-sky-200 cursor-wait' : 'bg-sky-500/20 hover:bg-sky-500/30 text-sky-100 border border-sky-500/40'}`}
-            >
-              {loading ? 'Gemini 변환 중…' : 'Gemini로 파비콘 생성'}
-            </button>
-            {error && <p className="text-xs text-amber-300">{error}</p>}
+              loading={loading}
+              loadingText="Gemini 변환 중…"
+              idleText="Gemini로 파비콘 생성"
+              variant="info"
+              className="w-full px-4 py-2 text-sm font-medium"
+            />
+            <ErrorMessage error={error} />
             {!error && message && <p className="text-xs text-gray-500">{message}</p>}
             {!error && !loading && uds.length > 0 && (
               <p className="text-xs text-gray-500">선택된 해상도: {uds.map(size => `${size}px`).join(', ')}{includeIco ? ' · ICO 포함' : ''}</p>

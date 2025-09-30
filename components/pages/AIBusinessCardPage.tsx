@@ -1,5 +1,6 @@
 import React from 'react';
 import type { PageProps } from '../../types';
+import { ErrorMessage, LoadingButton } from '../ui';
 
 // Types for user fields and text boxes
 export type FieldItem = { id: string; label: string; value: string };
@@ -271,10 +272,20 @@ const AIBusinessCardPage: React.FC<PageProps> = () => {
             </div>
           </div>
 
-          <div className="pt-2 flex items-center gap-2">
-            <button onClick={generateDesign} disabled={loading || !logoFile} className={`px-3 py-2 rounded text-sm border border-white/10 ${loading ? 'opacity-70' : 'hover:bg-white/10'} ${logoFile ? 'text-white' : 'text-gray-400'}`}>{loading ? '생성 중…' : '시안 생성'}</button>
-            <button onClick={resetLayout} className="px-3 py-2 rounded text-sm border border-white/10 text-gray-300 hover:bg-white/10">레이아웃 초기화</button>
-            {error && <span className="text-xs text-amber-300 truncate">{error}</span>}
+          <div className="pt-2 space-y-2">
+            <div className="flex items-center gap-2">
+              <LoadingButton
+                onClick={generateDesign}
+                disabled={!logoFile}
+                loading={loading}
+                loadingText="생성 중…"
+                idleText="시안 생성"
+                variant="secondary"
+                className="px-3 py-2 text-sm"
+              />
+              <button onClick={resetLayout} className="px-3 py-2 rounded text-sm border border-white/10 text-gray-300 hover:bg-white/10">레이아웃 초기화</button>
+            </div>
+            <ErrorMessage error={error} />
           </div>
         </div>
 

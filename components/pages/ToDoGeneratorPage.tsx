@@ -1,6 +1,7 @@
 import React from 'react';
 import type { PageProps } from '../../types';
 import { Icon } from '../../constants';
+import { ErrorMessage, LoadingButton } from '../ui';
 
 // Types
 export type TaskNode = {
@@ -284,12 +285,15 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
             placeholder="예: 3일간 도쿄 여행 준비"
             className="flex-1 min-w-0 px-3 py-2 rounded bg-[#1e1e1e] border border-white/10 text-gray-200 placeholder:text-gray-500"
           />
-          <button
+          <LoadingButton
             onClick={generate}
-            disabled={generating || !prompt.trim()}
-            className={`px-3 py-2 rounded text-sm border border-white/10 ${generating ? 'opacity-70' : 'hover:bg-white/10'} ${prompt.trim() ? 'text-white' : 'text-gray-400'}`}
-            title={generating ? '생성 중…' : '목록 생성'}
-          >{generating ? '생성 중…' : '생성'}</button>
+            disabled={!prompt.trim()}
+            loading={generating}
+            loadingText="생성 중…"
+            idleText="생성"
+            variant="secondary"
+            className="px-3 py-2 text-sm"
+          />
           <button
             onClick={addSiblingRoot}
             className="px-3 py-2 rounded text-sm border border-white/10 text-gray-300 hover:bg-white/10 inline-flex items-center gap-1 whitespace-nowrap"
@@ -307,7 +311,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
             <span>{copied ? '복사됨' : '복사'}</span>
           </button>
         </div>
-        {error && <p className="mt-2 text-xs text-amber-300">{error}</p>}
+        <ErrorMessage error={error} className="mt-2" />
       </section>
 
       {root.children.length === 0 ? (

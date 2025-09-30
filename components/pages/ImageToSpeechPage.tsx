@@ -1,5 +1,6 @@
 import React from 'react';
 import { PageProps } from '../../types';
+import { ErrorMessage, LoadingButton } from '../ui';
 
 const LANGUAGE_OPTIONS: Array<{ value: string; label: string }> = [
   { value: 'ko-KR', label: '한국어 (ko-KR)' },
@@ -659,24 +660,20 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
             <div className="text-xs text-gray-500">
               이미지 비공개 처리, 요청 결과는 서버에 저장되지 않습니다.
             </div>
-            <button
+            <LoadingButton
               type="submit"
-              disabled={loading || !file}
-              className={`px-5 py-2 rounded text-sm font-medium ${
-                loading || !file ? 'bg-blue-600/40 text-white/70 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white'
-              }`}
-            >
-              {loading ? '처리 중…' : '변환하기'}
-            </button>
+              disabled={!file}
+              loading={loading}
+              loadingText="처리 중…"
+              idleText="변환하기"
+              variant="primary"
+              className="px-5 py-2 text-sm font-medium"
+            />
           </div>
         </section>
       </form>
 
-      {error && (
-        <div className="mt-4 rounded border border-rose-500/40 bg-rose-500/10 p-3 text-sm text-rose-200 whitespace-pre-wrap">
-          {error}
-        </div>
-      )}
+      <ErrorMessage error={error} className="mt-4" />
 
       {hasResult && (
         <section className="mt-6 rounded-md border border-white/10 bg-white/[0.03] p-4 space-y-4">
@@ -748,9 +745,7 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
               {audioInfo ? (
                 <p className="mt-2 text-xs text-gray-500">MIME: {audioInfo.mime}{audioInfo.sampleRate ? ` · 샘플레이트: ${audioInfo.sampleRate}Hz` : ''}</p>
               ) : null}
-              {audioError ? (
-                <p className="mt-2 text-xs text-amber-300">{audioError}</p>
-              ) : null}
+              <ErrorMessage error={audioError} className="mt-2" variant="warning" />
             </div>
           )}
         </section>

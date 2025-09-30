@@ -1,5 +1,6 @@
 import React from 'react';
 import type { PageProps } from '../../types';
+import { ErrorMessage, LoadingButton } from '../ui';
 
 const DEFAULT_FN_NAME = 'worker_function';
 const DEFAULT_PARAMS = 'n';
@@ -148,12 +149,14 @@ const WebWorkerPage: React.FC<PageProps> = () => {
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
               />
-              <button
-                className={`px-3 py-2 rounded text-sm border border-white/10 ${genLoading ? 'opacity-70' : 'hover:bg-white/10'} text-white`}
+              <LoadingButton
                 onClick={generateWithAI}
-                disabled={genLoading}
-                title={genLoading ? '요청 중…' : 'AI로 생성'}
-              >{genLoading ? '요청 중…' : 'AI로 생성'}</button>
+                loading={genLoading}
+                loadingText="요청 중…"
+                idleText="AI로 생성"
+                variant="secondary"
+                className="px-3 py-2 text-sm"
+              />
             </div>
             <p className="text-xs text-gray-500">AI는 함수 내부 본문만 반환합니다. 반드시 <code>return</code>이 포함되어야 합니다.</p>
           </div>
@@ -182,12 +185,14 @@ const WebWorkerPage: React.FC<PageProps> = () => {
               />
             </div>
             <div className="mt-2 flex items-center gap-2 flex-wrap">
-              <button
-                className={`px-3 py-2 rounded text-sm border border-white/10 ${running ? 'opacity-70' : 'hover:bg-white/10'} text-white whitespace-nowrap shrink-0`}
+              <LoadingButton
                 onClick={run}
-                disabled={running}
-                title={running ? '실행 중…' : '실행'}
-              >{running ? '실행 중…' : '실행'}</button>
+                loading={running}
+                loadingText="실행 중…"
+                idleText="실행"
+                variant="primary"
+                className="px-3 py-2 text-sm whitespace-nowrap shrink-0"
+              />
               <button
                 className="px-3 py-2 rounded text-sm border border-white/10 text-gray-300 hover:bg-white/10 whitespace-nowrap shrink-0"
                 onClick={terminateWorker}
@@ -197,7 +202,7 @@ const WebWorkerPage: React.FC<PageProps> = () => {
             </div>
           </div>
         </div>
-        {error && <p className="mt-2 text-xs text-amber-300">{error}</p>}
+        <ErrorMessage error={error} className="mt-2" />
       </section>
 
       {/* 결과 표시: 요청/소스 사이 */}

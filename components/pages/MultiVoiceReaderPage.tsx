@@ -1,5 +1,6 @@
 import React from 'react';
 import { PageProps } from '../../types';
+import { ErrorMessage, LoadingButton } from '../ui';
 
 const DEFAULT_TEXT = `작은 항구 마을에 낡은 등대가 있었습니다.
 “오늘은 또 불이 꺼져 있네.” 어부 아저씨가 한숨을 내쉬었지요.
@@ -291,27 +292,29 @@ const MultiVoiceReaderPage: React.FC<PageProps> = () => {
             </select>
             <div className="mt-3">
               <div className="flex gap-2">
-                <button
-                  type="button"
+                <LoadingButton
                   onClick={handleConvert}
-                  className={`flex-1 px-4 py-2 rounded text-sm ${canConvert ? 'bg-indigo-600 hover:bg-indigo-500 text-white' : 'bg-indigo-600/40 text-white/70 cursor-not-allowed'}`}
                   disabled={!canConvert}
-                >
-                  {convertLoading ? '변환 중…' : '변환'}
-                </button>
-                <button
-                  type="button"
+                  loading={convertLoading}
+                  loadingText="변환 중…"
+                  idleText="변환"
+                  variant="primary"
+                  className="flex-1 px-4 py-2 text-sm"
+                />
+                <LoadingButton
                   onClick={handleSynthesize}
-                  className={`flex-1 px-4 py-2 rounded text-sm ${canSynthesize ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-blue-600/40 text-white/70 cursor-not-allowed'}`}
                   disabled={!canSynthesize}
-                >
-                  {synthLoading ? '합성 중…' : '합성'}
-                </button>
+                  loading={synthLoading}
+                  loadingText="합성 중…"
+                  idleText="합성"
+                  variant="primary"
+                  className="flex-1 px-4 py-2 text-sm"
+                />
               </div>
             </div>
           </div>
         </div>
-        {error && <div className="mt-3 text-sm text-red-300 whitespace-pre-wrap">{error}</div>}
+        <ErrorMessage error={error} className="mt-3" />
       </section>
 
       {/* Result panel placed above Intermediate for better visibility */}
