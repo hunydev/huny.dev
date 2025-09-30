@@ -3,6 +3,7 @@ import type { PageProps } from '../../types';
 import { ErrorMessage, LoadingButton } from '../ui';
 import { downloadFromUrl } from '../../utils/download';
 import { Icon } from '../../constants';
+import { useApiCall } from '../../hooks/useApiCall';
 
 const VARIANT_OPTIONS: Array<{ value: 'cover' | 'thumbnail'; label: string; description: string }> = [
   { value: 'cover', label: '블로그/기사 커버', description: '포스트 상단을 가득 채우는 히어로 이미지 스타일' },
@@ -28,54 +29,45 @@ const CoverCrafterPage: React.FC<PageProps> = () => {
   const [variant, setVariant] = React.useState<'cover' | 'thumbnail'>('cover');
   const [ratio, setRatio] = React.useState<'wide' | 'square' | 'vertical' | 'story'>('wide');
   const [style, setStyle] = React.useState<'illustration' | 'photoreal'>('illustration');
-  const [loading, setLoading] = React.useState<boolean>(false);
-  const [error, setError] = React.useState<string>('');
   const [imageUrl, setImageUrl] = React.useState<string>('');
   const [message, setMessage] = React.useState<string>('');
   const [promptSummary, setPromptSummary] = React.useState<string>('');
+
+  type CoverResponse = { image: string; message?: string; prompt?: string; error?: string };
+  const api = useApiCall<CoverResponse>({
+    url: '/api/cover-crafter',
+    method: 'POST',
+    onSuccess: (data) => {
+      const img = data?.image || '';
+      if (!img) {
+        api.setError('생성된 이미지를 확인할 수 없습니다.');
+        return;
+      }
+      setImageUrl(img.startsWith('data:') ? img : `data:image/png;base64,${img}`);
+      if (data?.message) setMessage(String(data.message));
+      if (data?.prompt) setPromptSummary(String(data.prompt));
+    },
+  });
 
   const trimmedLength = scriptText.trim().length;
   const remaining = Math.max(0, MAX_INPUT_CHARS - scriptText.length);
 
   const handleGenerate = async () => {
     if (!trimmedLength) {
-      setError('콘텐츠 전문을 붙여넣고 다시 시도해 주세요.');
+      api.setError('콘텐츠 전문을 붙여넣고 다시 시도해 주세요.');
       return;
     }
-    setLoading(true);
-    setError('');
     setImageUrl('');
     setMessage('');
     setPromptSummary('');
-    try {
-      const payload = {
+    await api.execute({
+      body: {
         text: scriptText,
         variant,
         ratio,
         style,
-      };
-      const res = await fetch('/api/cover-crafter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const text = await res.text();
-      let data: any = {};
-      try { data = text ? JSON.parse(text) : {}; } catch {}
-      if (!res.ok) {
-        throw new Error(data?.error || text || `이미지 생성 실패 (${res.status})`);
-      }
-      const img: string = typeof data?.image === 'string' ? data.image : '';
-      if (!img) {
-        throw new Error('생성된 이미지를 확인할 수 없습니다.');
-      }
-      setImageUrl(img.startsWith('data:') ? img : `data:image/png;base64,${img}`);
-      if (data?.message) setMessage(String(data.message));
-      if (data?.prompt) setPromptSummary(String(data.prompt));
-    } catch (e: any) {
-      setError(e?.message || '이미지 생성 중 문제가 발생했습니다.');
-      setLoading(false);
-    }
+      },
+    });
   };
 
   const handleDownload = async () => {
@@ -184,11 +176,11 @@ const CoverCrafterPage: React.FC<PageProps> = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
               <button
                 type="button"
-                disabled={loading}
+                disabled={api.loading}
                 onClick={handleGenerate}
-                className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded border text-sm font-medium transition ${loading ? 'border-white/15 text-gray-400 bg-white/5 cursor-wait' : 'border-sky-400 text-white hover:bg-sky-400/10'}`}
+                className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded border text-sm font-medium transition ${api.loading ? 'border-white/15 text-gray-400 bg-white/5 cursor-wait' : 'border-sky-400 text-white hover:bg-sky-400/10'}`}
               >
-                {loading ? (
+                {api.loading ? (
                   <>
                     <svg className="animate-spin h-4 w-4 text-sky-300" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
@@ -208,11 +200,7 @@ const CoverCrafterPage: React.FC<PageProps> = () => {
               </div>
             </div>
 
-            {error && (
-              <div className="rounded border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
-                {error}
-              </div>
-            )}
+            <ErrorMessage error={api.error} />
             {message && (
               <div className="rounded border border-emerald-400/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
                 {message}

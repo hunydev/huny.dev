@@ -1,6 +1,7 @@
 import React from 'react';
 import type { PageProps } from '../../types';
 import { ErrorMessage, LoadingButton } from '../ui';
+import { useApiCall } from '../../hooks/useApiCall';
 
 const DEFAULT_FN_NAME = 'worker_function';
 const DEFAULT_PARAMS = 'n';
@@ -34,8 +35,21 @@ const WebWorkerPage: React.FC<PageProps> = () => {
   const [prompt, setPrompt] = React.useState<string>('n을 받아서 1부터 n까지의 합을 반환');
   const [result, setResult] = React.useState<{ ok: boolean; out?: any; err?: string } | null>(null);
   const [running, setRunning] = React.useState<boolean>(false);
-  const [genLoading, setGenLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string>('');
+
+  type CodeGenResponse = { body: string };
+  const codeGenApi = useApiCall<CodeGenResponse>({
+    url: '/api/worker-codegen',
+    method: 'POST',
+    onSuccess: (data) => {
+      const bodyStr = data?.body || '';
+      if (!bodyStr || !/return\s+/m.test(bodyStr)) {
+        codeGenApi.setError('AI가 유효한 함수 본문을 반환하지 않았습니다. 다시 시도해 주세요.');
+      } else {
+        setBody(bodyStr);
+      }
+    },
+  });
 
   const workerRef = React.useRef<Worker | null>(null);
   const timeoutRef = React.useRef<number | null>(null);
@@ -99,29 +113,9 @@ const WebWorkerPage: React.FC<PageProps> = () => {
   };
 
   const generateWithAI = async () => {
-    if (genLoading) return;
-    setGenLoading(true);
-    setError('');
-    try {
-      const res = await fetch('/api/worker-codegen', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ prompt, fnName: DEFAULT_FN_NAME, params }),
-      });
-      const text = await res.text();
-      if (!res.ok) throw new Error(text || `Failed: ${res.status}`);
-      let js: any = {};
-      try { js = text ? JSON.parse(text) : {}; } catch {}
-      const bodyStr: string = typeof js?.body === 'string' ? js.body : '';
-      if (!bodyStr || !/return\s+/m.test(bodyStr)) {
-        throw new Error('AI가 유효한 함수 본문을 반환하지 않았습니다. 다시 시도해 주세요.');
-      }
-      setBody(bodyStr);
-    } catch (e: any) {
-      setError(e?.message || String(e));
-    } finally {
-      setGenLoading(false);
-    }
+    await codeGenApi.execute({
+      body: { prompt, fnName: DEFAULT_FN_NAME, params },
+    });
   };
 
   return (
@@ -151,7 +145,7 @@ const WebWorkerPage: React.FC<PageProps> = () => {
               />
               <LoadingButton
                 onClick={generateWithAI}
-                loading={genLoading}
+                loading={codeGenApi.loading}
                 loadingText="요청 중…"
                 idleText="AI로 생성"
                 variant="secondary"

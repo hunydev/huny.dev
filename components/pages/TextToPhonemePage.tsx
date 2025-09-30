@@ -2,39 +2,32 @@ import React from 'react';
 import type { PageProps } from '../../types';
 import { ErrorMessage, LoadingButton } from '../ui';
 import { Icon } from '../../constants';
+import { useApiCall } from '../../hooks/useApiCall';
 
 const TextToPhonemePage: React.FC<PageProps> = () => {
   const [text, setText] = React.useState('');
   const [normalized, setNormalized] = React.useState('');
   const [g2p, setG2p] = React.useState('');
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState('');
+
+  type PhonemeResponse = { normalized?: string; normalized_text?: string; g2p?: string; g2p_text?: string };
+  const api = useApiCall<PhonemeResponse>({
+    url: '/api/text-to-phoneme',
+    method: 'POST',
+    onSuccess: (data) => {
+      const n = data?.normalized || data?.normalized_text || '';
+      const p = data?.g2p || data?.g2p_text || '';
+      setNormalized(n);
+      setG2p(p);
+    },
+  });
 
   const run = async () => {
     if (!text.trim()) return;
-    setLoading(true);
-    setError('');
     setNormalized('');
     setG2p('');
-    try {
-      const res = await fetch('/api/text-to-phoneme', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ text, lang: 'ko' }),
-      });
-      const raw = await res.text();
-      if (!res.ok) throw new Error(raw || `Request failed: ${res.status}`);
-      let data: any = {};
-      try { data = JSON.parse(raw); } catch {}
-      const n = typeof data?.normalized === 'string' ? data.normalized : (typeof data?.normalized_text === 'string' ? data.normalized_text : '');
-      const p = typeof data?.g2p === 'string' ? data.g2p : (typeof data?.g2p_text === 'string' ? data.g2p_text : '');
-      setNormalized(n);
-      setG2p(p);
-    } catch (e: any) {
-      setError(e?.message || String(e));
-    } finally {
-      setLoading(false);
-    }
+    await api.execute({
+      body: { text, lang: 'ko' },
+    });
   };
 
   return (
@@ -62,14 +55,14 @@ const TextToPhonemePage: React.FC<PageProps> = () => {
           />
           <div className="mt-2 flex items-center gap-2">
             <LoadingButton
-              loading={loading}
-              disabled={loading || !text.trim()}
+              loading={api.loading}
+              disabled={!text.trim()}
               onClick={run}
               loadingText="변환 중…"
               idleText="변환"
               variant="primary"
             />
-            <ErrorMessage error={error} />
+            <ErrorMessage error={api.error} />
           </div>
         </div>
 

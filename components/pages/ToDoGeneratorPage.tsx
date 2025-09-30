@@ -2,6 +2,7 @@ import React from 'react';
 import type { PageProps } from '../../types';
 import { Icon } from '../../constants';
 import { ErrorMessage, LoadingButton } from '../ui';
+import { useApiCall } from '../../hooks/useApiCall';
 
 // Types
 export type TaskNode = {
@@ -15,10 +16,24 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 
 const ToDoGeneratorPage: React.FC<PageProps> = () => {
   const [prompt, setPrompt] = React.useState('');
-  const [generating, setGenerating] = React.useState(false);
-  const [error, setError] = React.useState('');
   const [root, setRoot] = React.useState<TaskNode>({ id: 'root', title: 'root', checked: false, children: [] });
   const [copied, setCopied] = React.useState(false);
+
+  type ToDoResponse = { tasks: any[] };
+  const api = useApiCall<ToDoResponse>({
+    url: '/api/todo-generator',
+    method: 'POST',
+    onSuccess: (data) => {
+      const items = Array.isArray(data?.tasks) ? data.tasks : [];
+      const toTree = (arr: any[]): TaskNode[] => (arr || []).map((t: any) => ({
+        id: uid(),
+        title: String(t?.title ?? ''),
+        checked: false,
+        children: Array.isArray(t?.children) ? toTree(t.children) : [],
+      }));
+      setTasks(toTree(items));
+    },
+  });
 
   const setTasks = (tasks: TaskNode[]) => setRoot(prev => ({ ...prev, children: tasks }));
 
@@ -140,33 +155,9 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
   // Fetch from server
   const generate = async () => {
     if (!prompt.trim()) return;
-    setGenerating(true);
-    setError('');
-    try {
-      const res = await fetch('/api/todo-generator', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ prompt, max_items: 30 }),
-      });
-      const text = await res.text();
-      if (!res.ok) {
-        throw new Error(text || `Failed: ${res.status}`);
-      }
-      let js: any = {};
-      try { js = text ? JSON.parse(text) : {}; } catch {}
-      const items: Array<any> = Array.isArray(js?.tasks) ? js.tasks : [];
-      const toTree = (arr: any[]): TaskNode[] => (arr || []).map((t: any) => ({
-        id: uid(),
-        title: String(t?.title ?? ''),
-        checked: false,
-        children: Array.isArray(t?.children) ? toTree(t.children) : [],
-      }));
-      setTasks(toTree(items));
-    } catch (e: any) {
-      setError(e?.message || String(e));
-    } finally {
-      setGenerating(false);
-    }
+    await api.execute({
+      body: { prompt, max_items: 30 },
+    });
   };
 
   // Editable item component
@@ -281,14 +272,14 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
           <input
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (!generating && prompt.trim()) generate(); } }}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (!api.loading && prompt.trim()) generate(); } }}
             placeholder="예: 3일간 도쿄 여행 준비"
             className="flex-1 min-w-0 px-3 py-2 rounded bg-[#1e1e1e] border border-white/10 text-gray-200 placeholder:text-gray-500"
           />
           <LoadingButton
             onClick={generate}
             disabled={!prompt.trim()}
-            loading={generating}
+            loading={api.loading}
             loadingText="생성 중…"
             idleText="생성"
             variant="secondary"
@@ -311,13 +302,12 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
             <span>{copied ? '복사됨' : '복사'}</span>
           </button>
         </div>
-        <ErrorMessage error={error} className="mt-2" />
+        <ErrorMessage error={api.error} className="mt-2" />
       </section>
 
       {root.children.length === 0 ? (
         <div className="border border-white/10 rounded p-6 text-center text-gray-400 bg-[#1e1e1e]">
           <p className="mb-2">아직 항목이 없습니다.</p>
-          <p className="mb-2">해야할 일을 입력하고 "생성"을 눌러 보세요.</p>
           <p className="text-xs">또는 "+ 작업"으로 수동으로 추가할 수 있습니다.</p>
         </div>
       ) : (
