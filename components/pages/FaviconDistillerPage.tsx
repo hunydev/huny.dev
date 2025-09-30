@@ -150,7 +150,7 @@ const FaviconDistillerPage: React.FC<PageProps> = () => {
     }
   };
 
-  const uds = React.useMemo(() => Array.from(selectedSizes).sort((a, b) => a - b), [selectedSizes]);
+  const uds = React.useMemo(() => Array.from(selectedSizes).sort((a: number, b: number) => a - b), [selectedSizes]);
 
   return (
     <div className="text-gray-300 max-w-6xl mx-auto font-sans leading-relaxed">
