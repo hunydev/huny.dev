@@ -12,7 +12,7 @@ import { getDocBySlug } from './components/pages/docsData';
 import { MONITOR_GROUPS, getMonitorItemById } from './components/pages/monitorData';
 import { extractBaseId, viewForTabId } from './utils/navigation';
 
-const APP_VERSION = '2025.09.30.1';
+const APP_VERSION = '2025.09.30.2';
 
 const TABS_STORAGE_KEY = 'app.openTabs.v1';
 const DEFAULT_TAB_IDS: readonly string[] = ['welcome', 'works', 'domain', 'about'];
