@@ -9,7 +9,7 @@ import {
 import { fetchAllApps, buildPBFileUrl } from '../../utils/pbClient';
 import { Icon } from '../../constants';
 
-const AppsPage: React.FC<PageProps> = ({ routeParams }) => {
+const AppsPage: React.FC<PageProps> = ({ routeParams, onOpenFile }) => {
   const categoryId = (routeParams?.categoryId as AppCategoryId) || 'huny';
   const category = useMemo(() => getAppCategoryById(categoryId), [categoryId]);
   const [allApps, setAllApps] = useState<AppItem[]>(() => []);
@@ -113,7 +113,13 @@ const AppsPage: React.FC<PageProps> = ({ routeParams }) => {
             {apps.map(app => (
               <button
                 key={app.id}
-                onClick={() => setSelected(app)}
+                onClick={() => {
+                  if (app.link) {
+                    onOpenFile(`app:${app.id}`);
+                  } else {
+                    setSelected(app);
+                  }
+                }}
                 className="relative group bg-white/5 border border-white/10 hover:border-white/20 rounded-md p-2 flex flex-col items-center justify-between h-28 md:h-32 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/20"
               >
                 <div className="flex flex-col items-center gap-1">

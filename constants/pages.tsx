@@ -11,6 +11,7 @@ const MonitorPage = React.lazy(() => import('../components/pages/MonitorPage'));
 const NotesBoardPage = React.lazy(() => import('../components/pages/NotesBoardPage'));
 const DomainPage = React.lazy(() => import('../components/pages/DomainPage'));
 const AppsPage = React.lazy(() => import('../components/pages/AppsPage'));
+const AppDetailPage = React.lazy(() => import('../components/pages/AppDetailPage'));
 const DocsPage = React.lazy(() => import('../components/pages/DocsPage'));
 const WorksPage = React.lazy(() => import('../components/pages/WorksPage'));
 const DigitalShelfPage = React.lazy(() => import('../components/pages/DigitalShelfPage'));
@@ -209,5 +210,15 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
         <path d="M10.5 13.5V11a1 1 0 0 1 1-1h2.5" opacity={0.6} />
       </svg>
     ),
+  },
+  apps: {
+    title: 'apps',
+    component: AppsPage,
+    icon: <Icon name="apps" className="mr-2" />,
+  },
+  app: {
+    title: 'app',
+    component: AppDetailPage,
+    icon: <Icon name="apps" className="mr-2" />,
   },
 };

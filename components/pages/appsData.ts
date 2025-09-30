@@ -74,3 +74,7 @@ export const APPS: AppItem[] = [
 export function getAppsByCategoryId(categoryId: AppCategoryId): AppItem[] {
   return APPS.filter((a) => a.categoryId === categoryId);
 }
+
+export function getAppById(id: string): AppItem | undefined {
+  return APPS.find((a) => a.id === id);
+}

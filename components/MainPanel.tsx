@@ -108,6 +108,9 @@ const parseTabRoute = (tabId: string): { baseId: string; routeParams?: Record<st
   if (baseId === 'apps') {
     return { baseId, routeParams: { categoryId: arg || 'huny' } };
   }
+  if (baseId === 'app') {
+    return { baseId, routeParams: { appId: arg || '' } };
+  }
   if (baseId === 'docs') {
     return { baseId, routeParams: { slug: arg || '' } };
   }

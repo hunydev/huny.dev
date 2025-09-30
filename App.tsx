@@ -7,7 +7,7 @@ import { PAGES, ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS, Icon } from './constants';
 import logo from './logo_128x128.png';
 import { getCategoryById } from './components/pages/bookmarksData';
 import { getNoteGroupById } from './components/pages/notesData';
-import { getAppCategoryById } from './components/pages/appsData';
+import { getAppCategoryById, getAppById } from './components/pages/appsData';
 import { getDocBySlug } from './components/pages/docsData';
 import { MONITOR_GROUPS, getMonitorItemById } from './components/pages/monitorData';
 import { extractBaseId, viewForTabId } from './utils/navigation';
@@ -196,6 +196,20 @@ const App: React.FC = () => {
         tabIcon = <img src={category.iconUrl} alt="" className="w-4 h-4 mr-2 rounded-sm" />;
       } else if (category?.emoji) {
         tabIcon = <span className="mr-2 text-sm" aria-hidden>{category.emoji}</span>;
+      }
+    } else if (baseId === 'app') {
+      // Individual app detail tab (app:<appId>)
+      const appId = arg || '';
+      const app = getAppById(appId);
+      if (app) {
+        tabTitle = app.name;
+        if (app.iconUrl) {
+          tabIcon = <img src={app.iconUrl} alt="" className="w-4 h-4 mr-2 rounded-sm" />;
+        } else if (app.iconEmoji) {
+          tabIcon = <span className="mr-2 text-sm" aria-hidden>{app.iconEmoji}</span>;
+        }
+      } else {
+        tabTitle = 'app – unknown';
       }
     } else if (baseId === 'docs') {
       const slug = arg || '';
