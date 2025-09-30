@@ -13,6 +13,7 @@ type TabBarProps = {
 
 const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCloseTab, onTogglePin }) => {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const tabRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
 
   const onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     const el = containerRef.current;
@@ -34,11 +35,32 @@ const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCl
     return [...pinned, ...others];
   }, [openTabs]);
 
+  // Auto-scroll to active tab when it changes
+  React.useEffect(() => {
+    const container = containerRef.current;
+    const activeTabElement = tabRefs.current[activeTabId];
+    
+    if (container && activeTabElement) {
+      const containerRect = container.getBoundingClientRect();
+      const tabRect = activeTabElement.getBoundingClientRect();
+      
+      // Check if tab is not fully visible
+      if (tabRect.left < containerRect.left || tabRect.right > containerRect.right) {
+        activeTabElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'center',
+        });
+      }
+    }
+  }, [activeTabId]);
+
   return (
     <div ref={containerRef} onWheel={onWheel} className="flex bg-[#252526] overflow-x-auto overflow-y-hidden shrink-0">
       {orderedTabs.map(tab => (
         <div
           key={tab.id}
+          ref={(el) => { tabRefs.current[tab.id] = el; }}
           onClick={() => onTabClick(tab.id)}
           className={`flex items-center justify-between cursor-pointer px-4 py-2 border-r border-black/30 flex-shrink-0 whitespace-nowrap ${
             activeTabId === tab.id
