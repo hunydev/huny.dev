@@ -4,10 +4,15 @@
   "description": "Huny.dev Works & Digital Playground",
   "start_url": "/",
   "scope": "/",
+  "id": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#111827",
   "theme_color": "#0ea5e9",
+  "lang": "ko",
+  "dir": "ltr",
+  "categories": ["productivity", "utilities", "developer tools"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icons/notebook_128x128.png",
@@ -22,7 +27,23 @@
     {
       "src": "/icons/notebook_512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/notebook_512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "HunyDev main interface"
     }
   ],
   "shortcuts": [
