@@ -3,7 +3,6 @@ const CACHE_VERSION = `hunydev-cache-v1-${APP_VERSION}`;
 const OFFLINE_URL = '/offline.html';
 const PRECACHE_URLS = [
   '/',
-  '/index.css',
   OFFLINE_URL,
   '/site.webmanifest',
   '/icons/notebook_128x128.png',

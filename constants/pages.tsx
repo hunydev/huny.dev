@@ -167,6 +167,11 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
       </svg>
     ),
   },
+  mascot: {
+    title: 'mascot.gallery',
+    component: MascotGalleryPage,
+    icon: <Icon name="file" className="mr-2" />,
+  },
   project: {
     title: 'project.js',
     component: ProjectPage,
