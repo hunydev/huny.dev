@@ -1,5 +1,7 @@
 import React from 'react';
 import { PageProps } from '../../types';
+import { Badge, ErrorMessage, LoadingButton } from '../ui';
+import { downloadJson, copyToClipboardWithFallback } from '../../utils/download';
 
 // Gemini model used by the server worker
 const GEMINI_MODEL = 'gemini-2.5-flash';
@@ -57,9 +59,6 @@ function extractJsonString(s: string): string {
   return s.trim();
 }
 
-const Badge: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <span className="inline-flex items-center px-2 py-0.5 rounded-md border border-white/10 bg-white/5 text-[11px] text-gray-300">{children}</span>
-);
 
 const SplitSpeakerPage: React.FC<PageProps> = () => {
   const [text, setText] = React.useState<string>('');
@@ -96,31 +95,13 @@ const SplitSpeakerPage: React.FC<PageProps> = () => {
   const copyJson = async () => {
     if (!result) return;
     const payload = JSON.stringify(result, null, 2);
-    try {
-      await navigator.clipboard.writeText(payload);
-      alert('JSON이 클립보드에 복사되었습니다.');
-    } catch {
-      // fallback
-      const blob = new Blob([payload], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'split-speaker.json';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+    const copied = await copyToClipboardWithFallback(payload, 'split-speaker.json');
+    if (copied) alert('JSON이 클립보드에 복사되었습니다.');
   };
 
-  const downloadJson = () => {
+  const handleDownloadJson = () => {
     if (!result) return;
-    const payload = JSON.stringify(result, null, 2);
-    const blob = new Blob([payload], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'split-speaker.json';
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadJson(result, 'split-speaker.json');
   };
 
   return (
@@ -153,36 +134,38 @@ const SplitSpeakerPage: React.FC<PageProps> = () => {
             onChange={(e) => setText(e.target.value)}
           />
           <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={fillSample}
-              className="px-3 py-1.5 rounded bg-white/10 hover:bg-white/20 text-sm"
+            <LoadingButton
+              loading={loading}
               disabled={loading}
-            >
-              예시 채우기
-            </button>
-            <button
-              type="button"
-              onClick={onClear}
+              onClick={fillSample}
+              loadingText=""
+              idleText="예시 채우기"
+              variant="secondary"
               className="px-3 py-1.5 rounded bg-white/10 hover:bg-white/20 text-sm"
+            />
+            <LoadingButton
+              loading={loading}
               disabled={loading || (!text && !result && !error)}
-            >
-              초기화
-            </button>
-            <button
-              type="button"
-              onClick={onRun}
-              className={`px-3 py-1.5 rounded text-sm ${canRun ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-blue-600/40 text-white/70 cursor-not-allowed'}`}
+              onClick={onClear}
+              loadingText=""
+              idleText="초기화"
+              variant="secondary"
+              className="px-3 py-1.5 rounded bg-white/10 hover:bg-white/20 text-sm"
+            />
+            <LoadingButton
+              loading={loading}
               disabled={!canRun}
-            >
-              {loading ? '분석 중…' : '분리 실행'}
-            </button>
+              onClick={onRun}
+              loadingText="분석 중…"
+              idleText="분리 실행"
+              variant="blue"
+            />
           </div>
           <p className="mt-2 text-xs text-amber-300">
             개발 중에는 워커 서버가 필요합니다. 별도 터미널에서 <code>wrangler dev</code>를 실행하고, 프로젝트 루트의 <code>.dev.vars</code>에 <code>GEMINI_API_KEY</code>를 설정하세요. Vite 개발 서버는 <code>/api</code> 요청을 워커(127.0.0.1:8787)로 프록시합니다.
           </p>
           {error && (
-            <div className="mt-3 text-sm text-red-300 whitespace-pre-wrap">{error}</div>
+            <ErrorMessage error={error} className="mt-3 text-sm text-red-300 whitespace-pre-wrap" />
           )}
         </section>
 
@@ -200,15 +183,15 @@ const SplitSpeakerPage: React.FC<PageProps> = () => {
               >
                 복사
               </button>
-              <button
-                type="button"
-                onClick={downloadJson}
-                className="px-2.5 py-1.5 rounded bg-white/10 hover:bg-white/20 text-xs"
+              <LoadingButton
+                loading={false}
                 disabled={!result}
-                title="JSON 파일 저장"
-              >
-                저장
-              </button>
+                onClick={handleDownloadJson}
+                loadingText=""
+                idleText="저장"
+                variant="secondary"
+                className="px-2.5 py-1.5 rounded bg-white/10 hover:bg-white/20 text-xs"
+              />
             </div>
           </div>
 
