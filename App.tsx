@@ -673,7 +673,7 @@ const App: React.FC = () => {
       )}
       {updateToastVisible && (
         <div
-          className="fixed bottom-4 right-4 z-50 max-w-sm rounded-md border border-amber-500/70 bg-[#1e1e1e] shadow-lg text-amber-100 p-4 flex flex-col gap-3"
+          className="fixed right-4 bottom-[calc(env(safe-area-inset-bottom,0)+4rem)] md:bottom-[calc(env(safe-area-inset-bottom,0)+3.5rem)] z-50 max-w-sm rounded-md border border-amber-500/70 bg-[#1e1e1e] shadow-lg text-amber-100 p-4 flex flex-col gap-3"
           role="alert"
           aria-live="assertive"
         >
