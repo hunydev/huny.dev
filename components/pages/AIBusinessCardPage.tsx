@@ -1,6 +1,7 @@
 import React from 'react';
 import type { PageProps } from '../../types';
 import { ErrorMessage, LoadingButton } from '../ui';
+import { useApiCall } from '../../hooks/useApiCall';
 
 // Types for user fields and text boxes
 export type FieldItem = { id: string; label: string; value: string };
@@ -42,12 +43,24 @@ const AIBusinessCardPage: React.FC<PageProps> = () => {
   const [extraImages, setExtraImages] = React.useState<File[]>([]);
   const [extraPrompt, setExtraPrompt] = React.useState('');
   const [includeBack, setIncludeBack] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState('');
 
   // Generated images
   const [frontImg, setFrontImg] = React.useState<string>('');
   const [backImg, setBackImg] = React.useState<string>('');
+
+  type CardResponse = { images: { front: string; back?: string } };
+  const api = useApiCall<CardResponse>({
+    url: '/api/ai-business-card',
+    method: 'POST',
+    onSuccess: (data) => {
+      const front = data?.images?.front || '';
+      const back = data?.images?.back || '';
+      setFrontImg(front);
+      setBackImg(back);
+      setActiveSide('front');
+      resetLayout();
+    },
+  });
 
   // Text overlays per side
   const [textBoxesFront, setTextBoxesFront] = React.useState<TextBox[]>([]);
@@ -160,33 +173,15 @@ const AIBusinessCardPage: React.FC<PageProps> = () => {
   };
 
   const generateDesign = async () => {
-    setLoading(true);
-    setError('');
-    setFrontImg(''); setBackImg('');
-    try {
-      const fd = new FormData();
-      if (logoFile) fd.append('logo', logoFile);
-      for (const f of extraImages) fd.append('extras', f);
-      fd.append('include_back', includeBack ? '1' : '0');
-      fd.append('prompt', extraPrompt || '');
-      // fields as JSON for design cue
-      fd.append('fields', JSON.stringify(fields));
-
-      const res = await fetch('/api/ai-business-card', { method: 'POST', body: fd });
-      const text = await res.text();
-      if (!res.ok) throw new Error(text || `Failed: ${res.status}`);
-      let js: any = {};
-      try { js = text ? JSON.parse(text) : {}; } catch {}
-      const front: string = typeof js?.images?.front === 'string' ? js.images.front : '';
-      const back: string = typeof js?.images?.back === 'string' ? js.images.back : '';
-      setFrontImg(front); setBackImg(back);
-      setActiveSide('front');
-      resetLayout();
-    } catch (e: any) {
-      setError(e?.message || String(e));
-    } finally {
-      setLoading(false);
-    }
+    setFrontImg('');
+    setBackImg('');
+    const fd = new FormData();
+    if (logoFile) fd.append('logo', logoFile);
+    for (const f of extraImages) fd.append('extras', f);
+    fd.append('include_back', includeBack ? '1' : '0');
+    fd.append('prompt', extraPrompt || '');
+    fd.append('fields', JSON.stringify(fields));
+    await api.execute({ body: fd });
   };
 
   const exportPNG = async () => {
@@ -277,7 +272,7 @@ const AIBusinessCardPage: React.FC<PageProps> = () => {
               <LoadingButton
                 onClick={generateDesign}
                 disabled={!logoFile}
-                loading={loading}
+                loading={api.loading}
                 loadingText="생성 중…"
                 idleText="시안 생성"
                 variant="secondary"
@@ -285,7 +280,7 @@ const AIBusinessCardPage: React.FC<PageProps> = () => {
               />
               <button onClick={resetLayout} className="px-3 py-2 rounded text-sm border border-white/10 text-gray-300 hover:bg-white/10">레이아웃 초기화</button>
             </div>
-            <ErrorMessage error={error} />
+            <ErrorMessage error={api.error} />
           </div>
         </div>
 

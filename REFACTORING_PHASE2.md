@@ -241,20 +241,123 @@ const fileUpload = useFileUpload({ accept: 'image/*' });
 
 ## 진행 상황
 
-### 완료
+### ✅ 완료 (세션 1: 2025-09-30)
+
+**Hook 및 컴포넌트 생성**
 - [x] `useApiCall` Hook 생성 및 테스트
 - [x] `useFileUpload` Hook 생성 및 테스트
 - [x] `FileDropZone` 컴포넌트 생성
-- [x] TextCleaningPage 적용 및 빌드 검증
 
-### 진행 중
-- [ ] 나머지 15개 페이지에 useApiCall 적용
-- [ ] 10개 페이지에 useFileUpload + FileDropZone 적용
+**useApiCall 적용 완료 (5개 페이지)**
+- [x] TextCleaningPage - API 호출 로직 Hook화
+- [x] TextToPhonemePage - API 호출 로직 Hook화
+- [x] WebWorkerPage - 코드 생성 API Hook화
+- [x] ToDoGeneratorPage - 할일 생성 API Hook화
+- [x] CoverCrafterPage - 커버 생성 API Hook화
+
+**useApiCall + useFileUpload + FileDropZone 적용 완료 (2개 페이지)**
+- [x] UIClonePage - 파일 업로드 + API 호출 통합
+- [x] StickerGeneratorPage - 파일 업로드 + API 호출 통합
+
+**검증**
+- [x] 빌드 테스트 통과 (npm run build)
+- [x] TypeScript 타입 체크 통과
+- [x] 코드 감소량 확인: 약 350줄 (7개 페이지 × 평균 50줄)
+
+### 🚧 진행 중 (세션 2 대기)
+
+**파일 업로드 페이지 (8개) - 복잡도 중상**
+- [ ] ComicRestylerPage - 만화 스타일 변환 (파일 업로드 + API)
+- [ ] FaviconDistillerPage - 파비콘 생성 (다중 사이즈, 복잡한 상태)
+- [ ] BirdGeneratorPage - 마스코트 생성 (다중 파일 업로드)
+- [ ] AIBusinessCardPage - 명함 생성
+- [ ] MultiVoiceReaderPage - 다중 음성 처리
+- [ ] ImageToSpeechPage - 이미지→음성 변환
+- [ ] SceneToScriptPage - 장면→대본 변환
+
+**API 호출 페이지 (1개)**
+- [ ] SplitSpeakerPage - 화자 분리 (별도 API 함수 사용)
+
+### 📝 세션 간 인수인계 사항
+
+#### 작업 패턴
+1. **import 추가**
+   ```tsx
+   import { useApiCall } from '../../hooks/useApiCall';
+   import { useFileUpload } from '../../hooks/useFileUpload';
+   import { FileDropZone } from '../ui';
+   ```
+
+2. **Hook 초기화**
+   ```tsx
+   const fileUpload = useFileUpload({
+     accept: 'image/*',
+     maxSize: 10 * 1024 * 1024,
+   });
+
+   type ResponseType = { field: string };
+   const api = useApiCall<ResponseType>({
+     url: '/api/endpoint',
+     method: 'POST',
+     onSuccess: (data) => {
+       // 성공 처리
+     },
+   });
+   ```
+
+3. **붙여넣기 지원**
+   ```tsx
+   React.useEffect(() => {
+     window.addEventListener('paste', fileUpload.onPaste);
+     return () => window.removeEventListener('paste', fileUpload.onPaste);
+   }, [fileUpload.onPaste]);
+   ```
+
+4. **UI 교체**
+   - 기존 드래그앤드롭 영역 → `<FileDropZone />` 컴포넌트
+   - `loading={loading}` → `loading={api.loading}`
+   - `disabled={!file}` → `disabled={!fileUpload.file}`
+   - `<ErrorMessage error={error} />` → `<ErrorMessage error={api.error || fileUpload.error} />`
+
+5. **API 호출**
+   ```tsx
+   const generate = async () => {
+     if (!fileUpload.file) {
+       api.setError('파일을 업로드해 주세요.');
+       return;
+     }
+     const fd = new FormData();
+     fd.append('image', fileUpload.file);
+     await api.execute({ body: fd });
+   };
+   ```
+
+#### 주의사항
+- **파일 손상 방지**: MultiEdit 사용 시 정확한 문자열 매칭 필수
+- **단계별 검증**: 각 페이지 수정 후 빌드 테스트
+- **복잡한 페이지**: FaviconDistillerPage, BirdGeneratorPage는 추가 상태 관리 필요
+- **git checkout 준비**: 오류 발생 시 즉시 복원
+
+#### 예상 난이도
+- **쉬움** (20분/페이지): ComicRestylerPage, AIBusinessCardPage
+- **보통** (30분/페이지): ImageToSpeechPage, SceneToScriptPage, MultiVoiceReaderPage
+- **어려움** (45분/페이지): FaviconDistillerPage, BirdGeneratorPage
+- **특수** (20분): SplitSpeakerPage (별도 API 함수 사용)
+
+#### 다음 작업 순서 (권장)
+1. ComicRestylerPage (가장 단순한 파일 업로드 패턴)
+2. AIBusinessCardPage
+3. ImageToSpeechPage, SceneToScriptPage
+4. MultiVoiceReaderPage
+5. BirdGeneratorPage (다중 파일)
+6. FaviconDistillerPage (복잡한 상태)
+7. SplitSpeakerPage (별도 처리)
 
 ### 대기
-- [ ] 빌드 테스트
-- [ ] 런타임 테스트
-- [ ] 문서화 업데이트
+- [ ] 최종 빌드 테스트
+- [ ] 런타임 기능 테스트
+- [ ] 코드 리뷰
+- [ ] PR 생성
 
 ---
 

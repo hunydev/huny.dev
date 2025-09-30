@@ -1,8 +1,10 @@
 import React from 'react';
 import type { PageProps } from '../../types';
 import { Icon } from '../../constants';
-import { ErrorMessage, LoadingButton } from '../ui';
+import { ErrorMessage, LoadingButton, FileDropZone } from '../ui';
 import { downloadFromUrl } from '../../utils/download';
+import { useApiCall } from '../../hooks/useApiCall';
+import { useFileUpload } from '../../hooks/useFileUpload';
 
 const STYLE_OPTIONS: Array<{ id: 'illustration' | 'photoreal'; label: string; description: string }> = [
   {
@@ -18,96 +20,49 @@ const STYLE_OPTIONS: Array<{ id: 'illustration' | 'photoreal'; label: string; de
 ];
 
 const ComicRestylerPage: React.FC<PageProps> = () => {
-  const [file, setFile] = React.useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = React.useState<string>('');
   const [styleId, setStyleId] = React.useState<'illustration' | 'photoreal'>('illustration');
   const [prompt, setPrompt] = React.useState<string>('');
-  const [loading, setLoading] = React.useState<boolean>(false);
-  const [error, setError] = React.useState<string>('');
   const [resultUrl, setResultUrl] = React.useState<string>('');
 
+  const fileUpload = useFileUpload({
+    accept: 'image/*',
+    maxSize: 10 * 1024 * 1024,
+  });
+
+  type ComicResponse = { image: string };
+  const api = useApiCall<ComicResponse>({
+    url: '/api/comic-restyler',
+    method: 'POST',
+    onSuccess: (data) => {
+      const img = data?.image || '';
+      if (!img) {
+        api.setError('이미지 생성에 실패했습니다.');
+        return;
+      }
+      setResultUrl(img);
+    },
+  });
+
   React.useEffect(() => {
-    const onPaste = async (e: ClipboardEvent) => {
-      try {
-        const items = e.clipboardData?.items || [];
-        for (const item of items as any) {
-          if (item.type?.startsWith('image/')) {
-            const f = item.getAsFile();
-            if (f) {
-              setFile(f);
-              const url = URL.createObjectURL(f);
-              setPreviewUrl(url);
-              setError('');
-              setResultUrl('');
-              break;
-            }
-          }
-        }
-      } catch {}
-    };
-    window.addEventListener('paste', onPaste as any);
-    return () => window.removeEventListener('paste', onPaste as any);
-  }, []);
+    window.addEventListener('paste', fileUpload.onPaste);
+    return () => window.removeEventListener('paste', fileUpload.onPaste);
+  }, [fileUpload.onPaste]);
 
   React.useEffect(() => () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
     if (resultUrl && resultUrl.startsWith('blob:')) URL.revokeObjectURL(resultUrl);
-  }, [previewUrl, resultUrl]);
-
-  const handleFile = (f: File | null) => {
-    if (!f) return;
-    if (!f.type.startsWith('image/')) {
-      setError('이미지 파일만 업로드할 수 있습니다.');
-      return;
-    }
-    setFile(f);
-    const url = URL.createObjectURL(f);
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(url);
-    setResultUrl('');
-    setError('');
-  };
-
-  const onDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    try {
-      const f = e.dataTransfer.files?.[0];
-      if (f) handleFile(f);
-    } catch {}
-  };
-
-  const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (f) handleFile(f);
-  };
+  }, [resultUrl]);
 
   const generate = async () => {
-    if (!file) {
-      setError('원본 만화 이미지(컷 만화 짤)를 업로드하거나 붙여넣어 주세요.');
+    if (!fileUpload.file) {
+      api.setError('원본 만화 이미지(컷 만화 짤)를 업로드하거나 붙여넣어 주세요.');
       return;
     }
-    setLoading(true);
-    setError('');
     setResultUrl('');
-    try {
-      const fd = new FormData();
-      fd.append('image', file);
-      fd.append('style', styleId);
-      if (prompt.trim()) fd.append('prompt', prompt.trim());
-
-      const res = await fetch('/api/comic-restyler', { method: 'POST', body: fd });
-      const text = await res.text();
-      if (!res.ok) throw new Error(text || `Failed: ${res.status}`);
-      let data: any = {};
-      try { data = text ? JSON.parse(text) : {}; } catch {}
-      const image: string = typeof data?.image === 'string' ? data.image : '';
-      if (!image) throw new Error('이미지 생성에 실패했습니다.');
-      setResultUrl(image);
-    } catch (e: any) {
-      setError(e?.message || String(e));
-    } finally {
-      setLoading(false);
-    }
+    const fd = new FormData();
+    fd.append('image', fileUpload.file);
+    fd.append('style', styleId);
+    if (prompt.trim()) fd.append('prompt', prompt.trim());
+    await api.execute({ body: fd });
   };
 
   const downloadImage = async () => {
@@ -135,24 +90,24 @@ const ComicRestylerPage: React.FC<PageProps> = () => {
         <h2 className="text-sm font-medium text-white mb-2">입력</h2>
         <div className="grid gap-4 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
           <div>
-            <div
-              className={`relative rounded border border-dashed ${file ? 'border-white/10 bg-black/30' : 'border-white/20 bg-black/20'} p-4 flex flex-col items-center justify-center text-center min-h-[220px]`}
-              onDrop={onDrop}
-              onDragOver={(e) => e.preventDefault()}
-            >
-              {previewUrl ? (
-                <img src={previewUrl} alt="원본" className="max-h-72 object-contain rounded" />
-              ) : (
-                <>
-                  <p className="text-sm text-gray-400">만화 컷 이미지를 드래그&드롭하거나 클릭하여 업로드, 또는 붙여넣기(Ctrl/Cmd + V)</p>
-                  <label className="mt-3 inline-flex items-center gap-2 px-3 py-2 rounded border border-white/10 text-gray-200 hover:bg-white/10 cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M19 21H8V7h11m0-2H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2m-3-4H4a2 2 0 0 0-2 2v14h2V3h12z"/></svg>
-                    <span>이미지 선택</span>
-                    <input type="file" accept="image/*" className="hidden" onChange={onPick} />
-                  </label>
-                </>
-              )}
-            </div>
+            <FileDropZone
+              file={fileUpload.file}
+              previewUrl={fileUpload.previewUrl}
+              error={fileUpload.error}
+              isDragging={fileUpload.isDragging}
+              accept="image/*"
+              onDrop={fileUpload.onDrop}
+              onDragOver={fileUpload.onDragOver}
+              onDragEnter={fileUpload.onDragEnter}
+              onDragLeave={fileUpload.onDragLeave}
+              onInputChange={fileUpload.onInputChange}
+              onReset={() => {
+                fileUpload.reset();
+                setResultUrl('');
+              }}
+              label="만화 컷 이미지를 드래그&드롭하거나 클릭하여 업로드, 또는 붙여넣기(Ctrl/Cmd + V)"
+              previewClassName="max-h-72 object-contain"
+            />
           </div>
           <div className="space-y-4">
             <div>
@@ -191,28 +146,25 @@ const ComicRestylerPage: React.FC<PageProps> = () => {
             </div>
             <div className="flex items-center gap-2">
               <LoadingButton
-                loading={loading}
-                disabled={!file || loading}
+                loading={api.loading}
+                disabled={!fileUpload.file}
                 onClick={generate}
                 loadingText="변환 중…"
                 idleText="변환 실행"
                 variant="primary"
-                className={`px-3 py-2 rounded text-sm border border-white/10 ${file && !loading ? 'hover:bg-white/10 text-white' : 'text-gray-400'} ${loading ? 'opacity-70' : ''}`}
+                className="px-3 py-2 text-sm"
               />
               <LoadingButton
                 loading={false}
                 onClick={() => {
-                  if (previewUrl) URL.revokeObjectURL(previewUrl);
-                  setFile(null);
-                  setPreviewUrl('');
+                  fileUpload.reset();
                   setResultUrl('');
-                  setError('');
                 }}
                 loadingText=""
                 idleText="초기화"
                 variant="secondary"
               />
-              <ErrorMessage error={error} className="text-xs text-amber-300 truncate" />
+              <ErrorMessage error={api.error || fileUpload.error} className="text-xs text-amber-300 truncate" />
             </div>
           </div>
         </div>
