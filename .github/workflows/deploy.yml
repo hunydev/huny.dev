@@ -34,6 +34,42 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Update version
+        run: |
+          # KST 기준 현재 날짜 가져오기
+          CURRENT_DATE=$(TZ='Asia/Seoul' date +'%Y.%m.%d')
+          
+          # service-worker.js에서 현재 버전 추출
+          CURRENT_VERSION=$(grep -oP "const APP_VERSION = '\K[^']+" public/service-worker.js)
+          
+          # 현재 버전에서 날짜와 번호 분리
+          VERSION_DATE=$(echo "$CURRENT_VERSION" | cut -d'.' -f1-3)
+          VERSION_NUMBER=$(echo "$CURRENT_VERSION" | cut -d'.' -f4)
+          
+          # 날짜가 같으면 번호 증가, 다르면 번호 1로 초기화
+          if [ "$VERSION_DATE" = "$CURRENT_DATE" ]; then
+            NEW_NUMBER=$((VERSION_NUMBER + 1))
+          else
+            NEW_NUMBER=1
+          fi
+          
+          NEW_VERSION="${CURRENT_DATE}.${NEW_NUMBER}"
+          
+          echo "Current version: $CURRENT_VERSION"
+          echo "New version: $NEW_VERSION"
+          
+          # service-worker.js 업데이트
+          sed -i "s/const APP_VERSION = '[^']*'/const APP_VERSION = '${NEW_VERSION}'/" public/service-worker.js
+          
+          # App.tsx 업데이트
+          sed -i "s/const APP_VERSION = '[^']*'/const APP_VERSION = '${NEW_VERSION}'/" App.tsx
+          
+          # 변경사항 확인
+          echo "Updated service-worker.js:"
+          grep "APP_VERSION" public/service-worker.js
+          echo "Updated App.tsx:"
+          grep "APP_VERSION" App.tsx
+
       - name: Build
         run: npm run build
 
