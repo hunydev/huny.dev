@@ -63,13 +63,11 @@ interface PasswordModalProps {
 
 const PasswordModal: React.FC<PasswordModalProps> = ({ state, onConfirm, onCancel }) => {
   const [password, setPassword] = React.useState('');
-  const [showPassword, setShowPassword] = React.useState(false);
   const [error, setError] = React.useState('');
   const inputRef = React.useRef<HTMLInputElement | null>(null);
 
   React.useEffect(() => {
     setPassword('');
-    setShowPassword(false);
     setError('');
     const id = window.setTimeout(() => inputRef.current?.focus(), 0);
     return () => window.clearTimeout(id);
@@ -122,7 +120,7 @@ const PasswordModal: React.FC<PasswordModalProps> = ({ state, onConfirm, onCance
             <input
               ref={inputRef}
               id="notes-password-input"
-              type={showPassword ? 'text' : 'password'}
+              type="password"
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
@@ -131,13 +129,6 @@ const PasswordModal: React.FC<PasswordModalProps> = ({ state, onConfirm, onCance
               className="flex-1 rounded border border-white/15 bg-black/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400/60"
               placeholder="암호를 입력하세요"
             />
-            <button
-              type="button"
-              className="rounded border border-white/15 px-2 py-1 text-xs text-gray-300 transition hover:bg-white/10"
-              onClick={() => setShowPassword((prev) => !prev)}
-            >
-              {showPassword ? '숨기기' : '보기'}
-            </button>
           </div>
           {error && <p className="text-xs text-rose-300">{error}</p>}
         </div>
