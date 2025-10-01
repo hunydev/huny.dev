@@ -282,6 +282,12 @@ const App: React.FC = () => {
         if (ids.length > 0) {
           ids.forEach(id => handleOpenFile(id));
           setActiveTabId(ids[ids.length - 1]);
+          // Remove ?open query parameter from URL after opening tabs
+          if (typeof window !== 'undefined' && window.history && window.location.search) {
+            const url = new URL(window.location.href);
+            url.search = ''; // Remove all query parameters
+            window.history.replaceState({}, '', url.pathname + url.hash);
+          }
         }
         return;
       }
