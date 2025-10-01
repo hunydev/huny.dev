@@ -129,7 +129,7 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         const explorerPages = (pageSummariesByView.get(ViewId.Explorer) ?? [])
           .filter(page => !page.id.includes(':'))
           .filter(page => page.id !== 'app'); // Remove 'app' from Explorer section
-        const orderedIds = ['welcome', 'project', 'works', 'about', 'stack', 'digital-shelf', 'mascot', 'domain'];
+        const orderedIds = ['welcome', 'project', 'works', 'about', 'stack', 'digital-shelf', 'mascot', 'domain', 'extensions', 'gear'];
         const sorted = explorerPages.sort((a, b) => {
           const ai = orderedIds.indexOf(a.id);
           const bi = orderedIds.indexOf(b.id);

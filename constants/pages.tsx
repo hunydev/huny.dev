@@ -34,6 +34,7 @@ const CoverCrafterPage = React.lazy(() => import('../components/pages/CoverCraft
 const AvatarDistillerPage = React.lazy(() => import('../components/pages/AvatarDistillerPage'));
 const ImageToSpeechPage = React.lazy(() => import('../components/pages/ImageToSpeechPage'));
 const SceneToScriptPage = React.lazy(() => import('../components/pages/SceneToScriptPage'));
+const GearPage = React.lazy(() => import('../components/pages/GearPage'));
 
 export type PageComponent =
   | React.ComponentType<PageProps>
@@ -185,6 +186,11 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
   about: {
     title: 'about.json',
     component: AboutPage,
+    icon: <Icon name="file" className="mr-2" />,
+  },
+  gear: {
+    title: 'gear.json',
+    component: GearPage,
     icon: <Icon name="file" className="mr-2" />,
   },
   bookmark: {
