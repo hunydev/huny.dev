@@ -25,19 +25,20 @@ const SectionCard: React.FC<{ title: string; subtitle?: string; children: React.
 
 const ImgTile: React.FC<{ src: string; label?: string; h?: number }>= ({ src, label, h = 200 }) => (
   <figure className="flex flex-col items-center gap-2">
-    <img
-      src={src}
-      alt={label || 'mascot'}
-      className="rounded border border-white/10 bg-[#1a1a1a] object-contain"
-      style={{ height: h, width: 'auto', maxWidth: 360 }}
-      loading="lazy"
-    />
+    <div className="flex items-center justify-center rounded border border-white/10 bg-[#1a1a1a]" style={{ height: h, width: 300 }}>
+      <img
+        src={src}
+        alt={label || 'mascot'}
+        className="object-contain max-h-full max-w-full"
+        loading="lazy"
+      />
+    </div>
     {label && <figcaption className="text-xs text-gray-400">{label}</figcaption>}
   </figure>
 );
 
 const ImageRow: React.FC<{ children: React.ReactNode }>= ({ children }) => (
-  <div className="flex flex-wrap items-end gap-4">{children}</div>
+  <div className="flex flex-wrap items-start justify-center gap-6">{children}</div>
 );
 
 const MascotGalleryPage: React.FC<PageProps> = () => {
@@ -55,30 +56,30 @@ const MascotGalleryPage: React.FC<PageProps> = () => {
         </div>
       </div>
 
-      <div className="mt-6 grid gap-4 md:gap-6">
+      <div className="mt-6 max-w-7xl mx-auto grid gap-6">
         {/* Concept */}
         <SectionCard title="Concept" subtitle="최초 콘셉트 이미지">
-          <div className="flex justify-center">
-            <ImgTile src={conceptImg} label="concept.png" h={360} />
+          <div className="flex justify-center py-4">
+            <ImgTile src={conceptImg} label="concept.png" h={400} />
           </div>
         </SectionCard>
 
         {/* Base images */}
         <SectionCard title="Base" subtitle="기본 이미지 (좌→우: side, front, rear)">
           <ImageRow>
-            <ImgTile src={sideImg} label="side.png" h={240} />
-            <ImgTile src={frontImg} label="front.png" h={240} />
-            <ImgTile src={rearImg} label="rear.png" h={240} />
+            <ImgTile src={sideImg} label="side.png" h={280} />
+            <ImgTile src={frontImg} label="front.png" h={280} />
+            <ImgTile src={rearImg} label="rear.png" h={280} />
           </ImageRow>
         </SectionCard>
 
         {/* Variations */}
         <SectionCard title="Variations" subtitle="확장(variation)">
           <ImageRow>
-            <ImgTile src={workImg} label="work.png" h={220} />
-            <ImgTile src={injuryImg} label="injury.png" h={220} />
-            <ImgTile src={cyborgImg} label="cyborg.png" h={220} />
-            <ImgTile src={iconImg} label="icon.png" h={160} />
+            <ImgTile src={workImg} label="work.png" h={260} />
+            <ImgTile src={injuryImg} label="injury.png" h={260} />
+            <ImgTile src={cyborgImg} label="cyborg.png" h={260} />
+            <ImgTile src={iconImg} label="icon.png" h={260} />
           </ImageRow>
         </SectionCard>
       </div>
