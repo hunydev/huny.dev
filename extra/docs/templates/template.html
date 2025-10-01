@@ -3,41 +3,295 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>문서 템플릿 제목</title>
+  <title>문서 제목을 여기에 입력하세요</title>
 </head>
 <body>
-  <h1>문서 제목</h1>
-  <p>이 문서는 HunyDev Docs 템플릿을 기반으로 작성되었습니다. 본문은 HTML로 자유롭게 구성하되, 사이트의 다크 테마와 타이포그래피를 그대로 승계합니다.</p>
-
-  <h2>섹션 제목</h2>
-  <p>설명 텍스트를 입력합니다. 링크는 <a href="https://huny.dev" target="_blank" rel="noopener">이렇게</a> 표기합니다.</p>
-
-  <h3>코드 샘플</h3>
-  <pre><code>// 코드 블록 예시
-function hello(name) {
-  console.log(`Hello, ${name}!`);
-}
-</code></pre>
-
-  <h3>목록</h3>
-  <ul>
-    <li>리스트 아이템 1</li>
-    <li>리스트 아이템 2</li>
-  </ul>
+  <h1>문서 제목을 여기에 입력하세요</h1>
+  <p>
+    이 템플릿은 <strong>HunyDev Docs</strong> 문서 작성을 위한 시작점입니다. 
+    제목, 본문, 코드 예시, 표 등을 포함한 완전한 구조를 제공하며, 
+    각 섹션을 복사하여 자유롭게 조합할 수 있습니다.
+  </p>
 
   <blockquote>
-    인용문 예시 — UI 테마에 맞게 스타일됩니다.
+    <strong>템플릿 사용법</strong>: 이 파일을 복사하여 새 이름으로 저장한 후, 
+    각 섹션의 내용을 실제 문서 내용으로 교체하세요.
   </blockquote>
 
-  <h3>표</h3>
+  <h2>개요</h2>
+  <p>
+    이 섹션에는 문서의 전반적인 소개를 작성합니다. 
+    무엇에 관한 문서인지, 왜 중요한지, 누가 읽어야 하는지를 명확히 설명하세요.
+  </p>
+
+  <ul>
+    <li><strong>대상 독자</strong>: 이 문서를 읽을 주요 대상을 명시합니다.</li>
+    <li><strong>선행 지식</strong>: 독자가 알아야 할 배경 지식을 나열합니다.</li>
+    <li><strong>예상 소요 시간</strong>: 문서를 읽고 실습하는 데 걸리는 시간을 안내합니다.</li>
+  </ul>
+
+  <h2>주요 개념</h2>
+  <p>핵심 개념이나 용어를 정의합니다. 독자가 본문을 이해하는 데 필요한 배경 지식을 제공하세요.</p>
+
+  <h3>개념 1: 예시 개념</h3>
+  <p>
+    첫 번째 주요 개념을 설명합니다. 정의, 목적, 사용 사례를 포함하세요.
+    필요하다면 <a href="https://example.com" target="_blank" rel="noopener">외부 참조 링크</a>를 추가할 수 있습니다.
+  </p>
+
+  <h3>개념 2: 관련 기술</h3>
+  <p>
+    두 번째 개념을 설명합니다. <code>inline code</code>를 사용하여 
+    기술 용어나 코드 조각을 강조할 수 있습니다.
+  </p>
+
+  <h2>시작하기</h2>
+  <p>실제 구현이나 사용 방법을 단계별로 안내합니다.</p>
+
+  <h3>1단계: 환경 설정</h3>
+  <p>필요한 도구나 라이브러리를 설치하는 방법을 설명합니다:</p>
+  <pre><code># 패키지 설치 예시
+npm install package-name
+
+# 또는
+yarn add package-name</code></pre>
+
+  <h3>2단계: 기본 구현</h3>
+  <p>가장 간단한 구현 예시를 제공합니다:</p>
+  <pre><code>// 기본 사용 예시
+import { Example } from 'package-name';
+
+const instance = new Example({
+  option1: 'value1',
+  option2: true
+});
+
+instance.run();</code></pre>
+
+  <h3>3단계: 고급 설정</h3>
+  <p>추가 옵션이나 고급 사용법을 설명합니다:</p>
+  <pre><code>// 고급 설정 예시
+const advancedInstance = new Example({
+  option1: 'value1',
+  option2: true,
+  onSuccess: (result) => {
+    console.log('Success:', result);
+  },
+  onError: (error) => {
+    console.error('Error:', error);
+  }
+});</code></pre>
+
+  <h2>실전 예제</h2>
+  <p>실제 사용 시나리오를 기반으로 한 완전한 예제를 제공합니다.</p>
+
+  <h3>예제 1: 기본 워크플로우</h3>
+  <p>가장 일반적인 사용 사례를 보여줍니다:</p>
+  <pre><code>async function basicWorkflow() {
+  try {
+    const data = await fetchData();
+    const processed = processData(data);
+    const result = await saveData(processed);
+    return result;
+  } catch (error) {
+    console.error('Workflow failed:', error);
+    throw error;
+  }
+}</code></pre>
+
+  <h3>예제 2: 심화 패턴</h3>
+  <p>더 복잡한 사용 패턴이나 최적화 기법을 소개합니다:</p>
+  <pre><code>class AdvancedPattern {
+  constructor(config) {
+    this.config = config;
+    this.cache = new Map();
+  }
+
+  async execute(input) {
+    const cacheKey = this.getCacheKey(input);
+    
+    if (this.cache.has(cacheKey)) {
+      return this.cache.get(cacheKey);
+    }
+
+    const result = await this.process(input);
+    this.cache.set(cacheKey, result);
+    return result;
+  }
+
+  getCacheKey(input) {
+    return JSON.stringify(input);
+  }
+
+  async process(input) {
+    // 실제 처리 로직
+    return input;
+  }
+}</code></pre>
+
+  <h2>API 레퍼런스</h2>
+  <p>주요 메서드나 속성을 표로 정리하여 빠른 참조가 가능하도록 합니다.</p>
+
   <table>
     <thead>
-      <tr><th>항목</th><th>값</th></tr>
+      <tr>
+        <th>메서드/속성</th>
+        <th>타입</th>
+        <th>설명</th>
+      </tr>
     </thead>
     <tbody>
-      <tr><td>예시 A</td><td>123</td></tr>
-      <tr><td>예시 B</td><td>456</td></tr>
+      <tr>
+        <td><code>init(config)</code></td>
+        <td>Function</td>
+        <td>초기화 함수. config 객체를 받아 인스턴스를 설정합니다.</td>
+      </tr>
+      <tr>
+        <td><code>get(key)</code></td>
+        <td>Function</td>
+        <td>지정된 키의 값을 반환합니다. 키가 없으면 undefined를 반환합니다.</td>
+      </tr>
+      <tr>
+        <td><code>set(key, value)</code></td>
+        <td>Function</td>
+        <td>키-값 쌍을 저장합니다. 체이닝을 위해 인스턴스를 반환합니다.</td>
+      </tr>
+      <tr>
+        <td><code>clear()</code></td>
+        <td>Function</td>
+        <td>모든 데이터를 삭제합니다.</td>
+      </tr>
+      <tr>
+        <td><code>size</code></td>
+        <td>Number</td>
+        <td>현재 저장된 항목의 개수를 반환합니다.</td>
+      </tr>
     </tbody>
   </table>
+
+  <h3>설정 옵션</h3>
+  <p>사용 가능한 설정 옵션을 상세히 설명합니다:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>옵션</th>
+        <th>타입</th>
+        <th>기본값</th>
+        <th>설명</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>maxSize</code></td>
+        <td>Number</td>
+        <td>100</td>
+        <td>최대 저장 가능한 항목 수</td>
+      </tr>
+      <tr>
+        <td><code>ttl</code></td>
+        <td>Number</td>
+        <td>3600</td>
+        <td>항목의 유효 시간(초 단위)</td>
+      </tr>
+      <tr>
+        <td><code>autoSave</code></td>
+        <td>Boolean</td>
+        <td>false</td>
+        <td>변경 시 자동 저장 여부</td>
+      </tr>
+      <tr>
+        <td><code>onError</code></td>
+        <td>Function</td>
+        <td>null</td>
+        <td>에러 발생 시 호출되는 콜백</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>자주 묻는 질문</h2>
+
+  <h3>Q1: 어떤 상황에서 이 방법을 사용해야 하나요?</h3>
+  <p>
+    A: 이 방법은 다음과 같은 상황에서 유용합니다:
+  </p>
+  <ul>
+    <li>대규모 데이터를 효율적으로 처리해야 할 때</li>
+    <li>성능 최적화가 중요한 경우</li>
+    <li>확장 가능한 아키텍처가 필요할 때</li>
+  </ul>
+
+  <h3>Q2: 다른 방법과 비교했을 때 장단점은 무엇인가요?</h3>
+  <p>A: 주요 장단점은 다음과 같습니다:</p>
+
+  <p><strong>장점:</strong></p>
+  <ul>
+    <li>높은 성능과 효율성</li>
+    <li>유연한 설정 옵션</li>
+    <li>활발한 커뮤니티 지원</li>
+  </ul>
+
+  <p><strong>단점:</strong></p>
+  <ul>
+    <li>초기 학습 곡선이 있음</li>
+    <li>일부 레거시 환경에서 제한적</li>
+  </ul>
+
+  <h3>Q3: 문제가 발생했을 때 어떻게 디버깅하나요?</h3>
+  <p>다음 단계를 따라 문제를 진단하세요:</p>
+  <ol>
+    <li>콘솔 로그를 확인하여 에러 메시지를 파악합니다.</li>
+    <li>설정 옵션이 올바른지 검증합니다.</li>
+    <li>네트워크 탭에서 요청/응답을 확인합니다.</li>
+    <li>공식 문서나 이슈 트래커를 참조합니다.</li>
+  </ol>
+
+  <h2>모범 사례</h2>
+  <p>효과적인 사용을 위한 권장 사항입니다:</p>
+
+  <blockquote>
+    <strong>중요</strong>: 프로덕션 환경에 배포하기 전에 반드시 충분한 테스트를 수행하세요.
+  </blockquote>
+
+  <ol>
+    <li><strong>에러 처리</strong>: 모든 비동기 작업에 적절한 에러 핸들링을 구현하세요.</li>
+    <li><strong>성능 모니터링</strong>: 주기적으로 성능 지표를 측정하고 최적화하세요.</li>
+    <li><strong>보안</strong>: 민감한 데이터는 암호화하고 환경 변수를 사용하세요.</li>
+    <li><strong>문서화</strong>: 팀원들이 이해할 수 있도록 코드에 주석을 추가하세요.</li>
+    <li><strong>버전 관리</strong>: 의존성 버전을 명확히 명시하고 정기적으로 업데이트하세요.</li>
+  </ol>
+
+  <h2>추가 자료</h2>
+  <p>더 자세한 정보는 다음 리소스를 참고하세요:</p>
+
+  <ul>
+    <li><a href="https://example.com/docs" target="_blank" rel="noopener">공식 문서</a></li>
+    <li><a href="https://example.com/api" target="_blank" rel="noopener">API 레퍼런스</a></li>
+    <li><a href="https://github.com/example/repo" target="_blank" rel="noopener">GitHub 저장소</a></li>
+    <li><a href="https://example.com/community" target="_blank" rel="noopener">커뮤니티 포럼</a></li>
+  </ul>
+
+  <h2>변경 이력</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>버전</th>
+        <th>날짜</th>
+        <th>변경 내용</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1.0.0</td>
+        <td>2025-10-01</td>
+        <td>초기 버전 작성</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <blockquote>
+    <strong>팁</strong>: 이 템플릿의 각 섹션은 선택적입니다. 
+    문서의 성격에 따라 필요한 섹션만 남기고 나머지는 삭제하세요.
+  </blockquote>
 </body>
 </html>

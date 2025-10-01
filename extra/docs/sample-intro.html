@@ -3,21 +3,188 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Docs 소개</title>
+  <title>Docs 소개 및 사용 가이드</title>
 </head>
 <body>
-  <h1>Docs 소개</h1>
-  <p>이 섹션은 <strong>HTML 소스</strong>만으로 문서를 추가할 수 있도록 설계되었습니다. <code>extra/docs/</code> 폴더에 HTML 파일을 두면 사이드바에 자동으로 노출됩니다. 탭과 Recent에도 문서의 <em>title</em>이 그대로 사용됩니다.</p>
+  <h1>Docs 소개 및 사용 가이드</h1>
+  <p>
+    <strong>HunyDev Docs</strong>는 순수 <strong>HTML 파일</strong>만으로 기술 문서를 작성하고 공유할 수 있는 시스템입니다. 
+    <code>extra/docs/</code> 폴더에 HTML 파일을 추가하면 사이드바에 자동으로 등록되며, 
+    앱의 다크 테마와 타이포그래피가 자동으로 적용됩니다.
+  </p>
 
-  <h2>문서 추가 방법</h2>
-  <ol>
-    <li><code>extra/docs/template.html</code> 파일을 복사합니다.</li>
-    <li>파일명을 적절한 슬러그로 변경합니다. 예: <code>my-guide.html</code></li>
-    <li><code>&lt;title&gt;</code> 요소에 사이드바와 탭에 표시할 문서명을 입력합니다.</li>
-    <li>본문을 자유롭게 HTML로 작성합니다.</li>
-  </ol>
+  <blockquote>
+    <strong>핵심 철학</strong>: CSS를 작성할 필요 없이 시맨틱 HTML 요소만으로 아름답고 읽기 쉬운 문서를 작성합니다.
+  </blockquote>
 
-  <h2>스타일</h2>
-  <p>문서의 본문은 앱의 다크 테마에 맞춰 <code>.docs-content</code> 스타일로 감싸져 렌더링됩니다. 색상, 타이포그래피, 코드블록, 표, 인용문 등 기본 요소가 자연스럽게 보이도록 미리 정의되어 있습니다.</p>
+  <h2>주요 특징</h2>
+  <ul>
+    <li><strong>자동 스타일링</strong>: 다크 테마, 타이포그래피, 코드 하이라이팅 등이 자동 적용됩니다.</li>
+    <li><strong>TOC 생성</strong>: h2, h3 제목이 자동으로 우측 사이드바 목차에 표시됩니다.</li>
+    <li><strong>앵커 링크</strong>: 모든 제목에 호버하면 ¶ 앵커 링크가 나타납니다.</li>
+    <li><strong>코드 복사</strong>: 모든 <code>&lt;pre&gt;</code> 블록에 자동으로 복사 버튼이 추가됩니다.</li>
+    <li><strong>원문 보기</strong>: 우측 상단 버튼으로 원본 HTML 소스를 확인할 수 있습니다.</li>
+  </ul>
+
+  <h2>빠른 시작</h2>
+  
+  <h3>1단계: 템플릿 복사</h3>
+  <p>템플릿 파일을 복사하여 새 문서를 만듭니다:</p>
+  <pre><code>cp extra/docs/templates/template.html extra/docs/my-guide.html</code></pre>
+
+  <h3>2단계: 메타데이터 수정</h3>
+  <p>HTML 파일의 <code>&lt;title&gt;</code> 태그를 수정합니다. 이 제목이 사이드바와 탭에 표시됩니다:</p>
+  <pre><code>&lt;title&gt;나만의 가이드 문서&lt;/title&gt;</code></pre>
+
+  <h3>3단계: 본문 작성</h3>
+  <p>
+    <code>&lt;body&gt;</code> 안에 시맨틱 HTML로 콘텐츠를 작성합니다. 
+    사용 가능한 모든 HTML 요소는 <a href="#" target="_blank">Cheatsheet</a>를 참고하세요.
+  </p>
+
+  <h3>4단계: R2 업로드 (선택)</h3>
+  <p>로컬 파일은 자동으로 표시되며, 원하는 경우 R2 스토리지에 업로드하여 <code>r2/</code> 경로로 접근할 수 있습니다.</p>
+
+  <h2>지원되는 HTML 요소</h2>
+  <p>다음 요소들이 앱의 스타일 시스템에 통합되어 있습니다:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>요소</th>
+        <th>용도</th>
+        <th>스타일 특징</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>&lt;h1&gt; ~ &lt;h6&gt;</code></td>
+        <td>제목 계층</td>
+        <td>흰색, 앵커 링크, h2는 하단 보더</td>
+      </tr>
+      <tr>
+        <td><code>&lt;p&gt;</code></td>
+        <td>본문 단락</td>
+        <td>회색 텍스트, 1.75 줄간격</td>
+      </tr>
+      <tr>
+        <td><code>&lt;strong&gt;</code></td>
+        <td>강조</td>
+        <td>굵은 글씨</td>
+      </tr>
+      <tr>
+        <td><code>&lt;em&gt;</code></td>
+        <td>기울임 강조</td>
+        <td>이탤릭</td>
+      </tr>
+      <tr>
+        <td><code>&lt;code&gt;</code></td>
+        <td>인라인 코드</td>
+        <td>배경색, 패딩, 둥근 모서리</td>
+      </tr>
+      <tr>
+        <td><code>&lt;pre&gt;&lt;code&gt;</code></td>
+        <td>코드 블록</td>
+        <td>어두운 배경, 자동 복사 버튼</td>
+      </tr>
+      <tr>
+        <td><code>&lt;a&gt;</code></td>
+        <td>링크</td>
+        <td>파란색, 밑줄</td>
+      </tr>
+      <tr>
+        <td><code>&lt;ul&gt; &lt;ol&gt;</code></td>
+        <td>리스트</td>
+        <td>들여쓰기, 마커 표시</td>
+      </tr>
+      <tr>
+        <td><code>&lt;blockquote&gt;</code></td>
+        <td>인용문</td>
+        <td>좌측 파란 보더, 회색 텍스트</td>
+      </tr>
+      <tr>
+        <td><code>&lt;table&gt;</code></td>
+        <td>표</td>
+        <td>보더, 헤더 배경</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>작성 팁</h2>
+
+  <h3>제목 구조화</h3>
+  <p>h2와 h3를 사용하여 문서 구조를 명확히 하세요. 이들은 자동으로 TOC에 표시됩니다:</p>
+  <pre><code>&lt;h2&gt;메인 섹션&lt;/h2&gt;
+&lt;h3&gt;서브 섹션&lt;/h3&gt;</code></pre>
+
+  <h3>코드 블록</h3>
+  <p>언어를 명시할 필요 없이 <code>&lt;pre&gt;&lt;code&gt;</code>로 감싸면 됩니다. 복사 버튼이 자동 생성됩니다:</p>
+  <pre><code>function example() {
+  return "Hello, World!";
+}</code></pre>
+
+  <h3>링크 참조</h3>
+  <p>외부 링크는 <code>target="_blank"</code>와 <code>rel="noopener"</code>를 권장합니다:</p>
+  <pre><code>&lt;a href="https://example.com" target="_blank" rel="noopener"&gt;외부 링크&lt;/a&gt;</code></pre>
+
+  <h3>인용 강조</h3>
+  <p>중요한 메시지는 blockquote로 강조하세요:</p>
+  <blockquote>
+    이렇게 하면 시각적으로 돋보이며 독자의 주의를 끌 수 있습니다.
+  </blockquote>
+
+  <h2>고급 활용</h2>
+
+  <h3>중첩 리스트</h3>
+  <p>리스트는 중첩하여 계층 구조를 표현할 수 있습니다:</p>
+  <ul>
+    <li>상위 항목
+      <ul>
+        <li>하위 항목 1</li>
+        <li>하위 항목 2</li>
+      </ul>
+    </li>
+    <li>또 다른 상위 항목</li>
+  </ul>
+
+  <h3>복잡한 표</h3>
+  <p>표는 기술 문서에서 정보를 정리하는 강력한 도구입니다:</p>
+  <table>
+    <thead>
+      <tr>
+        <th>메서드</th>
+        <th>설명</th>
+        <th>반환값</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>get()</code></td>
+        <td>데이터를 가져옵니다</td>
+        <td>Promise&lt;T&gt;</td>
+      </tr>
+      <tr>
+        <td><code>set()</code></td>
+        <td>데이터를 저장합니다</td>
+        <td>void</td>
+      </tr>
+      <tr>
+        <td><code>delete()</code></td>
+        <td>데이터를 삭제합니다</td>
+        <td>boolean</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>다음 단계</h2>
+  <ul>
+    <li><a href="#">Template 문서</a>에서 실제 템플릿 구조를 확인하세요.</li>
+    <li><a href="#">Cheatsheet</a>에서 모든 HTML 요소의 렌더링 예시를 보세요.</li>
+    <li>첫 문서를 작성하고 <code>extra/docs/</code>에 저장하세요!</li>
+  </ul>
+
+  <blockquote>
+    <strong>팁</strong>: 모든 문서는 Git으로 버전 관리되므로 자유롭게 실험하고 수정할 수 있습니다.
+  </blockquote>
 </body>
 </html>
