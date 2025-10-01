@@ -1,4 +1,4 @@
-const APP_VERSION = '2025.10.01.3';
+const APP_VERSION = '2025.10.01.4';
 const CACHE_VERSION = `hunydev-cache-v1-${APP_VERSION}`;
 const OFFLINE_URL = '/offline.html';
 const PRECACHE_URLS = [
