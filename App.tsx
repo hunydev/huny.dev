@@ -461,6 +461,65 @@ const App: React.FC = () => {
     });
   }, []);
 
+  const handleOpenInNewWindow = useCallback((tabId: string) => {
+    // Open in new window and close current tab
+    const baseId = extractBaseId(tabId);
+    const url = `${window.location.origin}${window.location.pathname}?open=${baseId}`;
+    window.open(url, '_blank');
+    handleCloseTab(tabId);
+  }, [handleCloseTab]);
+
+  const handleShowInMenu = useCallback((tabId: string) => {
+    const view = viewForTabId(tabId);
+    if (view) {
+      setActiveView(view);
+      if (!isSidebarPinned) {
+        setOverlayOpen(true);
+        setOverlayView(view);
+      }
+    }
+  }, [isSidebarPinned]);
+
+  const handleShareTab = useCallback(async (tabId: string) => {
+    const baseId = extractBaseId(tabId);
+    const url = `${window.location.origin}${window.location.pathname}?open=${baseId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      showInfoToast('탭 링크가 클립보드에 복사되었습니다.');
+    } catch {
+      showInfoToast('링크 복사에 실패했습니다.');
+    }
+  }, [showInfoToast]);
+
+  const handleShareAllTabs = useCallback(async () => {
+    const tabIds = openTabs.map(t => extractBaseId(t.id)).join(',');
+    const url = `${window.location.origin}${window.location.pathname}?open=${tabIds}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      showInfoToast(`${openTabs.length}개 탭 링크가 클립보드에 복사되었습니다.`);
+    } catch {
+      showInfoToast('링크 복사에 실패했습니다.');
+    }
+  }, [openTabs, showInfoToast]);
+
+  const handleCloseTabsToRight = useCallback((tabId: string) => {
+    setOpenTabs(prev => {
+      const idx = prev.findIndex(t => t.id === tabId);
+      if (idx === -1) return prev;
+      
+      // Keep tabs up to and including the selected tab
+      const remaining = prev.slice(0, idx + 1);
+      
+      // If active tab was removed, select the rightmost remaining tab
+      setActiveTabId(curr => {
+        const stillExists = remaining.some(t => t.id === curr);
+        return stillExists ? curr : remaining[remaining.length - 1]?.id || '';
+      });
+      
+      return remaining;
+    });
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!e.altKey || e.metaKey || e.ctrlKey) return;
@@ -997,6 +1056,12 @@ const App: React.FC = () => {
               return next;
             });
           }}
+          onOpenInNewWindow={handleOpenInNewWindow}
+          onShowInMenu={handleShowInMenu}
+          onShareTab={handleShareTab}
+          onShareAllTabs={handleShareAllTabs}
+          onCloseTabsToRight={handleCloseTabsToRight}
+          onCloseAllTabs={handleCloseAllTabs}
         />
         {/* Overlay sidebar when unpinned */}
         {!isSidebarPinned && (
