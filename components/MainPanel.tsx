@@ -296,6 +296,15 @@ const parseTabRoute = (tabId: string): { baseId: string; routeParams?: Record<st
 };
 
 const MainPanel: React.FC<MainPanelProps> = ({ openTabs, activeTabId, onTabClick, onCloseTab, pageProps, onTogglePin, onOpenInNewWindow, onShowInMenu, onShareTab, onShareAllTabs, onCloseTabsToRight, onCloseAllTabs }) => {
+  const apiTask = useApiTask();
+
+  // 활성 탭이 변경될 때 완료된 작업 정리
+  React.useEffect(() => {
+    if (activeTabId) {
+      apiTask.clearTaskIfCompleted(activeTabId);
+    }
+  }, [activeTabId, apiTask]);
+
   // 모든 탭의 컴포넌트를 렌더링하되 활성 탭만 표시
   const tabComponents = React.useMemo(() => {
     return openTabs.map(tab => {
@@ -303,9 +312,14 @@ const MainPanel: React.FC<MainPanelProps> = ({ openTabs, activeTabId, onTabClick
       const pageInfo = PAGES[baseId];
       if (!pageInfo) return null;
 
-      const finalProps: PageProps = { ...pageProps, routeParams };
-      const Comp = pageInfo.component as React.ComponentType<PageProps>;
       const isActive = tab.id === activeTabId;
+      const finalProps: PageProps = { 
+        ...pageProps, 
+        routeParams,
+        currentTabId: tab.id,
+        isActiveTab: isActive,
+      };
+      const Comp = pageInfo.component as React.ComponentType<PageProps>;
 
       return (
         <div

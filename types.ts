@@ -32,8 +32,12 @@ export type PageProps = {
   // API Task management
   apiTask?: {
     startTask: (tabId: string) => void;
-    completeTask: (tabId: string) => void;
+    completeTask: (tabId: string, isActiveTab?: boolean) => void;
     errorTask: (tabId: string, error: string) => void;
     getTaskStatus: (tabId: string) => 'pending' | 'completed' | 'error' | null;
+    clearTaskIfCompleted: (tabId: string) => void;
   };
+  // 현재 탭 정보
+  currentTabId?: string;
+  isActiveTab?: boolean;
 };

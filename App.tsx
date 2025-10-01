@@ -757,6 +757,7 @@ const App: React.FC = () => {
       completeTask: apiTaskContext.completeTask,
       errorTask: apiTaskContext.errorTask,
       getTaskStatus: apiTaskContext.getTaskStatus,
+      clearTaskIfCompleted: apiTaskContext.clearTaskIfCompleted,
     },
   };
 

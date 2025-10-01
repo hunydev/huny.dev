@@ -8,15 +8,17 @@ export type ApiTask = {
   startedAt: number;
   completedAt?: number;
   error?: string;
+  wasActiveWhenCompleted?: boolean; // 완료 시 활성 탭이었는지
 };
 
 type ApiTaskContextType = {
   tasks: Map<string, ApiTask>;
   startTask: (tabId: string) => void;
-  completeTask: (tabId: string) => void;
+  completeTask: (tabId: string, isActiveTab?: boolean) => void;
   errorTask: (tabId: string, error: string) => void;
   getTaskStatus: (tabId: string) => ApiTaskStatus | null;
   hasActiveTasks: () => boolean;
+  clearTaskIfCompleted: (tabId: string) => void; // 탭 방문 시 완료 상태 정리
 };
 
 const ApiTaskContext = createContext<ApiTaskContextType | null>(null);
@@ -44,7 +46,7 @@ export const ApiTaskProvider: React.FC<{ children: React.ReactNode }> = ({ child
     });
   }, []);
 
-  const completeTask = useCallback((tabId: string) => {
+  const completeTask = useCallback((tabId: string, isActiveTab: boolean = false) => {
     setTasks(prev => {
       const next = new Map<string, ApiTask>(prev);
       const task = next.get(tabId);
@@ -54,20 +56,23 @@ export const ApiTaskProvider: React.FC<{ children: React.ReactNode }> = ({ child
           status: 'completed',
           startedAt: task.startedAt,
           completedAt: Date.now(),
+          wasActiveWhenCompleted: isActiveTab,
         };
         next.set(tabId, updated);
         
-        // 5초 후에 완료 상태 자동 정리
-        setTimeout(() => {
-          setTasks(current => {
-            const cleaned = new Map<string, ApiTask>(current);
-            const currentTask = cleaned.get(tabId);
-            if (currentTask?.status === 'completed') {
-              cleaned.delete(tabId);
-            }
-            return cleaned;
-          });
-        }, 5000);
+        // 활성 탭에서 완료된 경우만 5초 후 자동 정리
+        if (isActiveTab) {
+          setTimeout(() => {
+            setTasks(current => {
+              const cleaned = new Map<string, ApiTask>(current);
+              const currentTask = cleaned.get(tabId);
+              if (currentTask?.status === 'completed' && currentTask?.wasActiveWhenCompleted) {
+                cleaned.delete(tabId);
+              }
+              return cleaned;
+            });
+          }, 5000);
+        }
       }
       return next;
     });
@@ -102,6 +107,18 @@ export const ApiTaskProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return false;
   }, [tasks]);
 
+  const clearTaskIfCompleted = useCallback((tabId: string) => {
+    setTasks(prev => {
+      const next = new Map<string, ApiTask>(prev);
+      const task = next.get(tabId);
+      // 비활성 탭에서 완료된 작업만 정리 (사용자가 확인함)
+      if (task?.status === 'completed' && !task.wasActiveWhenCompleted) {
+        next.delete(tabId);
+      }
+      return next;
+    });
+  }, []);
+
   // beforeunload 이벤트 처리
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -125,6 +142,7 @@ export const ApiTaskProvider: React.FC<{ children: React.ReactNode }> = ({ child
     errorTask,
     getTaskStatus,
     hasActiveTasks,
+    clearTaskIfCompleted,
   };
 
   return <ApiTaskContext.Provider value={value}>{children}</ApiTaskContext.Provider>;

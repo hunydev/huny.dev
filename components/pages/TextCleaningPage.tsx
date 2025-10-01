@@ -48,7 +48,7 @@ function diffTokens(a: string[], b: string[]): Op[] {
   return ops;
 }
 
-const TextCleaningPage: React.FC<PageProps> = ({ apiTask }) => {
+const TextCleaningPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const inputRef = React.useRef<HTMLDivElement | null>(null);
   const [rawText, setRawText] = React.useState('');
   const [baseline, setBaseline] = React.useState(''); // captured when Clean runs
@@ -59,6 +59,7 @@ const TextCleaningPage: React.FC<PageProps> = ({ apiTask }) => {
     url: '/api/text-cleaning',
     method: 'POST',
     tabId: 'text-cleaning',
+    isActiveTab,
     apiTask,
     onSuccess: (data) => {
       if (data?.cleaned) setCleaned(data.cleaned);

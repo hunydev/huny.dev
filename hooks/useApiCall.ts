@@ -10,9 +10,10 @@ export type ApiCallOptions<TResponse = any> = {
   onError?: (error: Error) => void;
   // API Task 관리를 위한 옵션
   tabId?: string;
+  isActiveTab?: boolean; // 현재 활성 탭인지 여부
   apiTask?: {
     startTask: (tabId: string) => void;
-    completeTask: (tabId: string) => void;
+    completeTask: (tabId: string, isActiveTab?: boolean) => void;
     errorTask: (tabId: string, error: string) => void;
     getTaskStatus: (tabId: string) => 'pending' | 'completed' | 'error' | null;
   };
@@ -107,9 +108,9 @@ export function useApiCall<TResponse = any>(
 
         setData(parsedData);
         
-        // API Task 완료 추적
+        // API Task 완료 추적 (활성 탭 여부 전달)
         if (options.tabId && options.apiTask) {
-          options.apiTask.completeTask(options.tabId);
+          options.apiTask.completeTask(options.tabId, options.isActiveTab);
         }
         
         options.onSuccess?.(parsedData);
