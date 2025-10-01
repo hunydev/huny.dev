@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: deploy-${{ github.ref }}
@@ -69,6 +69,14 @@ jobs:
           grep "APP_VERSION" public/service-worker.js
           echo "Updated App.tsx:"
           grep "APP_VERSION" App.tsx
+
+      - name: Commit version update
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add App.tsx public/service-worker.js
+          git diff --staged --quiet || git commit -m "chore: update version [skip ci]"
+          git push
 
       - name: Build
         run: npm run build
