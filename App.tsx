@@ -11,6 +11,7 @@ import { getAppCategoryById, getAppById } from './components/pages/appsData';
 import { getDocBySlug } from './components/pages/docsData';
 import { MONITOR_GROUPS, getMonitorItemById } from './components/pages/monitorData';
 import { extractBaseId, viewForTabId } from './utils/navigation';
+import { ApiTaskProvider, useApiTask } from './contexts/ApiTaskContext';
 
 const APP_VERSION = '2025.10.01.2';
 
@@ -18,6 +19,7 @@ const TABS_STORAGE_KEY = 'app.openTabs.v1';
 const DEFAULT_TAB_IDS: readonly string[] = ['welcome', 'works', 'domain', 'about'];
 
 const App: React.FC = () => {
+  const apiTaskContext = useApiTask();
   const [activeView, setActiveView] = useState<ViewId>(ViewId.Explorer);
   const [openTabs, setOpenTabs] = useState<Tab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string>('');
@@ -439,6 +441,13 @@ const App: React.FC = () => {
 
 
   const handleCloseTab = useCallback((tabId: string) => {
+    // API 작업 진행 중인지 확인
+    const taskStatus = apiTaskContext.getTaskStatus(tabId);
+    if (taskStatus === 'pending') {
+      const confirmed = window.confirm('API 요청이 진행 중입니다. 탭을 닫으시겠습니까?');
+      if (!confirmed) return;
+    }
+
     setOpenTabs(prevTabs => {
       const tabIndex = prevTabs.findIndex(tab => tab.id === tabId);
       if (tabIndex === -1) return prevTabs;
@@ -452,7 +461,7 @@ const App: React.FC = () => {
       });
       return newTabs;
     });
-  }, []);
+  }, [apiTaskContext]);
 
   const handleCloseAllTabs = useCallback(() => {
     setOpenTabs(prev => {
@@ -743,6 +752,12 @@ const App: React.FC = () => {
     onOpenFile: handleOpenFile,
     setActiveView: setActiveView,
     onActivityClick: handleActivityItemClick,
+    apiTask: {
+      startTask: apiTaskContext.startTask,
+      completeTask: apiTaskContext.completeTask,
+      errorTask: apiTaskContext.errorTask,
+      getTaskStatus: apiTaskContext.getTaskStatus,
+    },
   };
 
   return (
@@ -1297,4 +1312,12 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+const AppWithProvider: React.FC = () => {
+  return (
+    <ApiTaskProvider>
+      <App />
+    </ApiTaskProvider>
+  );
+};
+
+export default AppWithProvider;

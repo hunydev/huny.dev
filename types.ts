@@ -29,4 +29,11 @@ export type PageProps = {
   setActiveView: (viewId: ViewId) => void;
   onActivityClick?: (viewId: ViewId) => void;
   routeParams?: Record<string, string>;
+  // API Task management
+  apiTask?: {
+    startTask: (tabId: string) => void;
+    completeTask: (tabId: string) => void;
+    errorTask: (tabId: string, error: string) => void;
+    getTaskStatus: (tabId: string) => 'pending' | 'completed' | 'error' | null;
+  };
 };

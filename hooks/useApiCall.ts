@@ -8,6 +8,14 @@ export type ApiCallOptions<TResponse = any> = {
   parseResponse?: (text: string) => TResponse;
   onSuccess?: (data: TResponse) => void;
   onError?: (error: Error) => void;
+  // API Task 관리를 위한 옵션
+  tabId?: string;
+  apiTask?: {
+    startTask: (tabId: string) => void;
+    completeTask: (tabId: string) => void;
+    errorTask: (tabId: string, error: string) => void;
+    getTaskStatus: (tabId: string) => 'pending' | 'completed' | 'error' | null;
+  };
 };
 
 export type ApiCallState<TResponse> = {
@@ -48,6 +56,11 @@ export function useApiCall<TResponse = any>(
   const execute = useCallback(
     async (overrideOptions?: Partial<ApiCallOptions<TResponse>>): Promise<TResponse | null> => {
       const options = { ...defaultOptions, ...overrideOptions };
+      
+      // API Task 시작 추적
+      if (options.tabId && options.apiTask) {
+        options.apiTask.startTask(options.tabId);
+      }
       
       setLoading(true);
       setError('');
@@ -93,11 +106,23 @@ export function useApiCall<TResponse = any>(
         }
 
         setData(parsedData);
+        
+        // API Task 완료 추적
+        if (options.tabId && options.apiTask) {
+          options.apiTask.completeTask(options.tabId);
+        }
+        
         options.onSuccess?.(parsedData);
         return parsedData;
       } catch (e: any) {
         const errorMessage = e?.message || String(e);
         setError(errorMessage);
+        
+        // API Task 에러 추적
+        if (options.tabId && options.apiTask) {
+          options.apiTask.errorTask(options.tabId, errorMessage);
+        }
+        
         options.onError?.(e);
         return null;
       } finally {

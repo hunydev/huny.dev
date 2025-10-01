@@ -2,6 +2,7 @@ import React from 'react';
 import { Tab, PageProps } from '../types';
 import { PAGES } from '../constants';
 import SitemapPage from './pages/SitemapPage';
+import { useApiTask } from '../contexts/ApiTaskContext';
 
 type TabBarProps = {
   openTabs: Tab[];
@@ -18,6 +19,7 @@ type TabBarProps = {
 };
 
 const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCloseTab, onTogglePin, onOpenInNewWindow, onShowInMenu, onShareTab, onShareAllTabs, onCloseTabsToRight, onCloseAllTabs }) => {
+  const apiTask = useApiTask();
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const tabRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
   const [contextMenu, setContextMenu] = React.useState<{ x: number; y: number; tabId: string } | null>(null);
@@ -136,20 +138,29 @@ const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCl
               <span className="text-sm overflow-hidden text-ellipsis whitespace-nowrap max-w-[180px] md:max-w-[240px]">
                 {tab.title}
               </span>
+              {/* API Task Status Badge */}
+              {apiTask.getTaskStatus(tab.id) === 'completed' && (
+                <span className="ml-1 w-1.5 h-1.5 rounded-full bg-green-400" title="API 작업 완료" />
+              )}
             </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onCloseTab(tab.id);
-              }}
-              className="ml-4 p-0.5 rounded hover:bg-white/20"
-              aria-label={`Close tab ${tab.title}`}
-              title="Close"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
-                <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" />
-              </svg>
-            </button>
+            {/* Close button or loading indicator */}
+            {apiTask.getTaskStatus(tab.id) === 'pending' ? (
+              <div className="ml-4 w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" title="API 작업 중..." />
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCloseTab(tab.id);
+                }}
+                className="ml-4 p-0.5 rounded hover:bg-white/20"
+                aria-label={`Close tab ${tab.title}`}
+                title="Close"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+                  <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" />
+                </svg>
+              </button>
+            )}
           </div>
         ))}
       </div>
