@@ -126,7 +126,9 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
   const renderViewContent = (viewId: ViewId) => {
     switch (viewId) {
       case ViewId.Explorer: {
-        const explorerPages = (pageSummariesByView.get(ViewId.Explorer) ?? []).filter(page => !page.id.includes(':'));
+        const explorerPages = (pageSummariesByView.get(ViewId.Explorer) ?? [])
+          .filter(page => !page.id.includes(':'))
+          .filter(page => page.id !== 'app'); // Remove 'app' from Explorer section
         const orderedIds = ['welcome', 'project', 'works', 'about', 'stack', 'digital-shelf', 'mascot', 'domain'];
         const sorted = explorerPages.sort((a, b) => {
           const ai = orderedIds.indexOf(a.id);
@@ -137,7 +139,7 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
           return ai - bi;
         });
         return (
-          <ul className="space-y-1 text-sm">
+          <ul className="space-y-1 text-sm max-h-48 overflow-auto pr-1">
             {sorted.map(page => (
               <li key={page.id}>
                 <button
@@ -186,7 +188,7 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         );
       case ViewId.Apps:
         return (
-          <ul className="space-y-1 text-sm">
+          <ul className="space-y-1 text-sm max-h-48 overflow-auto pr-1">
             {CATEGORIES.map(cat => (
               <li key={cat.id}>
                 <button
@@ -243,7 +245,7 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
       }
       case ViewId.Bookmark:
         return (
-          <ul className="space-y-1 text-sm">
+          <ul className="space-y-1 text-sm max-h-48 overflow-auto pr-1">
             <li>
               <button
                 onClick={() => onOpenFile('bookmark:all')}
@@ -278,7 +280,7 @@ const SitemapPage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         );
       case ViewId.Notes:
         return (
-          <ul className="space-y-1 text-sm">
+          <ul className="space-y-1 text-sm max-h-48 overflow-auto pr-1">
             {NOTE_GROUPS.map(group => (
               <li key={group.id}>
                 <button
