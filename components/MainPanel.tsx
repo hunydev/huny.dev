@@ -296,22 +296,32 @@ const parseTabRoute = (tabId: string): { baseId: string; routeParams?: Record<st
 };
 
 const MainPanel: React.FC<MainPanelProps> = ({ openTabs, activeTabId, onTabClick, onCloseTab, pageProps, onTogglePin, onOpenInNewWindow, onShowInMenu, onShareTab, onShareAllTabs, onCloseTabsToRight, onCloseAllTabs }) => {
-  const activeTab = openTabs.find(tab => tab.id === activeTabId);
-  
-  let ActiveComponentContent: React.ReactNode = null;
-  if (activeTab) {
-    const { baseId, routeParams } = parseTabRoute(activeTab.id);
-    const pageInfo = PAGES[baseId];
-    if (pageInfo) {
+  // 모든 탭의 컴포넌트를 렌더링하되 활성 탭만 표시
+  const tabComponents = React.useMemo(() => {
+    return openTabs.map(tab => {
+      const { baseId, routeParams } = parseTabRoute(tab.id);
+      const pageInfo = PAGES[baseId];
+      if (!pageInfo) return null;
+
       const finalProps: PageProps = { ...pageProps, routeParams };
       const Comp = pageInfo.component as React.ComponentType<PageProps>;
-      ActiveComponentContent = (
-        <React.Suspense fallback={<div className="text-sm text-gray-400">Loading…</div>}>
-          <Comp {...finalProps} />
-        </React.Suspense>
+      const isActive = tab.id === activeTabId;
+
+      return (
+        <div
+          key={tab.id}
+          className={`flex-1 min-w-0 min-h-0 bg-[#1e1e1e] p-4 md:p-8 overflow-y-auto overflow-x-hidden ${isActive ? '' : 'hidden'}`}
+          style={{ minHeight: 0 }}
+        >
+          <React.Suspense fallback={<div className="text-sm text-gray-400">Loading…</div>}>
+            <Comp {...finalProps} />
+          </React.Suspense>
+        </div>
       );
-    }
-  }
+    });
+  }, [openTabs, activeTabId, pageProps]);
+
+  const hasActiveTab = openTabs.some(tab => tab.id === activeTabId);
 
   return (
     <div className="flex-1 min-w-0 min-h-0 flex flex-col" style={{ minHeight: 0 }}>
@@ -328,13 +338,12 @@ const MainPanel: React.FC<MainPanelProps> = ({ openTabs, activeTabId, onTabClick
         onCloseTabsToRight={onCloseTabsToRight}
         onCloseAllTabs={onCloseAllTabs}
       />
-      <div className="flex-1 min-w-0 min-h-0 bg-[#1e1e1e] p-4 md:p-8 overflow-y-auto overflow-x-hidden" style={{ minHeight: 0 }}>
-        {ActiveComponentContent ? (
-          ActiveComponentContent
-        ) : (
+      {tabComponents}
+      {!hasActiveTab && (
+        <div className="flex-1 min-w-0 min-h-0 bg-[#1e1e1e] p-4 md:p-8 overflow-y-auto overflow-x-hidden" style={{ minHeight: 0 }}>
           <SitemapPage {...pageProps} />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
