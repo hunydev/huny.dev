@@ -24,7 +24,7 @@ const STYLE_OPTIONS: Array<{ value: 'illustration' | 'photoreal'; label: string;
 
 const MAX_INPUT_CHARS = 5000;
 
-const CoverCrafterPage: React.FC<PageProps> = () => {
+const CoverCrafterPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [scriptText, setScriptText] = React.useState<string>('');
   const [variant, setVariant] = React.useState<'cover' | 'thumbnail'>('cover');
   const [ratio, setRatio] = React.useState<'wide' | 'square' | 'vertical' | 'story'>('wide');
@@ -37,6 +37,9 @@ const CoverCrafterPage: React.FC<PageProps> = () => {
   const api = useApiCall<CoverResponse>({
     url: '/api/cover-crafter',
     method: 'POST',
+    tabId: 'cover-crafter',
+    isActiveTab,
+    apiTask,
     onSuccess: (data) => {
       const img = data?.image || '';
       if (!img) {

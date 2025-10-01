@@ -19,7 +19,7 @@ const STYLE_OPTIONS: Array<{ id: 'illustration' | 'photoreal'; label: string; de
   },
 ];
 
-const ComicRestylerPage: React.FC<PageProps> = () => {
+const ComicRestylerPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [styleId, setStyleId] = React.useState<'illustration' | 'photoreal'>('illustration');
   const [prompt, setPrompt] = React.useState<string>('');
   const [resultUrl, setResultUrl] = React.useState<string>('');
@@ -33,6 +33,9 @@ const ComicRestylerPage: React.FC<PageProps> = () => {
   const api = useApiCall<ComicResponse>({
     url: '/api/comic-restyler',
     method: 'POST',
+    tabId: 'comic-restyler',
+    isActiveTab,
+    apiTask,
     onSuccess: (data) => {
       const img = data?.image || '';
       if (!img) {

@@ -6,7 +6,7 @@ import { downloadFromUrl } from '../../utils/download';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useFileUpload } from '../../hooks/useFileUpload';
 
-const StickerGeneratorPage: React.FC<PageProps> = () => {
+const StickerGeneratorPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [minCount, setMinCount] = React.useState<number>(10);
   const [prompt, setPrompt] = React.useState<string>('');
   const [transparent, setTransparent] = React.useState<boolean>(false);
@@ -21,6 +21,9 @@ const StickerGeneratorPage: React.FC<PageProps> = () => {
   const api = useApiCall<StickerResponse>({
     url: '/api/sticker-generator',
     method: 'POST',
+    tabId: 'sticker-generator',
+    isActiveTab,
+    apiTask,
     onSuccess: (data) => {
       const dataUrl = data?.image || '';
       if (!dataUrl) {

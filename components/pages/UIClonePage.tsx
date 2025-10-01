@@ -4,7 +4,7 @@ import { ErrorMessage, LoadingButton, FileDropZone } from '../ui';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useFileUpload } from '../../hooks/useFileUpload';
 
-const UIClonePage: React.FC<PageProps> = () => {
+const UIClonePage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [html, setHtml] = React.useState<string>('');
 
   const fileUpload = useFileUpload({
@@ -16,6 +16,9 @@ const UIClonePage: React.FC<PageProps> = () => {
   const api = useApiCall<UICloneResponse>({
     url: '/api/ui-clone',
     method: 'POST',
+    tabId: 'ui-clone',
+    isActiveTab,
+    apiTask,
     onSuccess: (data) => {
       const outHtml = data?.html || '';
       if (!outHtml) {

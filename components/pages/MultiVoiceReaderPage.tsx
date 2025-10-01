@@ -14,7 +14,7 @@ const DEFAULT_TEXT = `작은 항구 마을에 낡은 등대가 있었습니다.
 밤바다 위, 환한 불빛이 멀리까지 퍼지며 사람들의 마음을 든든하게 비추어 주었습니다.
 `;
 
-const MultiVoiceReaderPage: React.FC<PageProps> = () => {
+const MultiVoiceReaderPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [text, setText] = React.useState<string>(DEFAULT_TEXT);
   const [model, setModel] = React.useState<'gemini-2.5-flash-preview-tts' | 'gemini-2.5-pro-preview-tts'>('gemini-2.5-flash-preview-tts');
   const [convertLoading, setConvertLoading] = React.useState<boolean>(false);
@@ -153,6 +153,7 @@ const MultiVoiceReaderPage: React.FC<PageProps> = () => {
     setSegments([]);
     setPrompts([]);
     setConvertLoading(true);
+    apiTask?.startTask('multi-voice-reader');
     try {
       const data: { prompts: Array<{ text: string; name: string; gender: 'male'|'female'|'unknown'; extra: string; directive: string }> }
         = await fetchJsonWithRetry('/api/split-speaker', {
@@ -183,8 +184,11 @@ const MultiVoiceReaderPage: React.FC<PageProps> = () => {
         else initMap[nm] = pickUnique(ALL_VOICES);
       }
       setVoiceMap(initMap);
+      apiTask?.completeTask('multi-voice-reader', isActiveTab);
     } catch (e: any) {
-      setError(e?.message || String(e));
+      const errorMsg = e?.message || String(e);
+      setError(errorMsg);
+      apiTask?.errorTask('multi-voice-reader', errorMsg);
     } finally {
       setConvertLoading(false);
     }
@@ -192,6 +196,7 @@ const MultiVoiceReaderPage: React.FC<PageProps> = () => {
 
   const handleSynthesize = async () => {
     setError('');
+    apiTask?.startTask('multi-voice-reader');
     setAudioInfo(null);
     setSegments([]);
     setSynthLoading(true);
@@ -240,8 +245,11 @@ const MultiVoiceReaderPage: React.FC<PageProps> = () => {
       } else {
         throw new Error('오디오 데이터가 없습니다.');
       }
+      apiTask?.completeTask('multi-voice-reader', isActiveTab);
     } catch (e: any) {
-      setError(e?.message || String(e));
+      const errorMsg = e?.message || String(e);
+      setError(errorMsg);
+      apiTask?.errorTask('multi-voice-reader', errorMsg);
     } finally {
       setSynthLoading(false);
     }

@@ -60,7 +60,7 @@ function extractJsonString(s: string): string {
 }
 
 
-const SplitSpeakerPage: React.FC<PageProps> = () => {
+const SplitSpeakerPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [text, setText] = React.useState<string>('');
   const [loading, setLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string>('');
@@ -76,11 +76,15 @@ const SplitSpeakerPage: React.FC<PageProps> = () => {
     setError('');
     setResult(null);
     setLoading(true);
+    apiTask?.startTask('split-speaker');
     try {
       const out = await callSplitServerFirst(text.trim());
       setResult(out);
+      apiTask?.completeTask('split-speaker', isActiveTab);
     } catch (e: any) {
-      setError(e?.message || String(e));
+      const errorMsg = e?.message || String(e);
+      setError(errorMsg);
+      apiTask?.errorTask('split-speaker', errorMsg);
     } finally {
       setLoading(false);
     }

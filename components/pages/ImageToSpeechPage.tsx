@@ -51,7 +51,7 @@ const formatTime = (seconds: number): string => {
 const isSeekControlKey = (key: string) =>
   key.startsWith('Arrow') || key === 'Home' || key === 'End' || key === 'PageUp' || key === 'PageDown';
 
-const ImageToSpeechPage: React.FC<PageProps> = () => {
+const ImageToSpeechPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [mode, setMode] = React.useState<'simple' | 'description' | 'detail'>('description');
   const [language, setLanguage] = React.useState<string>('ko-KR');
   const [file, setFile] = React.useState<File | null>(null);
@@ -193,6 +193,7 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
     setAudioError('');
     resetPlaybackState();
     setPlayerState('loading');
+    apiTask?.startTask('image-to-speech');
 
     try {
       const formData = new FormData();
@@ -343,9 +344,12 @@ const ImageToSpeechPage: React.FC<PageProps> = () => {
         setPlayerState('stopped');
         setAudioError('자동 재생에 실패했습니다. 재생 버튼을 눌러 주세요.');
       }
+      apiTask?.completeTask('image-to-speech', isActiveTab);
     } catch (err: any) {
       console.error(err);
-      setError(err?.message || '처리 중 오류가 발생했습니다.');
+      const errorMsg = err?.message || '처리 중 오류가 발생했습니다.';
+      setError(errorMsg);
+      apiTask?.errorTask('image-to-speech', errorMsg);
     } finally {
       setLoading(false);
     }

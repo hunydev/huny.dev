@@ -44,7 +44,7 @@ const ensureDataUrl = (maybeBase64: string, format: string) => {
   return `data:${mime};base64,${maybeBase64}`;
 };
 
-const FaviconDistillerPage: React.FC<PageProps> = () => {
+const FaviconDistillerPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [selectedSizes, setSelectedSizes] = React.useState<Set<number>>(() => new Set([32, 64, 128]));
   const [includeIco, setIncludeIco] = React.useState(true);
   const [transparent, setTransparent] = React.useState(true);
@@ -61,6 +61,9 @@ const FaviconDistillerPage: React.FC<PageProps> = () => {
   const api = useApiCall<ApiResponse>({
     url: '/api/favicon-distiller',
     method: 'POST',
+    tabId: 'favicon-distiller',
+    isActiveTab,
+    apiTask,
     onSuccess: (data) => {
       const parsedAssets = parseAssets(data);
       if (parsedAssets.length === 0) {

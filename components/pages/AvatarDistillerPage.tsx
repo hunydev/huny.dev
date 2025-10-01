@@ -4,7 +4,7 @@ import { ErrorMessage, LoadingButton } from '../ui';
 import { downloadFromUrl } from '../../utils/download';
 import { Icon } from '../../constants';
 
-const AvatarDistillerPage: React.FC<PageProps> = () => {
+const AvatarDistillerPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [file, setFile] = React.useState<File | null>(null);
   const [localPreview, setLocalPreview] = React.useState<string>('');
   const [styleId, setStyleId] = React.useState<'illustration' | 'photoreal'>('illustration');
@@ -50,6 +50,7 @@ const AvatarDistillerPage: React.FC<PageProps> = () => {
     setLoading(true);
     setError('');
     setResultUrl('');
+    apiTask?.startTask('avatar-distiller');
     try {
       const fd = new FormData();
       fd.append('image', file);
@@ -64,8 +65,11 @@ const AvatarDistillerPage: React.FC<PageProps> = () => {
       const out = typeof data?.image === 'string' && data.image ? data.image : '';
       if (!out) throw new Error('생성된 아바타 이미지를 확인할 수 없습니다.');
       setResultUrl(out);
+      apiTask?.completeTask('avatar-distiller', isActiveTab);
     } catch (e: any) {
-      setError(e?.message || String(e));
+      const errorMsg = e?.message || String(e);
+      setError(errorMsg);
+      apiTask?.errorTask('avatar-distiller', errorMsg);
     } finally {
       setLoading(false);
     }

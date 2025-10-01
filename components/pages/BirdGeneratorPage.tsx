@@ -12,7 +12,7 @@ type BirdGeneratorResponse = {
   [k: string]: any;
 };
 
-const BirdGeneratorPage: React.FC<PageProps> = () => {
+const BirdGeneratorPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [model, setModel] = React.useState<'gpt-image-1' | 'dall-e-2'>('gpt-image-1');
   const [dimension, setDimension] = React.useState<'2d' | '3d'>('2d');
   const [prompt, setPrompt] = React.useState<string>('A stylized cyberpunk bird with neon highlights, highly detailed');
@@ -25,6 +25,9 @@ const BirdGeneratorPage: React.FC<PageProps> = () => {
   const api = useApiCall<BirdGeneratorResponse>({
     url: '/api/bird-generator',
     method: 'POST',
+    tabId: 'bird-generator',
+    isActiveTab,
+    apiTask,
     onSuccess: (data) => {
       setResults({ urls: Array.isArray(data?.urls) ? data.urls : [], meta: data });
     },

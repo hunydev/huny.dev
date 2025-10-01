@@ -14,7 +14,7 @@ export type TaskNode = {
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
-const ToDoGeneratorPage: React.FC<PageProps> = () => {
+const ToDoGeneratorPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [prompt, setPrompt] = React.useState('');
   const [root, setRoot] = React.useState<TaskNode>({ id: 'root', title: 'root', checked: false, children: [] });
   const [copied, setCopied] = React.useState(false);
@@ -23,6 +23,9 @@ const ToDoGeneratorPage: React.FC<PageProps> = () => {
   const api = useApiCall<ToDoResponse>({
     url: '/api/todo-generator',
     method: 'POST',
+    tabId: 'todo-generator',
+    isActiveTab,
+    apiTask,
     onSuccess: (data) => {
       const items = Array.isArray(data?.tasks) ? data.tasks : [];
       const toTree = (arr: any[]): TaskNode[] => (arr || []).map((t: any) => ({

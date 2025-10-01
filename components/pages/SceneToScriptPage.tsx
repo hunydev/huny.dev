@@ -42,7 +42,7 @@ type SceneToScriptResponse = {
   rawNarrative?: string;
 };
 
-const SceneToScriptPage: React.FC<PageProps> = () => {
+const SceneToScriptPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [file, setFile] = React.useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = React.useState('');
   const [loading, setLoading] = React.useState(false);
@@ -174,6 +174,7 @@ const SceneToScriptPage: React.FC<PageProps> = () => {
     setDuration(0);
     setTrackPosition(0);
     setIsSeeking(false);
+    apiTask?.startTask('scene-to-script');
 
     try {
       const formData = new FormData();
@@ -242,8 +243,11 @@ const SceneToScriptPage: React.FC<PageProps> = () => {
           setAudioError('자동 재생에 실패했습니다. 재생 버튼을 눌러 주세요.');
         }
       }
+      apiTask?.completeTask('scene-to-script', isActiveTab);
     } catch (err: any) {
-      setError(err?.message ?? '요청 중 오류가 발생했습니다.');
+      const errorMsg = err?.message ?? '요청 중 오류가 발생했습니다.';
+      setError(errorMsg);
+      apiTask?.errorTask('scene-to-script', errorMsg);
     } finally {
       setLoading(false);
     }

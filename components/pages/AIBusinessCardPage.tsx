@@ -37,7 +37,7 @@ const fonts = [
   { name: 'Georgia, serif', label: 'Georgia' },
 ];
 
-const AIBusinessCardPage: React.FC<PageProps> = () => {
+const AIBusinessCardPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [fields, setFields] = React.useState<FieldItem[]>(defaultFields);
   const [logoFile, setLogoFile] = React.useState<File | null>(null);
   const [extraImages, setExtraImages] = React.useState<File[]>([]);
@@ -52,6 +52,9 @@ const AIBusinessCardPage: React.FC<PageProps> = () => {
   const api = useApiCall<CardResponse>({
     url: '/api/ai-business-card',
     method: 'POST',
+    tabId: 'ai-business-card',
+    isActiveTab,
+    apiTask,
     onSuccess: (data) => {
       const front = data?.images?.front || '';
       const back = data?.images?.back || '';

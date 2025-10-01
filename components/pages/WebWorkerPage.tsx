@@ -28,7 +28,7 @@ function isOkResult(x: { ok: true; value: any[] } | { ok: false; error: string }
   return (x as any).ok === true;
 }
 
-const WebWorkerPage: React.FC<PageProps> = () => {
+const WebWorkerPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [params, setParams] = React.useState<string>(DEFAULT_PARAMS);
   const [body, setBody] = React.useState<string>(DEFAULT_BODY);
   const [argsText, setArgsText] = React.useState<string>('10');
@@ -41,6 +41,9 @@ const WebWorkerPage: React.FC<PageProps> = () => {
   const codeGenApi = useApiCall<CodeGenResponse>({
     url: '/api/worker-codegen',
     method: 'POST',
+    tabId: 'web-worker',
+    isActiveTab,
+    apiTask,
     onSuccess: (data) => {
       const bodyStr = data?.body || '';
       if (!bodyStr || !/return\s+/m.test(bodyStr)) {

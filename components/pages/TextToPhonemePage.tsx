@@ -4,7 +4,7 @@ import { ErrorMessage, LoadingButton } from '../ui';
 import { Icon } from '../../constants';
 import { useApiCall } from '../../hooks/useApiCall';
 
-const TextToPhonemePage: React.FC<PageProps> = () => {
+const TextToPhonemePage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [text, setText] = React.useState('');
   const [normalized, setNormalized] = React.useState('');
   const [g2p, setG2p] = React.useState('');
@@ -13,6 +13,9 @@ const TextToPhonemePage: React.FC<PageProps> = () => {
   const api = useApiCall<PhonemeResponse>({
     url: '/api/text-to-phoneme',
     method: 'POST',
+    tabId: 'text-to-phoneme',
+    isActiveTab,
+    apiTask,
     onSuccess: (data) => {
       const n = data?.normalized || data?.normalized_text || '';
       const p = data?.g2p || data?.g2p_text || '';
