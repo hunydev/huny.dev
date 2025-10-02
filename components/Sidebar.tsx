@@ -601,25 +601,28 @@ const MonitorView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpe
   );
 };
 
-const BookmarkView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
-  const Item: React.FC<{ id: string; name: string; color: string; count: number }>
-    = ({ id, name, color, count }) => (
-      <button
-        onClick={() => onOpenFile(`bookmark:${id}`)}
-        className="flex items-center justify-between text-left w-full hover:bg-white/10 rounded px-2 py-1.5"
-      >
-        <span className="flex items-center gap-2">
-          <span className="inline-flex items-center justify-center w-5 h-5">
-            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" style={{ color }} aria-hidden>
-              <path d="M4 2.5A1.5 1.5 0 0 1 5.5 1h5A1.5 1.5 0 0 1 12 2.5v11.086a.5.5 0 0 1-.777.416L8 11.972l-3.223 2.03A.5.5 0 0 1 4 13.586z" />
-            </svg>
-          </span>
-          <span className="text-sm">{name}</span>
+const BookmarkItem: React.FC<{ id: string; name: string; color: string; count: number; loading: boolean; onOpenFile: (fileId: string) => void }> = 
+  React.memo(({ id, name, color, count, loading, onOpenFile }) => (
+    <button
+      onClick={() => {
+        console.log('[BookmarkView] clicked, id:', id, 'calling onOpenFile with:', `bookmark:${id}`);
+        onOpenFile(`bookmark:${id}`);
+      }}
+      className="flex items-center justify-between text-left w-full hover:bg-white/10 rounded px-2 py-1.5"
+    >
+      <span className="flex items-center gap-2">
+        <span className="inline-flex items-center justify-center w-5 h-5">
+          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" style={{ color }} aria-hidden>
+            <path d="M4 2.5A1.5 1.5 0 0 1 5.5 1h5A1.5 1.5 0 0 1 12 2.5v11.086a.5.5 0 0 1-.777.416L8 11.972l-3.223 2.03A.5.5 0 0 1 4 13.586z" />
+          </svg>
         </span>
-        {!loading && <span className="text-xs text-gray-400">{count}</span>}
-      </button>
-    );
+        <span className="text-sm">{name}</span>
+      </span>
+      {!loading && <span className="text-xs text-gray-400">{count}</span>}
+    </button>
+  ));
 
+const BookmarkView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
   // Load counts from Notion once (remote-first); fallback to static BOOKMARKS on error.
   const [all, setAll] = React.useState<Bookmark[]>(() => []);
   const [error, setError] = React.useState('');
@@ -658,14 +661,31 @@ const BookmarkView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
     <div className="p-2">
       <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Bookmarks</h2>
       <div className="flex flex-col gap-1">
-        <Item id="all" name="All" color="#9ca3af" count={total} />
+        <BookmarkItem id="all" name="All" color="#9ca3af" count={total} loading={loading} onOpenFile={onOpenFile} />
         {BOOKMARK_CATEGORIES.map(c => (
-          <Item key={c.id} id={c.id} name={c.name} color={c.color} count={count(c.id)} />
+          <BookmarkItem key={c.id} id={c.id} name={c.name} color={c.color} count={count(c.id)} loading={loading} onOpenFile={onOpenFile} />
         ))}
       </div>
     </div>
   );
 };
+
+const NotesItem: React.FC<{ id: string; name: string; color: string; count: number; onOpenFile: (fileId: string) => void }> = 
+  React.memo(({ id, name, color, count, onOpenFile }) => (
+    <button
+      onClick={() => {
+        console.log('[NotesView] clicked, id:', id, 'calling onOpenFile with:', `notes:${id}`);
+        onOpenFile(`notes:${id}`);
+      }}
+      className="flex items-center justify-between text-left w-full hover:bg-white/10 rounded px-2 py-1.5"
+    >
+      <span className="flex items-center gap-2">
+        <span className="inline-flex items-center justify-center w-5 h-5 rounded-sm" style={{ background: color }} />
+        <span className="text-sm">{name}</span>
+      </span>
+      <span className="text-xs text-gray-400">{count}</span>
+    </button>
+  ));
 
 const NotesView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
   const [counts, setCounts] = React.useState<Record<string, number>>(() => {
@@ -683,26 +703,12 @@ const NotesView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenF
     return unsubscribe;
   }, []);
 
-  const Item: React.FC<{ id: string; name: string; color: string; count: number }>
-    = ({ id, name, color, count }) => (
-      <button
-        onClick={() => onOpenFile(`notes:${id}`)}
-        className="flex items-center justify-between text-left w-full hover:bg-white/10 rounded px-2 py-1.5"
-      >
-        <span className="flex items-center gap-2">
-          <span className="inline-flex items-center justify-center w-5 h-5 rounded-sm" style={{ background: color }} />
-          <span className="text-sm">{name}</span>
-        </span>
-        <span className="text-xs text-gray-400">{count}</span>
-      </button>
-    );
-
   return (
     <div className="p-2">
       <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Notes</h2>
       <div className="flex flex-col gap-1">
         {NOTE_GROUPS.map(g => (
-          <Item key={g.id} id={g.id} name={g.name} color={g.color} count={counts[g.id] ?? 0} />
+          <NotesItem key={g.id} id={g.id} name={g.name} color={g.color} count={counts[g.id] ?? 0} onOpenFile={onOpenFile} />
         ))}
       </div>
     </div>
