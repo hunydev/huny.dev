@@ -119,7 +119,7 @@ const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCl
             title={tab.title}
           >
             <div className="flex items-center min-w-0 gap-2">
-              {/* Icon wrapper with pin overlay */}
+              {/* Icon wrapper with pin overlay and badge */}
               <span className="relative inline-flex items-center justify-center group">
                 {/* original icon */}
                 <span className="pointer-events-none">{tab.icon}</span>
@@ -134,14 +134,21 @@ const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCl
                     <path d="M11 12h6v-1l-3-1V2l3-1V0H3v1l3 1v8l-3 1v1h6v7l1 1l1-1z"/>
                   </svg>
                 </button>
+                {/* API Task Status Badge - Android style */}
+                {apiTask.getTaskStatus(tab.id) === 'completed' && (
+                  <span 
+                    className="absolute -top-1 -right-1 flex items-center justify-center min-w-[14px] h-[14px] px-1 rounded-full bg-green-500 border border-[#252526] shadow-sm" 
+                    title="API 작업 완료"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-2.5 h-2.5 text-white">
+                      <path fillRule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clipRule="evenodd" />
+                    </svg>
+                  </span>
+                )}
               </span>
               <span className="text-sm overflow-hidden text-ellipsis whitespace-nowrap max-w-[180px] md:max-w-[240px]">
                 {tab.title}
               </span>
-              {/* API Task Status Badge */}
-              {apiTask.getTaskStatus(tab.id) === 'completed' && (
-                <span className="ml-1 w-1.5 h-1.5 rounded-full bg-green-400" title="API 작업 완료" />
-              )}
             </div>
             {/* Close button or loading indicator */}
             {apiTask.getTaskStatus(tab.id) === 'pending' ? (
