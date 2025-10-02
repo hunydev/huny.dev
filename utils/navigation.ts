@@ -16,6 +16,7 @@ const PLAYGROUND_BASE_IDS = new Set<string>([
   'avatar-distiller',
   'cover-crafter',
   'image-to-speech',
+  'non-native-korean-tts',
   'scene-to-script',
 ]);
 

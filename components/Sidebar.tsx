@@ -283,6 +283,15 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
         <span className="text-sm">Image to Speech</span>
       </button>
       <button
+        onClick={() => onOpenFile('non-native-korean-tts')}
+        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
+      >
+        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
+          <Icon name="nonNativeKoreanTts" className="w-4 h-4" aria-hidden />
+        </span>
+        <span className="text-sm">Non-Native Korean TTS</span>
+      </button>
+      <button
         onClick={() => onOpenFile('scene-to-script')}
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >

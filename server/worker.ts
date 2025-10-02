@@ -2581,6 +2581,94 @@ ${extraPrompt}` : undefined,
           });
         }
       }
+      if (url.pathname === '/api/non-native-korean-tts') {
+        if (request.method !== 'POST') {
+          return new Response('Method Not Allowed', { status: 405 });
+        }
+        try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const body = await request.json<any>().catch(() => ({} as any));
+          const text: string = typeof body?.text === 'string' ? body.text.trim() : '';
+          const instruction: string = typeof body?.instruction === 'string' ? body.instruction.trim() : '';
+          if (!text) {
+            return new Response(JSON.stringify({ error: 'Missing text' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+          if (!instruction) {
+            return new Response(JSON.stringify({ error: 'Missing instruction' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+
+          const ttsModel = 'gemini-2.5-flash-preview-tts';
+          const ttsUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(ttsModel)}:generateContent`;
+
+          // Build prompt with instruction
+          const promptText = `${instruction}\n\n텍스트: ${text}`;
+
+          const ttsRes = await fetch(ttsUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': geminiKey,
+            },
+            body: JSON.stringify({
+              contents: [ { parts: [ { text: promptText } ] } ],
+              generationConfig: {
+                responseModalities: ['AUDIO'],
+                speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Gacrux' } } },
+              },
+              model: ttsModel,
+            }),
+          });
+
+          if (!ttsRes.ok) {
+            const errText = await ttsRes.text().catch(() => '');
+            return new Response(JSON.stringify({ error: `Gemini TTS error: ${ttsRes.status} ${ttsRes.statusText}`, detail: errText }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const ttsJson: any = await ttsRes.json();
+          let b64 = '';
+          let mimeType = '';
+          const cand = Array.isArray(ttsJson?.candidates) ? ttsJson.candidates : [];
+          for (const c of cand) {
+            const parts = c?.content?.parts || [];
+            for (const p of parts) {
+              if (p?.inlineData?.data) {
+                b64 = String(p.inlineData.data);
+                mimeType = String(p.inlineData.mimeType || 'audio/raw;rate=24000');
+                break;
+              }
+            }
+            if (b64) break;
+          }
+          if (!b64) {
+            return new Response(JSON.stringify({ error: 'No audio returned from Gemini TTS', raw: ttsJson }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          let sampleRate = 24000;
+          const m = /rate\s*=\s*(\d{4,6})/.exec(mimeType);
+          if (m) sampleRate = parseInt(m[1], 10);
+
+          return new Response(JSON.stringify({ audio: b64, sampleRate, mimeType }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
       return new Response('Not Found', { status: 404 });
     }
 

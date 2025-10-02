@@ -33,6 +33,7 @@ const FaviconDistillerPage = React.lazy(() => import('../components/pages/Favico
 const CoverCrafterPage = React.lazy(() => import('../components/pages/CoverCrafterPage'));
 const AvatarDistillerPage = React.lazy(() => import('../components/pages/AvatarDistillerPage'));
 const ImageToSpeechPage = React.lazy(() => import('../components/pages/ImageToSpeechPage'));
+const NonNativeKoreanTTSPage = React.lazy(() => import('../components/pages/NonNativeKoreanTTSPage'));
 const SceneToScriptPage = React.lazy(() => import('../components/pages/SceneToScriptPage'));
 const GearPage = React.lazy(() => import('../components/pages/GearPage'));
 const InspirationGalleryPage = React.lazy(() => import('../components/pages/InspirationGalleryPage'));
@@ -136,6 +137,11 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     title: 'Image to Speech',
     component: ImageToSpeechPage,
     icon: <Icon name="imageToSpeech" className="mr-2" />,
+  },
+  'non-native-korean-tts': {
+    title: 'Non-Native Korean TTS',
+    component: NonNativeKoreanTTSPage,
+    icon: <Icon name="nonNativeKoreanTts" className="mr-2" />,
   },
   'scene-to-script': {
     title: 'Scene to Script',
