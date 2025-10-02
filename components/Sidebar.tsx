@@ -601,11 +601,10 @@ const MonitorView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpe
   );
 };
 
-const BookmarkItem: React.FC<{ id: string; name: string; color: string; count: number; loading: boolean; onOpenFile: (fileId: string) => void }> = 
+const BookmarkItem: React.FC<{ id: string; name: string; color: string; count: number; loading: boolean; onOpenFile: (fileId: string) => void }> =
   React.memo(({ id, name, color, count, loading, onOpenFile }) => (
     <button
       onClick={() => {
-        console.log('[BookmarkView] clicked, id:', id, 'calling onOpenFile with:', `bookmark:${id}`);
         onOpenFile(`bookmark:${id}`);
       }}
       className="flex items-center justify-between text-left w-full hover:bg-white/10 rounded px-2 py-1.5"
@@ -670,11 +669,10 @@ const BookmarkView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
   );
 };
 
-const NotesItem: React.FC<{ id: string; name: string; color: string; count: number; onOpenFile: (fileId: string) => void }> = 
+const NotesItem: React.FC<{ id: string; name: string; color: string; count: number; onOpenFile: (fileId: string) => void }> =
   React.memo(({ id, name, color, count, onOpenFile }) => (
     <button
       onClick={() => {
-        console.log('[NotesView] clicked, id:', id, 'calling onOpenFile with:', `notes:${id}`);
         onOpenFile(`notes:${id}`);
       }}
       className="flex items-center justify-between text-left w-full hover:bg-white/10 rounded px-2 py-1.5"

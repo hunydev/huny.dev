@@ -155,7 +155,6 @@ const App: React.FC = () => {
   }, []);
 
   const handleOpenFile = useCallback((fileId: string) => {
-    console.log('[handleOpenFile] called with:', fileId);
     const originalId = fileId;
     let baseId = fileId;
     let arg: string | undefined;
@@ -169,7 +168,6 @@ const App: React.FC = () => {
 
     const pageInfo = PAGES[baseId];
     if (!pageInfo) {
-      console.log('[handleOpenFile] pageInfo not found for baseId:', baseId);
       return;
     }
 
@@ -242,10 +240,8 @@ const App: React.FC = () => {
 
     setOpenTabs(prevTabs => {
       const exists = prevTabs.some(tab => tab.id === originalId);
-      console.log('[handleOpenFile] tab exists?', exists, 'originalId:', originalId);
       if (exists) {
         // 이미 존재하는 탭이면 추가하지 않음
-        console.log('[handleOpenFile] tab already exists, not adding');
         return prevTabs;
       }
       const newTab: Tab = {
@@ -254,11 +250,9 @@ const App: React.FC = () => {
         icon: tabIcon,
         pinned: false,
       };
-      console.log('[handleOpenFile] adding new tab:', newTab);
       return [...prevTabs, newTab];
     });
     // 새 탭이든 기존 탭이든 항상 활성화
-    console.log('[handleOpenFile] setting active tab to:', originalId);
     setActiveTabId(originalId);
     // Update session-based recent list (exclude 'welcome', max 5)
     try {
