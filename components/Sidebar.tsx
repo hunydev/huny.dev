@@ -402,6 +402,10 @@ const ExplorerView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
           <Icon name="file" className="mr-2" />
           <span>gear.json</span>
         </button>
+        <button onClick={() => onOpenFile('inspiration')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
+          <Icon name="file" className="mr-2" />
+          <span>inspiration.gallery</span>
+        </button>
       </div>
     </div>
   </div>

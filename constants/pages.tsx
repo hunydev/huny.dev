@@ -35,6 +35,7 @@ const AvatarDistillerPage = React.lazy(() => import('../components/pages/AvatarD
 const ImageToSpeechPage = React.lazy(() => import('../components/pages/ImageToSpeechPage'));
 const SceneToScriptPage = React.lazy(() => import('../components/pages/SceneToScriptPage'));
 const GearPage = React.lazy(() => import('../components/pages/GearPage'));
+const InspirationGalleryPage = React.lazy(() => import('../components/pages/InspirationGalleryPage'));
 
 export type PageComponent =
   | React.ComponentType<PageProps>
@@ -191,6 +192,11 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
   gear: {
     title: 'gear.json',
     component: GearPage,
+    icon: <Icon name="file" className="mr-2" />,
+  },
+  inspiration: {
+    title: 'inspiration.gallery',
+    component: InspirationGalleryPage,
     icon: <Icon name="file" className="mr-2" />,
   },
   bookmark: {
