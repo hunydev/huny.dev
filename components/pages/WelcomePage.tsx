@@ -183,6 +183,9 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         { id: 'domain', desc: 'TTS history timeline (2015 → present)' },
         { id: 'mascot', desc: 'Brand mascot gallery (concept · base · variations)' },
         { id: 'project', desc: 'Projects listing (code-style)' },
+        { id: 'extensions', desc: 'Extensions & tooling in use' },
+        { id: 'gear', desc: 'Daily devices & hardware setup' },
+        { id: 'inspiration', desc: 'UI/UX inspiration gallery' },
     ];
 
     return (
