@@ -166,7 +166,7 @@ const App: React.FC = () => {
       arg = fileId.slice(baseFromId.length + 1);
     }
 
-    const pageInfo = PAGES[baseId] || PAGES[fileId];
+    const pageInfo = PAGES[baseId];
     if (!pageInfo) return;
 
     let tabTitle = pageInfo.title;
