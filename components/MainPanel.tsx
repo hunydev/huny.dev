@@ -111,7 +111,7 @@ const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCl
             ref={(el) => { tabRefs.current[tab.id] = el; }}
             onClick={() => onTabClick(tab.id)}
             onContextMenu={(e) => handleContextMenu(e, tab.id)}
-            className={`flex items-center justify-between cursor-pointer px-4 py-2 border-r border-black/30 flex-shrink-0 whitespace-nowrap ${
+            className={`flex items-center justify-between cursor-pointer px-4 py-2 border-r border-black/30 flex-shrink-0 whitespace-nowrap select-none ${
               activeTabId === tab.id
                 ? 'bg-[#1e1e1e] text-white border-t-2 border-t-blue-500'
                 : 'bg-[#2d2d2d] text-gray-400 hover:bg-[#3e3e3e]'
