@@ -64,70 +64,93 @@ const CHANNELS: Channel[] = [
 ];
 
 const YouTubeChannelsPage: React.FC<PageProps> = () => {
+  const [mounted, setMounted] = React.useState(false);
   const categories = Array.from(new Set(CHANNELS.map(ch => ch.category)));
 
-  return (
-    <div className="max-w-6xl mx-auto">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">YouTube Channels</h1>
-        <p className="text-gray-400">즐겨보는 IT & 과학 유튜브 채널 모음</p>
-      </header>
+  React.useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(t);
+  }, []);
 
-      {categories.map(category => {
-        const channelsInCategory = CHANNELS.filter(ch => ch.category === category);
-        
-        return (
-          <section key={category} className="mb-10">
-            <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-              <span className="inline-block w-1 h-6 bg-blue-500 rounded"></span>
-              {category}
-            </h2>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {channelsInCategory.map(channel => (
-                <a
-                  key={channel.id}
-                  href={channel.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group bg-[#252526] border border-white/10 rounded-lg p-4 hover:bg-[#2d2d2d] hover:border-blue-500/50 transition-all duration-200"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0">
-                      <img
-                        src={channel.thumbnail}
-                        alt={channel.name}
-                        className="w-16 h-16 rounded-full object-cover"
-                        loading="lazy"
-                        onError={(e) => {
-                          // 썸네일 로드 실패 시 기본 이미지
-                          e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23666"%3E%3Cpath d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/%3E%3C/svg%3E';
-                        }}
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-white font-medium mb-1 group-hover:text-blue-400 transition-colors truncate">
-                        {channel.name}
-                      </h3>
-                      <p className="text-sm text-gray-400 mb-2 truncate">{channel.handle}</p>
-                      <div className="flex items-center gap-1 text-xs text-gray-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-red-500">
-                          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                        </svg>
-                        <span className="group-hover:text-gray-400 transition-colors">YouTube 채널 방문</span>
+  return (
+    <div className="min-h-full">
+      {/* Hero */}
+      <div className="relative overflow-hidden rounded-lg border border-white/10 bg-[#1b1b1b] p-5 md:p-7">
+        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-red-500/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl" />
+        </div>
+        <div className="relative">
+          <h1 className="mt-3 text-2xl md:text-3xl font-semibold text-white">YouTube Channels</h1>
+          <p className="mt-1 text-sm md:text-base text-gray-400">즐겨보는 IT & 과학 유튜브 채널 모음</p>
+        </div>
+      </div>
+
+      {/* Categories */}
+      <div className="mt-6 space-y-6">
+        {categories.map((category, catIdx) => {
+          const channelsInCategory = CHANNELS.filter(ch => ch.category === category);
+          const categoryColor = category === 'IT' ? '#3b82f6' : '#10b981';
+          
+          return (
+            <section
+              key={category}
+              className={`relative rounded-lg border border-white/10 bg-[#202020] p-4 md:p-5 transition-all duration-500 ${
+                mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+              }`}
+              style={{ transitionDelay: `${catIdx * 100}ms` }}
+            >
+              <div className="absolute inset-x-0 top-0 h-1.5 rounded-t-lg" style={{ background: categoryColor, opacity: 0.9 }} aria-hidden />
+              
+              <h2 className="text-white font-medium text-lg md:text-xl flex items-center gap-2 mb-4">
+                <span className="inline-block w-2.5 h-2.5 rounded" style={{ background: categoryColor }} aria-hidden />
+                {category}
+              </h2>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                {channelsInCategory.map((channel, idx) => (
+                  <a
+                    key={channel.id}
+                    href={channel.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`group bg-[#252526] border border-white/10 rounded-lg p-3 md:p-4 hover:bg-[#2d2d2d] hover:border-blue-500/50 transition-all duration-300 ${
+                      mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+                    }`}
+                    style={{ transitionDelay: `${catIdx * 100 + idx * 50}ms` }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0">
+                        <img
+                          src={channel.thumbnail}
+                          alt={channel.name}
+                          className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover"
+                          loading="lazy"
+                          onError={(e) => {
+                            e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23666"%3E%3Cpath d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/%3E%3C/svg%3E';
+                          }}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-white font-medium text-sm md:text-base mb-0.5 group-hover:text-blue-400 transition-colors truncate">
+                          {channel.name}
+                        </h3>
+                        <p className="text-xs md:text-sm text-gray-400 mb-2 truncate">{channel.handle}</p>
+                        <div className="flex items-center gap-1 text-[10px] md:text-xs text-gray-500">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 md:w-4 md:h-4 text-red-500">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                          </svg>
+                          <span className="group-hover:text-gray-400 transition-colors">채널 방문</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </section>
-        );
-      })}
-
-      <footer className="mt-12 pt-6 border-t border-white/10 text-sm text-gray-500">
-        <p>채널 정보는 정기적으로 업데이트됩니다.</p>
-      </footer>
+                  </a>
+                ))}
+              </div>
+            </section>
+          );
+        })}
+      </div>
     </div>
   );
 };
