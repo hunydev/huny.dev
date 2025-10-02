@@ -43,6 +43,19 @@ const GEAR_ITEMS: GearItem[] = [
     note: '고음질 무선 이어폰으로 몰입감 있는 오디오 경험',
   },
   {
+    category: 'Headset',
+    name: 'Sony MDR-7506',
+    model: 'Professional Monitor Headphones',
+    specs: [
+      '40mm 다이나믹 드라이버, 클로즈드백 설계',
+      '주파수 응답 10Hz–20kHz',
+      '63Ω 임피던스 / 106dB 감도',
+      '3m 코일형 OFC 케이블 (금도금 플러그)',
+      '접이식 디자인 & 휴대용 파우치 포함',
+    ],
+    note: '장시간 착용에도 편안한 레퍼런스 모니터링 헤드셋',
+  },
+  {
     category: 'Laptop',
     name: 'Samsung Galaxy Book4 Edge',
     model: '16인치 (NT960XMB)',
@@ -53,7 +66,7 @@ const GEAR_ITEMS: GearItem[] = [
       'Qualcomm Hexagon NPU',
       '61.8Wh 배터리',
       'Wi-Fi 7, Bluetooth 5.3',
-      'Windows 11 ARM Home',
+      'Windows 11 ARM Pro',
     ],
     note: 'ARM 기반 고효율 프로세서로 장시간 사용 가능',
   },
@@ -86,6 +99,19 @@ const GEAR_ITEMS: GearItem[] = [
     note: '컴팩트하고 휴대성 좋은 프리미엄 무선 마우스',
   },
   {
+    category: 'Desktop',
+    name: 'Custom Workstation',
+    model: 'Windows 11 Pro',
+    specs: [
+      'Intel Core i7-14700K @ 3.40GHz (20코어 하이브리드)',
+      '64GB DDR5 RAM (63.7GB usable)',
+      'ASUS PRIME B760M-A 메인보드',
+      'SHPP41-500GM NVMe SSD',
+      'Windows 11 Pro',
+    ],
+    note: '개발과 콘텐츠 제작을 위한 메인 데스크탑 워크스테이션',
+  },
+  {
     category: 'Bag',
     name: 'Techiture Laptop Backpack',
     model: 'CONSPARA',
@@ -104,11 +130,13 @@ const GEAR_ITEMS: GearItem[] = [
 
 const categoryIcons: Record<string, string> = {
   Phone: '📱',
-  Earbuds: '🎧',
+  Earbuds: '🎶',
   Laptop: '💻',
   Keyboard: '⌨️',
   Mouse: '🖱️',
   Bag: '🎒',
+  Headset: '🎧',
+  Desktop: '🖥️',
 };
 
 const GearCard: React.FC<{ item: GearItem }> = ({ item }) => (
