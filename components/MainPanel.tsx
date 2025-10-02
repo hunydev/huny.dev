@@ -15,10 +15,11 @@ type TabBarProps = {
   onShareTab: (tabId: string) => void;
   onShareAllTabs: () => void;
   onCloseTabsToRight: (tabId: string) => void;
+  onCloseOtherTabs: (tabId: string) => void;
   onCloseAllTabs: () => void;
 };
 
-const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCloseTab, onTogglePin, onOpenInNewWindow, onShowInMenu, onShareTab, onShareAllTabs, onCloseTabsToRight, onCloseAllTabs }) => {
+const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCloseTab, onTogglePin, onOpenInNewWindow, onShowInMenu, onShareTab, onShareAllTabs, onCloseTabsToRight, onCloseOtherTabs, onCloseAllTabs }) => {
   const apiTask = useApiTask();
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const tabRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
@@ -250,6 +251,16 @@ const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCl
 
           <button
             className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10 flex items-center gap-2"
+            onClick={() => handleMenuAction(() => onCloseOtherTabs(contextMenu.tabId))}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+              <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+            </svg>
+            다른 탭 닫기
+          </button>
+
+          <button
+            className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10 flex items-center gap-2"
             onClick={() => handleMenuAction(() => onCloseAllTabs())}
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
@@ -275,6 +286,7 @@ type MainPanelProps = {
   onShareTab: (tabId: string) => void;
   onShareAllTabs: () => void;
   onCloseTabsToRight: (tabId: string) => void;
+  onCloseOtherTabs: (tabId: string) => void;
   onCloseAllTabs: () => void;
 };
 
@@ -302,7 +314,7 @@ const parseTabRoute = (tabId: string): { baseId: string; routeParams?: Record<st
   return { baseId };
 };
 
-const MainPanel: React.FC<MainPanelProps> = ({ openTabs, activeTabId, onTabClick, onCloseTab, pageProps, onTogglePin, onOpenInNewWindow, onShowInMenu, onShareTab, onShareAllTabs, onCloseTabsToRight, onCloseAllTabs }) => {
+const MainPanel: React.FC<MainPanelProps> = ({ openTabs, activeTabId, onTabClick, onCloseTab, pageProps, onTogglePin, onOpenInNewWindow, onShowInMenu, onShareTab, onShareAllTabs, onCloseTabsToRight, onCloseOtherTabs, onCloseAllTabs }) => {
   const apiTask = useApiTask();
 
   // 활성 탭이 변경될 때 완료된 작업 정리
@@ -357,6 +369,7 @@ const MainPanel: React.FC<MainPanelProps> = ({ openTabs, activeTabId, onTabClick
         onShareTab={onShareTab}
         onShareAllTabs={onShareAllTabs}
         onCloseTabsToRight={onCloseTabsToRight}
+        onCloseOtherTabs={onCloseOtherTabs}
         onCloseAllTabs={onCloseAllTabs}
       />
       {tabComponents}

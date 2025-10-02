@@ -541,6 +541,18 @@ const App: React.FC = () => {
     });
   }, []);
 
+  const handleCloseOtherTabs = useCallback((tabId: string) => {
+    setOpenTabs(prev => {
+      // 선택한 탭과 고정된 탭만 유지
+      const remaining = prev.filter(t => t.id === tabId || t.pinned);
+      
+      // 선택한 탭을 활성화
+      setActiveTabId(tabId);
+      
+      return remaining;
+    });
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!e.altKey || e.metaKey || e.ctrlKey) return;
@@ -1089,6 +1101,7 @@ const App: React.FC = () => {
           onShareTab={handleShareTab}
           onShareAllTabs={handleShareAllTabs}
           onCloseTabsToRight={handleCloseTabsToRight}
+          onCloseOtherTabs={handleCloseOtherTabs}
           onCloseAllTabs={handleCloseAllTabs}
         />
         {/* Overlay sidebar when unpinned */}
