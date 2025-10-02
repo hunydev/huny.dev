@@ -209,6 +209,15 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
         <span className="text-sm">Text to Phoneme</span>
       </button>
       <button
+        onClick={() => onOpenFile('text-to-emoji')}
+        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
+      >
+        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
+          <Icon name="textToEmoji" className="w-4 h-4" aria-hidden />
+        </span>
+        <span className="text-sm">Text to Emoji</span>
+      </button>
+      <button
         onClick={() => onOpenFile('ui-clone')}
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >

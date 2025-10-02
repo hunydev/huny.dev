@@ -22,6 +22,7 @@ const BirdGeneratorPage = React.lazy(() => import('../components/pages/BirdGener
 const MultiVoiceReaderPage = React.lazy(() => import('../components/pages/MultiVoiceReaderPage'));
 const ToDoGeneratorPage = React.lazy(() => import('../components/pages/ToDoGeneratorPage'));
 const TextToPhonemePage = React.lazy(() => import('../components/pages/TextToPhonemePage'));
+const TextToEmojiPage = React.lazy(() => import('../components/pages/TextToEmojiPage'));
 const WebWorkerPage = React.lazy(() => import('../components/pages/WebWorkerPage'));
 const UIClonePage = React.lazy(() => import('../components/pages/UIClonePage'));
 const ExtensionsPage = React.lazy(() => import('../components/pages/ExtensionsPage'));
@@ -82,6 +83,11 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     title: 'Text to Phoneme',
     component: TextToPhonemePage,
     icon: <Icon name="textToPhoneme" className="mr-2" />,
+  },
+  'text-to-emoji': {
+    title: 'Text to Emoji',
+    component: TextToEmojiPage,
+    icon: <Icon name="textToEmoji" className="mr-2" />,
   },
   'web-worker': {
     title: 'Web Worker',

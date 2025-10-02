@@ -2669,6 +2669,78 @@ ${extraPrompt}` : undefined,
           });
         }
       }
+      if (url.pathname === '/api/text-to-emoji') {
+        if (request.method !== 'POST') {
+          return new Response('Method Not Allowed', { status: 405 });
+        }
+        try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const body = await request.json<any>().catch(() => ({} as any));
+          const text: string = typeof body?.text === 'string' ? body.text.trim() : '';
+          const mode: string = typeof body?.mode === 'string' ? body.mode : 'insert';
+          if (!text) {
+            return new Response(JSON.stringify({ error: 'Missing text' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+
+          let systemPrompt = '';
+          if (mode === 'full') {
+            systemPrompt = '주어진 텍스트의 의미를 emoji만으로 표현하세요. 텍스트는 전혀 사용하지 않고 emoji만 사용합니다. 원문의 의미와 감정을 최대한 정확하게 전달해야 합니다.';
+          } else if (mode === 'partial') {
+            systemPrompt = '주어진 텍스트의 일부를 적절한 emoji로 대치하세요. 텍스트와 emoji를 혼합하여 재미있고 직관적으로 만듭니다. 중요한 단어나 개념을 emoji로 교체하되 전체적인 가독성을 유지하세요.';
+          } else {
+            systemPrompt = '주어진 텍스트를 그대로 유지하되, 적절한 위치에 emoji를 삽입하여 표현을 풍부하게 만드세요. 텍스트의 의미를 보강하거나 감정을 표현하는 emoji를 추가합니다.';
+          }
+
+          const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
+          const gRes = await fetch(geminiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': geminiKey,
+            },
+            body: JSON.stringify({
+              contents: [
+                { parts: [ { text: `${systemPrompt}\n\n입력 텍스트: ${text}\n\n변환된 결과만 출력하고, 설명이나 추가 텍스트는 포함하지 마세요.` } ] },
+              ],
+            }),
+          });
+
+          if (!gRes.ok) {
+            const errText = await gRes.text().catch(() => '');
+            return new Response(JSON.stringify({ error: `Gemini API error: ${gRes.status} ${gRes.statusText}`, detail: errText }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const data: any = await gRes.json();
+          const raw: string = ((data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [])
+            .map((p: any) => p?.text || '')
+            .join('');
+          
+          const result = raw.trim();
+          if (!result) {
+            return new Response(JSON.stringify({ error: 'Empty result from Gemini', raw }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          return new Response(JSON.stringify({ result }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
       return new Response('Not Found', { status: 404 });
     }
 

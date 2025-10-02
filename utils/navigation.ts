@@ -6,6 +6,7 @@ const PLAYGROUND_BASE_IDS = new Set<string>([
   'multi-voice-reader',
   'todo-generator',
   'text-to-phoneme',
+  'text-to-emoji',
   'web-worker',
   'text-cleaning',
   'ai-business-card',
