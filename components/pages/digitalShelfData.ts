@@ -65,6 +65,7 @@ export const DIGITAL_SHELF: DigitalShelfData = {
     { name: 'SecureCRT 9', category: 'SSH', price: 130.9, currency: 'USD', note: 'w/1 Yr of Updates' },
     { name: 'Copy To Notion', category: 'Utilities', price: 59, currency: 'USD', note: 'Lifetime deal pro' },
     { name: 'FastKeys', category: 'Utilities', price: 29, currency: 'USD', note: 'Lifetime license, no subscription' },
+    { name: 'Tabler', category: 'Bundle', price: 69, currency: 'USD', note: 'All Package: Illustrations, Admin Template, Icons, Emails, Avatars' },
   ],
   freeTiers: [
     { name: 'Netlify', kind: 'Hosting', minPlan: '$9/mo' },
