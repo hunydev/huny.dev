@@ -19,7 +19,7 @@ export type Bookmark = {
 };
 
 export const BOOKMARK_CATEGORIES: BookmarkCategory[] = [
-  { id: 'dev', name: 'Development', color: '#60a5fa' },
+  { id: 'development', name: 'Development', color: '#60a5fa' },
   { id: 'design', name: 'Design', color: '#f59e0b' },
   { id: 'tools', name: 'Tools', color: '#10b981' },
   { id: 'learn', name: 'Learning', color: '#a78bfa' },
@@ -31,7 +31,7 @@ export const BOOKMARKS: Bookmark[] = [
   // Development
   {
     id: 'bm-react',
-    categoryId: 'dev',
+    categoryId: 'development',
     name: 'React – Official',
     description: 'A JavaScript library for building user interfaces',
     url: 'https://react.dev',
@@ -42,7 +42,7 @@ export const BOOKMARKS: Bookmark[] = [
   },
   {
     id: 'bm-ts',
-    categoryId: 'dev',
+    categoryId: 'development',
     name: 'TypeScript – Handbook',
     description: 'TypeScript official documentation and handbook',
     url: 'https://www.typescriptlang.org/docs/handbook/intro.html',
