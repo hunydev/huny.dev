@@ -3,6 +3,7 @@ import { Tab, PageProps } from '../types';
 import { PAGES } from '../constants';
 import SitemapPage from './pages/SitemapPage';
 import { useApiTask } from '../contexts/ApiTaskContext';
+import { Icon } from '../constants';
 
 type TabBarProps = {
   openTabs: Tab[];
@@ -134,15 +135,15 @@ const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCl
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M16 3a1 1 0 0 1 .117 1.993l-.117 .007v4.764l1.894 3.789a1 1 0 0 1 .1 .331l.006 .116v2a1 1 0 0 1 -.883 .993l-.117 .007h-4v4a1 1 0 0 1 -1.993 .117l-.007 -.117v-4h-4a1 1 0 0 1 -.993 -.883l-.007 -.117v-2a1 1 0 0 1 .06 -.34l.046 -.107l1.894 -3.791v-4.762a1 1 0 0 1 -.117 -1.993l.117 -.007h8z" />
                   </svg>
                 </button>
-                {/* API Task Status Badge - Android style */}
+                {/* API Task Status Badge */}
                 {apiTask.getTaskStatus(tab.id) === 'completed' && (
                   <span 
-                    className="absolute -top-1 -right-1 flex items-center justify-center min-w-[14px] h-[14px] px-1 rounded-full bg-green-500 border border-[#252526] shadow-sm" 
+                    className="absolute -top-1 -right-1" 
                     title="API 작업 완료"
                   >
                     <svg  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"  fill="none" stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  className="w-2.5 h-2.5 text-white">
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                      <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" fill="currentColor" />
+                      <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" fill="#22c55e" />
                     </svg>
                   </span>
                 )}
@@ -164,9 +165,7 @@ const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCl
                 aria-label={`Close tab ${tab.title}`}
                 title="Close"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
-                  <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" />
-                </svg>
+                <Icon name="close" />
               </button>
             )}
           </div>
