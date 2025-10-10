@@ -3,6 +3,7 @@ import type { PageProps } from '../../types';
 import { ErrorMessage, LoadingButton, FileDropZone } from '../ui';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useFileUpload } from '../../hooks/useFileUpload';
+import { Icon } from '../../constants/icons';
 
 const UIClonePage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [html, setHtml] = React.useState<string>('');
@@ -77,7 +78,7 @@ const UIClonePage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
         <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
           <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-pink-300">
             {/* Layers/clone icon */}
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-6 h-6"><path fill="currentColor" d="M11 22q-.825 0-1.412-.587T9 20v-7q0-.825.588-1.412T11 11h7q.825 0 1.413.588T20 13v7q0 .825-.587 1.413T18 22zM4 15q-.825 0-1.412-.587T2 13V6q0-.825.588-1.412T4 4h7q.825 0 1.413.588T13 6v1H6q-.825 0-1.412.588T4 9z"/></svg>
+            <Icon name="uiClone" className="w-6 h-6"/>
           </span>
           UI Clone
         </h1>

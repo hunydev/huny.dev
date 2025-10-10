@@ -222,7 +222,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >
         <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M11 22q-.825 0-1.412-.587T9 20v-7q0-.825.588-1.412T11 11h7q.825 0 1.413.588T20 13v7q0 .825-.587 1.413T18 22zM4 15q-.825 0-1.412-.587T2 13V6q0-.825.588-1.412T4 4h7q.825 0 1.413.588T13 6v1H6q-.825 0-1.412.588T4 9z" /></svg>
+          <Icon name="uiClone" className="w-4 h-4" aria-hidden />
         </span>
         <span className="text-sm">UI Clone</span>
       </button>
@@ -618,10 +618,7 @@ const BookmarkItem: React.FC<{ id: string; name: string; color: string; count: n
     >
       <span className="flex items-center gap-2">
         <span className="inline-flex items-center justify-center w-5 h-5">
-          <svg  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"  fill="currentColor"  style={{ color }} aria-hidden>
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-            <path d="M14 2a5 5 0 0 1 5 5v14a1 1 0 0 1 -1.555 .832l-5.445 -3.63l-5.444 3.63a1 1 0 0 1 -1.55 -.72l-.006 -.112v-14a5 5 0 0 1 5 -5h4z" />
-          </svg>
+          <Icon name="bookmark" className="w-4 h-4 text-gray-200" style={{ color }}/>
         </span>
         <span className="text-sm">{name}</span>
       </span>

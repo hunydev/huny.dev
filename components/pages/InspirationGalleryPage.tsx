@@ -1,5 +1,6 @@
 import React from 'react';
 import type { PageProps } from '../../types';
+import { Icon } from '../../constants/icons';
 
 interface InspirationItem {
   name: string;
@@ -90,9 +91,11 @@ const InspirationCard: React.FC<{ item: InspirationItem }> = ({ item }) => (
 
     <div className="space-y-3">
       <h4 className="text-xs uppercase tracking-wider text-gray-500 font-medium flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
-          <path d="M8 1a.75.75 0 0 1 .75.75v6.5a.75.75 0 0 1-1.5 0v-6.5A.75.75 0 0 1 8 1ZM5.75 3a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-4.5ZM5 6.75A.75.75 0 0 1 5.75 6h4.5a.75.75 0 0 1 0 1.5h-4.5A.75.75 0 0 1 5 6.75ZM4 9.75A.75.75 0 0 1 4.75 9h6.5a.75.75 0 0 1 0 1.5h-6.5A.75.75 0 0 1 4 9.75ZM4.75 12a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Z" />
-        </svg>
+      <svg  xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  className="w-3.5 h-3.5">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+        <path d="M4 14m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+      </svg>
         영향받은 요소
       </h4>
       <ul className="space-y-2">
@@ -114,9 +117,7 @@ const InspirationCard: React.FC<{ item: InspirationItem }> = ({ item }) => (
           className="inline-flex items-center gap-1.5 text-sm text-blue-400 hover:text-blue-300 transition-colors group-hover:gap-2"
         >
           <span>방문하기</span>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5">
-            <path fillRule="evenodd" d="M4.22 11.78a.75.75 0 0 1 0-1.06L9.44 5.5H5.75a.75.75 0 0 1 0-1.5h5.5a.75.75 0 0 1 .75.75v5.5a.75.75 0 0 1-1.5 0V6.56l-5.22 5.22a.75.75 0 0 1-1.06 0Z" clipRule="evenodd" />
-          </svg>
+          <Icon name="link" className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5"/>
         </a>
       </div>
     )}
