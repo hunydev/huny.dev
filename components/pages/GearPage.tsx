@@ -128,21 +128,91 @@ const GEAR_ITEMS: GearItem[] = [
   },
 ];
 
-const categoryIcons: Record<string, string> = {
-  Phone: '📱',
-  Earbuds: '🎶',
-  Laptop: '💻',
-  Keyboard: '⌨️',
-  Mouse: '🖱️',
-  Bag: '🎒',
-  Headset: '🎧',
-  Desktop: '🖥️',
+const categoryIcons: Record<string, React.ReactElement> = {
+  Phone: (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M6 5a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2v-14z" />
+      <path d="M11 4h2" />
+      <path d="M12 17v.01" />
+    </svg>
+  ),
+  Earbuds: (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M6 4a4 4 0 0 1 4 3.8l0 .2v10.5a1.5 1.5 0 0 1 -3 0v-6.5h-1a4 4 0 0 1 -4 -3.8l0 -.2a4 4 0 0 1 4 -4z" />
+      <path d="M18 4a4 4 0 0 0 -4 3.8l0 .2v10.5a1.5 1.5 0 0 0 3 0v-6.5h1a4 4 0 0 0 4 -3.8l0 -.2a4 4 0 0 0 -4 -4z" />
+    </svg>
+  ),
+  Laptop: (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M3 19l18 0" />
+      <path d="M5 6m0 1a1 1 0 0 1 1 -1h12a1 1 0 0 1 1 1v8a1 1 0 0 1 -1 1h-12a1 1 0 0 1 -1 -1z" />
+    </svg>
+  ),
+  Keyboard: (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M2 6m0 2a2 2 0 0 1 2 -2h16a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-16a2 2 0 0 1 -2 -2z" />
+      <path d="M6 10l0 .01" />
+      <path d="M10 10l0 .01" />
+      <path d="M14 10l0 .01" />
+      <path d="M18 10l0 .01" />
+      <path d="M6 14l0 .01" />
+      <path d="M18 14l0 .01" />
+      <path d="M10 14l4 .01" />
+    </svg>
+  ),
+  Mouse: (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M6 3m0 4a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v10a4 4 0 0 1 -4 4h-4a4 4 0 0 1 -4 -4z" />
+      <path d="M12 7l0 4" />
+    </svg>
+  ),
+  Bag: (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M5 18v-6a6 6 0 0 1 6 -6h2a6 6 0 0 1 6 6v6a3 3 0 0 1 -3 3h-8a3 3 0 0 1 -3 -3z" />
+      <path d="M10 6v-1a2 2 0 1 1 4 0v1" />
+      <path d="M9 21v-4a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v4" />
+      <path d="M11 10h2" />
+    </svg>
+  ),
+  Headset: (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M4 13m0 2a2 2 0 0 1 2 -2h1a2 2 0 0 1 2 2v3a2 2 0 0 1 -2 2h-1a2 2 0 0 1 -2 -2z" />
+      <path d="M15 13m0 2a2 2 0 0 1 2 -2h1a2 2 0 0 1 2 2v3a2 2 0 0 1 -2 2h-1a2 2 0 0 1 -2 -2z" />
+      <path d="M4 15v-3a8 8 0 0 1 16 0v3" />
+    </svg>
+  ),
+  Desktop: (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-10z" />
+      <path d="M7 20h10" />
+      <path d="M9 16v4" />
+      <path d="M15 16v4" />
+    </svg>
+  ),
 };
 
 const GearCard: React.FC<{ item: GearItem }> = ({ item }) => (
   <div className="rounded-lg border border-white/10 bg-[#202020] p-4 md:p-5 hover:border-white/20 transition-colors">
     <div className="flex items-start gap-3 mb-3">
-      <span className="text-3xl" aria-hidden="true">{categoryIcons[item.category] || '📦'}</span>
+      <div className="text-gray-400" aria-hidden="true">
+        {categoryIcons[item.category] || (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" />
+            <path d="M12 12l8 -4.5" />
+            <path d="M12 12l0 9" />
+            <path d="M12 12l-8 -4.5" />
+          </svg>
+        )}
+      </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xs uppercase tracking-wider text-gray-500 font-medium">{item.category}</span>
