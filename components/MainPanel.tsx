@@ -130,8 +130,8 @@ const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCl
                   aria-label={tab.pinned ? 'Unpin tab' : 'Pin tab'}
                   title={tab.pinned ? 'Unpin' : 'Pin'}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
-                    <path d="M11 12h6v-1l-3-1V2l3-1V0H3v1l3 1v8l-3 1v1h6v7l1 1l1-1z"/>
+                  <svg  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"  fill="currentColor"  className="w-3.5 h-3.5">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M16 3a1 1 0 0 1 .117 1.993l-.117 .007v4.764l1.894 3.789a1 1 0 0 1 .1 .331l.006 .116v2a1 1 0 0 1 -.883 .993l-.117 .007h-4v4a1 1 0 0 1 -1.993 .117l-.007 -.117v-4h-4a1 1 0 0 1 -.993 -.883l-.007 -.117v-2a1 1 0 0 1 .06 -.34l.046 -.107l1.894 -3.791v-4.762a1 1 0 0 1 -.117 -1.993l.117 -.007h8z" />
                   </svg>
                 </button>
                 {/* API Task Status Badge - Android style */}
@@ -140,8 +140,9 @@ const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCl
                     className="absolute -top-1 -right-1 flex items-center justify-center min-w-[14px] h-[14px] px-1 rounded-full bg-green-500 border border-[#252526] shadow-sm" 
                     title="API 작업 완료"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-2.5 h-2.5 text-white">
-                      <path fillRule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clipRule="evenodd" />
+                    <svg  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"  fill="none" stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  className="w-2.5 h-2.5 text-white">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" fill="currentColor" />
                     </svg>
                   </span>
                 )}
@@ -183,79 +184,61 @@ const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCl
           }}
         >
           <button
-            className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10 flex items-center gap-2"
+            className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10"
             onClick={() => handleMenuAction(() => onOpenInNewWindow(contextMenu.tabId))}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
-              <path d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z" />
-              <path d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z" />
-            </svg>
             새 창에서 열기
           </button>
 
           <button
-            className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10 flex items-center gap-2"
+            className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10"
             onClick={() => handleMenuAction(() => onShowInMenu(contextMenu.tabId))}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
-              <path fillRule="evenodd" d="M2 4.75A.75.75 0 0 1 2.75 4h10.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75ZM2 8a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 8Zm0 3.25a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Z" clipRule="evenodd" />
-            </svg>
             해당 메뉴 열기
           </button>
 
           <div className="h-px bg-white/10 my-1" />
 
           <button
-            className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10 flex items-center gap-2"
+            className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10 flex items-center justify-between"
             onClick={() => handleMenuAction(() => onShareTab(contextMenu.tabId))}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
-              <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z" />
-            </svg>
-            이 탭 공유
+            <span>이 탭 공유</span>
+            <span className="text-xs text-gray-500">Alt+S</span>
           </button>
 
           <button
-            className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10 flex items-center gap-2"
+            className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10 flex items-center justify-between"
             onClick={() => handleMenuAction(() => onShareAllTabs())}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
-              <path fillRule="evenodd" d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z" clipRule="evenodd" />
-            </svg>
-            모든 탭 공유
+            <span>모든 탭 공유</span>
+            <span className="text-xs text-gray-500">Alt+Shift+S</span>
           </button>
 
           <div className="h-px bg-white/10 my-1" />
 
           <button
-            className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10 flex items-center gap-2"
+            className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10 flex items-center justify-between"
             onClick={() => handleMenuAction(() => onCloseTab(contextMenu.tabId))}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
-              <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" />
-            </svg>
-            이 탭 닫기
+            <span>이 탭 닫기</span>
+            <span className="text-xs text-gray-500">Alt+W</span>
           </button>
 
           <button
-            className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => handleMenuAction(() => onCloseTabsToRight(contextMenu.tabId))}
             disabled={!hasTabsToRight}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
-              <path fillRule="evenodd" d="M12.78 7.595a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06l2.72-2.72-2.72-2.72a.75.75 0 0 1 1.06-1.06l3.25 3.25ZM6.28 7.595a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06l2.72-2.72-2.72-2.72a.75.75 0 0 1 1.06-1.06l3.25 3.25Z" clipRule="evenodd" />
-            </svg>
             우측 탭 닫기
           </button>
 
           <button
-            className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10 flex items-center gap-2"
+            className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10 flex items-center justify-between"
             onClick={() => handleMenuAction(() => onCloseAllTabs())}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
-              <path fillRule="evenodd" d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
-            </svg>
-            모든 탭 닫기
+            <span>모든 탭 닫기</span>
+            <span className="text-xs text-gray-500">Alt+Shift+W</span>
           </button>
         </div>
       )}
