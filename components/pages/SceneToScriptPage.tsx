@@ -1,5 +1,6 @@
 import React from 'react';
 import { PageProps } from '../../types';
+import { Icon } from '../../constants';
 import { ErrorMessage, LoadingButton } from '../ui';
 
 const genderLabel = (gender: 'male' | 'female' | 'unknown') => {
@@ -478,13 +479,7 @@ const SceneToScriptPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
       <header className="mb-6">
         <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
           <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-blue-300">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-6 h-6">
-              <rect x={3} y={3} width={18} height={18} rx={2} />
-              <path d="M7 8h7" />
-              <path d="M7 12h4" />
-              <path d="M7 16h5" />
-              <path d="M16 10c1.105 0 2 .672 2 1.5S17.105 13 16 13m0 0v3m0-3l1.5-1.5" />
-            </svg>
+            <Icon name="sceneToScript" className="w-6 h-6" aria-hidden />
           </span>
           Scene to Script
         </h1>

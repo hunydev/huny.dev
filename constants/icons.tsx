@@ -268,25 +268,32 @@ const ICON_DEFS = {
     defaultClassName: 'w-4 h-4 text-gray-400',
     attrs: { fill: 'currentColor' },
   },
-  favicon: {
+  favicon: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
-      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}>
-        <path d="M2 8a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3zm4 2v4" />
-        <path d="M11 10a2 2 0 1 0 0 4m3-2a2 2 0 1 0 4 0a2 2 0 1 0-4 0" />
-      </g>
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M2 5m0 3a3 3 0 0 1 3 -3h14a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-14a3 3 0 0 1 -3 -3z" />
+        <path d="M6 10v4" />
+        <path d="M11 10a2 2 0 1 0 0 4" />
+        <path d="M16 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+      </>
     ),
     defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   },
-  avatar: {
+  avatar: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
-      <g fill="currentColor">
-        <path d="M12 2a5.5 5.5 0 1 1 0 11a5.5 5.5 0 0 1 0-11" />
-        <path d="M4 20.5C4 17.462 7.582 15 12 15s8 2.462 8 5.5V22H4z" opacity=".6" />
-      </g>
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+        <path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+        <path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855" />
+      </>
     ),
     defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   },
   monitorStatus: {
     viewBox: '0 0 24 24',
@@ -421,150 +428,231 @@ const ICON_DEFS = {
     defaultClassName: 'w-4 h-4 text-gray-400',
     attrs: { fill: 'currentColor' },
   },
-  todoGenerator: {
+  todoGenerator: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
-      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}>
-        <path d="M13 5h8m-8 7h8m-8 7h8M3 17l2 2l4-4" />
-        <rect width={6} height={6} x={3} y={4} rx={1} />
-      </g>
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M13 5h8" />
+        <path d="M13 9h5" />
+        <path d="M13 15h8" />
+        <path d="M13 19h5" />
+        <path d="M3 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+        <path d="M3 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+      </>
     ),
     defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: {fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round'},
   },
-  textToPhoneme: {
+  textToPhoneme: { //tabler
     viewBox: '0 0 24 24',
-    nodes: <path d="M5.4 12.575q.65 0 1.113-.287t.462-.863t-.462-.875t-1.113-.3t-1.112.3t-.463.875t.463.863t1.112.287M1.875 8.8V7.7h2.85V6.3h1.3v1.4H8.9v1.1zM5.4 13.675q-1.175 0-2.013-.587t-.837-1.663q0-1.1.838-1.675T5.4 9.175q1.2 0 2.038.575t.837 1.675t-.837 1.675t-2.038.575M3.575 17.7v-3.5H4.9v2.4h6.6v1.1zM9.7 15.075V6.3h1.275v3.75H12.7v1.1H11v3.925zm7.85.575q.7 0 1.363-.325t1.212-.925v-2.65q-.575.075-1.062.175t-.913.225q-1.125.35-1.687.875T15.9 14.25q0 .65.45 1.025t1.2.375m-.575 1.7q-1.425 0-2.25-.812t-.825-2.213q0-1.3.825-2.125t2.65-1.325q.575-.15 1.263-.275t1.487-.225q-.05-1.175-.55-1.713t-1.55-.537q-.65 0-1.287.238T15.1 9.2l-.8-1.4q.825-.625 1.938-1.012T18.5 6.4q1.775 0 2.7 1.1t.925 3.2v6.425H20.45L20.3 16q-.7.625-1.537.988t-1.788.362" />,
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M4 17v-10l7 10v-10" />
+        <path d="M15 17h5" />
+        <path d="M17.5 10m-2.5 0a2.5 3 0 1 0 5 0a2.5 3 0 1 0 -5 0" />
+      </>
+    ),
     defaultClassName: 'w-4 h-4 text-gray-400',
-    attrs: { fill: 'currentColor' },
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   },
   webWorker: {
-    viewBox: '0 0 32 32',
+    viewBox: '0 0 24 24',
     nodes: (
       <>
-        <path d="m20.17 19-2.59 2.59L19 23l4-4l-4-4l-1.42 1.41zm-8.34 0l2.59-2.59L13 15l-4 4l4 4l1.42-1.41z" />
-        <circle cx={9} cy={8} r={1} />
-        <circle cx={6} cy={8} r={1} />
-        <path d="M28 4H4c-1.103 0-2 .898-2 2v20c0 1.103.897 2 2 2h24c1.103 0 2-.897 2-2V6c0-1.102-.897-2-2-2m0 2v4H4V6zM4 26V12h24v14z" />
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M3 15h3v4.5a1.5 1.5 0 0 1 -3 0" /><path d="M9 20.25c0 .414 .336 .75 .75 .75h1.25a1 1 0 0 0 1 -1v-1a1 1 0 0 0 -1 -1h-1a1 1 0 0 1 -1 -1v-1a1 1 0 0 1 1 -1h1.25a.75 .75 0 0 1 .75 .75" /><path d="M5 12v-7a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2h-1" />
       </>
     ),
     defaultClassName: 'w-4 h-4 text-gray-400',
-    attrs: { fill: 'currentColor' },
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   },
-  textCleaning: {
-    viewBox: '0 0 24 24',
-    nodes: <path d="m14.1 22l-4.25-4.25l1.4-1.4l2.85 2.85l5.65-5.65l1.4 1.4zM3 16L7.85 3h2.35l4.85 13h-2.3l-1.15-3.3H6.35L5.2 16zm4.05-5.2h3.9l-1.9-5.4h-.1z" />,
-    defaultClassName: 'w-4 h-4 text-gray-400',
-    attrs: { fill: 'currentColor' },
-  },
-  aiBusinessCard: {
-    viewBox: '0 0 24 24',
-    nodes: <path d="M3 5h18v14H3zm2 2v10h14V7zM6 9h6v2H6zm0 3h8v2H6z" />,
-    defaultClassName: 'w-4 h-4 text-gray-400',
-    attrs: { fill: 'currentColor' },
-  },
-  stickerGenerator: {
-    viewBox: '0 0 24 24',
-    nodes: <path d="M18.5 2h-13C3.6 2 2 3.6 2 5.5v13C2 20.4 3.6 22 5.5 22H16l6-6V5.5C22 3.6 20.4 2 18.5 2M15 20v-1.5c0-1.9 1.6-3.5 3.5-3.5H20z" />,
-    defaultClassName: 'w-4 h-4 text-gray-400',
-    attrs: { fill: 'currentColor' },
-  },
-  comicRestyler: {
+  textCleaning: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
-      <path fill="currentColor" d="M11 3.925L8.925 6H6v2.925L3.925 11L6 13.075V16h2.925L11 18.075l2.5-2.5l4.2 2.125l-2.15-4.175L18.075 11L16 8.925V6h-2.925zM11 1.1L13.9 4H18v4.1l2.9 2.9l-2.9 2.9l2.875 5.65q.175.325.1.638t-.275.512t-.512.275t-.638-.1L13.9 18L11 20.9L8.1 18H4v-4.1L1.1 11L4 8.1V4h4.1zm0 9.9" />
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M5 15v-7.5a3.5 3.5 0 0 1 7 0v7.5" />
+        <path d="M5 10h7" />
+        <path d="M10 18l3 3l7 -7" />
+      </>
     ),
     defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   },
-  uiClone: {
-    viewBox: '0 0 24 24',
-    nodes: <path d="M11 22q-.825 0-1.412-.587T9 20v-7q0-.825.588-1.412T11 11h7q.825 0 1.413.588T20 13v7q0 .825-.587 1.413T18 22zM4 15q-.825 0-1.412-.587T2 13V6q0-.825.588-1.412T4 4h7q.825 0 1.413.588T13 6v1H6q-.825 0-1.412.588T4 9z" />,
-    defaultClassName: 'w-4 h-4 text-gray-400',
-    attrs: { fill: 'currentColor' },
-  },
-  coverCrafter: {
+  aiBusinessCard: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
-      <path fill="currentColor" d="m20.713 8.128l-.246.566a.506.506 0 0 1-.934 0l-.246-.566a4.36 4.36 0 0 0-2.22-2.25l-.759-.339a.53.53 0 0 1 0-.963l.717-.319a4.37 4.37 0 0 0 2.251-2.326l.253-.611a.506.506 0 0 1 .942 0l.253.61a4.37 4.37 0 0 0 2.25 2.327l.718.32a.53.53 0 0 1 0 .962l-.76.338a4.36 4.36 0 0 0-2.219 2.251M2.992 3H14v2H4v14L14 9l6 6v-4h2v9.007a1 1 0 0 1-.992.993H2.992A.993.993 0 0 1 2 20.007V3.993A1 1 0 0 1 2.992 3M20 17.828l-6-6L6.828 19H20zM8 11a2 2 0 1 1 0-4a2 2 0 0 1 0 4" />
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M3 4m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v10a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z" />
+        <path d="M9 10m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+        <path d="M15 8l2 0" />
+        <path d="M15 12l2 0" />
+        <path d="M7 16l10 0" />
+      </>
     ),
     defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   },
-  download: {
+  stickerGenerator: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
-      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
-        <path d="M12 4v12" />
-        <path d="m7 11l5 5l5-5" />
-        <path d="M5 20h14" />
-      </g>
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M6 4h12a2 2 0 0 1 2 2v7h-5a2 2 0 0 0 -2 2v5h-7a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2z" />
+        <path d="M20 13v.172a2 2 0 0 1 -.586 1.414l-4.828 4.828a2 2 0 0 1 -1.414 .586h-.172" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  comicRestyler: { //tabler
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M12.4 3a5.34 5.34 0 0 1 4.906 3.239a5.333 5.333 0 0 1 -1.195 10.6a4.26 4.26 0 0 1 -5.28 1.863l-3.831 2.298v-3.134a2.668 2.668 0 0 1 -1.795 -3.773a4.8 4.8 0 0 1 2.908 -8.933a5.33 5.33 0 0 1 4.287 -2.16" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  uiClone: { //tabler
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z" />
+        <path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  coverCrafter: { //tabler
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+        <path d="M4 16l16 0" />
+        <path d="M4 12l3 -3c.928 -.893 2.072 -.893 3 0l4 4" />
+        <path d="M13 12l2 -2c.928 -.893 2.072 -.893 3 0l2 2" />
+        <path d="M14 7l.01 0" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  download: { //tabler
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+        <path d="M7 11l5 5l5 -5" />
+        <path d="M12 4l0 12" />
+      </>
     ),
     defaultClassName: 'w-4 h-4 text-gray-300',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   },
-  splitSpeaker: {
+  splitSpeaker: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
       <>
-        <path d="M2 5a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3H9l-4 3v-3H5a3 3 0 0 1-3-3z" />
-        <path d="M14 10a3 3 0 0 0 3-3v-.5h2a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3h-1l-3 2.25V16h-1a3 3 0 0 1-3-3v-1z" opacity={0.65} />
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M21 14l-3 -3h-7a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1h9a1 1 0 0 1 1 1v10" />
+        <path d="M14 15v2a1 1 0 0 1 -1 1h-7l-3 3v-10a1 1 0 0 1 1 -1h2" />
       </>
     ),
     defaultClassName: 'w-4 h-4 text-gray-400',
-    attrs: { fill: 'currentColor' },
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   },
-  bird: {
+  bird: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
-      <g fill="none" fillRule="evenodd">
-        <path d="m12.594 23.258-.012.002-.071.035-.02.004-.014-.004-.071-.036q-.016-.004-.024.006l-.004.01-.017.428.005.02.01.013.104.074.015.004.012-.004.104-.074.012-.016.004-.017-.017-.427q-.004-.016-.016-.018m.264-.113-.014.002-.184.093-.01.01-.003.011.018.43.005.012.008.008.201.092q.019.005.029-.008l.004-.014-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014-.034.614q.001.018.017.024l.015-.002.201-.093.01-.008.003-.011.018-.43-.003-.012-.01-.01z" />
-        <path fill="currentColor" d="M15 2a5 5 0 0 1 4.49 2.799l.094.201H21a1 1 0 0 1 .9 1.436l-.068.119-1.552 2.327a1 1 0 0 0-.166.606l.014.128.141.774c.989 5.438-3.108 10.451-8.593 10.606l-.262.004H3a1 1 0 0 1-.9-1.436l.068-.119L9.613 8.277A2.3 2.3 0 0 0 10 7a5 5 0 0 1 5-5m-3.5 9c-.271 0-.663.07-1.036.209-.375.14-.582.295-.654.378l-3.384 5.077c.998-.287 2.065-.603 3.063-.994 1.067-.417 1.978-.892 2.609-1.446.612-.537.902-1.092.902-1.724a1.5 1.5 0 0 0-1.5-1.5M15 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2" />
-      </g>
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M4 20l10 -10m0 -5v5h5m-9 -1v5h5m-9 -1v5h5m-5 -5l4 -4l4 -4" />
+        <path d="M19 10c.638 -.636 1 -1.515 1 -2.486a3.515 3.515 0 0 0 -3.517 -3.514c-.97 0 -1.847 .367 -2.483 1m-3 13l4 -4l4 -4" />
+      </>
     ),
     defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   },
-  multiVoiceReader: {
-    viewBox: '0 0 24 24',
-    nodes: <path d="M4 22q-.825 0-1.412-.587T2 20V4q0-.825.588-1.412T4 2h8.15l-2 2H4v16h11v-2h2v2q0 .825-.587 1.413T15 22zm2-4v-2h7v2zm0-3v-2h5v2zm9 0-4-4H8V6h3l4-4zm2-3.05v-6.9q.9.525 1.45 1.425T19 8.5t-.55 2.025T17 11.95m0 4.3v-2.1q1.75-.625 2.875-2.162T21 8.5t-1.125-3.488T17 2.85V.75q2.6.675 4.3 2.813T23 8.5t-1.7 4.938T17 16.25" />,
-    defaultClassName: 'w-4 h-4 text-gray-400',
-    attrs: { fill: 'currentColor' },
-  },
-  nonNativeKoreanTts: {
-    viewBox: '0 0 16 16',
-    nodes: (
-      <path fill="currentColor" d="M10.044 1.498a.75.75 0 0 1 .958-.454c.214.09.001 0 .001 0h.001l.003.001l.005.003l.015.005a2 2 0 0 1 .19.08c.118.056.28.138.47.253c.379.23.876.596 1.37 1.143C14.057 3.636 15 5.44 15 8.249a.75.75 0 0 1-1.5 0c0-2.44-.807-3.885-1.556-4.715a4.7 4.7 0 0 0-1.036-.865a3 3 0 0 0-.401-.209l-.014-.005a.75.75 0 0 1-.45-.957M7.198 3.475a.75.75 0 0 0-1.395 0l-3.75 9.5a.75.75 0 0 0 1.395.55l.898-2.275h4.308l.898 2.275a.75.75 0 1 0 1.396-.55zm.864 6.275H4.938L6.5 5.793zm2.668-6.076a.75.75 0 0 0-.962 1.15l.006.006l.034.03q.049.045.139.136c.12.123.28.304.44.53c.327.463.613 1.063.613 1.724a.75.75 0 0 0 1.5 0c0-1.088-.464-1.989-.887-2.588a6 6 0 0 0-.853-.962l-.02-.017l-.006-.005l-.002-.002zm-.962 1.15l.001.002Z"/>
-    ),
-    defaultClassName: 'w-4 h-4 text-gray-400',
-  },
-  textToEmoji: {
+  multiVoiceReader: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
-      <path fill="currentColor" d="M14.74 5.457a2.84 2.84 0 0 1 1.8 1.803l.448 1.377A.544.544 0 0 0 18 8.671l.001-.003l.012-.021l.049-.151l-.001-.005l.4-1.23c.128-.385.336-.737.611-1.033l.013-.007a2.9 2.9 0 0 1 .676-.53l-.004-.005q.24-.135.502-.222l1.378-.448a.544.544 0 0 0 0-1.025l-.028-.007l-1.378-.448a2.84 2.84 0 0 1-1.798-1.796L17.987.363a.544.544 0 0 0-1.027 0l-.448 1.377l-.011.034a2.84 2.84 0 0 1-1.76 1.76l-1.377.448a.543.543 0 0 0 0 1.027zm9.043 4.756l-.766-.248a1.58 1.58 0 0 1-.998-.999l-.25-.764a.302.302 0 0 0-.57 0l-.248.764a1.58 1.58 0 0 1-.984.999l-.096.03h-.004l-.667.217a.3.3 0 0 0-.202.286a.3.3 0 0 0 .204.285l.763.248a1.58 1.58 0 0 1 .83.643q.106.166.17.357l.249.765a.3.3 0 0 0 .111.149a.302.302 0 0 0 .46-.147l.249-.764a1.58 1.58 0 0 1 .999-.999l.765-.248a.302.302 0 0 0 0-.57zM12 22.001c4.85 0 8.895-3.453 9.808-8.036a1.3 1.3 0 0 1-1.545-.856l-.248-.762a.57.57 0 0 0-.358-.363l-.79-.257a1.3 1.3 0 0 1-.692-1.881a1.546 1.546 0 0 1-2.14-.9l-.447-1.373a1.8 1.8 0 0 0-.443-.721a1.84 1.84 0 0 0-.714-.444l-1.4-.455a1.544 1.544 0 0 1 .023-2.92l1.36-.442q.21-.073.397-.192a10 10 0 0 0-2.811-.4c-5.524-.001-10.002 4.477-10.002 10c0 5.524 4.478 10.002 10.002 10.002m-4.592-7.343a.75.75 0 0 1 1.053.125A4.5 4.5 0 0 0 12 16.5a4.49 4.49 0 0 0 3.534-1.714a.75.75 0 1 1 1.178.93A5.99 5.99 0 0 1 12 18a5.99 5.99 0 0 1-4.717-2.29a.75.75 0 0 1 .125-1.053M7.751 10a1.25 1.25 0 1 1 2.498 0a1.25 1.25 0 0 1-2.498 0m6 0a1.25 1.25 0 1 1 2.498 0a1.25 1.25 0 0 1-2.498 0"/>
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+        <path d="M5 12v-7a2 2 0 0 1 2 -2h7l5 5v4" />
+        <path d="M3 12l18 0" />
+        <path d="M6 16l0 2" />
+        <path d="M10 16l0 6" />
+        <path d="M14 16l0 2" />
+        <path d="M18 16l0 4" />
+      </>
     ),
     defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   },
-  sceneToScript: {
+  nonNativeKoreanTts: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
-      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
-        <rect x={3} y={3} width={18} height={18} rx={2} />
-        <path d="M7 8h7" />
-        <path d="M7 12h4" />
-        <path d="M7 16h5" />
-        <path d="M16 10c1.105 0 2 .672 2 1.5S17.105 13 16 13m0 0v3m0-3l1.5-1.5" />
-      </g>
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M4 21v-13a3 3 0 0 1 3 -3h10a3 3 0 0 1 3 3v6a3 3 0 0 1 -3 3h-9l-4 4" />
+        <path d="M10 14v-4a2 2 0 1 1 4 0v4" />
+        <path d="M14 12h-4" />
+      </>
     ),
     defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   },
-  imageToSpeech: {
+  textToEmoji: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
-      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
-        <rect x={3} y={3} width={10} height={10} rx={2} />
-        <path d="m3 13 3-3l6 3" />
-        <circle cx={9} cy={7} r={1.5} />
-        <path d="M15 10v6a2 2 0 0 0 2 2h1.5" />
-        <path d="M15 14h2.5a2.5 2.5 0 0 0 0-5H15" />
-      </g>
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M20.955 11.104a9 9 0 1 0 -9.895 9.847" />
+        <path d="M9 10h.01" />
+        <path d="M15 10h.01" />
+        <path d="M9.5 15c.658 .672 1.56 1 2.5 1c.126 0 .251 -.006 .376 -.018" />
+        <path d="M18.42 15.61a2.1 2.1 0 0 1 2.97 2.97l-3.39 3.42h-3v-3l3.42 -3.39z" />
+      </>
     ),
     defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  sceneToScript: { //tabler
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+        <path d="M10 4l4 16" />
+        <path d="M12 12l-8 2" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  imageToSpeech: { //tabler
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M18 4a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-5l-5 3v-3h-2a3 3 0 0 1 -3 -3v-8a3 3 0 0 1 3 -3h12z" />
+        <path d="M9.5 9h.01" />
+        <path d="M14.5 9h.01" />
+        <path d="M9.5 13a3.5 3.5 0 0 0 5 0" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   },
   monitor: {
     viewBox: '0 0 24 24',

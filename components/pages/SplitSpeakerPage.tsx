@@ -2,6 +2,7 @@ import React from 'react';
 import { PageProps } from '../../types';
 import { Badge, ErrorMessage, LoadingButton } from '../ui';
 import { downloadJson, copyToClipboardWithFallback } from '../../utils/download';
+import { Icon } from '../../constants';
 
 // Gemini model used by the server worker
 const GEMINI_MODEL = 'gemini-2.5-flash';
@@ -117,7 +118,7 @@ const SplitSpeakerPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
       <header className="mb-6">
         <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
           <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-blue-300">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M2 5a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3H9l-4 3v-3H5a3 3 0 0 1-3-3z"/><path d="M14 10a3 3 0 0 0 3-3v-.5h2a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3h-1l-3 2.25V16h-1a3 3 0 0 1-3-3v-1z" opacity=".65"/></svg>
+            <Icon name="splitSpeaker" className="w-6 h-6" />
           </span>
           Split Speaker
         </h1>

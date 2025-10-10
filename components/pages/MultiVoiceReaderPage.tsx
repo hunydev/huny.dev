@@ -1,5 +1,6 @@
 import React from 'react';
 import { PageProps } from '../../types';
+import { Icon } from '../../constants/icons';
 import { ErrorMessage, LoadingButton } from '../ui';
 
 const DEFAULT_TEXT = `작은 항구 마을에 낡은 등대가 있었습니다.
@@ -269,7 +270,7 @@ const MultiVoiceReaderPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => 
       <header className="mb-6">
         <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
           <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-blue-300">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M4 22q-.825 0-1.412-.587T2 20V4q0-.825.588-1.412T4 2h8.15l-2 2H4v16h11v-2h2v2q0 .825-.587 1.413T15 22zm2-4v-2h7v2zm0-3v-2h5v2zm9 0l-4-4H8V6h3l4-4zm2-3.05v-6.9q.9.525 1.45 1.425T19 8.5t-.55 2.025T17 11.95m0 4.3v-2.1q1.75-.625 2.875-2.162T21 8.5t-1.125-3.488T17 2.85V.75q2.6.675 4.3 2.813T23 8.5t-1.7 4.938T17 16.25"/></svg>
+            <Icon name="multiVoiceReader" className="w-6 h-6" aria-hidden />
           </span>
           MultiVoice Reader
         </h1>

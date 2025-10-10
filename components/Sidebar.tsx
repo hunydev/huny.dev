@@ -231,7 +231,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >
         <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-4 h-4"><path fill="currentColor" d="m20.17 19l-2.59 2.59L19 23l4-4l-4-4l-1.42 1.41zm-8.34 0l2.59-2.59L13 15l-4 4l4 4l1.42-1.41z" /><circle cx="9" cy="8" r="1" fill="currentColor" /><circle cx="6" cy="8" r="1" fill="currentColor" /><path fill="currentColor" d="M28 4H4c-1.103 0-2 .898-2 2v20c0 1.103.897 2 2 2h24c1.103 0 2-.897 2-2V6c0-1.102-.897-2-2-2m0 2v4H4V6zM4 26V12h24v14z" /></svg>
+          <Icon name="webWorker" className="w-4 h-4" aria-hidden />
         </span>
         <span className="text-sm">Web Worker</span>
       </button>
@@ -240,7 +240,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >
         <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" className="w-4 h-4"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M13 5h8m-8 7h8m-8 7h8M3 17l2 2l4-4" /><rect width="6" height="6" x="3" y="4" rx="1" /></g></svg>
+          <Icon name="todoGenerator" className="w-4 h-4" aria-hidden />
         </span>
         <span className="text-sm">To-do Generator</span>
       </button>
@@ -249,7 +249,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >
         <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M2 5a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3H9l-4 3v-3H5a3 3 0 0 1-3-3z" /><path d="M14 10a3 3 0 0 0 3-3v-.5h2a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3h-1l-3 2.25V16h-1a3 3 0 0 1-3-3v-1z" opacity=".65" /></svg>
+          <Icon name="splitSpeaker" className="w-4 h-4" aria-hidden />
         </span>
         <span className="text-sm">Split Speaker</span>
       </button>
@@ -258,12 +258,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >
         <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4">
-            <g fill="none" fillRule="evenodd">
-              <path d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z" />
-              <path fill="currentColor" d="M15 2a5 5 0 0 1 4.49 2.799l.094.201H21a1 1 0 0 1 .9 1.436l-.068.119l-1.552 2.327a1 1 0 0 0-.166.606l.014.128l.141.774c.989 5.438-3.108 10.451-8.593 10.606l-.262.004H3a1 1 0 0 1-.9-1.436l.068-.119L9.613 8.277A2.3 2.3 0 0 0 10 7a5 5 0 0 1 5-5m-3.5 9c-.271 0-.663.07-1.036.209c-.375.14-.582.295-.654.378l-3.384 5.077c.998-.287 2.065-.603 3.063-.994c1.067-.417 1.978-.892 2.609-1.446c.612-.537.902-1.092.902-1.724a1.5 1.5 0 0 0-1.5-1.5M15 6a1 1 0 1 0 0 2a1 1 0 0 0 0-2" />
-            </g>
-          </svg>
+          <Icon name="bird" className="w-4 h-4" aria-hidden />
         </span>
         <span className="text-sm">Bird Generator</span>
       </button>
@@ -272,7 +267,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >
         <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M4 22q-.825 0-1.412-.587T2 20V4q0-.825.588-1.412T4 2h8.15l-2 2H4v16h11v-2h2v2q0 .825-.587 1.413T15 22zm2-4v-2h7v2zm0-3v-2h5v2zm9 0l-4-4H8V6h3l4-4zm2-3.05v-6.9q.9.525 1.45 1.425T19 8.5t-.55 2.025T17 11.95m0 4.3v-2.1q1.75-.625 2.875-2.162T21 8.5t-1.125-3.488T17 2.85V.75q2.6.675 4.3 2.813T23 8.5t-1.7 4.938T17 16.25" /></svg>
+          <Icon name="multiVoiceReader" className="w-4 h-4" aria-hidden />
         </span>
         <span className="text-sm">MultiVoice Reader</span>
       </button>
@@ -281,13 +276,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ on
         className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
       >
         <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
-            <rect x="3" y="3" width="10" height="10" rx="2" />
-            <path d="m3 13 3-3 6 3" />
-            <circle cx="9" cy="7" r="1.5" />
-            <path d="M15 10v6a2 2 0 0 0 2 2h1.5" />
-            <path d="M15 14h2.5a2.5 2.5 0 0 0 0-5H15" />
-          </svg>
+          <Icon name="imageToSpeech" className="w-4 h-4" aria-hidden />
         </span>
         <span className="text-sm">Image to Speech</span>
       </button>
@@ -629,8 +618,9 @@ const BookmarkItem: React.FC<{ id: string; name: string; color: string; count: n
     >
       <span className="flex items-center gap-2">
         <span className="inline-flex items-center justify-center w-5 h-5">
-          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" style={{ color }} aria-hidden>
-            <path d="M4 2.5A1.5 1.5 0 0 1 5.5 1h5A1.5 1.5 0 0 1 12 2.5v11.086a.5.5 0 0 1-.777.416L8 11.972l-3.223 2.03A.5.5 0 0 1 4 13.586z" />
+          <svg  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"  fill="currentColor"  style={{ color }} aria-hidden>
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M14 2a5 5 0 0 1 5 5v14a1 1 0 0 1 -1.555 .832l-5.445 -3.63l-5.444 3.63a1 1 0 0 1 -1.55 -.72l-.006 -.112v-14a5 5 0 0 1 5 -5h4z" />
           </svg>
         </span>
         <span className="text-sm">{name}</span>

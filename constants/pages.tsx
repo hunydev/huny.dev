@@ -162,12 +162,7 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
   'split-speaker': {
     title: 'Split Speaker',
     component: SplitSpeakerPage,
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 mr-2 text-gray-400">
-        <path d="M2 5a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3H9l-4 3v-3H5a3 3 0 0 1-3-3z" />
-        <path d="M14 10a3 3 0 0 0 3-3v-.5h2a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3h-1l-3 2.25V16h-1a3 3 0 0 1-3-3v-1z" opacity={0.65} />
-      </svg>
-    ),
+    icon: <Icon name="splitSpeaker" className="mr-2" />,
   },
   'bird-generator': {
     title: 'Bird Generator',

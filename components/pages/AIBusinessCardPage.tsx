@@ -2,6 +2,7 @@ import React from 'react';
 import type { PageProps } from '../../types';
 import { ErrorMessage, LoadingButton } from '../ui';
 import { useApiCall } from '../../hooks/useApiCall';
+import { Icon } from '../../constants/icons';
 
 // Types for user fields and text boxes
 export type FieldItem = { id: string; label: string; value: string };
@@ -220,9 +221,7 @@ const AIBusinessCardPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
       <header className="mb-6">
         <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
           <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-pink-300">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor" aria-hidden>
-              <path d="M3 5h18v14H3zm2 2v10h14V7zM6 9h6v2H6zm0 3h8v2H6z"/>
-            </svg>
+            <Icon name="aiBusinessCard" className="w-6 h-6" aria-hidden/>
           </span>
           AI Business Card
         </h1>

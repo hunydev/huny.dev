@@ -1,5 +1,6 @@
 import React from 'react';
 import { PageProps } from '../../types';
+import { Icon } from '../../constants/icons';
 import { ErrorMessage, LoadingButton } from '../ui';
 
 const LANGUAGE_OPTIONS: Array<{ value: string; label: string }> = [
@@ -579,13 +580,7 @@ const ImageToSpeechPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
       <header className="mb-6">
         <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
           <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-blue-300">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-6 h-6">
-              <rect x={3} y={3} width={10} height={10} rx={2} />
-              <path d="m3 13 3-3 6 3" />
-              <circle cx={9} cy={7} r={1.5} />
-              <path d="M15 10v6a2 2 0 0 0 2 2h1.5" />
-              <path d="M15 14h2.5a2.5 2.5 0 0 0 0-5H15" />
-            </svg>
+            <Icon name="imageToSpeech" className="w-6 h-6" aria-hidden />
           </span>
           Image to Speech
         </h1>

@@ -1,6 +1,7 @@
 import React from 'react';
 import type { PageProps } from '../../types';
 import { ErrorMessage, LoadingButton } from '../ui';
+import { Icon } from '../../constants';
 import { useApiCall } from '../../hooks/useApiCall';
 
 const DEFAULT_FN_NAME = 'worker_function';
@@ -127,7 +128,7 @@ const WebWorkerPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
         <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
           <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-indigo-300">
             {/* Monitor with code/arrows icon */}
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-6 h-6"><path fill="currentColor" d="m20.17 19l-2.59 2.59L19 23l4-4l-4-4l-1.42 1.41zm-8.34 0l2.59-2.59L13 15l-4 4l4 4l1.42-1.41z"/><circle cx="9" cy="8" r="1" fill="currentColor"/><circle cx="6" cy="8" r="1" fill="currentColor"/><path fill="currentColor" d="M28 4H4c-1.103 0-2 .898-2 2v20c0 1.103.897 2 2 2h24c1.103 0 2-.897 2-2V6c0-1.102-.897-2-2-2m0 2v4H4V6zM4 26V12h24v14z"/></svg>
+            <Icon name="webWorker" className="w-6 h-6" />
           </span>
           Web Worker
         </h1>

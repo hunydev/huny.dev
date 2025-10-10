@@ -263,7 +263,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
       <header className="mb-6">
         <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
           <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-emerald-300">
-            <Icon name="checklist" className="w-6 h-6" aria-hidden />
+            <Icon name="todoGenerator" className="w-6 h-6" aria-hidden />
           </span>
           To-do Generator
         </h1>
