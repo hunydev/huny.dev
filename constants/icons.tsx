@@ -5,6 +5,7 @@ export type IconDefinition = {
   nodes: React.ReactNode;
   defaultClassName?: string;
   attrs?: React.SVGAttributes<SVGSVGElement>;
+  style?: React.CSSProperties;
 };
 
 const ICON_DEFS = {
@@ -678,12 +679,12 @@ const ICON_DEFS = {
     defaultClassName: 'w-4 h-4',
     attrs: { fill: 'currentColor' },
   },
-  note: {
-    viewBox: '0 0 16 16',
+  note: { //tabler
+    viewBox: '0 0 24 24',
     nodes: (
       <>
-        <path d="M2.5 2A1.5 1.5 0 0 0 1 3.5v9A1.5 1.5 0 0 0 2.5 14h7.793l3.354-3.354A.5.5 0 0 0 14 10.293V3.5A1.5 1.5 0 0 0 12.5 2h-10Z" />
-        <path d="M10.5 13.5V11a1 1 0 0 1 1-1h2.5" opacity={0.6} />
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M18 3a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12a3 3 0 0 1 3 -3z" />
       </>
     ),
     defaultClassName: 'w-4 h-4',
@@ -715,6 +716,40 @@ const ICON_DEFS = {
     ),
     defaultClassName: 'w-4 h-4',
   },
+  bookmark: { //tabler
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M14 2a5 5 0 0 1 5 5v14a1 1 0 0 1 -1.555 .832l-5.445 -3.63l-5.444 3.63a1 1 0 0 1 -1.55 -.72l-.006 -.112v-14a5 5 0 0 1 5 -5h4z" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'currentColor' },
+  },
+  link: { //tabler
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M17 7l-10 10" />
+        <path d="M8 7l9 0l0 9" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  star: { //tabler
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M8.243 7.34l-6.38 .925l-.113 .023a1 1 0 0 0 -.44 1.684l4.622 4.499l-1.09 6.355l-.013 .11a1 1 0 0 0 1.464 .944l5.706 -3l5.693 3l.1 .046a1 1 0 0 0 1.352 -1.1l-1.091 -6.355l4.624 -4.5l.078 -.085a1 1 0 0 0 -.633 -1.62l-6.38 -.926l-2.852 -5.78a1 1 0 0 0 -1.794 0l-2.853 5.78z" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'currentColor' },
+  }
 } satisfies Record<string, IconDefinition>;
 
 export type IconName = keyof typeof ICON_DEFS;
