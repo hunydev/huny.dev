@@ -16,10 +16,11 @@ type TabBarProps = {
   onShareTab: (tabId: string) => void;
   onShareAllTabs: () => void;
   onCloseTabsToRight: (tabId: string) => void;
+  onCloseOtherTabs: (tabId: string) => void;
   onCloseAllTabs: () => void;
 };
 
-const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCloseTab, onTogglePin, onOpenInNewWindow, onShowInMenu, onShareTab, onShareAllTabs, onCloseTabsToRight, onCloseAllTabs }) => {
+const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCloseTab, onTogglePin, onOpenInNewWindow, onShowInMenu, onShareTab, onShareAllTabs, onCloseTabsToRight, onCloseOtherTabs, onCloseAllTabs }) => {
   const apiTask = useApiTask();
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const tabRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
@@ -257,6 +258,7 @@ type MainPanelProps = {
   onShareTab: (tabId: string) => void;
   onShareAllTabs: () => void;
   onCloseTabsToRight: (tabId: string) => void;
+  onCloseOtherTabs: (tabId: string) => void;
   onCloseAllTabs: () => void;
 };
 
@@ -284,7 +286,7 @@ const parseTabRoute = (tabId: string): { baseId: string; routeParams?: Record<st
   return { baseId };
 };
 
-const MainPanel: React.FC<MainPanelProps> = ({ openTabs, activeTabId, onTabClick, onCloseTab, pageProps, onTogglePin, onOpenInNewWindow, onShowInMenu, onShareTab, onShareAllTabs, onCloseTabsToRight, onCloseAllTabs }) => {
+const MainPanel: React.FC<MainPanelProps> = ({ openTabs, activeTabId, onTabClick, onCloseTab, pageProps, onTogglePin, onOpenInNewWindow, onShowInMenu, onShareTab, onShareAllTabs, onCloseTabsToRight, onCloseOtherTabs, onCloseAllTabs }) => {
   const apiTask = useApiTask();
 
   // 활성 탭이 변경될 때 완료된 작업 정리
@@ -339,6 +341,7 @@ const MainPanel: React.FC<MainPanelProps> = ({ openTabs, activeTabId, onTabClick
         onShareTab={onShareTab}
         onShareAllTabs={onShareAllTabs}
         onCloseTabsToRight={onCloseTabsToRight}
+        onCloseOtherTabs={onCloseOtherTabs}
         onCloseAllTabs={onCloseAllTabs}
       />
       {tabComponents}

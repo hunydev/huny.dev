@@ -13,7 +13,7 @@ import { MONITOR_GROUPS, getMonitorItemById } from './components/pages/monitorDa
 import { extractBaseId, viewForTabId } from './utils/navigation';
 import { ApiTaskProvider, useApiTask } from './contexts/ApiTaskContext';
 
-const APP_VERSION = '2025.10.02.10';
+const APP_VERSION = '2025.10.10.1';
 
 const TABS_STORAGE_KEY = 'app.openTabs.v1';
 const DEFAULT_TAB_IDS: readonly string[] = ['welcome', 'works', 'domain', 'about'];
@@ -536,6 +536,18 @@ const App: React.FC = () => {
         const stillExists = remaining.some(t => t.id === curr);
         return stillExists ? curr : remaining[remaining.length - 1]?.id || '';
       });
+      
+      return remaining;
+    });
+  }, []);
+
+  const handleCloseOtherTabs = useCallback((tabId: string) => {
+    setOpenTabs(prev => {
+      // 선택한 탭과 고정된 탭만 유지
+      const remaining = prev.filter(t => t.id === tabId || t.pinned);
+      
+      // 선택한 탭을 활성화
+      setActiveTabId(tabId);
       
       return remaining;
     });
@@ -1076,6 +1088,7 @@ const App: React.FC = () => {
           onShareTab={handleShareTab}
           onShareAllTabs={handleShareAllTabs}
           onCloseTabsToRight={handleCloseTabsToRight}
+          onCloseOtherTabs={handleCloseOtherTabs}
           onCloseAllTabs={handleCloseAllTabs}
         />
         {/* Overlay sidebar when unpinned */}
