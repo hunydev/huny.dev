@@ -8,7 +8,7 @@ export type IconDefinition = {
 };
 
 const ICON_DEFS = {
-  activityExplorer: {
+  activityExplorer: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
       <>
@@ -21,7 +21,7 @@ const ICON_DEFS = {
     defaultClassName: 'w-7 h-7',
     attrs: { fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round" },
   },
-  activitySearch: {
+  activitySearch: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
       <>
@@ -33,7 +33,7 @@ const ICON_DEFS = {
     defaultClassName: 'w-7 h-7',
     attrs: { fill: 'none', stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round" },
   },
-  activityDocs: {
+  activityDocs: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
       <>
@@ -48,7 +48,7 @@ const ICON_DEFS = {
     defaultClassName: 'w-7 h-7',
     attrs: { fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round" },
   },
-  activityAppsPrimary: {
+  activityAppsPrimary: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
       <>
@@ -63,7 +63,7 @@ const ICON_DEFS = {
     defaultClassName: 'w-7 h-7',
     attrs: { fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round" },
   },
-  activityMonitor: {
+  activityMonitor: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
       <>
@@ -81,7 +81,7 @@ const ICON_DEFS = {
     defaultClassName: 'w-7 h-7',
     attrs: { fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round" },
   },
-  activityPlayground: {
+  activityPlayground: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
       <>
@@ -94,7 +94,7 @@ const ICON_DEFS = {
     defaultClassName: 'w-7 h-7',
     attrs: { fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round" },
   },
-  activityBookmark: {
+  activityBookmark: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
       <>
@@ -105,7 +105,7 @@ const ICON_DEFS = {
     defaultClassName: 'w-7 h-7',
     attrs: { fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round" },
   },
-  activityNotes: {
+  activityNotes: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
       <>
