@@ -235,6 +235,13 @@ const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCl
 
           <button
             className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10 flex items-center justify-between"
+            onClick={() => handleMenuAction(() => onCloseOtherTabs(contextMenu.tabId))}
+          >
+            다른 탭 닫기
+          </button>
+
+          <button
+            className="w-full text-left px-3 py-1.5 text-sm text-gray-300 hover:bg-white/10 flex items-center justify-between"
             onClick={() => handleMenuAction(() => onCloseAllTabs())}
           >
             <span>모든 탭 닫기</span>
