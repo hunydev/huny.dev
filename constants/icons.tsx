@@ -10,159 +10,190 @@ export type IconDefinition = {
 const ICON_DEFS = {
   activityExplorer: {
     viewBox: '0 0 24 24',
-    nodes: <path d="M17.5 0h-9L7 1.5V6H2.5L1 7.5v15.07L2.5 24h12.07L16 22.57V18h4.7l1.3-1.43V4.5L17.5 0zm0 2.12l2.38 2.38H17.5V2.12zm-3 20.38h-12v-15H7v9.07L8.5 18h6v4.5zm6-6h-12v-15H16V6h4.5v10.5z" />,
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M15 3v4a1 1 0 0 0 1 1h4" />
+        <path d="M18 17h-7a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h4l5 5v7a2 2 0 0 1 -2 2z" />
+        <path d="M16 17v2a2 2 0 0 1 -2 2h-7a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h2" />
+      </>
+    ),
     defaultClassName: 'w-7 h-7',
-    attrs: { fill: 'currentColor' },
+    attrs: { fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round" },
   },
   activitySearch: {
     viewBox: '0 0 24 24',
     nodes: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-      />
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+        <path d="M21 21l-6 -6" />
+      </>
     ),
     defaultClassName: 'w-7 h-7',
-    attrs: { fill: 'none', stroke: 'currentColor', strokeWidth: 1.5 },
+    attrs: { fill: 'none', stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round" },
   },
   activityDocs: {
     viewBox: '0 0 24 24',
     nodes: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"
-      />
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0" />
+        <path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0" />
+        <path d="M3 6l0 13" />
+        <path d="M12 6l0 13" />
+        <path d="M21 6l0 13" />
+      </>
     ),
     defaultClassName: 'w-7 h-7',
-    attrs: { fill: 'none', stroke: 'currentColor', strokeWidth: 1.5 },
+    attrs: { fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round" },
   },
   activityAppsPrimary: {
     viewBox: '0 0 24 24',
     nodes: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25zm0 9.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18zm9.75-9.75a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25A2.25 2.25 0 0 1 13.5 8.25zm0 9.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18z"
-      />
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+        <path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+        <path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+        <path d="M14 7l6 0" />
+        <path d="M17 4l0 6" />
+      </>
     ),
     defaultClassName: 'w-7 h-7',
-    attrs: { fill: 'none', stroke: 'currentColor', strokeWidth: 1.5 },
+    attrs: { fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round" },
   },
   activityMonitor: {
     viewBox: '0 0 24 24',
     nodes: (
-      <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
-        <rect x={3} y={4} width={18} height={14} rx={2} />
-        <path d="M4 17l3-5l3.5 4.5l3.5-6.5l3 7h3" />
-        <path d="M10 22h4" />
-      </g>
-    ),
-    defaultClassName: 'w-7 h-7',
-  },
-  activityPlayground: {
-    viewBox: '0 0 512 512',
-    nodes: (
       <>
-        <path
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={32}
-          d="M448 341.37V170.61A32 32 0 0 0 432.11 143l-152-88.46a47.94 47.94 0 0 0-48.24 0L79.89 143A32 32 0 0 0 64 170.61v170.76A32 32 0 0 0 79.89 369l152 88.46a48 48 0 0 0 48.24 0l152-88.46A32 32 0 0 0 448 341.37"
-        />
-        <path
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={32}
-          d="m69 153.99 187 110 187-110m-187 310v-200"
-        />
-        <ellipse cx={256} cy={152} fill="currentColor" rx={24} ry={16} />
-        <ellipse cx={208} cy={296} fill="currentColor" rx={16} ry={24} />
-        <ellipse cx={112} cy={328} fill="currentColor" rx={16} ry={24} />
-        <ellipse cx={304} cy={296} fill="currentColor" rx={16} ry={24} />
-        <ellipse cx={400} cy={240} fill="currentColor" rx={16} ry={24} />
-        <ellipse cx={304} cy={384} fill="currentColor" rx={16} ry={24} />
-        <ellipse cx={400} cy={328} fill="currentColor" rx={16} ry={24} />
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M3 4m0 1a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1z" />
+        <path d="M7 20h10" />
+        <path d="M9 16v4" />
+        <path d="M15 16v4" />
+        <path d="M9 12v-4" />
+        <path d="M12 12v-1" />
+        <path d="M15 12v-2" />
+        <path d="M12 12v-1" />
       </>
     ),
     defaultClassName: 'w-7 h-7',
+    attrs: { fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round" },
+  },
+  activityPlayground: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M6.1 15h11.8" />
+        <path d="M14 3v7.342a6 6 0 0 1 1.318 10.658h-6.635a6 6 0 0 1 1.317 -10.66v-7.34h4z" />
+        <path d="M9 3h6" />
+      </>
+    ),
+    defaultClassName: 'w-7 h-7',
+    attrs: { fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round" },
   },
   activityBookmark: {
     viewBox: '0 0 24 24',
     nodes: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M4 17.98V9.709c0-3.634 0-5.45 1.172-6.58S8.229 2 12 2s5.657 0 6.828 1.129C20 4.257 20 6.074 20 9.708v8.273c0 2.306 0 3.459-.773 3.871c-1.497.8-4.304-1.867-5.637-2.67c-.773-.465-1.16-.698-1.59-.698s-.817.233-1.59.698c-1.333.803-4.14 3.47-5.637 2.67C4 21.44 4 20.287 4 17.981"
-      />
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M18 7v14l-6 -4l-6 4v-14a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4z" />
+      </>
     ),
     defaultClassName: 'w-7 h-7',
-    attrs: { fill: 'none', stroke: 'currentColor', strokeWidth: 1.5 },
+    attrs: { fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round" },
   },
   activityNotes: {
-    viewBox: '0 0 48 48',
+    viewBox: '0 0 24 24',
     nodes: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M5.5 9.5v22.9h10.1v10.1h22.9c2.2 0 4-1.8 4-4v-29c0-2.2-1.8-4-4-4h-29c-2.2 0-4 1.8-4 4m0 22.9 10.1 10.1"
-      />
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M13 20l7 -7" />
+        <path d="M13 20v-6a1 1 0 0 1 1 -1h6v-7a2 2 0 0 0 -2 -2h-12a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7" />
+      </>
     ),
     defaultClassName: 'w-7 h-7',
-    attrs: { fill: 'none', stroke: 'currentColor', strokeWidth: 3 },
+    attrs: { fill:"none", stroke:"currentColor", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round" },
   },
-  activityBlog: {
+  activityBlog: { //tabler
     viewBox: '0 0 24 24',
-    nodes: <path d="M3 3v18h18V3zm15 15H6v-1h12zm0-2H6v-1h12zm0-4H6V6h12z" />,
-    defaultClassName: 'w-7 h-7',
-    attrs: { fill: 'currentColor' },
-  },
-  activityAppsSecondary: {
-    viewBox: '0 0 24 24',
-    nodes: <path d="M11 20H3q-.425 0-.712-.288T2 19t.288-.712T3 18h8q.425 0 .713.288T12 19t-.288.713T11 20m-6-3q-.825 0-1.412-.587T3 15V6q0-.825.588-1.412T5 4h14q.825 0 1.413.588T21 6h-5.5q-1.45 0-2.475 1.025T12 9.5V16q0 .425-.288.713T11 17zm10.5 3q-.625 0-1.062-.437T14 18.5v-9q0-.625.438-1.062T15.5 8h5q.625 0 1.063.438T22 9.5v9q0 .625-.437 1.063T20.5 20zm2.5-7.5q.325 0 .538-.225t.212-.525q0-.325-.213-.537T18 11q-.3 0-.525.213t-.225.537q0 .3.225.525T18 12.5" />,
-    defaultClassName: 'w-7 h-7',
-    attrs: { fill: 'currentColor' },
-  },
-  activitySites: {
-    viewBox: '0 0 48 48',
     nodes: (
-      <g fill="none" stroke="currentColor" strokeWidth={4}>
-        <circle cx="22" cy="40" r="4" fill="currentColor" />
-        <circle cx="26" cy="8" r="4" fill="currentColor" />
-        <circle cx="36" cy="24" r="4" fill="currentColor" />
-        <circle cx="12" cy="24" r="4" fill="currentColor" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M32 24H16m7-13-8 10" />
-        <path d="m33 27-8.001 10" />
-      </g>
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M19 3a3 3 0 0 1 2.995 2.824l.005 .176v12a3 3 0 0 1 -2.824 2.995l-.176 .005h-14a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-12a3 3 0 0 1 2.824 -2.995l.176 -.005h14zm-2 12h-10l-.117 .007a1 1 0 0 0 0 1.986l.117 .007h10l.117 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm0 -4h-10l-.117 .007a1 1 0 0 0 0 1.986l.117 .007h10l.117 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm0 -4h-10l-.117 .007a1 1 0 0 0 0 1.986l.117 .007h10l.117 -.007a1 1 0 0 0 0 -1.986l-.117 -.007z" />
+      </>
     ),
     defaultClassName: 'w-7 h-7',
+    attrs: { fill: 'currentColor' },
   },
-  activityGitHub: {
-    viewBox: '0 0 15 15',
-    nodes: <path d="M9.358 2.145a8.2 8.2 0 0 0-3.716 0c-.706-.433-1.245-.632-1.637-.716a2.2 2.2 0 0 0-.51-.053a1.3 1.3 0 0 0-.232.028l-.01.002-.004.002h-.003l.137.481-.137-.48a.5.5 0 0 0-.32.276a3.12 3.12 0 0 0-.159 2.101A3.35 3.35 0 0 0 2 5.93c0 1.553.458 2.597 1.239 3.268c.547.47 1.211.72 1.877.863a2.3 2.3 0 0 0-.116.958v.598c-.407.085-.689.058-.89-.008c-.251-.083-.444-.25-.629-.49a5 5 0 0 1-.27-.402l-.057-.093a9 9 0 0 0-.224-.354c-.19-.281-.472-.633-.928-.753l-.484-.127-.254.968.484.127c.08.02.184.095.355.346a7 7 0 0 1 .19.302l.068.11c.094.152.202.32.327.484c.253.33.598.663 1.11.832c.35.116.748.144 1.202.074V14.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-3.562c0-.316-.014-.605-.103-.874c.663-.14 1.322-.39 1.866-.86c.78-.676 1.237-1.73 1.237-3.292v-.001a3.35 3.35 0 0 0-.768-2.125a3.12 3.12 0 0 0-.159-2.1a.5.5 0 0 0-.319-.277l-.137.48.135-.48.002-.001-.004-.002-.009-.002-.075-.015a1 1 0 0 0-.158-.013a2.2 2.2 0 0 0-.51.053c-.391.084-.93.283-1.636.716" />,
+  activityAppsSecondary: { //tabler
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M19 4a3 3 0 0 1 3 3v10a3 3 0 0 1 -3 3h-14a3 3 0 0 1 -3 -3v-10a3 3 0 0 1 3 -3zm-12.99 3l-.127 .007a1 1 0 0 0 .117 1.993l.127 -.007a1 1 0 0 0 -.117 -1.993zm3 0l-.127 .007a1 1 0 0 0 .117 1.993l.127 -.007a1 1 0 0 0 -.117 -1.993z" />
+      </>
+    ),
     defaultClassName: 'w-7 h-7',
     attrs: { fill: 'currentColor' },
   },
-  activityDiscord: {
+  activitySites: { //tabler
     viewBox: '0 0 24 24',
-    nodes: <path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.1.1 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.1 16.1 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02M8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12m6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12" />,
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M2 16.667a2.667 2.667 0 0 1 2.667 -2.667h2.666a2.667 2.667 0 0 1 2.667 2.667v2.666a2.667 2.667 0 0 1 -2.667 2.667h-2.666a2.667 2.667 0 0 1 -2.667 -2.667z" />
+        <path d="M14 16.667a2.667 2.667 0 0 1 2.667 -2.667h2.666a2.667 2.667 0 0 1 2.667 2.667v2.666a2.667 2.667 0 0 1 -2.667 2.667h-2.666a2.667 2.667 0 0 1 -2.667 -2.667z" />
+        <path d="M8 4.667a2.667 2.667 0 0 1 2.667 -2.667h2.666a2.667 2.667 0 0 1 2.667 2.667v2.666a2.667 2.667 0 0 1 -2.667 2.667h-2.666a2.667 2.667 0 0 1 -2.667 -2.667z" />
+        <path d="M12 8a1 1 0 0 0 -1 1v2h-3c-1.645 0 -3 1.355 -3 3v1a1 1 0 0 0 1 1a1 1 0 0 0 1 -1v-1c0 -.564 .436 -1 1 -1h8c.564 0 1 .436 1 1v1a1 1 0 0 0 1 1a1 1 0 0 0 1 -1v-1c0 -1.645 -1.355 -3 -3 -3h-3v-2a1 1 0 0 0 -1 -1z" />
+      </>
+    ),
     defaultClassName: 'w-7 h-7',
     attrs: { fill: 'currentColor' },
   },
-  activityX: {
+  activityGitHub: { //tabler
     viewBox: '0 0 24 24',
-    nodes: <path d="m17.687 3.063-4.996 5.711-4.32-5.711H2.112l7.477 9.776-7.086 8.099h3.034l5.469-6.25 4.78 6.25h6.102l-7.794-10.304 6.625-7.571zm-1.064 16.06L5.654 4.782h1.803l10.846 14.34z" />,
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M5.315 2.1c.791 -.113 1.9 .145 3.333 .966l.272 .161l.16 .1l.397 -.083a13.3 13.3 0 0 1 4.59 -.08l.456 .08l.396 .083l.161 -.1c1.385 -.84 2.487 -1.17 3.322 -1.148l.164 .008l.147 .017l.076 .014l.05 .011l.144 .047a1 1 0 0 1 .53 .514a5.2 5.2 0 0 1 .397 2.91l-.047 .267l-.046 .196l.123 .163c.574 .795 .93 1.728 1.03 2.707l.023 .295l.007 .272c0 3.855 -1.659 5.883 -4.644 6.68l-.245 .061l-.132 .029l.014 .161l.008 .157l.004 .365l-.002 .213l-.003 3.834a1 1 0 0 1 -.883 .993l-.117 .007h-6a1 1 0 0 1 -.993 -.883l-.007 -.117v-.734c-1.818 .26 -3.03 -.424 -4.11 -1.878l-.535 -.766c-.28 -.396 -.455 -.579 -.589 -.644l-.048 -.019a1 1 0 0 1 .564 -1.918c.642 .188 1.074 .568 1.57 1.239l.538 .769c.76 1.079 1.36 1.459 2.609 1.191l.001 -.678l-.018 -.168a5.03 5.03 0 0 1 -.021 -.824l.017 -.185l.019 -.12l-.108 -.024c-2.976 -.71 -4.703 -2.573 -4.875 -6.139l-.01 -.31l-.004 -.292a5.6 5.6 0 0 1 .908 -3.051l.152 -.222l.122 -.163l-.045 -.196a5.2 5.2 0 0 1 .145 -2.642l.1 -.282l.106 -.253a1 1 0 0 1 .529 -.514l.144 -.047l.154 -.03z" />
+      </>
+    ),
     defaultClassName: 'w-7 h-7',
     attrs: { fill: 'currentColor' },
   },
-  activityEmail: {
+  activityDiscord: { //tabler
     viewBox: '0 0 24 24',
-    nodes: <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2m0 4l-8 5-8-5V6l8 5 8-5z" />,
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M14.983 3l.123 .006c2.014 .214 3.527 .672 4.966 1.673a1 1 0 0 1 .371 .488c1.876 5.315 2.373 9.987 1.451 12.28c-1.003 2.005 -2.606 3.553 -4.394 3.553c-.732 0 -1.693 -.968 -2.328 -2.045a21.512 21.512 0 0 0 2.103 -.493a1 1 0 1 0 -.55 -1.924c-3.32 .95 -6.13 .95 -9.45 0a1 1 0 0 0 -.55 1.924c.717 .204 1.416 .37 2.103 .494c-.635 1.075 -1.596 2.044 -2.328 2.044c-1.788 0 -3.391 -1.548 -4.428 -3.629c-.888 -2.217 -.39 -6.89 1.485 -12.204a1 1 0 0 1 .371 -.488c1.439 -1.001 2.952 -1.459 4.966 -1.673a1 1 0 0 1 .935 .435l.063 .107l.651 1.285l.137 -.016a12.97 12.97 0 0 1 2.643 0l.134 .016l.65 -1.284a1 1 0 0 1 .754 -.54l.122 -.009zm-5.983 7a2 2 0 0 0 -1.977 1.697l-.018 .154l-.005 .149l.005 .15a2 2 0 1 0 1.995 -2.15zm6 0a2 2 0 0 0 -1.977 1.697l-.018 .154l-.005 .149l.005 .15a2 2 0 1 0 1.995 -2.15z" />
+      </>
+    ),
+    defaultClassName: 'w-7 h-7',
+    attrs: { fill: 'currentColor' },
+  },
+  activityX: { //tabler
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M8.267 3a1 1 0 0 1 .73 .317l.076 .092l4.274 5.828l5.946 -5.944a1 1 0 0 1 1.497 1.32l-.083 .094l-6.163 6.162l6.262 8.54a1 1 0 0 1 -.697 1.585l-.109 .006h-4.267a1 1 0 0 1 -.73 -.317l-.076 -.092l-4.276 -5.829l-5.944 5.945a1 1 0 0 1 -1.497 -1.32l.083 -.094l6.161 -6.163l-6.26 -8.539a1 1 0 0 1 .697 -1.585l.109 -.006h4.267z" />
+      </>
+    ),
+    defaultClassName: 'w-7 h-7',
+    attrs: { fill: 'currentColor' },
+  },
+  activityEmail: { //tabler
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M22 7.535v9.465a3 3 0 0 1 -2.824 2.995l-.176 .005h-14a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-9.465l9.445 6.297l.116 .066a1 1 0 0 0 .878 0l.116 -.066l9.445 -6.297z" />
+        <path d="M19 4c1.08 0 2.027 .57 2.555 1.427l-9.555 6.37l-9.555 -6.37a2.999 2.999 0 0 1 2.354 -1.42l.201 -.007h14z" />
+      </>
+    ),
     defaultClassName: 'w-7 h-7',
     attrs: { fill: 'currentColor' },
   },
@@ -227,7 +258,13 @@ const ICON_DEFS = {
   },
   file: {
     viewBox: '0 0 24 24',
-    nodes: <path d="M13 9V3.5L18.5 9M6 2c-1.11 0-2 .89-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />,
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M12 2l.117 .007a1 1 0 0 1 .876 .876l.007 .117v4l.005 .15a2 2 0 0 0 1.838 1.844l.157 .006h4l.117 .007a1 1 0 0 1 .876 .876l.007 .117v9a3 3 0 0 1 -2.824 2.995l-.176 .005h-10a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-14a3 3 0 0 1 2.824 -2.995l.176 -.005h5z" />
+        <path d="M19 7h-4l-.001 -4.001z" />
+      </>
+    ),
     defaultClassName: 'w-4 h-4 text-gray-400',
     attrs: { fill: 'currentColor' },
   },
