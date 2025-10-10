@@ -186,6 +186,7 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         { id: 'extensions', desc: 'Extensions & tooling in use' },
         { id: 'gear', desc: 'Daily devices & hardware setup' },
         { id: 'inspiration', desc: 'UI/UX inspiration gallery' },
+        { id: 'youtube-channels', desc: 'YouTube channels' },
     ];
 
     return (
