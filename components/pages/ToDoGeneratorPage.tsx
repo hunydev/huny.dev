@@ -1,8 +1,9 @@
 import React from 'react';
 import type { PageProps } from '../../types';
 import { Icon } from '../../constants';
-import { ErrorMessage, LoadingButton, ApiProviderBadge } from '../ui';
+import { ErrorMessage, LoadingButton, ApiProviderBadge, PlaygroundGuideModal } from '../ui';
 import { useApiCall } from '../../hooks/useApiCall';
+import { usePlaygroundGuide } from '../../hooks/usePlaygroundGuide';
 
 // Types
 export type TaskNode = {
@@ -18,6 +19,8 @@ const ToDoGeneratorPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [prompt, setPrompt] = React.useState('');
   const [root, setRoot] = React.useState<TaskNode>({ id: 'root', title: 'root', checked: false, children: [] });
   const [copied, setCopied] = React.useState(false);
+
+  const playgroundGuide = usePlaygroundGuide('to-do-generator');
 
   type ToDoResponse = { tasks: any[] };
   const api = useApiCall<ToDoResponse>({
@@ -261,17 +264,39 @@ const ToDoGeneratorPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   return (
     <div className="text-gray-300 max-w-6xl mx-auto font-sans leading-relaxed">
       <header className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
-          <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-emerald-300">
-            <Icon name="todoGenerator" className="w-6 h-6" aria-hidden />
-          </span>
-          To-do Generator
-        </h1>
-        <p className="mt-2 text-gray-400 text-sm md:text-base">간단한 설명을 입력하면 체크리스트를 생성합니다.</p>
-        <div className="mt-2">
-          <ApiProviderBadge provider="gemini" />
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
+              <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-emerald-300">
+                <Icon name="todoGenerator" className="w-6 h-6" aria-hidden />
+              </span>
+              To-do Generator
+            </h1>
+            <p className="mt-2 text-gray-400 text-sm md:text-base">간단한 설명을 입력하면 체크리스트를 생성합니다.</p>
+            <div className="mt-2">
+              <ApiProviderBadge provider="gemini" />
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={playgroundGuide.openGuide}
+            className="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition"
+            aria-label="사용 가이드 보기"
+            title="사용 가이드 보기"
+          >
+            <Icon name="info" className="w-5 h-5" />
+          </button>
         </div>
       </header>
+
+      <PlaygroundGuideModal
+        isOpen={playgroundGuide.isModalOpen}
+        onClose={playgroundGuide.closeGuide}
+        playgroundTitle="To-do Generator"
+        playgroundId="to-do-generator"
+        showDontShowAgain={playgroundGuide.showDontShowAgain}
+        onDontShowAgainChange={playgroundGuide.handleDontShowAgain}
+      />
 
       <section className="mb-4">
         <div className="flex items-center gap-2 flex-wrap">

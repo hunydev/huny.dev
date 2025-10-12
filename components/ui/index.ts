@@ -14,3 +14,6 @@ export { FileDropZone } from './FileDropZone';
 
 export { ApiProviderBadge } from './ApiProviderBadge';
 export type { ApiProviderBadgeProps, ApiProvider } from './ApiProviderBadge';
+
+export { PlaygroundGuideModal } from './PlaygroundGuideModal';
+export type { PlaygroundGuideModalProps } from './PlaygroundGuideModal';
