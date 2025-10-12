@@ -1,6 +1,6 @@
 import React from 'react';
 import { PageProps } from '../../types';
-import { Badge, ErrorMessage, LoadingButton } from '../ui';
+import { Badge, ErrorMessage, LoadingButton, ApiProviderBadge } from '../ui';
 import { downloadJson, copyToClipboardWithFallback } from '../../utils/download';
 import { Icon } from '../../constants';
 
@@ -127,6 +127,7 @@ const SplitSpeakerPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
         </p>
         <div className="mt-2 flex items-center gap-2 text-xs">
           <Badge>Playground</Badge>
+          <ApiProviderBadge provider="gemini" />
           <Badge>Gemini · {GEMINI_MODEL}</Badge>
           <Badge>Worker API</Badge>
         </div>

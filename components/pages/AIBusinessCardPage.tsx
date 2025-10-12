@@ -1,6 +1,6 @@
 import React from 'react';
 import type { PageProps } from '../../types';
-import { ErrorMessage, LoadingButton } from '../ui';
+import { ErrorMessage, LoadingButton, ApiProviderBadge } from '../ui';
 import { useApiCall } from '../../hooks/useApiCall';
 import { Icon } from '../../constants/icons';
 
@@ -226,6 +226,9 @@ const AIBusinessCardPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
           AI Business Card
         </h1>
         <p className="mt-2 text-gray-400 text-sm md:text-base">로고/추가 이미지와 입력 정보를 바탕으로 Gemini가 명함 배경 시안을 생성하고, 캔버스 위에서 텍스트를 배치/편집할 수 있습니다.</p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
       </header>
 
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">

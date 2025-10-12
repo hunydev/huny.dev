@@ -1,6 +1,6 @@
 import React from 'react';
 import type { PageProps } from '../../types';
-import { ErrorMessage, LoadingButton } from '../ui';
+import { ErrorMessage, LoadingButton, ApiProviderBadge } from '../ui';
 import { Icon } from '../../constants';
 import { useApiCall } from '../../hooks/useApiCall';
 
@@ -133,6 +133,9 @@ const WebWorkerPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
           Web Worker
         </h1>
         <p className="mt-2 text-gray-400 text-sm md:text-base">격리된 워커(Blob)로 사용자 JS를 안전하게 실행합니다. 함수 이름은 고정: <code>worker_function</code></p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
       </header>
 
       {/* 요청/설정 */}

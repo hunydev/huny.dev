@@ -1,6 +1,6 @@
 import React from 'react';
 import type { PageProps } from '../../types';
-import { ErrorMessage, LoadingButton } from '../ui';
+import { ErrorMessage, LoadingButton, ApiProviderBadge } from '../ui';
 import { downloadFromUrl } from '../../utils/download';
 import { Icon } from '../../constants';
 import { useApiCall } from '../../hooks/useApiCall';
@@ -94,6 +94,9 @@ const CoverCrafterPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
           블로그·기사·영상 스크립트를 붙여넣으면 Gemini가 내용을 분석해 맞춤형 커버/썸네일 이미지를 제안합니다.
           구도 비율과 스타일을 선택해 브랜드에 어울리는 시각을 빠르게 확보해 보세요.
         </p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
       </header>
 
       <section className="grid gap-4 md:grid-cols-[minmax(0,1fr)_320px]">

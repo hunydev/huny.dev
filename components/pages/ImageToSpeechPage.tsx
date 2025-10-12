@@ -1,7 +1,7 @@
 import React from 'react';
 import { PageProps } from '../../types';
 import { Icon } from '../../constants/icons';
-import { ErrorMessage, LoadingButton } from '../ui';
+import { ErrorMessage, LoadingButton, ApiProviderBadge } from '../ui';
 
 const LANGUAGE_OPTIONS: Array<{ value: string; label: string }> = [
   { value: 'ko-KR', label: '한국어 (ko-KR)' },
@@ -587,6 +587,9 @@ const ImageToSpeechPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
         <p className="mt-2 text-gray-400 text-sm md:text-base">
           이미지를 업로드하면 Gemini가 시각 정보를 분석하여 텍스트 묘사를 생성하고, 지정한 언어와 단계에 맞춰 TTS 오디오로 변환합니다.
         </p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
         <p className="mt-1 text-[12px] text-gray-500">
           지원 포맷: PNG, JPEG, WEBP, GIF, SVG (최대 8MB). 기본 언어는 한국어(Korean), 묘사 단계 기본값은 Description입니다.
         </p>

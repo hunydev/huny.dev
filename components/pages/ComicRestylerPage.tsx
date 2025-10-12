@@ -1,7 +1,7 @@
 import React from 'react';
 import type { PageProps } from '../../types';
 import { Icon } from '../../constants';
-import { ErrorMessage, LoadingButton, FileDropZone } from '../ui';
+import { ErrorMessage, LoadingButton, FileDropZone, ApiProviderBadge } from '../ui';
 import { downloadFromUrl } from '../../utils/download';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useFileUpload } from '../../hooks/useFileUpload';
@@ -87,6 +87,9 @@ const ComicRestylerPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
         <p className="mt-2 text-gray-400 text-sm md:text-base">
           인터넷에서 자주 보는 N컷 만화 스케치 이미지를 업로드하면, 컷 구성과 대사는 유지하면서 등장인물과 배경을 더 생동감 있게 재렌더링합니다. 원하는 스타일(일러스트/현실감)을 선택하고 추가 프롬프트로 분위기를 보완해 보세요.
         </p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
       </header>
 
       <section className="rounded-md border border-white/10 bg-white/[0.03] p-3 md:p-4">

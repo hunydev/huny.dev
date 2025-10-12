@@ -1,7 +1,7 @@
 import React from 'react';
 import type { PageProps } from '../../types';
 import { Icon } from '../../constants';
-import { ErrorMessage, LoadingButton, FileDropZone } from '../ui';
+import { ErrorMessage, LoadingButton, FileDropZone, ApiProviderBadge } from '../ui';
 import { downloadFromUrl } from '../../utils/download';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useFileUpload } from '../../hooks/useFileUpload';
@@ -86,6 +86,9 @@ const StickerGeneratorPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => 
           Sticker Generator
         </h1>
         <p className="mt-2 text-gray-400 text-sm md:text-base">업로드한 이미지를 바탕으로 다양한 포즈/방향/컨셉의 스티커를 한 장의 시트로 생성합니다. 최소 개수(default 10)와 투명 배경 옵션을 설정할 수 있습니다.</p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
       </header>
 
       <section className="rounded-md border border-white/10 bg-white/[0.03] p-3 md:p-4">

@@ -1,6 +1,6 @@
 import React from 'react';
 import type { PageProps } from '../../types';
-import { ErrorMessage, LoadingButton } from '../ui';
+import { ErrorMessage, LoadingButton, ApiProviderBadge } from '../ui';
 import { downloadFromUrl } from '../../utils/download';
 import { Icon } from '../../constants';
 
@@ -95,6 +95,9 @@ const AvatarDistillerPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
           업로드한 이미지를 프로필(아바타) 용도에 맞게 최적화합니다. 얼굴/피사체에 초점을 맞추고 표정·조명·배경을 정돈하여
           단순하지만 개성을 유지하는 최고의 프로필 이미지를 만들어 드립니다.
         </p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
       </header>
 
       <section className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(300px,360px)]">

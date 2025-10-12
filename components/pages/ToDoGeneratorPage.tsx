@@ -1,7 +1,7 @@
 import React from 'react';
 import type { PageProps } from '../../types';
 import { Icon } from '../../constants';
-import { ErrorMessage, LoadingButton } from '../ui';
+import { ErrorMessage, LoadingButton, ApiProviderBadge } from '../ui';
 import { useApiCall } from '../../hooks/useApiCall';
 
 // Types
@@ -268,6 +268,9 @@ const ToDoGeneratorPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
           To-do Generator
         </h1>
         <p className="mt-2 text-gray-400 text-sm md:text-base">간단한 설명을 입력하면 체크리스트를 생성합니다.</p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
       </header>
 
       <section className="mb-4">

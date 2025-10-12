@@ -11,3 +11,6 @@ export { LoadingButton } from './LoadingButton';
 export type { LoadingButtonProps } from './LoadingButton';
 
 export { FileDropZone } from './FileDropZone';
+
+export { ApiProviderBadge } from './ApiProviderBadge';
+export type { ApiProviderBadgeProps, ApiProvider } from './ApiProviderBadge';
