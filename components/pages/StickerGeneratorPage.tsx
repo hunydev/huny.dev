@@ -82,28 +82,24 @@ const StickerGeneratorPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => 
   return (
     <div className="text-gray-300 max-w-6xl mx-auto font-sans leading-relaxed">
       <header className="mb-6">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
-              <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-pink-300">
-                <Icon name="stickerGenerator" className="w-6 h-6" />
-              </span>
-              Sticker Generator
-            </h1>
-            <p className="mt-2 text-gray-400 text-sm md:text-base">업로드한 이미지를 바탕으로 다양한 포즈/방향/컨셉의 스티커를 한 장의 시트로 생성합니다. 최소 개수(default 10)와 투명 배경 옵션을 설정할 수 있습니다.</p>
-            <div className="mt-2">
-              <ApiProviderBadge provider="gemini" />
-            </div>
-          </div>
+        <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
+          <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-pink-300">
+            <Icon name="stickerGenerator" className="w-6 h-6" />
+          </span>
+          Sticker Generator
           <button
             type="button"
             onClick={playgroundGuide.openGuide}
-            className="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition"
+            className="ml-1 px-2 py-0.5 text-xs rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition"
             aria-label="사용 가이드 보기"
             title="사용 가이드 보기"
           >
-            <Icon name="info" className="w-5 h-5" />
+            ?
           </button>
+        </h1>
+        <p className="mt-2 text-gray-400 text-sm md:text-base">업로드한 이미지를 바탕으로 다양한 포즈/방향/컨셉의 스티커를 한 장의 시트로 생성합니다. 최소 개수(default 10)와 투명 배경 옵션을 설정할 수 있습니다.</p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
         </div>
       </header>
 

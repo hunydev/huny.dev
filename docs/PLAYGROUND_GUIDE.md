@@ -4,10 +4,12 @@
 
 ## 개요
 
-- **목적**: 각 playground에 물음표(?) 아이콘 버튼을 추가하여 사용자가 기능 설명 이미지를 볼 수 있도록 함
+- **목적**: 각 playground 제목 옆에 물음표(?) badge를 추가하여 사용자가 기능 설명 이미지를 볼 수 있도록 함
 - **자동 표시**: 첫 방문 시 자동으로 가이드 모달 표시
-- **"더 이상 보지 않기"**: localStorage를 사용하여 사용자 설정 저장
+- **"더 이상 보지 않기"**: localStorage를 사용하여 playground별로 사용자 설정 저장
 - **물음표 클릭**: 언제든지 가이드를 다시 볼 수 있음 (체크박스는 표시되지 않음)
+- **모달 헤더**: "사용 가이드 - {Playground 이름}" 형식
+- **디자인**: 제목 바로 옆에 badge 형태로 표시, 물음표 문자 "?" 사용
 
 ## 구성 요소
 
@@ -44,9 +46,11 @@ const playgroundGuide = usePlaygroundGuide('sticker-generator');
 - `handleDontShowAgain(checked)`: "더 이상 보지 않기" 처리
 
 ### 3. 가이드 이미지
-**위치**: `extra/playground/capture/{playground-id}.png`
+**위치**: `public/extra/playground/capture/{playground-id}.png`
 
-각 playground ID에 해당하는 이미지 파일을 저장합니다.
+각 playground ID에 해당하는 이미지 파일을 `public` 폴더 안에 저장합니다.
+
+**중요**: Next.js에서 정적 파일에 접근하려면 반드시 `public` 폴더 안에 있어야 합니다!
 
 **지원 형식**: PNG, JPG, JPEG
 
@@ -74,32 +78,30 @@ const YourPlaygroundPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
 
 ### Step 3: Header에 물음표 버튼 추가
 
-기존 header를 flex 레이아웃으로 감싸고 물음표 버튼을 추가합니다:
+제목 바로 옆에 badge 스타일의 물음표 버튼을 추가합니다:
 
 ```tsx
 <header className="mb-6">
-  <div className="flex items-start justify-between gap-4">
-    <div className="flex-1">
-      {/* 기존 h1, p, ApiProviderBadge 등 */}
-      <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
-        {/* ... */}
-      </h1>
-      <p className="mt-2 text-gray-400 text-sm md:text-base">
-        {/* ... */}
-      </p>
-      <div className="mt-2">
-        <ApiProviderBadge provider="gemini" />
-      </div>
-    </div>
+  <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
+    <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-blue-300">
+      <Icon name="yourIcon" className="w-6 h-6" />
+    </span>
+    Your Playground
     <button
       type="button"
       onClick={playgroundGuide.openGuide}
-      className="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition"
+      className="ml-1 px-2 py-0.5 text-xs rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition"
       aria-label="사용 가이드 보기"
       title="사용 가이드 보기"
     >
-      <Icon name="info" className="w-5 h-5" />
+      ?
     </button>
+  </h1>
+  <p className="mt-2 text-gray-400 text-sm md:text-base">
+    {/* 설명 */}
+  </p>
+  <div className="mt-2">
+    <ApiProviderBadge provider="gemini" />
   </div>
 </header>
 ```
@@ -127,11 +129,17 @@ Header 바로 다음에 모달 컴포넌트를 추가합니다:
 
 ### Step 5: 가이드 이미지 준비
 
-`extra/playground/capture/` 폴더에 이미지를 추가합니다:
+`public/extra/playground/capture/` 폴더에 이미지를 추가합니다:
 
 - 파일명: `{playground-id}.png` (또는 `.jpg`, `.jpeg`)
 - 권장 크기: 최대 너비 1200px
 - 내용: playground 주요 기능 및 사용 방법 설명
+
+**예시**:
+```
+public/extra/playground/capture/sticker-generator.png
+public/extra/playground/capture/cover-crafter.png
+```
 
 ## 전체 예시
 
@@ -153,28 +161,24 @@ const YourPlaygroundPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   return (
     <div className="text-gray-300 max-w-6xl mx-auto font-sans leading-relaxed">
       <header className="mb-6">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
-              <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-blue-300">
-                <Icon name="yourIcon" className="w-6 h-6" />
-              </span>
-              Your Playground
-            </h1>
-            <p className="mt-2 text-gray-400 text-sm md:text-base">설명</p>
-            <div className="mt-2">
-              <ApiProviderBadge provider="gemini" />
-            </div>
-          </div>
+        <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
+          <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-blue-300">
+            <Icon name="yourIcon" className="w-6 h-6" />
+          </span>
+          Your Playground
           <button
             type="button"
             onClick={playgroundGuide.openGuide}
-            className="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition"
+            className="ml-1 px-2 py-0.5 text-xs rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition"
             aria-label="사용 가이드 보기"
             title="사용 가이드 보기"
           >
-            <Icon name="info" className="w-5 h-5" />
+            ?
           </button>
+        </h1>
+        <p className="mt-2 text-gray-400 text-sm md:text-base">설명</p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
         </div>
       </header>
 

@@ -1,6 +1,21 @@
 # Playground 가이드 이미지
 
-이 폴더에는 각 playground의 사용 가이드 이미지가 저장됩니다.
+⚠️ **중요**: 이 폴더는 **개발 참고용**입니다. 
+
+실제 서비스되는 이미지는 **`public/extra/playground/capture/`** 폴더에 있어야 합니다!
+
+## 올바른 경로
+
+웹에서 접근 가능한 위치에 이미지를 저장하세요:
+
+```
+public/extra/playground/capture/{playground-id}.png
+```
+
+예시:
+- `public/extra/playground/capture/sticker-generator.png`
+- `public/extra/playground/capture/cover-crafter.png`
+- `public/extra/playground/capture/to-do-generator.png`
 
 ## 파일명 규칙
 

@@ -87,31 +87,27 @@ const CoverCrafterPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   return (
     <div className="text-gray-300 max-w-6xl mx-auto font-sans leading-relaxed">
       <header className="mb-6">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
-              <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-sky-300">
-                <Icon name="coverCrafter" className="w-6 h-6" aria-hidden />
-              </span>
-              Cover Crafter
-            </h1>
-            <p className="mt-2 text-sm md:text-base text-gray-400">
-              블로그·기사·영상 스크립트를 붙여넣으면 Gemini가 내용을 분석해 맞춤형 커버/썸네일 이미지를 제안합니다.
-              구도 비율과 스타일을 선택해 브랜드에 어울리는 시각을 빠르게 확보해 보세요.
-            </p>
-            <div className="mt-2">
-              <ApiProviderBadge provider="gemini" />
-            </div>
-          </div>
+        <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
+          <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-sky-300">
+            <Icon name="coverCrafter" className="w-6 h-6" aria-hidden />
+          </span>
+          Cover Crafter
           <button
             type="button"
             onClick={playgroundGuide.openGuide}
-            className="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition"
+            className="ml-1 px-2 py-0.5 text-xs rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition"
             aria-label="사용 가이드 보기"
             title="사용 가이드 보기"
           >
             ?
           </button>
+        </h1>
+        <p className="mt-2 text-sm md:text-base text-gray-400">
+          블로그·기사·영상 스크립트를 붙여넣으면 Gemini가 내용을 분석해 맞춤형 커버/썸네일 이미지를 제안합니다.
+          구도 비율과 스타일을 선택해 브랜드에 어울리는 시각을 빠르게 확보해 보세요.
+        </p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
         </div>
       </header>
 

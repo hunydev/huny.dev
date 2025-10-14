@@ -59,7 +59,7 @@ const TabBar: React.FC<TabBarProps> = ({ openTabs, activeTabId, onTabClick, onCl
       // Check if tab is not fully visible
       if (tabRect.left < containerRect.left || tabRect.right > containerRect.right) {
         activeTabElement.scrollIntoView({
-          behavior: 'smooth',
+          behavior: 'instant',
           block: 'nearest',
           inline: 'center',
         });
