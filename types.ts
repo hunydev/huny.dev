@@ -24,6 +24,12 @@ export type Tab = {
   pinned: boolean;
 };
 
+// API 요구사항 타입
+export type ApiRequirement = {
+  provider: 'openai' | 'gemini';
+  features: ('text' | 'tts' | 'image')[];  // text: 무료 가능, tts/image: 유료 키 필요
+};
+
 export type PageProps = {
   onOpenFile: (fileId: string) => void;
   setActiveView: (viewId: ViewId) => void;

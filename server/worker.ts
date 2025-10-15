@@ -338,9 +338,9 @@ export default {
       if (url.pathname === '/api/favicon-distiller') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
         try {
-          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          const geminiKey = await getGeminiKeyFromRequest(request, env, true);
           if (!geminiKey) {
-            return errorJson(500, 'GEMINI_API_KEY is not configured on the server.');
+            return errorJson(500, '이미지 생성 기능은 사용자 API 키가 필요합니다. 설정에서 GEMINI_API_KEY를 등록해 주세요.');
           }
 
           const form = await request.formData();
@@ -539,9 +539,9 @@ export default {
       if (url.pathname === '/api/cover-crafter') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
         try {
-          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          const geminiKey = await getGeminiKeyFromRequest(request, env, true);
           if (!geminiKey) {
-            return errorJson(500, 'GEMINI_API_KEY is not configured on the server.');
+            return errorJson(500, '이미지 생성 기능은 사용자 API 키가 필요합니다. 설정에서 GEMINI_API_KEY를 등록해 주세요.');
           }
 
           const payload = await safeJson(request, {} as any);
@@ -654,9 +654,9 @@ export default {
       if (url.pathname === '/api/image-to-speech') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
         try {
-          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          const geminiKey = await getGeminiKeyFromRequest(request, env, true);
           if (!geminiKey) {
-            return errorJson(500, 'GEMINI_API_KEY is not configured on the server.');
+            return errorJson(500, 'TTS 기능은 사용자 API 키가 필요합니다. 설정에서 GEMINI_API_KEY를 등록해 주세요.');
           }
 
           const form = await request.formData();
@@ -838,9 +838,9 @@ export default {
       if (url.pathname === '/api/scene-to-script') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
         try {
-          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          const geminiKey = await getGeminiKeyFromRequest(request, env, true);
           if (!geminiKey) {
-            return errorJson(500, 'GEMINI_API_KEY is not configured on the server.');
+            return errorJson(500, 'TTS 기능은 사용자 API 키가 필요합니다. 설정에서 GEMINI_API_KEY를 등록해 주세요.');
           }
 
           const form = await request.formData();
@@ -1105,9 +1105,9 @@ export default {
       if (url.pathname === '/api/sticker-generator') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
         try {
-          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          const geminiKey = await getGeminiKeyFromRequest(request, env, true);
           if (!geminiKey) {
-            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+            return new Response(JSON.stringify({ error: '이미지 생성 기능은 사용자 API 키가 필요합니다. 설정에서 GEMINI_API_KEY를 등록해 주세요.' }), {
               status: 500,
               headers: { 'content-type': 'application/json; charset=UTF-8' },
             });
@@ -1200,9 +1200,9 @@ export default {
       if (url.pathname === '/api/comic-restyler') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
         try {
-          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          const geminiKey = await getGeminiKeyFromRequest(request, env, true);
           if (!geminiKey) {
-            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+            return new Response(JSON.stringify({ error: '이미지 생성 기능은 사용자 API 키가 필요합니다. 설정에서 GEMINI_API_KEY를 등록해 주세요.' }), {
               status: 500,
               headers: { 'content-type': 'application/json; charset=UTF-8' },
             });
@@ -1307,9 +1307,9 @@ ${extraPrompt}` : undefined,
       if (url.pathname === '/api/avatar-distiller') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
         try {
-          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          const geminiKey = await getGeminiKeyFromRequest(request, env, true);
           if (!geminiKey) {
-            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+            return new Response(JSON.stringify({ error: '이미지 생성 기능은 사용자 API 키가 필요합니다. 설정에서 GEMINI_API_KEY를 등록해 주세요.' }), {
               status: 500,
               headers: { 'content-type': 'application/json; charset=UTF-8' },
             });
@@ -1551,9 +1551,9 @@ ${extraPrompt}` : undefined,
       if (url.pathname === '/api/ai-business-card') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
         try {
-          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          const geminiKey = await getGeminiKeyFromRequest(request, env, true);
           if (!geminiKey) {
-            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+            return new Response(JSON.stringify({ error: '이미지 생성 기능은 사용자 API 키가 필요합니다. 설정에서 GEMINI_API_KEY를 등록해 주세요.' }), {
               status: 500,
               headers: { 'content-type': 'application/json; charset=UTF-8' },
             });
@@ -2025,9 +2025,9 @@ ${extraPrompt}` : undefined,
           return new Response('Method Not Allowed', { status: 405 });
         }
         try {
-          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          const geminiKey = await getGeminiKeyFromRequest(request, env, true);
           if (!geminiKey) {
-            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+            return new Response(JSON.stringify({ error: 'TTS 기능은 사용자 API 키가 필요합니다. 설정에서 GEMINI_API_KEY를 등록해 주세요.' }), {
               status: 500,
               headers: { 'content-type': 'application/json; charset=UTF-8' },
             });
@@ -2218,9 +2218,9 @@ ${extraPrompt}` : undefined,
           return new Response('Method Not Allowed', { status: 405 });
         }
         try {
-          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          const geminiKey = await getGeminiKeyFromRequest(request, env, true);
           if (!geminiKey) {
-            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+            return new Response(JSON.stringify({ error: 'TTS 기능은 사용자 API 키가 필요합니다. 설정에서 GEMINI_API_KEY를 등록해 주세요.' }), {
               status: 500,
               headers: { 'content-type': 'application/json; charset=UTF-8' },
             });
@@ -2586,9 +2586,9 @@ ${extraPrompt}` : undefined,
           return new Response('Method Not Allowed', { status: 405 });
         }
         try {
-          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          const geminiKey = await getGeminiKeyFromRequest(request, env, true);
           if (!geminiKey) {
-            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+            return new Response(JSON.stringify({ error: 'TTS 기능은 사용자 API 키가 필요합니다. 설정에서 GEMINI_API_KEY를 등록해 주세요.' }), {
               status: 500,
               headers: { 'content-type': 'application/json; charset=UTF-8' },
             });
@@ -2946,21 +2946,33 @@ export async function decryptApiKeyPayload(cipherText: string, env: Env): Promis
   return JSON.parse(txt);
 }
 
-async function getApiKeyFromRequest(request: Request, env: Env): Promise<{ gemini?: string; openai?: string }> {
+async function getApiKeyFromRequest(request: Request, env: Env): Promise<{ gemini?: string; openai?: string; hasUserGemini: boolean; hasUserOpenAI: boolean }> {
   try {
     const hdr = request.headers.get('X-ApiKey-Cipher') || request.headers.get('x-apikey-cipher') || '';
-    if (!hdr) return { gemini: env.GEMINI_API_KEY, openai: env.OPENAI_API_KEY };
+    if (!hdr) {
+      // OpenAI: 서버 기본값 사용 불가 (사용자 키 필수)
+      // Gemini: 서버 기본값 사용 가능 (무료 키)
+      return { gemini: env.GEMINI_API_KEY, openai: undefined, hasUserGemini: false, hasUserOpenAI: false };
+    }
     const js = await decryptApiKeyPayload(hdr, env).catch(() => ({}));
-    const gemini = (typeof js?.gemini === 'string' && js.gemini.trim()) ? js.gemini.trim() : (env.GEMINI_API_KEY || undefined);
-    const openai = (typeof js?.openai === 'string' && js.openai.trim()) ? js.openai.trim() : (env.OPENAI_API_KEY || undefined);
-    return { gemini, openai };
+    const hasUserGemini = !!(typeof js?.gemini === 'string' && js.gemini.trim());
+    const hasUserOpenAI = !!(typeof js?.openai === 'string' && js.openai.trim());
+    // Gemini: 사용자 키 우선, 없으면 서버 기본값
+    const gemini = hasUserGemini ? js.gemini.trim() : (env.GEMINI_API_KEY || undefined);
+    // OpenAI: 사용자 키만 허용, 서버 기본값 사용 불가
+    const openai = hasUserOpenAI ? js.openai.trim() : undefined;
+    return { gemini, openai, hasUserGemini, hasUserOpenAI };
   } catch {
-    return { gemini: env.GEMINI_API_KEY, openai: env.OPENAI_API_KEY };
+    return { gemini: env.GEMINI_API_KEY, openai: undefined, hasUserGemini: false, hasUserOpenAI: false };
   }
 }
 
-export async function getGeminiKeyFromRequest(request: Request, env: Env): Promise<string | undefined> {
-  const { gemini } = await getApiKeyFromRequest(request, env);
+export async function getGeminiKeyFromRequest(request: Request, env: Env, requireUserKey: boolean = false): Promise<string | undefined> {
+  const { gemini, hasUserGemini } = await getApiKeyFromRequest(request, env);
+  // TTS/이미지 생성 기능은 사용자 키 필수 (무료 키 미지원)
+  if (requireUserKey && !hasUserGemini) {
+    return undefined;
+  }
   return gemini;
 }
 

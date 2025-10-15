@@ -1,5 +1,5 @@
 import React from 'react';
-import { PageProps } from '../types';
+import { PageProps, ApiRequirement } from '../types';
 import welcomeIcon from '../icon_32x32.png';
 import { Icon } from './icons';
 
@@ -44,7 +44,7 @@ export type PageComponent =
   | React.ComponentType<PageProps>
   | React.LazyExoticComponent<React.ComponentType<PageProps>>;
 
-export const PAGES: Record<string, { title: string; component: PageComponent; icon: React.ReactNode }> = {
+export const PAGES: Record<string, { title: string; component: PageComponent; icon: React.ReactNode; apiRequirement?: ApiRequirement }> = {
   welcome: {
     title: 'Welcome',
     component: WelcomePage,
@@ -79,81 +79,97 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     title: 'To-do Generator',
     component: ToDoGeneratorPage,
     icon: <Icon name="todoGenerator" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['text'] },
   },
   'text-to-phoneme': {
     title: 'Text to Phoneme',
     component: TextToPhonemePage,
     icon: <Icon name="textToPhoneme" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['text'] },
   },
   'text-to-emoji': {
     title: 'Text to Emoji',
     component: TextToEmojiPage,
     icon: <Icon name="textToEmoji" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['text'] },
   },
   'web-worker': {
     title: 'Web Worker',
     component: WebWorkerPage,
     icon: <Icon name="webWorker" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['text'] },
   },
   'text-cleaning': {
     title: 'Text Cleaning',
     component: TextCleaningPage,
     icon: <Icon name="textCleaning" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['text'] },
   },
   'ai-business-card': {
     title: 'AI Business Card',
     component: AIBusinessCardPage,
     icon: <Icon name="aiBusinessCard" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['image'] },
   },
   'sticker-generator': {
     title: 'Sticker Generator',
     component: StickerGeneratorPage,
     icon: <Icon name="stickerGenerator" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['image'] },
   },
   'comic-restyler': {
     title: 'Comic Restyler',
     component: ComicRestylerPage,
     icon: <Icon name="comicRestyler" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['image'] },
   },
   'favicon-distiller': {
     title: 'Favicon Distiller',
     component: FaviconDistillerPage,
     icon: <Icon name="favicon" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['image'] },
   },
   'avatar-distiller': {
     title: 'Avatar Distiller',
     component: AvatarDistillerPage,
     icon: <Icon name="avatar" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['image'] },
   },
   'cover-crafter': {
     title: 'Cover Crafter',
     component: CoverCrafterPage,
     icon: <Icon name="coverCrafter" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['image'] },
   },
   'ui-clone': {
     title: 'UI Clone',
     component: UIClonePage,
     icon: <Icon name="uiClone" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['text'] },
   },
   'multi-voice-reader': {
     title: 'MultiVoice Reader',
     component: MultiVoiceReaderPage,
     icon: <Icon name="multiVoiceReader" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['text', 'tts'] },
   },
   'image-to-speech': {
     title: 'Image to Speech',
     component: ImageToSpeechPage,
     icon: <Icon name="imageToSpeech" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['text', 'tts'] },
   },
   'non-native-korean-tts': {
     title: 'Non-Native Korean TTS',
     component: NonNativeKoreanTTSPage,
     icon: <Icon name="nonNativeKoreanTts" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['tts'] },
   },
   'scene-to-script': {
     title: 'Scene to Script',
     component: SceneToScriptPage,
     icon: <Icon name="sceneToScript" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['text', 'tts'] },
   },
   monitor: {
     title: 'monitor',
@@ -164,11 +180,13 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     title: 'Split Speaker',
     component: SplitSpeakerPage,
     icon: <Icon name="splitSpeaker" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['text'] },
   },
   'bird-generator': {
     title: 'Bird Generator',
     component: BirdGeneratorPage,
     icon: <Icon name="bird" className="mr-2" />,
+    apiRequirement: { provider: 'openai', features: ['image'] },
   },
   mascot: {
     title: 'mascot.gallery',
