@@ -280,6 +280,18 @@ const App: React.FC = () => {
     initialShortcutIdsRef.current = uniqueIds;
   }, []);
 
+  // Restore API key meta flags BEFORE restoring tabs
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('secure.apikeys.meta.v1');
+      if (raw) {
+        const meta = JSON.parse(raw) as { gemini?: boolean; openai?: boolean };
+        setApiHasGemini(!!meta?.gemini);
+        setApiHasOpenAI(!!meta?.openai);
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
     // Restore tabs from localStorage on initial load; fallback to Welcome
     if (restoredRef.current) return;
@@ -637,18 +649,6 @@ const App: React.FC = () => {
       document.removeEventListener('mousedown', onDocMouseDown);
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, []);
-
-  // Restore API key meta flags
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem('secure.apikeys.meta.v1');
-      if (raw) {
-        const meta = JSON.parse(raw) as { gemini?: boolean; openai?: boolean };
-        setApiHasGemini(!!meta?.gemini);
-        setApiHasOpenAI(!!meta?.openai);
-      }
-    } catch {}
   }, []);
 
   const checkForUpdates = useCallback(async () => {
