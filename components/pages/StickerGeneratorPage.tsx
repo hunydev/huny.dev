@@ -1,16 +1,19 @@
 import React from 'react';
 import type { PageProps } from '../../types';
 import { Icon } from '../../constants';
-import { ErrorMessage, LoadingButton, FileDropZone } from '../ui';
+import { ErrorMessage, LoadingButton, FileDropZone, ApiProviderBadge, PlaygroundGuideModal } from '../ui';
 import { downloadFromUrl } from '../../utils/download';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useFileUpload } from '../../hooks/useFileUpload';
+import { usePlaygroundGuide } from '../../hooks/usePlaygroundGuide';
 
 const StickerGeneratorPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [minCount, setMinCount] = React.useState<number>(10);
   const [prompt, setPrompt] = React.useState<string>('');
   const [transparent, setTransparent] = React.useState<boolean>(false);
   const [outUrl, setOutUrl] = React.useState<string>('');
+
+  const playgroundGuide = usePlaygroundGuide('sticker-generator');
 
   const fileUpload = useFileUpload({
     accept: 'image/*',
@@ -84,9 +87,30 @@ const StickerGeneratorPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => 
             <Icon name="stickerGenerator" className="w-6 h-6" />
           </span>
           Sticker Generator
+          <button
+            type="button"
+            onClick={playgroundGuide.openGuide}
+            className="ml-1 px-2 py-0.5 text-xs rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition"
+            aria-label="사용 가이드 보기"
+            title="사용 가이드 보기"
+          >
+            ?
+          </button>
         </h1>
         <p className="mt-2 text-gray-400 text-sm md:text-base">업로드한 이미지를 바탕으로 다양한 포즈/방향/컨셉의 스티커를 한 장의 시트로 생성합니다. 최소 개수(default 10)와 투명 배경 옵션을 설정할 수 있습니다.</p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
       </header>
+
+      <PlaygroundGuideModal
+        isOpen={playgroundGuide.isModalOpen}
+        onClose={playgroundGuide.closeGuide}
+        playgroundTitle="Sticker Generator"
+        playgroundId="sticker-generator"
+        showDontShowAgain={playgroundGuide.showDontShowAgain}
+        onDontShowAgainChange={playgroundGuide.handleDontShowAgain}
+      />
 
       <section className="rounded-md border border-white/10 bg-white/[0.03] p-3 md:p-4">
         <h2 className="text-sm font-medium text-white mb-2">입력</h2>

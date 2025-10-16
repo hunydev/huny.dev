@@ -1,6 +1,6 @@
 import React from 'react';
 import { PageProps } from '../../types';
-import { ErrorMessage, LoadingButton } from '../ui';
+import { ErrorMessage, LoadingButton, ApiProviderBadge } from '../ui';
 import { Icon } from '../../constants';
 
 const INSTRUCTION_PRESETS = [
@@ -363,6 +363,9 @@ const NonNativeKoreanTTSPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) =
         <p className="mt-2 text-gray-400 text-sm md:text-base">
           한국어 텍스트를 입력하면 외국인 억양(미국/영국/일본/중국 등)으로 합성음을 생성합니다.
         </p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
         <p className="mt-1 text-[12px] text-gray-500">
           Gemini TTS API를 사용하며, instruction을 통해 발음 스타일을 조정합니다. 출력은 Linear 16-bit PCM이며 WebAudio API로 재생하거나 WAV 파일로 다운로드할 수 있습니다.
         </p>

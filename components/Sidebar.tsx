@@ -1,5 +1,5 @@
 import React from 'react';
-import { ViewId } from '../types';
+import { ViewId, ApiRequirement } from '../types';
 import { Icon, PAGES } from '../constants';
 import { BOOKMARK_CATEGORIES, BOOKMARKS, type Bookmark } from './pages/bookmarksData';
 import { NOTE_GROUPS, getNoteCountByGroup, subscribeNotes } from './pages/notesData';
@@ -15,6 +15,8 @@ type SidebarProps = {
   activeView: ViewId;
   onOpenFile: (fileId: string) => void;
   width?: number;
+  apiHasGemini?: boolean;
+  apiHasOpenAI?: boolean;
 };
 
 const DocsView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
@@ -159,175 +161,79 @@ const DocsView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFi
   );
 };
 
-const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => (
-  <div className="p-2">
-    <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Playground</h2>
-    <div className="flex flex-col gap-1">
-      <button
-        onClick={() => onOpenFile('sticker-generator')}
-        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-      >
-        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <Icon name="stickerGenerator" className="w-4 h-4" />
-        </span>
-        <span className="text-sm">Sticker Generator</span>
-      </button>
-      <button
-        onClick={() => onOpenFile('comic-restyler')}
-        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-      >
-        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <Icon name="comicRestyler" className="w-4 h-4" />
-        </span>
-        <span className="text-sm">Comic Restyler</span>
-      </button>
-      <button
-        onClick={() => onOpenFile('ai-business-card')}
-        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-      >
-        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <Icon name="aiBusinessCard" className="w-4 h-4" aria-hidden />
-        </span>
-        <span className="text-sm">AI Business Card</span>
-      </button>
-      <button
-        onClick={() => onOpenFile('text-cleaning')}
-        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-      >
-        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <Icon name="textCleaning" className="w-4 h-4" aria-hidden />
-        </span>
-        <span className="text-sm">Text Cleaning</span>
-      </button>
-      <button
-        onClick={() => onOpenFile('text-to-phoneme')}
-        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-      >
-        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <Icon name="textToPhoneme" className="w-4 h-4" aria-hidden />
-        </span>
-        <span className="text-sm">Text to Phoneme</span>
-      </button>
-      <button
-        onClick={() => onOpenFile('text-to-emoji')}
-        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-      >
-        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <Icon name="textToEmoji" className="w-4 h-4" aria-hidden />
-        </span>
-        <span className="text-sm">Text to Emoji</span>
-      </button>
-      <button
-        onClick={() => onOpenFile('ui-clone')}
-        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-      >
-        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <Icon name="uiClone" className="w-4 h-4" aria-hidden />
-        </span>
-        <span className="text-sm">UI Clone</span>
-      </button>
-      <button
-        onClick={() => onOpenFile('web-worker')}
-        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-      >
-        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <Icon name="webWorker" className="w-4 h-4" aria-hidden />
-        </span>
-        <span className="text-sm">Web Worker</span>
-      </button>
-      <button
-        onClick={() => onOpenFile('todo-generator')}
-        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-      >
-        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <Icon name="todoGenerator" className="w-4 h-4" aria-hidden />
-        </span>
-        <span className="text-sm">To-do Generator</span>
-      </button>
-      <button
-        onClick={() => onOpenFile('split-speaker')}
-        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-      >
-        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <Icon name="splitSpeaker" className="w-4 h-4" aria-hidden />
-        </span>
-        <span className="text-sm">Split Speaker</span>
-      </button>
-      <button
-        onClick={() => onOpenFile('bird-generator')}
-        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-      >
-        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <Icon name="bird" className="w-4 h-4" aria-hidden />
-        </span>
-        <span className="text-sm">Bird Generator</span>
-      </button>
-      <button
-        onClick={() => onOpenFile('multi-voice-reader')}
-        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-      >
-        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <Icon name="multiVoiceReader" className="w-4 h-4" aria-hidden />
-        </span>
-        <span className="text-sm">MultiVoice Reader</span>
-      </button>
-      <button
-        onClick={() => onOpenFile('image-to-speech')}
-        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-      >
-        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <Icon name="imageToSpeech" className="w-4 h-4" aria-hidden />
-        </span>
-        <span className="text-sm">Image to Speech</span>
-      </button>
-      <button
-        onClick={() => onOpenFile('non-native-korean-tts')}
-        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-      >
-        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <Icon name="nonNativeKoreanTts" className="w-4 h-4" aria-hidden />
-        </span>
-        <span className="text-sm">Non-Native Korean TTS</span>
-      </button>
-      <button
-        onClick={() => onOpenFile('scene-to-script')}
-        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-      >
-        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <Icon name="sceneToScript" className="w-4 h-4" aria-hidden />
-        </span>
-        <span className="text-sm">Scene to Script</span>
-      </button>
-      <button
-        onClick={() => onOpenFile('favicon-distiller')}
-        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-      >
-        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <Icon name="favicon" className="w-4 h-4" aria-hidden />
-        </span>
-        <span className="text-sm">Favicon Distiller</span>
-      </button>
-      <button
-        onClick={() => onOpenFile('avatar-distiller')}
-        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-      >
-        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <Icon name="avatar" className="w-4 h-4" aria-hidden />
-        </span>
-        <span className="text-sm">Avatar Distiller</span>
-      </button>
-      <button
-        onClick={() => onOpenFile('cover-crafter')}
-        className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1"
-      >
-        <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
-          <Icon name="coverCrafter" className="w-4 h-4" aria-hidden />
-        </span>
-        <span className="text-sm">Cover Crafter</span>
-      </button>
+const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void; apiHasGemini?: boolean; apiHasOpenAI?: boolean }> = ({ onOpenFile, apiHasGemini, apiHasOpenAI }) => {
+  const checkAvailability = (pageId: string): boolean => {
+    const pageInfo = PAGES[pageId];
+    if (!pageInfo?.apiRequirement) return true;
+
+    const { provider, features } = pageInfo.apiRequirement;
+    const requiresUserKey = features.some(f => f === 'tts' || f === 'image');
+
+    if (provider === 'openai') {
+      return !!apiHasOpenAI;
+    } else if (provider === 'gemini') {
+      if (requiresUserKey) {
+        return !!apiHasGemini;
+      }
+    }
+    return true;
+  };
+
+  const playgroundItems = [
+    { id: 'sticker-generator', icon: 'stickerGenerator', label: 'Sticker Generator' },
+    { id: 'comic-restyler', icon: 'comicRestyler', label: 'Comic Restyler' },
+    { id: 'ai-business-card', icon: 'aiBusinessCard', label: 'AI Business Card' },
+    { id: 'text-cleaning', icon: 'textCleaning', label: 'Text Cleaning' },
+    { id: 'text-to-phoneme', icon: 'textToPhoneme', label: 'Text to Phoneme' },
+    { id: 'text-to-emoji', icon: 'textToEmoji', label: 'Text to Emoji' },
+    { id: 'ui-clone', icon: 'uiClone', label: 'UI Clone' },
+    { id: 'web-worker', icon: 'webWorker', label: 'Web Worker' },
+    { id: 'todo-generator', icon: 'todoGenerator', label: 'To-do Generator' },
+    { id: 'split-speaker', icon: 'splitSpeaker', label: 'Split Speaker' },
+    { id: 'bird-generator', icon: 'bird', label: 'Bird Generator' },
+    { id: 'multi-voice-reader', icon: 'multiVoiceReader', label: 'MultiVoice Reader' },
+    { id: 'image-to-speech', icon: 'imageToSpeech', label: 'Image to Speech' },
+    { id: 'non-native-korean-tts', icon: 'nonNativeKoreanTts', label: 'Non-Native Korean TTS' },
+    { id: 'scene-to-script', icon: 'sceneToScript', label: 'Scene to Script' },
+    { id: 'favicon-distiller', icon: 'favicon', label: 'Favicon Distiller' },
+    { id: 'avatar-distiller', icon: 'avatar', label: 'Avatar Distiller' },
+    { id: 'cover-crafter', icon: 'coverCrafter', label: 'Cover Crafter' },
+  ];
+
+  return (
+    <div className="p-2">
+      <h2 className="text-xs uppercase text-gray-400 tracking-wider mb-2">Playground</h2>
+      <div className="flex flex-col gap-1">
+        {playgroundItems.map(item => {
+          const available = checkAvailability(item.id);
+          return (
+            <button
+              key={item.id}
+              onClick={() => onOpenFile(item.id)}
+              className={`flex items-center text-left w-full rounded px-2 py-1 ${
+                available 
+                  ? 'hover:bg-white/10' 
+                  : 'opacity-40 cursor-not-allowed hover:bg-white/5'
+              }`}
+              title={available ? undefined : 'API 키 설정이 필요합니다'}
+            >
+              <span className="inline-flex items-center justify-center w-4 h-4 mr-2 text-gray-400">
+                <Icon name={item.icon as any} className="w-4 h-4" aria-hidden />
+              </span>
+              <span className="text-sm">{item.label}</span>
+              {!available && (
+                <svg className="w-3 h-3 ml-auto text-amber-400" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                  <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
+                </svg>
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const AppsView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFile }) => {
   const ORDER: Array<'huny' | 'dev' | 'ai' | 'tools' | 'design'> = ['huny', 'dev', 'ai', 'tools', 'design'];
@@ -723,7 +629,7 @@ const NotesView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenF
 };
 
 
-const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile, width = 256 }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile, width = 256, apiHasGemini, apiHasOpenAI }) => {
 
   const renderView = () => {
     switch (activeView) {
@@ -738,7 +644,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onOpenFile, width = 256 }
       case ViewId.Monitor:
         return <MonitorView onOpenFile={onOpenFile} />;
       case ViewId.Playground:
-        return <PlaygroundView onOpenFile={onOpenFile} />;
+        return <PlaygroundView onOpenFile={onOpenFile} apiHasGemini={apiHasGemini} apiHasOpenAI={apiHasOpenAI} />;
       case ViewId.Bookmark:
         return <BookmarkView onOpenFile={onOpenFile} />;
       case ViewId.Notes:

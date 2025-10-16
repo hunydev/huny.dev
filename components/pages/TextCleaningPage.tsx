@@ -1,6 +1,6 @@
 import React from 'react';
 import type { PageProps } from '../../types';
-import { ErrorMessage, LoadingButton, Badge } from '../ui';
+import { ErrorMessage, LoadingButton, Badge, ApiProviderBadge } from '../ui';
 import { useApiCall } from '../../hooks/useApiCall';
 import { Icon } from '../../constants/icons';
 
@@ -127,6 +127,9 @@ const TextCleaningPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
           Text Cleaning
         </h1>
         <p className="mt-2 text-gray-400 text-sm md:text-base">입력한 텍스트의 오타 및 맞춤법을 교정하고, 좌/우 비교 UI로 변화점을 강조합니다.</p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
       </header>
 
       {/* Input */}

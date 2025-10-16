@@ -1,7 +1,7 @@
 import React from 'react';
 import { PageProps } from '../../types';
 import { Icon } from '../../constants/icons';
-import { ErrorMessage, LoadingButton } from '../ui';
+import { ErrorMessage, LoadingButton, ApiProviderBadge } from '../ui';
 
 const DEFAULT_TEXT = `작은 항구 마을에 낡은 등대가 있었습니다.
 “오늘은 또 불이 꺼져 있네.” 어부 아저씨가 한숨을 내쉬었지요.
@@ -277,6 +277,9 @@ const MultiVoiceReaderPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => 
         <p className="mt-2 text-gray-400 text-sm md:text-base">
           입력 텍스트의 화자를 자동 분리하고 Gemini TTS 멀티스피커로 합성하여 하나의 오디오로 재생합니다.
         </p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
         <p className="mt-1 text-[12px] text-gray-500">
           사용 방법: (1) 텍스트 입력 → (2) 변환(선택) 또는 바로 합성 → (3) 결과에서 재생/중지. 화자별 보이스는 아래 "화자별 보이스 지정"에서 설정할 수 있어요.
         </p>

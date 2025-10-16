@@ -1,6 +1,6 @@
 import React from 'react';
 import type { PageProps } from '../../types';
-import { ErrorMessage, LoadingButton, FileDropZone } from '../ui';
+import { ErrorMessage, LoadingButton, FileDropZone, ApiProviderBadge } from '../ui';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useFileUpload } from '../../hooks/useFileUpload';
 import { Icon } from '../../constants/icons';
@@ -83,6 +83,9 @@ const UIClonePage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
           UI Clone
         </h1>
         <p className="mt-2 text-gray-400 text-sm md:text-base">캡쳐 이미지를 업로드/붙여넣기 후, Gemini로 단일 HTML 파일(인라인 CSS 포함)을 생성하고, 샌드박스된 프리뷰와 다운로드를 제공합니다.</p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
       </header>
 
       <section className="rounded-md border border-white/10 bg-white/[0.03] p-3 md:p-4">

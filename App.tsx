@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import ActivityBar from './components/ActivityBar';
 import Sidebar from './components/Sidebar';
 import MainPanel from './components/MainPanel';
-import { ViewId, Tab, PageProps } from './types';
+import { ViewId, Tab, PageProps, ApiRequirement } from './types';
 import { PAGES, ACTIVITY_BAR_ITEMS, EXTERNAL_LINKS, Icon } from './constants';
 import logo from './logo_128x128.png';
 import { getCategoryById } from './components/pages/bookmarksData';
@@ -13,7 +13,7 @@ import { MONITOR_GROUPS, getMonitorItemById } from './components/pages/monitorDa
 import { extractBaseId, viewForTabId } from './utils/navigation';
 import { ApiTaskProvider, useApiTask } from './contexts/ApiTaskContext';
 
-const APP_VERSION = '2025.10.10.4';
+const APP_VERSION = '2025.10.16.1';
 
 const TABS_STORAGE_KEY = 'app.openTabs.v1';
 const DEFAULT_TAB_IDS: readonly string[] = ['welcome', 'works', 'domain', 'about'];
@@ -171,6 +171,19 @@ const App: React.FC = () => {
       return;
     }
 
+    // API 요구사항 체크
+    if (pageInfo.apiRequirement) {
+      const check = checkApiRequirement(pageInfo.apiRequirement);
+      if (!check.available) {
+        const providerName = pageInfo.apiRequirement.provider === 'openai' ? 'OpenAI' : 'Gemini';
+        const message = `${pageInfo.title}는 ${providerName} API 키가 필요합니다.\n\n${check.reason || ''}`;
+        if (window.confirm(`${message}\n\nAPI 키 설정 화면으로 이동하시겠습니까?`)) {
+          openApiKeyModal();
+        }
+        return;
+      }
+    }
+
     let tabTitle = pageInfo.title;
     let tabIcon: React.ReactNode = pageInfo.icon;
     if (baseId === 'bookmark') {
@@ -262,7 +275,7 @@ const App: React.FC = () => {
       const trimmed = next.filter(id => id !== 'welcome').slice(0, 5);
       sessionStorage.setItem('recentTabs', JSON.stringify(trimmed));
     } catch { }
-  }, []);
+  }, [apiHasGemini, apiHasOpenAI]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -766,6 +779,28 @@ const App: React.FC = () => {
     }
   };
 
+  // API 키 요구사항 체크 함수
+  const checkApiRequirement = (requirement?: ApiRequirement): { available: boolean; reason?: string } => {
+    if (!requirement) return { available: true };
+
+    const { provider, features } = requirement;
+    const requiresUserKey = features.some(f => f === 'tts' || f === 'image');
+
+    if (provider === 'openai') {
+      // OpenAI는 무조건 사용자 키 필수
+      if (!apiHasOpenAI) {
+        return { available: false, reason: 'OpenAI API 키를 설정해야 사용할 수 있습니다.' };
+      }
+    } else if (provider === 'gemini') {
+      // Gemini는 TTS/이미지 기능에만 사용자 키 필요
+      if (requiresUserKey && !apiHasGemini) {
+        return { available: false, reason: 'Gemini API 키를 설정해야 사용할 수 있습니다.' };
+      }
+    }
+
+    return { available: true };
+  };
+
   const pageProps: PageProps = {
     onOpenFile: handleOpenFile,
     setActiveView: setActiveView,
@@ -1055,7 +1090,7 @@ const App: React.FC = () => {
         />
         {isSidebarPinned && (
           <>
-            <Sidebar activeView={activeView} onOpenFile={handleOpenFile} width={sidebarWidth} />
+            <Sidebar activeView={activeView} onOpenFile={handleOpenFile} width={sidebarWidth} apiHasGemini={apiHasGemini} apiHasOpenAI={apiHasOpenAI} />
             <div
               className={`w-1 cursor-col-resize bg-transparent hover:bg-white/10 ${isResizing ? 'bg-blue-500/40' : ''}`}
               onMouseDown={handleSidebarResizeStart}
@@ -1098,7 +1133,7 @@ const App: React.FC = () => {
             style={{ width: sidebarWidth }}
           >
             {overlayView && (
-              <Sidebar activeView={overlayView} onOpenFile={handleOpenFile} width={sidebarWidth} />
+              <Sidebar activeView={overlayView} onOpenFile={handleOpenFile} width={sidebarWidth} apiHasGemini={apiHasGemini} apiHasOpenAI={apiHasOpenAI} />
             )}
           </div>
         )}
@@ -1264,7 +1299,11 @@ const App: React.FC = () => {
               </div>
               <div className="min-w-0 flex-1">
                 <h2 id="apikey-modal-title" className="text-lg font-semibold text-white">API Key 설정</h2>
-                <p className="text-sm text-gray-400">여기에 설정한 키는 서버 환경변수 대신 우선적으로 사용됩니다. 값은 암호화되어 브라우저에 저장됩니다. Playground AI 도구에 활용되며 서버 기본값은 무료 키를 사용합니다.</p>
+                <p className="text-sm text-gray-400 mb-2">Playground AI 도구를 사용하기 위한 API 키를 설정합니다. 값은 암호화되어 브라우저에 저장됩니다.</p>
+                <div className="text-xs text-gray-500 space-y-1">
+                  <p>• <span className="text-amber-300">OpenAI API</span>: 모든 기능에 사용자 키 필수 (서버 기본값 사용 불가)</p>
+                  <p>• <span className="text-blue-300">Gemini API</span>: TTS 및 이미지 생성 기능에만 사용자 키 필수</p>
+                </div>
               </div>
               <button onClick={() => setApiModalOpen(false)} className="ml-2 p-1.5 rounded hover:bg-white/10 text-gray-300" aria-label="닫기" title="닫기">
                 <Icon name="close" />
@@ -1283,7 +1322,7 @@ const App: React.FC = () => {
                   className="w-full px-2 py-2 rounded bg-black/40 border border-white/10 text-sm"
                   autoComplete="off"
                 />
-                <p className="text-xs text-gray-500 mt-1">입력하지 않으면 서버 기본값을 사용합니다.</p>
+                <p className="text-xs text-gray-500 mt-1">TTS/이미지 생성 기능에 필요. 텍스트 분석 기능은 서버 무료 키 사용 가능.</p>
               </div>
               <div>
                 <label className="block text-sm text-gray-300 mb-1" htmlFor="openai-key">OPENAI_API_KEY</label>
@@ -1296,7 +1335,7 @@ const App: React.FC = () => {
                   className="w-full px-2 py-2 rounded bg-black/40 border border-white/10 text-sm"
                   autoComplete="off"
                 />
-                <p className="text-xs text-gray-500 mt-1">입력하지 않으면 서버 기본값을 사용합니다.</p>
+                <p className="text-xs text-amber-300 mt-1">필수 입력. OpenAI API를 사용하는 모든 기능에 필요합니다.</p>
               </div>
               {apiError && <div className="text-xs text-amber-300">{apiError}</div>}
               <div className="flex items-center justify-end gap-2 pt-2">

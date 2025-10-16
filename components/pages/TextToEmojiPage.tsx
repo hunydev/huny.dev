@@ -1,6 +1,6 @@
 import React from 'react';
 import { PageProps } from '../../types';
-import { ErrorMessage, LoadingButton } from '../ui';
+import { ErrorMessage, LoadingButton, ApiProviderBadge } from '../ui';
 import { Icon } from '../../constants';
 
 type EmojiMode = 'full' | 'partial' | 'insert';
@@ -80,6 +80,9 @@ const TextToEmojiPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
         <p className="mt-2 text-gray-400 text-sm md:text-base">
           텍스트를 입력하면 선택한 모드에 따라 emoji로 변환된 결과를 보여줍니다.
         </p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
         <p className="mt-1 text-[12px] text-gray-500">
           Gemini Flash 모델을 사용하여 빠르고 간단하게 처리합니다.
         </p>

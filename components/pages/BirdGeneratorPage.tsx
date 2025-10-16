@@ -1,6 +1,6 @@
 import React from 'react';
 import { PageProps } from '../../types';
-import { ErrorMessage, LoadingButton } from '../ui';
+import { ErrorMessage, LoadingButton, ApiProviderBadge } from '../ui';
 import { useApiCall } from '../../hooks/useApiCall';
 import { Icon } from '../../constants/icons';
 import sideImg from '../../extra/mascot/images/side.png';
@@ -91,6 +91,9 @@ const BirdGeneratorPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
           세 장의 기준 이미지를 섞어 새로운 새 이미지를 만들어봅니다. OpenAI Images Edit (<span className="text-emerald-300">gpt-image-1</span> / <span className="text-emerald-300">dall-e-2</span>) 지원.
           <br/>dall-e-2 선택 시 규격상 한 장만 허용되어 중앙(front) 이미지만 사용합니다.
         </p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="openai" />
+        </div>
       </header>
 
       {/* Top: three ingredient images */}

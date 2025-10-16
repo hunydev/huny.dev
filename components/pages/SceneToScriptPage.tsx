@@ -1,7 +1,7 @@
 import React from 'react';
 import { PageProps } from '../../types';
 import { Icon } from '../../constants';
-import { ErrorMessage, LoadingButton } from '../ui';
+import { ErrorMessage, LoadingButton, ApiProviderBadge } from '../ui';
 
 const genderLabel = (gender: 'male' | 'female' | 'unknown') => {
   switch (gender) {
@@ -486,6 +486,9 @@ const SceneToScriptPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
         <p className="mt-2 text-gray-400 text-sm md:text-base">
           업로드한 장면 속 등장인물을 분석해 다화자 스크립트와 멀티 스피커 합성음을 생성합니다. 카툰·웹툰·단체 사진처럼 인물이 뚜렷한 이미지에 적합합니다.
         </p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
         <p className="mt-1 text-[12px] text-gray-500">
           사용 방법: 이미지를 업로드하고 "장면 분석"을 눌러 스크립트를 생성한 뒤, 자동으로 멀티 스피커 합성 음성이 제공됩니다.
         </p>

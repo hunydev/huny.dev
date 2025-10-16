@@ -1,6 +1,6 @@
 import React from 'react';
 import type { PageProps } from '../../types';
-import { ErrorMessage, LoadingButton } from '../ui';
+import { ErrorMessage, LoadingButton, ApiProviderBadge } from '../ui';
 import { Icon } from '../../constants';
 import { useApiCall } from '../../hooks/useApiCall';
 
@@ -43,6 +43,9 @@ const TextToPhonemePage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
           Text to Phoneme
         </h1>
         <p className="mt-2 text-gray-400 text-sm md:text-base">입력한 텍스트를 노말라이즈하고, 그 결과를 G2P(발음)로 변환합니다.</p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
       </header>
 
       <section className="space-y-3">

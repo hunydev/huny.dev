@@ -1,7 +1,7 @@
 import React from 'react';
 import type { PageProps } from '../../types';
 import { Icon } from '../../constants';
-import { ErrorMessage, LoadingButton } from '../ui';
+import { ErrorMessage, LoadingButton, ApiProviderBadge } from '../ui';
 import { downloadFromUrl } from '../../utils/download';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useFileUpload } from '../../hooks/useFileUpload';
@@ -167,6 +167,9 @@ const FaviconDistillerPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => 
         <p className="mt-2 text-sm md:text-base text-gray-400">
           고해상도 로고나 일러스트를 Gemini API로 단순화한 뒤, 파비콘에 적합한 해상도로 자동 변환합니다. 필요에 따라 PNG 혹은 ICO 포맷으로 저장하세요.
         </p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
       </header>
 
       <section className="grid gap-4 md:grid-cols-[minmax(0,1fr)_320px]">

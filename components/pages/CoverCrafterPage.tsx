@@ -1,9 +1,10 @@
 import React from 'react';
 import type { PageProps } from '../../types';
-import { ErrorMessage, LoadingButton } from '../ui';
+import { ErrorMessage, LoadingButton, ApiProviderBadge, PlaygroundGuideModal } from '../ui';
 import { downloadFromUrl } from '../../utils/download';
 import { Icon } from '../../constants';
 import { useApiCall } from '../../hooks/useApiCall';
+import { usePlaygroundGuide } from '../../hooks/usePlaygroundGuide';
 
 const VARIANT_OPTIONS: Array<{ value: 'cover' | 'thumbnail'; label: string; description: string }> = [
   { value: 'cover', label: '블로그/기사 커버', description: '포스트 상단을 가득 채우는 히어로 이미지 스타일' },
@@ -32,6 +33,8 @@ const CoverCrafterPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [imageUrl, setImageUrl] = React.useState<string>('');
   const [message, setMessage] = React.useState<string>('');
   const [promptSummary, setPromptSummary] = React.useState<string>('');
+
+  const playgroundGuide = usePlaygroundGuide('cover-crafter');
 
   type CoverResponse = { image: string; message?: string; prompt?: string; error?: string };
   const api = useApiCall<CoverResponse>({
@@ -89,12 +92,33 @@ const CoverCrafterPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
             <Icon name="coverCrafter" className="w-6 h-6" aria-hidden />
           </span>
           Cover Crafter
+          <button
+            type="button"
+            onClick={playgroundGuide.openGuide}
+            className="ml-1 px-2 py-0.5 text-xs rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition"
+            aria-label="사용 가이드 보기"
+            title="사용 가이드 보기"
+          >
+            ?
+          </button>
         </h1>
         <p className="mt-2 text-sm md:text-base text-gray-400">
           블로그·기사·영상 스크립트를 붙여넣으면 Gemini가 내용을 분석해 맞춤형 커버/썸네일 이미지를 제안합니다.
           구도 비율과 스타일을 선택해 브랜드에 어울리는 시각을 빠르게 확보해 보세요.
         </p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
       </header>
+
+      <PlaygroundGuideModal
+        isOpen={playgroundGuide.isModalOpen}
+        onClose={playgroundGuide.closeGuide}
+        playgroundTitle="Cover Crafter"
+        playgroundId="cover-crafter"
+        showDontShowAgain={playgroundGuide.showDontShowAgain}
+        onDontShowAgainChange={playgroundGuide.handleDontShowAgain}
+      />
 
       <section className="grid gap-4 md:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-4">
