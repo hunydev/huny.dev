@@ -788,7 +788,35 @@ const App: React.FC = () => {
 
   const deleteApiKey = async (keyType: 'gemini' | 'openai') => {
     const keyName = keyType === 'gemini' ? 'GEMINI_API_KEY' : 'OPENAI_API_KEY';
-    if (!confirm(`${keyName}를 삭제하시겠습니까?`)) return;
+    const provider = keyType === 'gemini' ? 'gemini' : 'openai';
+    
+    // 해당 API key를 사용하는 열린 탭 찾기
+    const affectedTabs = openTabs.filter(tab => {
+      const baseId = extractBaseId(tab.id);
+      const pageInfo = PAGES[baseId];
+      if (!pageInfo?.apiRequirement) return false;
+      
+      // provider가 일치하고, 사용자 키가 필요한 경우만 영향을 받음
+      if (pageInfo.apiRequirement.provider !== provider) return false;
+      
+      if (provider === 'openai') {
+        // OpenAI는 무조건 사용자 키 필요
+        return true;
+      } else {
+        // Gemini는 TTS/이미지 기능에만 사용자 키 필요
+        const requiresUserKey = pageInfo.apiRequirement.features.some(f => f === 'tts' || f === 'image');
+        return requiresUserKey;
+      }
+    });
+    
+    // 확인 메시지 구성
+    let confirmMessage = `${keyName}를 삭제하시겠습니까?`;
+    if (affectedTabs.length > 0) {
+      const tabTitles = affectedTabs.map(t => `• ${t.title}`).join('\n');
+      confirmMessage = `${keyName}를 삭제하시겠습니까?\n\n다음 탭들이 함께 닫힙니다:\n${tabTitles}`;
+    }
+    
+    if (!confirm(confirmMessage)) return;
     
     try {
       setApiSaving(true);
@@ -818,7 +846,25 @@ const App: React.FC = () => {
       setApiHasGemini(!!meta?.gemini);
       setApiHasOpenAI(!!meta?.openai);
       
-      showInfoToast(`${keyName}가 삭제되었습니다.`);
+      // 영향받는 탭들 닫기
+      if (affectedTabs.length > 0) {
+        const affectedTabIds = new Set(affectedTabs.map(t => t.id));
+        setOpenTabs(prev => prev.filter(tab => !affectedTabIds.has(tab.id)));
+        
+        // 활성 탭이 닫히면 다른 탭으로 전환
+        if (affectedTabIds.has(activeTabId)) {
+          const remainingTabs = openTabs.filter(tab => !affectedTabIds.has(tab.id));
+          if (remainingTabs.length > 0) {
+            setActiveTabId(remainingTabs[remainingTabs.length - 1].id);
+          }
+        }
+      }
+      
+      const closedCount = affectedTabs.length;
+      const message = closedCount > 0 
+        ? `${keyName}가 삭제되었습니다. (${closedCount}개 탭 닫힘)`
+        : `${keyName}가 삭제되었습니다.`;
+      showInfoToast(message);
     } catch (e: any) {
       setApiError(e?.message || String(e));
     } finally {
