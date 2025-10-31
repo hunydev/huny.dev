@@ -39,7 +39,7 @@ const TIER_ORDER: TierLevel[] = ['SSS', 'SS', 'S', 'A', 'B', 'C', 'D', 'E', 'F']
 const AITierListPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [prompt, setPrompt] = React.useState('');
   const [tierData, setTierData] = React.useState<TierData>({});
-  const [theme, setTheme] = React.useState<string>('');
+  const [theme, setTheme] = React.useState<string>('My Tier List');
   const [editingItem, setEditingItem] = React.useState<{ tier: TierLevel; index: number } | null>(null);
   const [editName, setEditName] = React.useState('');
   const [editDescription, setEditDescription] = React.useState('');
@@ -49,6 +49,18 @@ const AITierListPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const tierListRef = React.useRef<HTMLDivElement>(null);
 
   const playgroundGuide = usePlaygroundGuide('ai-tier-list');
+  
+  // 초기 로드 시 빈 티어 리스트 설정
+  React.useEffect(() => {
+    if (Object.keys(tierData).length === 0 && !api.loading) {
+      // 빈 티어 데이터 초기화
+      const emptyTiers: TierData = {};
+      TIER_ORDER.forEach(tier => {
+        emptyTiers[tier] = [];
+      });
+      setTierData(emptyTiers);
+    }
+  }, []);
 
   const api = useApiCall<TierListResponse>({
     url: '/api/ai-tier-list',
@@ -224,36 +236,89 @@ const AITierListPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
       setDraggedItem(null);
       setDragOverTier(null);
       
-      // html2canvas를 동적으로 로드
-      const html2canvas = (await import('html2canvas')).default;
+      // 글꼴 로딩 완료 대기 (가능한 경우)
+      if (typeof document !== 'undefined' && 'fonts' in document) {
+        try {
+          await (document as any).fonts.ready;
+        } catch (error) {
+          // ignore font loading errors
+        }
+      }
+
+      // dom-to-image-more를 동적으로 로드
+      const domtoimage = await import('dom-to-image-more');
       
       // 약간의 지연을 주어 hover 상태가 해제되도록
       await new Promise(resolve => setTimeout(resolve, 200));
       
-      const canvas = await html2canvas(tierListRef.current, {
-        backgroundColor: '#1e1e1e',
-        scale: 3, // 더 높은 해상도
-        logging: false,
-        allowTaint: true,
-        useCORS: true,
-        ignoreElements: (element) => {
-          // 편집 버튼들과 추가 버튼, 빈 티어 안내는 캡쳐하지 않음
-          return element.classList.contains('export-ignore');
-        },
+      // export-ignore 클래스를 가진 요소들을 임시로 숨김
+      const ignoreElements = tierListRef.current.querySelectorAll('.export-ignore');
+      const originalDisplays: string[] = [];
+      ignoreElements.forEach((el, index) => {
+        originalDisplays[index] = (el as HTMLElement).style.display;
+        (el as HTMLElement).style.display = 'none';
       });
       
-      // Canvas를 이미지로 변환
-      canvas.toBlob((blob) => {
-        if (!blob) return;
-        
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `tier-list-${theme.replace(/\s+/g, '-')}.png`;
-        link.click();
-        
-        URL.revokeObjectURL(url);
+      // border 문제 해결: GitHub Issue #14 참고
+      // 모든 요소의 border를 !important로 제거
+      const allElements = tierListRef.current.querySelectorAll('*');
+      const originalStyles: Array<string> = [];
+      allElements.forEach((el, index) => {
+        const element = el as HTMLElement;
+        originalStyles[index] = element.style.cssText;
+        element.style.setProperty('border', 'none', 'important');
+        element.style.setProperty('outline', 'none', 'important');
       });
+      
+      // 컨테이너 배경색 및 border 명시적 설정 (GitHub Issue #14 해결방법)
+      const originalContainerBg = tierListRef.current.style.backgroundColor;
+      const originalContainerBorder = tierListRef.current.style.border;
+      const originalContainerOutline = tierListRef.current.style.outline;
+      
+      tierListRef.current.style.backgroundColor = '#1e1e1e';
+      tierListRef.current.style.setProperty('border', 'none', 'important');
+      tierListRef.current.style.setProperty('outline', 'none', 'important');
+      tierListRef.current.style.setProperty('box-shadow', 'none', 'important');
+      
+      // 제목 input 처리
+      const titleInput = tierListRef.current.querySelector('.export-title') as HTMLInputElement;
+      if (titleInput) {
+        titleInput.blur(); // 포커스 제거
+        titleInput.style.setProperty('caret-color', 'transparent', 'important');
+      }
+      
+      // PNG로 변환
+      const dataUrl = await domtoimage.toPng(tierListRef.current, {
+        bgcolor: '#1e1e1e',
+        quality: 1,
+        scale: 2,
+        style: {
+          transform: 'scale(1)',
+          transformOrigin: 'top left'
+        }
+      });
+      
+      // 숨겼던 요소들 복원
+      ignoreElements.forEach((el, index) => {
+        (el as HTMLElement).style.display = originalDisplays[index];
+      });
+      
+      // 모든 스타일 복원
+      allElements.forEach((el, index) => {
+        const element = el as HTMLElement;
+        element.style.cssText = originalStyles[index] || '';
+      });
+      
+      // 컨테이너 스타일 복원
+      tierListRef.current.style.backgroundColor = originalContainerBg;
+      tierListRef.current.style.border = originalContainerBorder;
+      tierListRef.current.style.outline = originalContainerOutline;
+      
+      // 이미지 다운로드
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `tier-list-${theme.replace(/\s+/g, '-')}.png`;
+      link.click();
     } catch (error) {
       console.error('Export failed:', error);
       alert('이미지 내보내기에 실패했습니다.');
@@ -347,14 +412,16 @@ const AITierListPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
         <div className="space-y-4 mt-6">
           <div ref={tierListRef} className="p-6 bg-[#1e1e1e] rounded-lg overflow-visible">
             <div className="text-center mb-6">
-              <h2 
-                className="text-3xl font-bold"
+              <input
+                type="text"
+                value={theme}
+                onChange={(e) => setTheme(e.target.value)}
+                className="text-3xl font-bold text-center bg-transparent border-none outline-none w-full export-title"
                 style={{ 
                   color: '#93c5fd'
                 }}
-              >
-                {theme}
-              </h2>
+                placeholder="티어 리스트 제목"
+              />
             </div>
 
           <div className="space-y-2">
@@ -364,7 +431,7 @@ const AITierListPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
               return (
                 <div
                   key={tier}
-                  className={`flex items-stretch border border-white/10 rounded-lg bg-black/20 group/tier ${
+                  className={`grid grid-cols-[5rem_minmax(0,1fr)] border border-white/5 rounded-lg bg-black/20 group/tier ${
                     dragOverTier === tier ? 'border-blue-400 !border-2 bg-blue-500/10' : ''
                   }`}
                   onDragOver={(e) => handleDragOver(e, tier)}
@@ -379,17 +446,17 @@ const AITierListPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
                   </div>
 
                   {/* Tier Items */}
-                  <div className="flex-1 p-3 relative">
-                    <div className="flex flex-wrap gap-2 items-center">
+                  <div className="p-3 relative min-h-[3.5rem] flex items-center">
+                    <div className="flex flex-wrap gap-2 items-center w-full">
                       {items.length > 0 && items.map((item, idx) => (
                         <div
                           key={idx}
                           draggable
                           onDragStart={(e) => handleDragStart(e, tier, idx)}
                           onDragEnd={handleDragEnd}
-                          className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded text-sm group/item relative flex items-center gap-2 cursor-move"
+                          className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded text-sm group/item relative cursor-move"
                         >
-                          <span className="font-medium">{item.name}</span>
+                          <span className="font-medium" style={{ lineHeight: '1' }}>{item.name}</span>
                           
                           {/* Edit buttons (show on hover) */}
                           <div className="flex items-center gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity export-ignore">
@@ -411,14 +478,37 @@ const AITierListPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
 
                           {/* Description tooltip */}
                           {item.description && (
-                            <div className="absolute left-1/2 -translate-x-1/2 px-3 py-2 bg-gray-900 border border-white/20 rounded text-xs opacity-0 group-hover/item:opacity-100 pointer-events-none transition-opacity shadow-lg" 
-                                 style={{
-                                   bottom: 'calc(100% + 8px)',
-                                   zIndex: 9999,
-                                   maxWidth: '250px',
-                                   wordWrap: 'break-word',
-                                   whiteSpace: 'normal'
-                                 }}>
+                            <div 
+                              className="absolute px-4 py-3 bg-gray-900 border border-white/20 rounded text-sm opacity-0 group-hover/item:opacity-100 pointer-events-none transition-opacity shadow-xl" 
+                              style={{
+                                bottom: 'calc(100% + 8px)',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                zIndex: 9999,
+                                minWidth: '200px',
+                                maxWidth: 'min(600px, 90vw)',
+                                wordWrap: 'break-word',
+                                whiteSpace: 'normal',
+                                lineHeight: '1.5'
+                              }}
+                              onMouseEnter={(e) => {
+                                const tooltip = e.currentTarget;
+                                const rect = tooltip.getBoundingClientRect();
+                                const viewportWidth = window.innerWidth;
+                                
+                                // 왼쪽으로 넘치는 경우
+                                if (rect.left < 10) {
+                                  tooltip.style.left = '0';
+                                  tooltip.style.transform = 'translateX(0)';
+                                }
+                                // 오른쪽으로 넘치는 경우
+                                else if (rect.right > viewportWidth - 10) {
+                                  tooltip.style.left = 'auto';
+                                  tooltip.style.right = '0';
+                                  tooltip.style.transform = 'translateX(0)';
+                                }
+                              }}
+                            >
                               {item.description}
                             </div>
                           )}
@@ -432,7 +522,7 @@ const AITierListPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
                       {/* Add item button - show only on tier hover */}
                       <button
                         onClick={() => handleAddItem(tier)}
-                        className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 border-dashed rounded text-sm text-gray-400 hover:text-gray-200 flex items-center gap-1 opacity-0 group-hover/tier:opacity-100 transition-opacity export-ignore"
+                        className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/5 border-dashed rounded text-sm text-gray-400 hover:text-gray-200 flex items-center gap-1 opacity-0 group-hover/tier:opacity-100 transition-opacity export-ignore"
                         title={`${tier} 티어에 항목 추가`}
                       >
                         <Icon name="add" className="w-3 h-3" />
