@@ -319,8 +319,19 @@ export default {
           const next: any = {};
           const openaiIn: string = typeof body?.openai === 'string' ? body.openai.trim() : '';
           const geminiIn: string = typeof body?.gemini === 'string' ? body.gemini.trim() : '';
-          if (openaiIn) next.openai = openaiIn; else if (prev?.openai) next.openai = prev.openai;
-          if (geminiIn) next.gemini = geminiIn; else if (prev?.gemini) next.gemini = prev.gemini;
+          // 명시적으로 빈 문자열을 받으면 삭제, 값이 있으면 업데이트, undefined면 이전 값 유지
+          if ('openai' in body) {
+            if (openaiIn) next.openai = openaiIn;
+            // else: 빈 문자열이면 키를 추가하지 않음 (삭제)
+          } else if (prev?.openai) {
+            next.openai = prev.openai;
+          }
+          if ('gemini' in body) {
+            if (geminiIn) next.gemini = geminiIn;
+            // else: 빈 문자열이면 키를 추가하지 않음 (삭제)
+          } else if (prev?.gemini) {
+            next.gemini = prev.gemini;
+          }
           next.ts = new Date().toISOString();
           const cipher = await encryptApiKeyPayload(next, env);
           const meta = { openai: !!next.openai, gemini: !!next.gemini };

@@ -54,8 +54,27 @@ const App: React.FC = () => {
   const apiModalRef = useRef<HTMLDivElement | null>(null);
   const [apiSaving, setApiSaving] = useState<boolean>(false);
   const [apiError, setApiError] = useState<string>('');
-  const [apiHasGemini, setApiHasGemini] = useState<boolean>(false);
-  const [apiHasOpenAI, setApiHasOpenAI] = useState<boolean>(false);
+  // API key 상태를 localStorage에서 동기적으로 초기화 (탭 복원보다 먼저 실행되도록)
+  const [apiHasGemini, setApiHasGemini] = useState<boolean>(() => {
+    try {
+      const raw = localStorage.getItem('secure.apikeys.meta.v1');
+      if (raw) {
+        const meta = JSON.parse(raw) as { gemini?: boolean; openai?: boolean };
+        return !!meta?.gemini;
+      }
+    } catch {}
+    return false;
+  });
+  const [apiHasOpenAI, setApiHasOpenAI] = useState<boolean>(() => {
+    try {
+      const raw = localStorage.getItem('secure.apikeys.meta.v1');
+      if (raw) {
+        const meta = JSON.parse(raw) as { gemini?: boolean; openai?: boolean };
+        return !!meta?.openai;
+      }
+    } catch {}
+    return false;
+  });
   const [apiNewGemini, setApiNewGemini] = useState<string>('');
   const [apiNewOpenAI, setApiNewOpenAI] = useState<string>('');
   const infoToastTimeoutRef = useRef<number | null>(null);
@@ -291,18 +310,6 @@ const App: React.FC = () => {
     if (uniqueIds.length === 0) return;
     shortcutHandledRef.current = true;
     initialShortcutIdsRef.current = uniqueIds;
-  }, []);
-
-  // Restore API key meta flags BEFORE restoring tabs
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem('secure.apikeys.meta.v1');
-      if (raw) {
-        const meta = JSON.parse(raw) as { gemini?: boolean; openai?: boolean };
-        setApiHasGemini(!!meta?.gemini);
-        setApiHasOpenAI(!!meta?.openai);
-      }
-    } catch {}
   }, []);
 
   useEffect(() => {
@@ -772,6 +779,46 @@ const App: React.FC = () => {
       setApiModalOpen(false);
       setApiNewGemini('');
       setApiNewOpenAI('');
+    } catch (e: any) {
+      setApiError(e?.message || String(e));
+    } finally {
+      setApiSaving(false);
+    }
+  };
+
+  const deleteApiKey = async (keyType: 'gemini' | 'openai') => {
+    const keyName = keyType === 'gemini' ? 'GEMINI_API_KEY' : 'OPENAI_API_KEY';
+    if (!confirm(`${keyName}를 삭제하시겠습니까?`)) return;
+    
+    try {
+      setApiSaving(true);
+      setApiError('');
+      const existing = localStorage.getItem('secure.apikeys.v1') || '';
+      const payload: any = { existing };
+      // 삭제할 키는 빈 문자열로 전송
+      payload[keyType] = '';
+      
+      const res = await fetch('/api/secure-apikeys', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const text = await res.text();
+      if (!res.ok) throw new Error(text || `Failed: ${res.status}`);
+      let data: any = {};
+      try { data = text ? JSON.parse(text) : {}; } catch {}
+      const cipher = String(data?.cipher || '');
+      const meta = data?.meta && typeof data.meta === 'object' ? data.meta : {};
+      
+      if (cipher) localStorage.setItem('secure.apikeys.v1', cipher);
+      localStorage.setItem('secure.apikeys.meta.v1', JSON.stringify({
+        gemini: !!meta?.gemini,
+        openai: !!meta?.openai,
+      }));
+      setApiHasGemini(!!meta?.gemini);
+      setApiHasOpenAI(!!meta?.openai);
+      
+      showInfoToast(`${keyName}가 삭제되었습니다.`);
     } catch (e: any) {
       setApiError(e?.message || String(e));
     } finally {
@@ -1312,7 +1359,22 @@ const App: React.FC = () => {
 
             <div className="space-y-3 text-sm">
               <div>
-                <label className="block text-sm text-gray-300 mb-1" htmlFor="gemini-key">GEMINI_API_KEY</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm text-gray-300" htmlFor="gemini-key">GEMINI_API_KEY</label>
+                  {apiHasGemini && (
+                    <button
+                      type="button"
+                      onClick={() => deleteApiKey('gemini')}
+                      disabled={apiSaving}
+                      className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50 flex items-center gap-1"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
+                        <path fillRule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clipRule="evenodd" />
+                      </svg>
+                      삭제
+                    </button>
+                  )}
+                </div>
                 <input
                   id="gemini-key"
                   type="password"
@@ -1325,7 +1387,22 @@ const App: React.FC = () => {
                 <p className="text-xs text-gray-500 mt-1">TTS/이미지 생성 기능에 필요. 텍스트 분석 기능은 서버 무료 키 사용 가능.</p>
               </div>
               <div>
-                <label className="block text-sm text-gray-300 mb-1" htmlFor="openai-key">OPENAI_API_KEY</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm text-gray-300" htmlFor="openai-key">OPENAI_API_KEY</label>
+                  {apiHasOpenAI && (
+                    <button
+                      type="button"
+                      onClick={() => deleteApiKey('openai')}
+                      disabled={apiSaving}
+                      className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50 flex items-center gap-1"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
+                        <path fillRule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clipRule="evenodd" />
+                      </svg>
+                      삭제
+                    </button>
+                  )}
+                </div>
                 <input
                   id="openai-key"
                   type="password"
