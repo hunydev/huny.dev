@@ -39,6 +39,7 @@ const SceneToScriptPage = React.lazy(() => import('../components/pages/SceneToSc
 const GearPage = React.lazy(() => import('../components/pages/GearPage'));
 const InspirationGalleryPage = React.lazy(() => import('../components/pages/InspirationGalleryPage'));
 const YouTubeChannelsPage = React.lazy(() => import('../components/pages/YouTubeChannelsPage'));
+const AITierListPage = React.lazy(() => import('../components/pages/AITierListPage'));
 
 export type PageComponent =
   | React.ComponentType<PageProps>
@@ -79,6 +80,12 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     title: 'To-do Generator',
     component: ToDoGeneratorPage,
     icon: <Icon name="todoGenerator" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['text'] },
+  },
+  'ai-tier-list': {
+    title: 'AI Tier List',
+    component: AITierListPage,
+    icon: <Icon name="aiTierList" className="mr-2" />,
     apiRequirement: { provider: 'gemini', features: ['text'] },
   },
   'text-to-phoneme': {

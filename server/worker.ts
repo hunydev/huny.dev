@@ -1418,7 +1418,7 @@ ${extraPrompt}` : undefined,
           });
         }
       }
-      // Text Cleaning: proofread typos/spacing/grammar while preserving meaning; return JSON only
+      // Text Cleaning endpoint
       if (url.pathname === '/api/text-cleaning') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
         try {
@@ -2022,6 +2022,92 @@ ${extraPrompt}` : undefined,
           };
           const tasks = norm(tasksIn);
           return new Response(JSON.stringify({ tasks }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
+      // AI Tier List: generate tier list (SSS ~ F) based on user input
+      if (url.pathname === '/api/ai-tier-list') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const body = await request.json<any>().catch(() => ({} as any));
+          const prompt: string = typeof body?.prompt === 'string' ? body.prompt : '';
+          if (!prompt.trim()) {
+            return new Response(JSON.stringify({ error: 'Missing prompt' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+          // Instruction: return strict JSON with tier structure
+          const instructions = [
+            'You are a tier list generator. Create a tier list based on the given theme.',
+            'Rules:',
+            '- Output MUST be JSON only, no commentary, no markdown fences.',
+            '- Use this schema: { "theme": string, "tiers": { "SSS"?: [{"name": string, "description"?: string}], "SS"?: [...], "S"?: [...], "A"?: [...], "B"?: [...], "C"?: [...], "D"?: [...], "E"?: [...], "F"?: [...] } }',
+            '- Tier levels: SSS (God tier, extremely rare) > SS (Excellent, rare) > S (Outstanding) > A (Great) > B (Good) > C (Average) > D (Below Average) > E (Poor) > F (Worst)',
+            '- IMPORTANT: Higher tiers should have FEWER items (rarity principle). SSS: 1-3 items, SS: 2-4 items, S: 3-6 items, A/B: 4-8 items, C/D/E/F: 5-10 items.',
+            '- Skip tiers that would only have 1-2 items. Only include tiers where you can place 3+ items meaningfully.',
+            '- Try to use a wide range of tiers (including lower tiers like D, E, F) to show full spectrum.',
+            '- "name" is required, "description" is optional (brief explanation why it\'s in that tier).',
+            '- Be objective and consider multiple factors when ranking.',
+            '- The theme should be a clear, concise title summarizing the ranking criteria.',
+          ].join('\n');
+
+          const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+          const aiRes = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': geminiKey!,
+            },
+            body: JSON.stringify({
+              contents: [ { parts: [ { text: instructions }, { text: `Theme: ${prompt}` } ] } ],
+              generationConfig: { responseMimeType: 'application/json' },
+            }),
+          });
+          if (!aiRes.ok) {
+            const errText = await aiRes.text().catch(() => '');
+            return new Response(JSON.stringify({ error: `Gemini error: ${aiRes.status} ${aiRes.statusText}`, detail: errText }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const out: any = await aiRes.json();
+          const raw: string = ((out && out.candidates && out.candidates[0] && out.candidates[0].content && out.candidates[0].content.parts) || [])
+            .map((p: any) => p?.text || '')
+            .join('');
+          const jsonStr = extractJsonString(raw);
+          let parsed: any = {};
+          try { parsed = JSON.parse(jsonStr); } catch { parsed = {}; }
+          
+          const theme: string = typeof parsed?.theme === 'string' ? parsed.theme : prompt;
+          const tiersIn: any = typeof parsed?.tiers === 'object' && parsed.tiers ? parsed.tiers : {};
+          
+          // Sanitize tiers
+          const validTiers = ['SSS', 'SS', 'S', 'A', 'B', 'C', 'D', 'E', 'F'];
+          const tiers: any = {};
+          for (const tier of validTiers) {
+            if (Array.isArray(tiersIn[tier]) && tiersIn[tier].length > 0) {
+              tiers[tier] = tiersIn[tier]
+                .map((item: any) => ({
+                  name: typeof item?.name === 'string' ? item.name.trim() : '',
+                  ...(typeof item?.description === 'string' && item.description.trim() ? { description: item.description.trim() } : {}),
+                }))
+                .filter((item: any) => item.name)
+                .slice(0, 20);
+            }
+          }
+          
+          return new Response(JSON.stringify({ theme, tiers }), {
             headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
           });
         } catch (e: any) {
