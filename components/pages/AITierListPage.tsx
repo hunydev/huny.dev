@@ -83,8 +83,13 @@ const AITierListPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
 
   const handleReset = () => {
     setPrompt('');
-    setTierData({});
-    setTheme('');
+    // 빈 티어 데이터 초기화 (처음 로드될 때처럼)
+    const emptyTiers: TierData = {};
+    TIER_ORDER.forEach(tier => {
+      emptyTiers[tier] = [];
+    });
+    setTierData(emptyTiers);
+    setTheme('My Tier List');
     setEditingItem(null);
     api.reset();
   };
