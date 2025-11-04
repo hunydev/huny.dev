@@ -369,7 +369,7 @@ const AITierListPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
       {/* Input Section */}
       <div className="space-y-2">
         <label className="block text-sm text-gray-300">티어 리스트 주제</label>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
             value={prompt}
@@ -379,33 +379,35 @@ const AITierListPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
             className="flex-1 px-3 py-2 bg-black/40 border border-white/10 rounded text-sm focus:outline-none focus:border-white/30"
             disabled={api.loading}
           />
-          <LoadingButton
-            onClick={handleGenerate}
-            loading={api.loading}
-            disabled={!prompt.trim() || api.loading}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded text-sm font-medium"
-          >
-            생성
-          </LoadingButton>
-          {(tierData && Object.keys(tierData).length > 0) && (
-            <>
-              <button
-                onClick={handleExport}
-                disabled={api.loading || isExporting}
-                className="px-4 py-2 bg-green-700 hover:bg-green-600 disabled:bg-gray-800 disabled:cursor-not-allowed rounded text-sm flex items-center gap-2"
-              >
-                <Icon name="download" className="w-4 h-4" />
-                {isExporting ? '생성 중...' : 'Export'}
-              </button>
-              <button
-                onClick={handleReset}
-                disabled={api.loading}
-                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:cursor-not-allowed rounded text-sm"
-              >
-                초기화
-              </button>
-            </>
-          )}
+          <div className="flex gap-2">
+            <LoadingButton
+              onClick={handleGenerate}
+              loading={api.loading}
+              disabled={!prompt.trim() || api.loading}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded text-sm font-medium"
+            >
+              생성
+            </LoadingButton>
+            {(tierData && Object.keys(tierData).length > 0) && (
+              <>
+                <button
+                  onClick={handleExport}
+                  disabled={api.loading || isExporting}
+                  className="px-4 py-2 bg-green-700 hover:bg-green-600 disabled:bg-gray-800 disabled:cursor-not-allowed rounded text-sm flex items-center gap-2"
+                >
+                  <Icon name="download" className="w-4 h-4" />
+                  {isExporting ? '생성 중...' : 'Export'}
+                </button>
+                <button
+                  onClick={handleReset}
+                  disabled={api.loading}
+                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:cursor-not-allowed rounded text-sm"
+                >
+                  초기화
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
