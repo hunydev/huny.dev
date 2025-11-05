@@ -13,13 +13,14 @@
 | 3 | about.json | `about` | 자기소개 및 전문성 |
 | 4 | stack-huny.dev | `stack` | 기술 스택 상세 정보 |
 | 5 | digital-shelf.json | `digital-shelf` | 구독 서비스 및 구매 내역 |
-| 6 | tts-history.md | `domain` | TTS 도메인 경험 히스토리 |
-| 7 | mascot.gallery | `mascot` | 마스코트 이미지 갤러리 |
-| 8 | project.js | `project` | GitHub 프로젝트 포트폴리오 |
-| 9 | extensions.txt | `extensions` | VSCode 확장 프로그램 목록 |
-| 10 | gear.json | `gear` | 개발 장비 및 기어 |
-| 11 | inspiration.gallery | `inspiration` | 영감을 주는 디자인 갤러리 |
-| 12 | youtube-channels.json | `youtube-channels` | 즐겨보는 YouTube 채널 |
+| 6 | design-system.json | `design-system` | 개인 디자인 시스템 ⭐ NEW |
+| 7 | tts-history.md | `domain` | TTS 도메인 경험 히스토리 |
+| 8 | mascot.gallery | `mascot` | 마스코트 이미지 갤러리 |
+| 9 | project.js | `project` | GitHub 프로젝트 포트폴리오 |
+| 10 | extensions.txt | `extensions` | VSCode 확장 프로그램 목록 |
+| 11 | gear.json | `gear` | 개발 장비 및 기어 |
+| 12 | inspiration.gallery | `inspiration` | 영감을 주는 디자인 갤러리 |
+| 13 | youtube-channels.json | `youtube-channels` | 즐겨보는 YouTube 채널 |
 
 ---
 
@@ -36,7 +37,6 @@
 - **til.log** - Today I Learned (⭐⭐⭐)
 
 ### 크리에이티브
-- **design-system.json** - 개인 디자인 시스템 (⭐⭐⭐)
 - **portfolio.gallery** - 작업물 포트폴리오 (⭐⭐⭐⭐)
 - **music-playlist.json** - 작업용 음악 (⭐⭐)
 
@@ -118,6 +118,22 @@ export const PAGES = {
 </button>
 ```
 
+### 4단계: Welcome 페이지 Explorer 섹션에 추가
+
+**파일**: `components/pages/WelcomePage.tsx`
+
+```tsx
+// explorerItems 배열에 추가
+const explorerItems: Array<{ id: keyof typeof PAGES; desc: string }> = [
+  { id: 'works', desc: 'Works & experiments' },
+  { id: 'about', desc: 'About me' },
+  // ... 기존 항목들
+  { id: 'your-id', desc: 'Your page description' }, // 새 항목 추가
+];
+```
+
+**중요**: Welcome 페이지의 Explorer 섹션은 사용자가 포트폴리오의 주요 항목들을 한눈에 볼 수 있는 곳입니다. 새로운 Explorer 아이템을 추가할 때는 반드시 이 섹션도 함께 업데이트해야 합니다.
+
 ---
 
 ## 🎨 디자인 가이드라인
@@ -162,6 +178,30 @@ export const PAGES = {
 <button className="border border-gray-700 hover:border-blue-500 px-4 py-2 rounded">
 ```
 
+### 아이콘
+**사용 라이브러리**: [Tabler Icons](https://tabler.io/icons)
+- 4900개 이상의 무료 MIT 라이선스 SVG 아이콘
+- 2px stroke width 기반의 일관된 스타일
+- 깔끔하고 모던한 디자인
+
+```tsx
+// Tabler Icons 사용 예시
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" 
+     stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+     stroke-linejoin="round" className="w-5 h-5">
+  <path d="..." />
+</svg>
+```
+
+### Shadow
+```tsx
+shadow-sm                                    /* 앱 카드, 버튼 */
+shadow-md                                    /* 포스트잇, 기본 카드 */
+shadow-xl                                    /* 모달, 다이얼로그 */
+shadow-2xl                                   /* 최상위 레이어 */
+hover:shadow-2xl hover:shadow-blue-500/10    /* 호버 강조 */
+```
+
 ### 반응형 그리드
 ```tsx
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -183,11 +223,20 @@ style={{ transitionDelay: `${index * 80}ms` }}
 
 ## ✅ 체크리스트
 
+### 구현 단계
+- [ ] 페이지 컴포넌트 생성 (`components/pages/`)
+- [ ] 페이지 등록 (`constants/pages.tsx`)
+- [ ] Sidebar Explorer에 버튼 추가 (`components/Sidebar.tsx`)
+- [ ] Welcome 페이지 Explorer 섹션에 항목 추가 (`components/pages/WelcomePage.tsx`)
+
+### 디자인 요소
 - [ ] Hero Section 구현
 - [ ] 반응형 디자인 (모바일/데스크톱)
 - [ ] 호버 효과 및 트랜지션
 - [ ] 통일된 컬러 팔레트
 - [ ] 페이지 로딩 애니메이션
+
+### 코드 품질
 - [ ] TypeScript 타입 정의
 - [ ] 접근성 (aria-label, alt)
 - [ ] SEO (title, description)
@@ -198,5 +247,7 @@ style={{ transitionDelay: `${index * 80}ms` }}
 
 - `components/Sidebar.tsx` - Explorer 구조
 - `constants/pages.tsx` - 페이지 등록
+- `components/pages/WelcomePage.tsx` - Welcome 페이지 Explorer 섹션
 - `components/pages/ProjectPage.tsx` - 참고 예제
 - `components/pages/DigitalShelfPage.tsx` - 데이터 시각화 예제
+- `components/pages/DesignSystemPage.tsx` - 디자인 시스템 예제

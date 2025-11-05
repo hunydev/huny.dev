@@ -40,6 +40,7 @@ const GearPage = React.lazy(() => import('../components/pages/GearPage'));
 const InspirationGalleryPage = React.lazy(() => import('../components/pages/InspirationGalleryPage'));
 const YouTubeChannelsPage = React.lazy(() => import('../components/pages/YouTubeChannelsPage'));
 const AITierListPage = React.lazy(() => import('../components/pages/AITierListPage'));
+const DesignSystemPage = React.lazy(() => import('../components/pages/DesignSystemPage'));
 
 export type PageComponent =
   | React.ComponentType<PageProps>
@@ -74,6 +75,11 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
   'digital-shelf': {
     title: 'digital-shelf.json',
     component: DigitalShelfPage,
+    icon: <Icon name="file" className="mr-2" />,
+  },
+  'design-system': {
+    title: 'design-system.json',
+    component: DesignSystemPage,
     icon: <Icon name="file" className="mr-2" />,
   },
   'todo-generator': {

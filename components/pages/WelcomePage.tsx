@@ -180,6 +180,7 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         { id: 'about', desc: 'About me' },
         { id: 'stack', desc: 'Full‑stack map for huny.dev' },
         { id: 'digital-shelf', desc: 'Subscriptions · Licenses · Free‑tier' },
+        { id: 'design-system', desc: 'Personal design system · Colors · Typography · Components' },
         { id: 'domain', desc: 'TTS history timeline (2015 → present)' },
         { id: 'mascot', desc: 'Brand mascot gallery (concept · base · variations)' },
         { id: 'project', desc: 'Projects listing (code-style)' },
