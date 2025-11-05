@@ -11,23 +11,23 @@
 | 1 | Welcome | `welcome` | 포트폴리오 메인 랜딩 페이지 |
 | 2 | works.md | `works` | 업무 내용 및 기술 스택 |
 | 3 | about.json | `about` | 자기소개 및 전문성 |
-| 4 | stack-huny.dev | `stack` | 기술 스택 상세 정보 |
-| 5 | digital-shelf.json | `digital-shelf` | 구독 서비스 및 구매 내역 |
-| 6 | design-system.json | `design-system` | 개인 디자인 시스템 ⭐ NEW |
-| 7 | tts-history.md | `domain` | TTS 도메인 경험 히스토리 |
-| 8 | mascot.gallery | `mascot` | 마스코트 이미지 갤러리 |
-| 9 | project.js | `project` | GitHub 프로젝트 포트폴리오 |
-| 10 | extensions.txt | `extensions` | VSCode 확장 프로그램 목록 |
-| 11 | gear.json | `gear` | 개발 장비 및 기어 |
-| 12 | inspiration.gallery | `inspiration` | 영감을 주는 디자인 갤러리 |
-| 13 | youtube-channels.json | `youtube-channels` | 즐겨보는 YouTube 채널 |
+| 4 | resume.pdf | `resume` | 전문 이력서 · PDF 내보내기 ⭐ NEW |
+| 5 | stack-huny.dev | `stack` | 기술 스택 상세 정보 |
+| 6 | digital-shelf.json | `digital-shelf` | 구독 서비스 및 구매 내역 |
+| 7 | design-system.json | `design-system` | 개인 디자인 시스템 ⭐ NEW |
+| 8 | tts-history.md | `domain` | TTS 도메인 경험 히스토리 |
+| 9 | mascot.gallery | `mascot` | 마스코트 이미지 갤러리 |
+| 10 | project.js | `project` | GitHub 프로젝트 포트폴리오 |
+| 11 | extensions.txt | `extensions` | VSCode 확장 프로그램 목록 |
+| 12 | gear.json | `gear` | 개발 장비 및 기어 |
+| 13 | inspiration.gallery | `inspiration` | 영감을 주는 디자인 갤러리 |
+| 14 | youtube-channels.json | `youtube-channels` | 즐겨보는 YouTube 채널 |
 
 ---
 
 ## 🎯 추천 TODO 아이템
 
 ### 개인/커리어
-- **resume.pdf** - 이력서 (⭐⭐⭐⭐⭐)
 - **timeline.md** - 커리어 타임라인 (⭐⭐⭐⭐)
 - **achievements.json** - 성과 및 수상 이력 (⭐⭐⭐)
 

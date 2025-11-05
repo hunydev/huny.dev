@@ -178,6 +178,7 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
     const explorerItems: Array<{ id: keyof typeof PAGES; desc: string }> = [
         { id: 'works', desc: 'Works & experiments' },
         { id: 'about', desc: 'About me' },
+        { id: 'resume', desc: 'Professional resume · Export to PDF' },
         { id: 'stack', desc: 'Full‑stack map for huny.dev' },
         { id: 'digital-shelf', desc: 'Subscriptions · Licenses · Free‑tier' },
         { id: 'design-system', desc: 'Personal design system · Colors · Typography · Components' },

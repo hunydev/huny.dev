@@ -41,6 +41,7 @@ const InspirationGalleryPage = React.lazy(() => import('../components/pages/Insp
 const YouTubeChannelsPage = React.lazy(() => import('../components/pages/YouTubeChannelsPage'));
 const AITierListPage = React.lazy(() => import('../components/pages/AITierListPage'));
 const DesignSystemPage = React.lazy(() => import('../components/pages/DesignSystemPage'));
+const ResumePage = React.lazy(() => import('../components/pages/ResumePage'));
 
 export type PageComponent =
   | React.ComponentType<PageProps>
@@ -219,6 +220,11 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
   about: {
     title: 'about.json',
     component: AboutPage,
+    icon: <Icon name="file" className="mr-2" />,
+  },
+  resume: {
+    title: 'resume.pdf',
+    component: ResumePage,
     icon: <Icon name="file" className="mr-2" />,
   },
   gear: {

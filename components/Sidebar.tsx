@@ -288,6 +288,10 @@ const ExplorerView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOp
           <Icon name="file" className="mr-2" />
           <span>about.json</span>
         </button>
+        <button onClick={() => onOpenFile('resume')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
+          <Icon name="file" className="mr-2" />
+          <span>resume.pdf</span>
+        </button>
         <button onClick={() => onOpenFile('stack')} className="flex items-center text-left w-full hover:bg-white/10 rounded px-2 py-1">
           <Icon name="file" className="mr-2" />
           <span>stack-huny.dev</span>
