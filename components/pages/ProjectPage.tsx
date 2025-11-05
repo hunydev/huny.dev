@@ -11,7 +11,7 @@ interface Project {
     icon: string;
 }
 
-const ProjectCard = ({ title, description, tags, link, liveUrl, status, icon }: Project) => (
+const ProjectCard: React.FC<Project> = ({ title, description, tags, link, liveUrl, status, icon }) => (
     <div className="group relative bg-gradient-to-br from-[#2a2d2e] to-[#1f2223] p-6 rounded-xl border border-gray-700/50 hover:border-blue-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1">
         {/* 아이콘과 상태 배지 */}
         <div className="flex items-start justify-between mb-4">
@@ -131,8 +131,17 @@ const ProjectPage: React.FC<PageProps> = () => {
 
             {/* Projects Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {projects.map((project, index) => (
-                    <ProjectCard key={index} {...project} />
+                {projects.map((project) => (
+                    <ProjectCard 
+                        key={project.link}
+                        title={project.title}
+                        description={project.description}
+                        tags={project.tags}
+                        link={project.link}
+                        liveUrl={project.liveUrl}
+                        status={project.status}
+                        icon={project.icon}
+                    />
                 ))}
             </div>
 
