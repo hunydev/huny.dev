@@ -13,6 +13,20 @@ interface InspirationItem {
 
 const INSPIRATION_ITEMS: InspirationItem[] = [
   {
+    name: 'Tabler',
+    category: 'Design System & UI Kit',
+    description: '오픈소스 HTML Dashboard UI Kit - 아이콘, 컴포넌트, 어드민 템플릿까지 제공하는 종합 디자인 시스템',
+    influence: [
+      '4900+ 무료 SVG 아이콘 시스템 (Tabler Icons)',
+      'Bootstrap 기반 UI 컴포넌트 패턴',
+      '깔끔하고 일관된 2px stroke 디자인 철학',
+      '심플하면서 기능적인 어드민 레이아웃',
+      '오픈소스 프로젝트의 높은 완성도',
+    ],
+    link: 'https://tabler.io',
+    color: '#206bc4',
+  },
+  {
     name: 'Notion',
     category: 'Productivity Tool',
     description: '직관적이고 유연한 블록 기반 에디터와 데이터베이스 시스템',
