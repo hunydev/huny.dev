@@ -126,95 +126,80 @@ const TextMorphPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   };
 
   return (
-    <div className="h-full overflow-y-auto p-4 space-y-4">
+    <div className="text-gray-300 max-w-6xl mx-auto font-sans leading-relaxed">
+      {/* Header */}
+      <header className="mb-6">
+        <h1 className="text-2xl md:text-3xl font-semibold text-white flex items-center gap-2">
+          <span className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 text-blue-300">
+            <Icon name="textMorph" className="w-6 h-6" />
+          </span>
+          Text Morph
+          <button
+            type="button"
+            onClick={playgroundGuide.openGuide}
+            className="ml-1 px-2 py-0.5 text-xs rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition"
+            aria-label="사용 가이드 보기"
+            title="사용 가이드 보기"
+          >
+            ?
+          </button>
+        </h1>
+        <p className="mt-2 text-gray-400 text-sm md:text-base">
+          출처·의도 불명 텍스트를 입력하면 AI가 본질을 파악하고 읽기 쉬운 Markdown으로 변환합니다.
+        </p>
+        <div className="mt-2">
+          <ApiProviderBadge provider="gemini" />
+        </div>
+      </header>
+
+      {/* Playground 가이드 모달 */}
       <PlaygroundGuideModal
         isOpen={playgroundGuide.isModalOpen}
         onClose={playgroundGuide.closeGuide}
-        title="Text Morph 사용 가이드"
-        content={
-          <div className="space-y-4 text-sm text-gray-300">
-            <section>
-              <h3 className="font-semibold text-white mb-2">📝 개요</h3>
-              <p>가독성이 떨어지는 텍스트를 AI가 분석하여 읽기 쉬운 Markdown으로 자동 변환합니다.</p>
-            </section>
-            <section>
-              <h3 className="font-semibold text-white mb-2">✨ 주요 기능</h3>
-              <ul className="list-disc list-inside space-y-1 ml-2">
-                <li>표/코드/리스트 구조 자동 감지 및 포맷팅</li>
-                <li>한글 중심 변환 (원문 병기)</li>
-                <li>노이즈 및 제어문자 제거</li>
-                <li>날짜, 단위, 통화 정규화</li>
-                <li>신뢰도 스코어 제공</li>
-                <li>변경 내역 추적</li>
-              </ul>
-            </section>
-            <section>
-              <h3 className="font-semibold text-white mb-2">💡 사용 예시</h3>
-              <ul className="list-disc list-inside space-y-1 ml-2">
-                <li>Markdown 표가 포함된 raw text</li>
-                <li>영어와 한자가 섞인 텍스트</li>
-                <li>바이너리에서 추출한 노이즈 포함 텍스트</li>
-                <li>구조화되지 않은 문서</li>
-              </ul>
-            </section>
-            <section>
-              <h3 className="font-semibold text-white mb-2">📊 출력 구성</h3>
-              <ul className="list-disc list-inside space-y-1 ml-2">
-                <li><strong>분석 요약:</strong> 텍스트 본질 파악 근거</li>
-                <li><strong>메타 정보:</strong> 감지된 구조, 신뢰도 점수</li>
-                <li><strong>Markdown 본문:</strong> 최종 변환 결과</li>
-                <li><strong>변경 로그:</strong> 주요 변경 사항 (before/after)</li>
-              </ul>
-            </section>
-          </div>
-        }
+        playgroundTitle="Text Morph"
+        playgroundId="text-morph"
+        showDontShowAgain={playgroundGuide.showDontShowAgain}
+        onDontShowAgainChange={playgroundGuide.handleDontShowAgain}
       />
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Icon name="textMorph" className="w-5 h-5" />
-          <h1 className="text-xl font-semibold text-white">Text Morph</h1>
-          <ApiProviderBadge provider="gemini" />
-        </div>
-        <button
-          onClick={playgroundGuide.openGuide}
-          className="text-gray-400 hover:text-white transition-colors p-2"
-          title="사용 가이드"
-        >
-          <Icon name="help" className="w-5 h-5" />
-        </button>
-      </div>
-
-      <p className="text-sm text-gray-400">
-        출처·의도 불명 텍스트를 입력하면 AI가 본질을 파악하고 읽기 쉬운 Markdown으로 변환합니다.
-      </p>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            입력 텍스트
-          </label>
+      {/* 입력 섹션 */}
+      <section className="rounded-md border border-white/10 bg-white/[0.03] p-3 md:p-4">
+        <h2 className="text-sm font-medium text-white mb-2">입력</h2>
+        <form onSubmit={handleSubmit} className="space-y-3">
           <textarea
+            rows={6}
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="가독성이 떨어지는 텍스트를 입력하세요...&#10;&#10;예시:&#10;- Markdown 표가 포함된 raw text&#10;- 영어/한자가 섞인 텍스트&#10;- 바이너리 추출 텍스트&#10;- 구조화되지 않은 문서"
-            className="w-full h-40 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            placeholder="가독성이 떨어지는 텍스트를 입력하세요...\n\n예시:\n- Markdown 표가 포함된 raw text\n- 영어/한자가 섞인 텍스트\n- 바이너리 추출 텍스트\n- 구조화되지 않은 문서"
+            className="w-full px-3 py-2 rounded bg-black/40 border border-white/10 text-sm resize-y"
             disabled={api.loading}
           />
-        </div>
+          <div className="flex items-center gap-2 mt-3">
+            <LoadingButton
+              loading={api.loading}
+              disabled={!inputText.trim()}
+              onClick={handleSubmit}
+              loadingText="처리 중…"
+              idleText="변환 시작"
+              variant="primary"
+            />
+            <LoadingButton
+              loading={false}
+              onClick={() => { setInputText(''); setResult(null); api.reset(); }}
+              loadingText=""
+              idleText="초기화"
+              variant="secondary"
+            />
+            <ErrorMessage error={api.error} />
+          </div>
+        </form>
+      </section>
 
-        <LoadingButton type="submit" loading={api.loading} disabled={!inputText.trim() || api.loading}>
-          <Icon name="play" className="w-4 h-4 mr-2" />
-          변환 시작
-        </LoadingButton>
-      </form>
-
-      {api.error && <ErrorMessage error={api.error} />}
-
+      {/* 결과 섹션 */}
       {result && (
-        <div className="space-y-6 border-t border-gray-700 pt-6">
+        <div className="mt-4 space-y-4">
           {/* 분석 요약 */}
-          <section className="bg-gray-800 rounded-lg p-4 space-y-3">
+          <section className="rounded-md border border-white/10 bg-white/[0.03] p-3 md:p-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                 <Icon name="search" className="w-5 h-5 text-blue-400" />
@@ -231,8 +216,8 @@ const TextMorphPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
             <p className="text-gray-300 whitespace-pre-wrap">{result.summary}</p>
           </section>
 
-          {/* 메타 정보 */}
-          <section className="bg-gray-800 rounded-lg p-4 space-y-4">
+          {/* 메타데이터 */}
+          <section className="rounded-md border border-white/10 bg-white/[0.03] p-3 md:p-4">
             <h2 className="text-lg font-semibold text-white flex items-center gap-2">
               <Icon name="info" className="w-5 h-5 text-purple-400" />
               메타 정보
@@ -283,7 +268,7 @@ const TextMorphPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
           </section>
 
           {/* Markdown 본문 */}
-          <section className="bg-gray-800 rounded-lg p-4 space-y-3">
+          <section className="rounded-md border border-white/10 bg-white/[0.03] p-3 md:p-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                 <Icon name="file" className="w-5 h-5 text-green-400" />
@@ -321,7 +306,7 @@ const TextMorphPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
           </section>
 
           {/* 변경 로그 */}
-          <section className="bg-gray-800 rounded-lg p-4 space-y-4">
+          <section className="rounded-md border border-white/10 bg-white/[0.03] p-3 md:p-4">
             <h2 className="text-lg font-semibold text-white flex items-center gap-2">
               <Icon name="history" className="w-5 h-5 text-orange-400" />
               변경 로그
