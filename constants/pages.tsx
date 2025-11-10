@@ -43,6 +43,7 @@ const AITierListPage = React.lazy(() => import('../components/pages/AITierListPa
 const DesignSystemPage = React.lazy(() => import('../components/pages/DesignSystemPage'));
 const ResumePage = React.lazy(() => import('../components/pages/ResumePage'));
 const CronifyPage = React.lazy(() => import('../components/pages/CronifyPage'));
+const TextMorphPage = React.lazy(() => import('../components/pages/TextMorphPage'));
 
 export type PageComponent =
   | React.ComponentType<PageProps>
@@ -100,6 +101,12 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     title: 'Cronify',
     component: CronifyPage,
     icon: <Icon name="cronify" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['text'] },
+  },
+  'text-morph': {
+    title: 'Text Morph',
+    component: TextMorphPage,
+    icon: <Icon name="textMorph" className="mr-2" />,
     apiRequirement: { provider: 'gemini', features: ['text'] },
   },
   'text-to-phoneme': {

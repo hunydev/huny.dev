@@ -191,6 +191,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void; apiHasGem
     { id: 'todo-generator', icon: 'todoGenerator', label: 'To-do Generator' },
     { id: 'ai-tier-list', icon: 'aiTierList', label: 'AI Tier List' },
     { id: 'cronify', icon: 'cronify', label: 'Cronify' },
+    { id: 'text-morph', icon: 'textMorph', label: 'Text Morph' },
     { id: 'split-speaker', icon: 'splitSpeaker', label: 'Split Speaker' },
     { id: 'bird-generator', icon: 'bird', label: 'Bird Generator' },
     { id: 'multi-voice-reader', icon: 'multiVoiceReader', label: 'MultiVoice Reader' },

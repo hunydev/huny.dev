@@ -843,6 +843,23 @@ const ICON_DEFS = {
     ),
     defaultClassName: 'w-4 h-4 text-gray-400',
     attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  textMorph: { //tabler - text-scan2
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M4 8v-2a2 2 0 0 1 2 -2h2" />
+        <path d="M4 16v2a2 2 0 0 0 2 2h2" />
+        <path d="M16 4h2a2 2 0 0 1 2 2v2" />
+        <path d="M16 20h2a2 2 0 0 0 2 -2v-2" />
+        <path d="M7 10h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2v-6z" />
+        <path d="M14 14v-4" />
+        <path d="M14 10l2 2l-2 2" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   }
 } satisfies Record<string, IconDefinition>;
 

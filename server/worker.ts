@@ -2295,6 +2295,145 @@ ${extraPrompt}` : undefined,
           });
         }
       }
+      if (url.pathname === '/api/text-morph') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const body = await request.json<any>().catch(() => ({} as any));
+          const text: string = typeof body?.text === 'string' ? body.text : '';
+          if (!text.trim()) {
+            return new Response(JSON.stringify({ error: 'Missing input text' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+
+          const instructions = [
+            'You are an expert text analyst and formatter. Your task is to analyze unstructured, hard-to-read text and transform it into clean, readable Markdown.',
+            '',
+            '## Core Objectives:',
+            '1. **Understand the Essence**: Identify the core purpose, structure, and intent of the text',
+            '2. **Transform Format**: Convert to well-structured Markdown with proper formatting',
+            '3. **Enhance Readability**: Prioritize Korean, normalize mixed scripts, remove noise',
+            '4. **Track Changes**: Document what was changed and why',
+            '',
+            '## Transformation Rules:',
+            '',
+            '### Structure Detection & Formatting:',
+            '- **Tables**: Convert raw table data to proper Markdown tables',
+            '- **Lists**: Structure unordered content into bullet points or numbered lists',
+            '- **Code blocks**: Wrap code-like content in fenced code blocks with language tags',
+            '- **Headings**: Add hierarchical headings (##, ###) based on content structure',
+            '- **Emphasis**: Use **bold** for key terms, *italic* for secondary emphasis',
+            '',
+            '### Language & Script Normalization:',
+            '- Convert mixed English/Chinese/Japanese to Korean where appropriate',
+            '- Keep original in parentheses when meaning might be lost: "한글(原文)"',
+            '- For technical terms, keep English but add Korean translation',
+            '',
+            '### Noise Removal:',
+            '- Remove control characters, unprintable characters, binary artifacts',
+            '- Clean up excessive whitespace and line breaks',
+            '- Remove meaningless symbols that don\'t contribute to content',
+            '',
+            '### Data Normalization:',
+            '- Dates: Convert to consistent format (YYYY-MM-DD or Korean format)',
+            '- Units: Normalize measurements (e.g., "km", "MB", "°C")',
+            '- Currency: Standardize to "₩", "$", "€" with proper formatting',
+            '',
+            '## Output Format (JSON):',
+            '{',
+            '  "result": {',
+            '    "summary": "Brief analysis of what the text is about and how you understood its essence (2-3 sentences in Korean)",',
+            '    "metadata": {',
+            '      "originalLength": <number>,',
+            '      "processedLength": <number>,',
+            '      "detectedStructures": ["table", "list", "code", "mixed-language", etc.],',
+            '      "confidenceScore": <0-100>,',
+            '      "language": "Korean/English/Mixed",',
+            '      "primaryTransformations": ["structure", "language", "noise-removal", "normalization"]',
+            '    },',
+            '    "markdownContent": "The final transformed Markdown text",',
+            '    "changeLog": {',
+            '      "description": "Summary of major changes made (in Korean)",',
+            '      "examples": [',
+            '        { "before": "original snippet", "after": "transformed snippet" }',
+            '      ]',
+            '    }',
+            '  }',
+            '}',
+            '',
+            '## Important Notes:',
+            '- Output MUST be valid JSON only, no markdown fences, no commentary',
+            '- confidenceScore reflects how well you understood the text structure and intent',
+            '- Include 3-5 representative before/after examples in changeLog',
+            '- Preserve important information - never remove meaningful content',
+            '- When unsure, lean toward preserving original structure',
+            '',
+            `## Input Text to Transform:`,
+            '```',
+            text,
+            '```',
+          ].join('\n');
+
+          const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
+          const aiRes = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': geminiKey!,
+            },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: instructions }] }],
+              generationConfig: {
+                temperature: 0.3,
+                maxOutputTokens: 8192,
+              },
+            } satisfies Record<string, any>),
+          } as RequestInit<RequestInitCfProperties>);
+
+          if (!aiRes.ok) {
+            const errText = await aiRes.text().catch(() => 'Unknown error');
+            return new Response(JSON.stringify({ error: 'Gemini API error', detail: errText }), {
+              status: aiRes.status,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const aiData = await aiRes.json<any>();
+          const rawText = aiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          if (!rawText.trim()) {
+            return new Response(JSON.stringify({ error: 'Empty response from AI' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          // Parse JSON response
+          let parsed: any;
+          try {
+            const cleaned = rawText.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
+            parsed = JSON.parse(cleaned);
+          } catch (parseErr) {
+            return new Response(JSON.stringify({ error: 'Failed to parse AI response', detail: String(parseErr) }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          return new Response(JSON.stringify({ ...parsed, originalInput: text }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
       if (url.pathname === '/api/multivoice-tts') {
         if (request.method !== 'POST') {
           return new Response('Method Not Allowed', { status: 405 });
