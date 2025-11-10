@@ -2117,6 +2117,151 @@ ${extraPrompt}` : undefined,
           });
         }
       }
+      // Cronify: convert natural language schedule to cron expressions (A, B, C, D groups)
+      if (url.pathname === '/api/cronify') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const body = await request.json<any>().catch(() => ({} as any));
+          const text: string = typeof body?.text === 'string' ? body.text : '';
+          const timezone: string = typeof body?.timezone === 'string' ? body.timezone : 'Asia/Seoul';
+          if (!text.trim()) {
+            return new Response(JSON.stringify({ error: 'Missing schedule text' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+          
+          // Instruction: parse natural language and return cron expressions for 4 groups
+          const instructions = [
+            'You are a cron expression generator. Convert natural language schedule descriptions to cron expressions.',
+            'Generate 4 different formats:',
+            '- A (Linux cron, POSIX 5-field): minute hour day-of-month month day-of-week',
+            '- B (Quartz 6-field): second minute hour day-of-month month day-of-week',
+            '- C (AWS EventBridge cron 6-field): minute hour day-of-month month day-of-week year',
+            '- D (Quartz 7-field): second minute hour day-of-month month day-of-week year',
+            '',
+            'Rules:',
+            '- Output MUST be JSON only, no commentary, no markdown fences.',
+            '- Use this schema:',
+            '{',
+            '  "results": [',
+            '    {',
+            '      "group": "A"|"B"|"C"|"D",',
+            '      "expression": string (cron expression),',
+            '      "warnings": string[] (e.g., "초 미지원, 0초로 설정", "연도 필드 생략")',
+            '    }',
+            '  ]',
+            '}',
+            '',
+            'Important cron syntax:',
+            '- * means "every" (e.g., * * * * * for every minute)',
+            '- Use specific values for exact times (e.g., 30 9 * * * for 9:30 AM daily)',
+            '- Weekday: 0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday',
+            '- For "every Monday": use 1 in weekday field (e.g., 30 1 * * 1 for 1:30 AM every Monday)',
+            '- For "Mon-Fri": use 1-5 in weekday field',
+            '- For Quartz (B, D): use ? in day-of-month when specifying day-of-week, and vice versa',
+            '- For AWS (C): year field should be * unless specific year is requested',
+            '- For Linux/AWS (A, C): if seconds are requested, set to 0 and add warning',
+            '',
+            'Group-specific rules:',
+            '- Group A (Linux): 5 fields only, no seconds, no year',
+            '- Group B (Quartz 6): 6 fields with seconds, no year. Use ? for day fields when needed',
+            '- Group C (AWS): 6 fields, no seconds, year field defaults to *',
+            '- Group D (Quartz 7): 7 fields with seconds and year. Use ? for day fields when needed',
+            '',
+            `Timezone: ${timezone}`,
+            '',
+            'Example: "every Monday at 1:30 AM"',
+            '- A: 30 1 * * 1',
+            '- B: 0 30 1 ? * 1',
+            '- C: 30 1 * * 1 *',
+            '- D: 0 30 1 ? * 1 *',
+          ].join('\n');
+
+          const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+          const aiRes = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': geminiKey!,
+            },
+            body: JSON.stringify({
+              contents: [ { parts: [ { text: instructions }, { text: `Convert this schedule: ${text}` } ] } ],
+              generationConfig: { responseMimeType: 'application/json' },
+            }),
+          });
+          if (!aiRes.ok) {
+            const errText = await aiRes.text().catch(() => '');
+            return new Response(JSON.stringify({ error: `Gemini error: ${aiRes.status} ${aiRes.statusText}`, detail: errText }), {
+              status: 502,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const out: any = await aiRes.json();
+          const raw: string = ((out && out.candidates && out.candidates[0] && out.candidates[0].content && out.candidates[0].content.parts) || [])
+            .map((p: any) => p?.text || '')
+            .join('');
+          const jsonStr = extractJsonString(raw);
+          let parsed: any = {};
+          try { parsed = JSON.parse(jsonStr); } catch { parsed = { results: [] }; }
+          
+          const resultsIn: any[] = Array.isArray(parsed?.results) ? parsed.results : [];
+          
+          // Map to full result objects with metadata
+          const groupMetadata: Record<string, { name: string; description: string; usage: string }> = {
+            A: {
+              name: 'Linux cron (POSIX 5필드)',
+              description: '분 시 일 월 요일',
+              usage: 'Linux, Kubernetes, Google Cloud Scheduler'
+            },
+            B: {
+              name: 'Quartz 6필드',
+              description: '초 분 시 일 월 요일',
+              usage: 'Jenkins, Azure Functions, Spring Scheduler'
+            },
+            C: {
+              name: 'AWS cron 6필드',
+              description: '분 시 일 월 요일 연도',
+              usage: 'AWS EventBridge, AWS Lambda'
+            },
+            D: {
+              name: 'Quartz 7필드 (확장)',
+              description: '초 분 시 일 월 요일 연도',
+              usage: 'Spring Framework, Apache Airflow, Quartz Scheduler'
+            }
+          };
+          
+          const results = resultsIn
+            .filter((r: any) => r?.group && r?.expression)
+            .map((r: any) => {
+              const group = r.group;
+              const meta = groupMetadata[group] || { name: group, description: '', usage: '' };
+              return {
+                group,
+                name: meta.name,
+                description: meta.description,
+                usage: meta.usage,
+                expression: String(r.expression).trim(),
+                humanReadable: '', // Will be filled by client using cronstrue
+                nextExecutions: [], // Will be calculated by client
+                warnings: Array.isArray(r.warnings) ? r.warnings.map((w: any) => String(w)) : []
+              };
+            });
+          
+          return new Response(JSON.stringify({ results, originalInput: text }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
       if (url.pathname === '/api/multivoice-tts') {
         if (request.method !== 'POST') {
           return new Response('Method Not Allowed', { status: 405 });

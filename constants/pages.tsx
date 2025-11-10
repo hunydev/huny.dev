@@ -42,6 +42,7 @@ const YouTubeChannelsPage = React.lazy(() => import('../components/pages/YouTube
 const AITierListPage = React.lazy(() => import('../components/pages/AITierListPage'));
 const DesignSystemPage = React.lazy(() => import('../components/pages/DesignSystemPage'));
 const ResumePage = React.lazy(() => import('../components/pages/ResumePage'));
+const CronifyPage = React.lazy(() => import('../components/pages/CronifyPage'));
 
 export type PageComponent =
   | React.ComponentType<PageProps>
@@ -93,6 +94,12 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     title: 'AI Tier List',
     component: AITierListPage,
     icon: <Icon name="aiTierList" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['text'] },
+  },
+  'cronify': {
+    title: 'Cronify',
+    component: CronifyPage,
+    icon: <Icon name="cronify" className="mr-2" />,
     apiRequirement: { provider: 'gemini', features: ['text'] },
   },
   'text-to-phoneme': {

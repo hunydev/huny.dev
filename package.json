@@ -16,6 +16,8 @@
     "gen:extensions": "node scripts/generate-vscode-extensions.mjs"
   },
   "dependencies": {
+    "cron-parser": "^5.4.0",
+    "cronstrue": "^3.9.0",
     "dom-to-image-more": "^3.7.2",
     "highlight.js": "^11.9.0",
     "jspdf": "^2.5.2",
