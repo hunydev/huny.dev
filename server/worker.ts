@@ -2135,6 +2135,10 @@ ${extraPrompt}` : undefined,
             return new Response(JSON.stringify({ error: 'Missing schedule text' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
           }
           
+          // Get current time for next execution calculation
+          const now = new Date();
+          const currentTimeStr = now.toISOString();
+          
           // Instruction: parse natural language and return cron expressions for 4 groups
           const instructions = [
             'You are a cron expression generator. Convert natural language schedule descriptions to cron expressions.',
@@ -2152,6 +2156,7 @@ ${extraPrompt}` : undefined,
             '    {',
             '      "group": "A"|"B"|"C"|"D",',
             '      "expression": string (cron expression),',
+            '      "nextExecutions": string[] (next 3 execution times in ISO 8601 format),',
             '      "warnings": string[] (e.g., "초 미지원, 0초로 설정", "연도 필드 생략")',
             '    }',
             '  ]',
@@ -2173,7 +2178,11 @@ ${extraPrompt}` : undefined,
             '- Group C (AWS): 6 fields, no seconds, year field defaults to *',
             '- Group D (Quartz 7): 7 fields with seconds and year. Use ? for day fields when needed',
             '',
+            `Current time: ${currentTimeStr}`,
             `Timezone: ${timezone}`,
+            '',
+            'IMPORTANT: Calculate the next 3 execution times based on the cron expression.',
+            'Return execution times in ISO 8601 format (e.g., "2024-11-10T01:30:00+09:00").',
             '',
             'Example: "every Monday at 1:30 AM"',
             '- A: 30 1 * * 1',
@@ -2240,14 +2249,38 @@ ${extraPrompt}` : undefined,
             .map((r: any) => {
               const group = r.group;
               const meta = groupMetadata[group] || { name: group, description: '', usage: '' };
+              const expression = String(r.expression).trim();
+              
+              // Get nextExecutions from Gemini response and format them
+              let nextExecutions: string[] = [];
+              if (Array.isArray(r.nextExecutions)) {
+                nextExecutions = r.nextExecutions.map((isoStr: string) => {
+                  try {
+                    const date = new Date(isoStr);
+                    return new Intl.DateTimeFormat('ko-KR', {
+                      timeZone: timezone,
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      hour12: false
+                    }).format(date);
+                  } catch {
+                    return isoStr;
+                  }
+                });
+              }
+              
               return {
                 group,
                 name: meta.name,
                 description: meta.description,
                 usage: meta.usage,
-                expression: String(r.expression).trim(),
+                expression,
                 humanReadable: '', // Will be filled by client using cronstrue
-                nextExecutions: [], // Will be calculated by client
+                nextExecutions,
                 warnings: Array.isArray(r.warnings) ? r.warnings.map((w: any) => String(w)) : []
               };
             });

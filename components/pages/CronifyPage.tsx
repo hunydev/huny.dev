@@ -5,7 +5,6 @@ import { ErrorMessage, LoadingButton, ApiProviderBadge, PlaygroundGuideModal } f
 import { useApiCall } from '../../hooks/useApiCall';
 import { usePlaygroundGuide } from '../../hooks/usePlaygroundGuide';
 import cronstrue from 'cronstrue/i18n';
-import * as parser from 'cron-parser';
 
 type CronGroup = 'A' | 'B' | 'C' | 'D';
 
@@ -79,60 +78,8 @@ const CronifyPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
             humanReadable = '표현식 해석 실패';
           }
           
-          try {
-            // Calculate next 3 execution times using cron-parser
-            // cron-parser only supports standard 5-6 field format
-            // Convert expression to standard format for parsing
-            let parseExpression = result.expression;
-            
-            // Handle different group formats
-            if (result.group === 'A') {
-              // Linux cron: already 5 fields (min hour day month weekday)
-              parseExpression = result.expression;
-            } else if (result.group === 'B') {
-              // Quartz 6-field: sec min hour day month weekday
-              // Replace ? with * for parsing
-              parseExpression = result.expression.replace(/\?/g, '*');
-            } else if (result.group === 'C') {
-              // AWS cron 6-field: min hour day month weekday year
-              // Remove year field for parsing (last field)
-              const parts = result.expression.split(' ');
-              if (parts.length === 6) {
-                parseExpression = parts.slice(0, 5).join(' '); // Remove year
-              }
-            } else if (result.group === 'D') {
-              // Quartz 7-field: sec min hour day month weekday year
-              // Remove year field and replace ? with *
-              const parts = result.expression.split(' ');
-              if (parts.length === 7) {
-                parseExpression = parts.slice(0, 6).join(' ').replace(/\?/g, '*');
-              }
-            }
-            
-            const interval = (parser as any).parseExpression(parseExpression, {
-              currentDate: new Date(),
-              tz: timezone,
-            });
-            
-            for (let i = 0; i < 3; i++) {
-              const next = interval.next();
-              const date = next.toDate();
-              const formatted = date.toLocaleString('ko-KR', {
-                timeZone: timezone,
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-              });
-              nextExecutions.push(formatted);
-            }
-          } catch (err) {
-            console.error('Cron parse error:', err, 'Expression:', result.expression);
-            nextExecutions = ['시간 계산 실패'];
-          }
+          // nextExecutions은 서버에서 계산해서 받음
+          nextExecutions = result.nextExecutions || [];
           
           return {
             ...result,
