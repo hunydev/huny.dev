@@ -34,7 +34,7 @@ const CoverCrafterPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [message, setMessage] = React.useState<string>('');
   const [promptSummary, setPromptSummary] = React.useState<string>('');
 
-  const playgroundGuide = usePlaygroundGuide('cover-crafter');
+  const playgroundGuide = usePlaygroundGuide('cover-crafter', isActiveTab);
 
   type CoverResponse = { image: string; message?: string; prompt?: string; error?: string };
   const api = useApiCall<CoverResponse>({

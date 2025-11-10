@@ -20,7 +20,7 @@ const ToDoGeneratorPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [root, setRoot] = React.useState<TaskNode>({ id: 'root', title: 'root', checked: false, children: [] });
   const [copied, setCopied] = React.useState(false);
 
-  const playgroundGuide = usePlaygroundGuide('to-do-generator');
+  const playgroundGuide = usePlaygroundGuide('to-do-generator', isActiveTab);
 
   type ToDoResponse = { tasks: any[] };
   const api = useApiCall<ToDoResponse>({

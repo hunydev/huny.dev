@@ -130,8 +130,8 @@ const MyNewPlaygroundPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [inputText, setInputText] = React.useState<string>('');
   const [outputText, setOutputText] = React.useState<string>('');
 
-  // 2. Playground 가이드 훅
-  const playgroundGuide = usePlaygroundGuide('my-new-playground');
+  // 2. Playground 가이드 훅 (활성 탭일 때만 이미지 로드)
+  const playgroundGuide = usePlaygroundGuide('my-new-playground', isActiveTab);
 
   // 3. API 호출 훅
   type MyResponse = { result: string };
@@ -251,7 +251,7 @@ export default MyNewPlaygroundPage;
 
 **핵심 패턴**:
 - `PageProps`를 prop으로 받음 (`apiTask`, `isActiveTab`)
-- `usePlaygroundGuide` 훅으로 가이드 모달 관리
+- `usePlaygroundGuide` 훅으로 가이드 모달 관리 (활성 탭 전달 필수)
 - `useApiCall` 훅으로 API 호출 및 상태 관리
 - Header에 아이콘, 제목, 가이드 버튼, API Provider Badge 포함
 - 입력/결과 섹션을 `section` 태그로 구분
@@ -404,9 +404,10 @@ if (url.pathname === '/api/image-process' && request.method === 'POST') {
 **위치**: `public/extra/playground/capture/my-new-playground.png`
 
 **권장 사항**:
-- 파일명: `{playground-id}.png` (또는 `.jpg`, `.jpeg`)
+- 파일명: `{playground-id}.png` (**png 형식만 지원**)
 - 권장 크기: 최대 너비 1200px
 - 내용: 주요 기능과 사용 방법 설명
+- 이미지가 없어도 페이지는 정상 작동 (가이드 모달만 표시되지 않음)
 
 ---
 
@@ -747,6 +748,120 @@ const fileUpload = useFileUpload({
 
 ---
 
+### 5. Hooks 상세 가이드
+
+#### usePlaygroundGuide
+
+사용자 가이드 모달을 관리하는 훅입니다. 활성 탭일 때만 가이드 이미지를 로드하여 성능을 최적화합니다.
+
+**사용법**:
+```tsx
+const playgroundGuide = usePlaygroundGuide('playground-id', isActiveTab);
+```
+
+**파라미터**:
+- `playgroundId` (string): Playground 고유 ID (PAGES의 key와 동일)
+- `isActiveTab` (boolean): 현재 활성 탭 여부 (필수)
+
+**반환값**:
+```tsx
+{
+  isModalOpen: boolean;           // 모달 열림 상태
+  showDontShowAgain: boolean;     // "더 이상 보지 않기" 체크박스 표시 여부
+  openGuide: () => void;          // 모달 열기 (가이드 버튼 클릭 시)
+  closeGuide: () => void;         // 모달 닫기
+  handleDontShowAgain: (checked: boolean) => void; // "더 이상 보지 않기" 처리
+}
+```
+
+**동작 방식**:
+1. **활성 탭 체크**: `isActiveTab`이 `true`일 때만 이미지 존재 여부를 확인
+2. **이미지 로드**: `/extra/playground/capture/{playground-id}.png`에 HEAD 요청
+3. **첫 방문 자동 표시**: 이미지가 있고 사용자가 이전에 닫지 않았다면 자동으로 모달 표시
+4. **로컬스토리지 저장**: "더 이상 보지 않기" 선택 시 `localStorage`에 저장
+
+**중요 사항**:
+- ⚠️ **반드시 `isActiveTab`을 전달해야 합니다** - 이를 통해 비활성 탭에서 불필요한 이미지 요청을 방지
+- 가이드 이미지는 **png 형식만** 지원 (`{playground-id}.png`)
+- 이미지가 없어도 에러가 발생하지 않음 (모달만 표시되지 않음)
+
+**예제**:
+```tsx
+const MyPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
+  const playgroundGuide = usePlaygroundGuide('my-playground', isActiveTab);
+
+  return (
+    <div>
+      <header>
+        <h1>
+          My Playground
+          <button onClick={playgroundGuide.openGuide}>?</button>
+        </h1>
+      </header>
+
+      <PlaygroundGuideModal
+        isOpen={playgroundGuide.isModalOpen}
+        onClose={playgroundGuide.closeGuide}
+        playgroundTitle="My Playground"
+        playgroundId="my-playground"
+        showDontShowAgain={playgroundGuide.showDontShowAgain}
+        onDontShowAgainChange={playgroundGuide.handleDontShowAgain}
+      />
+      
+      {/* 나머지 컨텐츠 */}
+    </div>
+  );
+};
+```
+
+---
+
+#### useApiCall
+
+API 호출과 로딩/에러 상태를 관리하는 훅입니다. API 작업을 탭별로 추적하여 탭 전환 시에도 상태를 유지합니다.
+
+**사용법**:
+```tsx
+type MyResponse = { result: string };
+const api = useApiCall<MyResponse>({
+  url: '/api/endpoint',
+  method: 'POST',
+  tabId: 'my-playground',
+  isActiveTab,
+  apiTask,
+  onSuccess: (data) => {
+    // 성공 처리
+  },
+});
+```
+
+**반환값**:
+```tsx
+{
+  loading: boolean;              // 로딩 상태
+  error: string | null;          // 에러 메시지
+  execute: (options) => Promise<void>; // API 실행
+  setError: (error: string | null) => void; // 에러 설정
+  reset: () => void;             // 상태 초기화
+}
+```
+
+---
+
+#### useFileUpload
+
+파일 업로드와 미리보기를 관리하는 훅입니다.
+
+**사용법**:
+```tsx
+const fileUpload = useFileUpload({
+  accept: 'image/*',
+  maxSize: 10 * 1024 * 1024, // 10MB
+});
+```
+
+---
+
 ## API 엔드포인트 작성
 
 ### 엔드포인트 네이밍 규칙
@@ -824,7 +939,7 @@ if (!env.GEMINI_API_KEY) {
 - [ ] 페이지 컴포넌트 생성 (`components/pages/MyPlaygroundPage.tsx`)
 - [ ] `constants/pages.tsx`에 페이지 등록
 - [ ] `server/worker.ts`에 API 엔드포인트 추가
-- [ ] `usePlaygroundGuide` 훅 사용하여 가이드 모달 추가
+- [ ] `usePlaygroundGuide` 훅 사용하여 가이드 모달 추가 (isActiveTab 전달)
 - [ ] `useApiCall` 훅 사용하여 API 호출 관리
 - [ ] `ApiProviderBadge` 컴포넌트로 API 제공자 표시
 - [ ] 에러 처리 구현 (`ErrorMessage` 컴포넌트 사용)
@@ -864,7 +979,7 @@ const MinimalPlaygroundPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) =>
   const [input, setInput] = React.useState('');
   const [output, setOutput] = React.useState('');
   
-  const playgroundGuide = usePlaygroundGuide('minimal-playground');
+  const playgroundGuide = usePlaygroundGuide('minimal-playground', isActiveTab);
   
   type Response = { result: string };
   const api = useApiCall<Response>({
@@ -960,7 +1075,7 @@ import { usePlaygroundGuide } from '../../hooks/usePlaygroundGuide';
 const ImagePlaygroundPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [result, setResult] = React.useState('');
   
-  const playgroundGuide = usePlaygroundGuide('image-playground');
+  const playgroundGuide = usePlaygroundGuide('image-playground', isActiveTab);
   
   const fileUpload = useFileUpload({
     accept: 'image/*',

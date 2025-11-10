@@ -27,7 +27,7 @@ const DeobfuscateHangulPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) =>
   const [result, setResult] = React.useState<DeobfuscationResult | null>(null);
   const [copiedSection, setCopiedSection] = React.useState<string>('');
   
-  const playgroundGuide = usePlaygroundGuide('deobfuscate-hangul');
+  const playgroundGuide = usePlaygroundGuide('deobfuscate-hangul', isActiveTab);
 
   type Response = ApiResponse;
   const api = useApiCall<Response>({

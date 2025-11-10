@@ -13,7 +13,7 @@ const StickerGeneratorPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => 
   const [transparent, setTransparent] = React.useState<boolean>(false);
   const [outUrl, setOutUrl] = React.useState<string>('');
 
-  const playgroundGuide = usePlaygroundGuide('sticker-generator');
+  const playgroundGuide = usePlaygroundGuide('sticker-generator', isActiveTab);
 
   const fileUpload = useFileUpload({
     accept: 'image/*',

@@ -31,7 +31,7 @@ const CronifyPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [copiedIndex, setCopiedIndex] = React.useState<number>(-1);
   const [timezone, setTimezone] = React.useState<string>('Asia/Seoul');
 
-  const playgroundGuide = usePlaygroundGuide('cronify');
+  const playgroundGuide = usePlaygroundGuide('cronify', isActiveTab);
 
   type Response = ApiResponse;
   const api = useApiCall<Response>({

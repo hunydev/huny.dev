@@ -48,7 +48,7 @@ const AITierListPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [isExporting, setIsExporting] = React.useState(false);
   const tierListRef = React.useRef<HTMLDivElement>(null);
 
-  const playgroundGuide = usePlaygroundGuide('ai-tier-list');
+  const playgroundGuide = usePlaygroundGuide('ai-tier-list', isActiveTab);
   
   // 초기 로드 시 빈 티어 리스트 설정
   React.useEffect(() => {

@@ -33,7 +33,7 @@ const TextMorphPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [copiedSection, setCopiedSection] = React.useState<string>('');
   const [showRawMarkdown, setShowRawMarkdown] = React.useState<boolean>(false);
   
-  const playgroundGuide = usePlaygroundGuide('text-morph');
+  const playgroundGuide = usePlaygroundGuide('text-morph', isActiveTab);
 
   type Response = ApiResponse;
   const api = useApiCall<Response>({

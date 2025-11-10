@@ -2,25 +2,17 @@ import { useState, useEffect } from 'react';
 
 const STORAGE_KEY_PREFIX = 'playground-guide-dismissed-';
 
-// Check if guide image exists
+// Check if guide image exists (png only)
 const checkImageExists = async (playgroundId: string): Promise<boolean> => {
-  const extensions = ['png', 'jpg', 'jpeg'];
-  
-  for (const ext of extensions) {
-    try {
-      const response = await fetch(`/extra/playground/capture/${playgroundId}.${ext}`, { method: 'HEAD' });
-      if (response.ok) {
-        return true;
-      }
-    } catch {
-      // Continue to next extension
-    }
+  try {
+    const response = await fetch(`/extra/playground/capture/${playgroundId}.png`, { method: 'HEAD' });
+    return response.ok;
+  } catch {
+    return false;
   }
-  
-  return false;
 };
 
-export const usePlaygroundGuide = (playgroundId: string) => {
+export const usePlaygroundGuide = (playgroundId: string, isActiveTab: boolean) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showDontShowAgain, setShowDontShowAgain] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
@@ -34,28 +26,32 @@ export const usePlaygroundGuide = (playgroundId: string) => {
     return localStorage.getItem(storageKey) === 'true';
   };
 
-  // Check if image exists on mount
+  // Check if image exists only when tab becomes active
   useEffect(() => {
-    checkImageExists(playgroundId).then(setImageExists);
-  }, [playgroundId]);
-
-  // Show modal on first visit (only if image exists)
-  useEffect(() => {
-    if (!hasInitialized && !isDismissed() && imageExists) {
-      setIsModalOpen(true);
-      setShowDontShowAgain(true);
-      setHasInitialized(true);
+    if (isActiveTab && !hasInitialized && !isDismissed()) {
+      checkImageExists(playgroundId).then((exists) => {
+        setImageExists(exists);
+        if (exists) {
+          setIsModalOpen(true);
+          setShowDontShowAgain(true);
+        }
+        setHasInitialized(true);
+      });
     } else if (!hasInitialized) {
       setHasInitialized(true);
     }
-  }, [hasInitialized, storageKey, imageExists]);
+  }, [isActiveTab, hasInitialized, playgroundId, storageKey]);
 
-  // Open modal manually (from help button, only if image exists)
-  const openGuide = () => {
-    if (imageExists) {
-      setIsModalOpen(true);
-      setShowDontShowAgain(false);
+  // Open modal manually (from help button)
+  const openGuide = async () => {
+    // Check image exists if not checked yet
+    if (!imageExists) {
+      const exists = await checkImageExists(playgroundId);
+      setImageExists(exists);
+      if (!exists) return; // Don't open if no image
     }
+    setIsModalOpen(true);
+    setShowDontShowAgain(false);
   };
 
   // Close modal
