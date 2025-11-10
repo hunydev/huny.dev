@@ -2,10 +2,29 @@ import { useState, useEffect } from 'react';
 
 const STORAGE_KEY_PREFIX = 'playground-guide-dismissed-';
 
+// Check if guide image exists
+const checkImageExists = async (playgroundId: string): Promise<boolean> => {
+  const extensions = ['png', 'jpg', 'jpeg'];
+  
+  for (const ext of extensions) {
+    try {
+      const response = await fetch(`/extra/playground/capture/${playgroundId}.${ext}`, { method: 'HEAD' });
+      if (response.ok) {
+        return true;
+      }
+    } catch {
+      // Continue to next extension
+    }
+  }
+  
+  return false;
+};
+
 export const usePlaygroundGuide = (playgroundId: string) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showDontShowAgain, setShowDontShowAgain] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [imageExists, setImageExists] = useState(false);
 
   const storageKey = `${STORAGE_KEY_PREFIX}${playgroundId}`;
 
@@ -15,21 +34,28 @@ export const usePlaygroundGuide = (playgroundId: string) => {
     return localStorage.getItem(storageKey) === 'true';
   };
 
-  // Show modal on first visit
+  // Check if image exists on mount
   useEffect(() => {
-    if (!hasInitialized && !isDismissed()) {
+    checkImageExists(playgroundId).then(setImageExists);
+  }, [playgroundId]);
+
+  // Show modal on first visit (only if image exists)
+  useEffect(() => {
+    if (!hasInitialized && !isDismissed() && imageExists) {
       setIsModalOpen(true);
       setShowDontShowAgain(true);
       setHasInitialized(true);
-    } else {
+    } else if (!hasInitialized) {
       setHasInitialized(true);
     }
-  }, [hasInitialized, storageKey]);
+  }, [hasInitialized, storageKey, imageExists]);
 
-  // Open modal manually (from help button)
+  // Open modal manually (from help button, only if image exists)
   const openGuide = () => {
-    setIsModalOpen(true);
-    setShowDontShowAgain(false);
+    if (imageExists) {
+      setIsModalOpen(true);
+      setShowDontShowAgain(false);
+    }
   };
 
   // Close modal
