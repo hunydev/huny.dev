@@ -44,6 +44,7 @@ const DesignSystemPage = React.lazy(() => import('../components/pages/DesignSyst
 const ResumePage = React.lazy(() => import('../components/pages/ResumePage'));
 const CronifyPage = React.lazy(() => import('../components/pages/CronifyPage'));
 const TextMorphPage = React.lazy(() => import('../components/pages/TextMorphPage'));
+const DeobfuscateHangulPage = React.lazy(() => import('../components/pages/DeobfuscateHangulPage'));
 
 export type PageComponent =
   | React.ComponentType<PageProps>
@@ -107,6 +108,12 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     title: 'Text Morph',
     component: TextMorphPage,
     icon: <Icon name="textMorph" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['text'] },
+  },
+  'deobfuscate-hangul': {
+    title: 'Deobfuscate Hangul',
+    component: DeobfuscateHangulPage,
+    icon: <Icon name="deobfuscateHangul" className="mr-2" />,
     apiRequirement: { provider: 'gemini', features: ['text'] },
   },
   'text-to-phoneme': {

@@ -2434,6 +2434,151 @@ ${extraPrompt}` : undefined,
           });
         }
       }
+      if (url.pathname === '/api/deobfuscate-hangul') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const body = await request.json<any>().catch(() => ({} as any));
+          const text: string = typeof body?.text === 'string' ? body.text : '';
+          if (!text.trim()) {
+            return new Response(JSON.stringify({ error: 'Missing input text' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+
+          const instructions = [
+            'You are an expert in Korean language obfuscation reversal. Your task is to deobfuscate Korean text that has been intentionally scrambled using various techniques.',
+            '',
+            '## Obfuscation Techniques Used (Korean Hangul):',
+            '',
+            '### 1. Liaison (연음법칙) - Syllable Final to Next Initial',
+            '- Final consonant moves to next syllable\'s initial position',
+            '- Example: 책이 → 채기, 옷을 → 오슬, 낮에 → 나제',
+            '- Reverse: Move initial consonant back to previous syllable as final',
+            '',
+            '### 2. Consonant Duplication (받침 중복)',
+            '- Next syllable\'s initial consonant copied to previous syllable as final',
+            '- Example: 후기를 → 후길를, 지구상 → 지굿상, 어떤 → 얻떤',
+            '- Reverse: Remove duplicated final consonant',
+            '',
+            '### 3. Jamo Transformation (자모 변형)',
+            '- Similar-sounding consonants/vowels substituted:',
+            '  - Consonants: ㅂ↔ㅃ, ㅅ↔ㅆ, ㄷ↔ㅌ, ㄱ↔ㅋ',
+            '  - Vowels: ㅏ↔ㅑ, ㅓ↔ㅔ, ㅚ↔ㅙ/ㅢ, ㅟ↔ㅞ/ㅢ',
+            '- Example: 방→빵, 숙박→쑥박, 된다→퇸타, 규칙→큐칙',
+            '- Reverse: Try common phonetic substitutions',
+            '',
+            '### 4. Random Final Addition (의미없는 받침)',
+            '- Random final consonants added to syllables without finals',
+            '- Example: 해외여행→햇욍영행, 모르게→못륵겍, 만들어내는→만들얶냈는',
+            '- Reverse: Try removing unexpected finals',
+            '',
+            '## Korean Syllable Structure:',
+            '- Each Hangul syllable = Initial (초성) + Medial (중성) + Final (종성)',
+            '- 19 initials: ㄱ ㄲ ㄴ ㄷ ㄸ ㄹ ㅁ ㅂ ㅃ ㅅ ㅆ ㅇ ㅈ ㅉ ㅊ ㅋ ㅌ ㅍ ㅎ',
+            '- 21 medials: ㅏ ㅐ ㅑ ㅒ ㅓ ㅔ ㅕ ㅖ ㅗ ㅘ ㅙ ㅚ ㅛ ㅜ ㅝ ㅞ ㅟ ㅠ ㅡ ㅢ ㅣ',
+            '- 28 finals (including none): (none) ㄱ ㄲ ㄳ ㄴ ㄵ ㄶ ㄷ ㄹ ㄺ ㄻ ㄼ ㄽ ㄾ ㄿ ㅀ ㅁ ㅂ ㅄ ㅅ ㅆ ㅇ ㅈ ㅊ ㅋ ㅌ ㅍ ㅎ',
+            '',
+            '## Critical Constraint:',
+            '**The number of syllables MUST remain the same after deobfuscation.**',
+            '- Original: 꺜켞 덆삅 (4 syllables) → Deobfuscated: must have exactly 4 syllables',
+            '- Count only Hangul syllables, ignore spaces',
+            '',
+            '## Output Format (JSON):',
+            '{',
+            '  "result": {',
+            '    "original": "<input text>",',
+            '    "deobfuscated": "<restored Korean text>",',
+            '    "confidence": <0-100>,',
+            '    "syllableCount": {',
+            '      "original": <number>,',
+            '      "deobfuscated": <number>',
+            '    },',
+            '    "detectedPatterns": ["liaison", "duplication", "jamo-transform", "random-final"],',
+            '    "explanation": "Step-by-step reasoning in Korean (2-4 sentences)",',
+            '    "alternatives": ["alternative1", "alternative2"] // optional, if multiple interpretations possible',
+            '  }',
+            '}',
+            '',
+            '## Strategy:',
+            '1. Count syllables in input',
+            '2. Identify obfuscation patterns (check for odd finals, doubled consonants, etc.)',
+            '3. Try reversing techniques in order: random-final removal → duplication fix → liaison fix → jamo restore',
+            '4. For each attempt, check if result makes semantic sense in Korean',
+            '5. Verify syllable count matches original',
+            '6. Choose most likely interpretation based on Korean word frequency and grammar',
+            '',
+            '## Important:',
+            '- Output MUST be valid JSON only, no markdown fences',
+            '- Be conservative: if unsure, prefer simpler transformations',
+            '- Use context clues from surrounding syllables',
+            '- Consider common Korean words and grammar patterns',
+            '',
+            `## Input Text to Deobfuscate:`,
+            '```',
+            text,
+            '```',
+          ].join('\n');
+
+          const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
+          const aiRes = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': geminiKey!,
+            },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: instructions }] }],
+              generationConfig: {
+                temperature: 0.2,
+                maxOutputTokens: 4096,
+              },
+            } satisfies Record<string, any>),
+          } as RequestInit<RequestInitCfProperties>);
+
+          if (!aiRes.ok) {
+            const errText = await aiRes.text().catch(() => 'Unknown error');
+            return new Response(JSON.stringify({ error: 'Gemini API error', detail: errText }), {
+              status: aiRes.status,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const aiData = await aiRes.json<any>();
+          const rawText = aiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          if (!rawText.trim()) {
+            return new Response(JSON.stringify({ error: 'Empty response from AI' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          // Parse JSON response
+          let parsed: any;
+          try {
+            const cleaned = rawText.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
+            parsed = JSON.parse(cleaned);
+          } catch (parseErr) {
+            return new Response(JSON.stringify({ error: 'Failed to parse AI response', detail: String(parseErr) }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          return new Response(JSON.stringify(parsed), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
       if (url.pathname === '/api/multivoice-tts') {
         if (request.method !== 'POST') {
           return new Response('Method Not Allowed', { status: 405 });
