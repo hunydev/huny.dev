@@ -45,6 +45,7 @@ const ResumePage = React.lazy(() => import('../components/pages/ResumePage'));
 const CronifyPage = React.lazy(() => import('../components/pages/CronifyPage'));
 const TextMorphPage = React.lazy(() => import('../components/pages/TextMorphPage'));
 const DeobfuscateHangulPage = React.lazy(() => import('../components/pages/DeobfuscateHangulPage'));
+const DialectTTSPage = React.lazy(() => import('../components/pages/DialectTTSPage'));
 
 export type PageComponent =
   | React.ComponentType<PageProps>
@@ -115,6 +116,12 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     component: DeobfuscateHangulPage,
     icon: <Icon name="deobfuscateHangul" className="mr-2" />,
     apiRequirement: { provider: 'gemini', features: ['text'] },
+  },
+  'dialect-tts': {
+    title: 'Dialect TTS',
+    component: DialectTTSPage,
+    icon: <Icon name="dialectTts" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['text', 'tts'] },
   },
   'text-to-phoneme': {
     title: 'Text to Phoneme',

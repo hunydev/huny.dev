@@ -2579,6 +2579,185 @@ ${extraPrompt}` : undefined,
           });
         }
       }
+      if (url.pathname === '/api/dialect-tts') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env, true);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'TTS 기능은 사용자 API 키가 필요합니다. 설정에서 GEMINI_API_KEY를 등록해 주세요.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const body = await request.json<any>().catch(() => ({} as any));
+          const text: string = typeof body?.text === 'string' ? body.text : '';
+          const dialect: string = typeof body?.dialect === 'string' ? body.dialect : 'jeolla';
+          const useAccent: boolean = body?.useAccent === true;
+          const useStyle: boolean = body?.useStyle === true;
+
+          if (!text.trim()) {
+            return new Response(JSON.stringify({ error: 'Missing input text' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+
+          let finalText = text;
+          let convertedText: string | undefined;
+
+          // 문체 변환 (useStyle이 true인 경우)
+          if (useStyle) {
+            const dialectNames: Record<string, string> = {
+              jeolla: '전라도',
+              gyeongsang: '경상도',
+              chungcheong: '충청도',
+              gangwon: '강원도',
+            };
+
+            const styleInstructions = [
+              `You are an expert in Korean dialects. Convert the following text into natural conversational ${dialectNames[dialect] || '전라도'} dialect style.`,
+              '',
+              '## Conversion Rules:',
+              '- Use natural conversational tone (자연스러운 대화체)',
+              '- Apply characteristic endings and particles of the dialect',
+              '- Preserve the original meaning completely',
+              '- Make it sound like how locals would naturally speak',
+              '',
+              `## ${dialectNames[dialect] || '전라도'} Dialect Characteristics:`,
+              dialect === 'jeolla' ? '- Endings: ~잉, ~라우, ~구만, ~당께, ~제' : '',
+              dialect === 'jeolla' ? '- Particles: 긴디, 진디, 것이여, 라우' : '',
+              dialect === 'gyeongsang' ? '- Endings: ~노, ~나, ~카이, ~데이, ~더라' : '',
+              dialect === 'gyeongsang' ? '- Particles: 아이가, 예, 캐, 카데' : '',
+              dialect === 'chungcheong' ? '- Endings: ~유, ~잉, ~여, ~다우' : '',
+              dialect === 'chungcheong' ? '- Slow and relaxed tone' : '',
+              dialect === 'gangwon' ? '- Endings: ~게, ~소, ~라오' : '',
+              dialect === 'gangwon' ? '- Mountain dialect characteristics' : '',
+              '',
+              '## Output Format:',
+              'Just return the converted text in plain text (no JSON, no markdown, no explanation)',
+              '',
+              `## Input Text:`,
+              text,
+            ].filter(Boolean).join('\n');
+
+            const styleApiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+            const styleRes = await fetch(styleApiUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-goog-api-key': geminiKey!,
+              },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: styleInstructions }] }],
+                generationConfig: {
+                  temperature: 0.7,
+                  maxOutputTokens: 1024,
+                },
+              } satisfies Record<string, any>),
+            } as RequestInit<RequestInitCfProperties>);
+
+            if (!styleRes.ok) {
+              const errText = await styleRes.text().catch(() => 'Unknown error');
+              return new Response(JSON.stringify({ error: 'Gemini API error (style conversion)', detail: errText }), {
+                status: styleRes.status,
+                headers: { 'content-type': 'application/json; charset=UTF-8' },
+              });
+            }
+
+            const styleData = await styleRes.json<any>();
+            const styleText = styleData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            if (styleText.trim()) {
+              finalText = styleText.trim();
+              convertedText = finalText;
+            }
+          }
+
+          // TTS 생성 with 방언 억양 instruction
+          const dialectInstructions: Record<string, string> = {
+            jeolla: '전라도 사투리 억양으로 읽어주세요. 부드럽고 유연한 어조로 발음해주세요.',
+            gyeongsang: '경상도 사투리 억양으로 읽어주세요. 강하고 단호한 어조로 발음해주세요.',
+            chungcheong: '충청도 사투리 억양으로 읽어주세요. 느긋하고 여유로운 어조로 발음해주세요.',
+            gangwon: '강원도 사투리 억양으로 읽어주세요. 중후하고 담담한 어조로 발음해주세요.',
+          };
+
+          // Voice 선택 (다양성을 위해)
+          const voiceMap: Record<string, string> = {
+            jeolla: 'Charon',
+            gyeongsang: 'Kore',
+            chungcheong: 'Aoede',
+            gangwon: 'Fenrir',
+          };
+
+          const voice = voiceMap[dialect] || 'Charon';
+          
+          // 억양이 선택된 경우 instruction 추가
+          let ttsPrompt = finalText;
+          if (useAccent) {
+            const instruction = dialectInstructions[dialect] || '';
+            ttsPrompt = `${instruction}\n\n텍스트: ${finalText}`;
+          }
+
+          const ttsApiUrl = `https://generativelanguage.googleapis.com/v1alpha/models/gemini-2.5-flash-preview-tts:generateContent?key=${geminiKey}`;
+          const ttsRes = await fetch(ttsApiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: ttsPrompt }] }],
+              generationConfig: {
+                responseModalities: ['AUDIO'],
+                speechConfig: {
+                  voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } }
+                }
+              }
+            } satisfies Record<string, any>),
+          } as RequestInit<RequestInitCfProperties>);
+
+          if (!ttsRes.ok) {
+            const errText = await ttsRes.text().catch(() => 'Unknown error');
+            return new Response(JSON.stringify({ error: 'Gemini TTS API error', detail: errText }), {
+              status: ttsRes.status,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const ttsData = await ttsRes.json<any>();
+          
+          // NonNativeKoreanTTS와 동일하게 모든 candidates와 parts를 순회하여 오디오 데이터 찾기
+          let audioBase64 = '';
+          const candidates = Array.isArray(ttsData?.candidates) ? ttsData.candidates : [];
+          for (const c of candidates) {
+            const parts = c?.content?.parts || [];
+            for (const p of parts) {
+              if (p?.inlineData?.data) {
+                audioBase64 = String(p.inlineData.data);
+                break;
+              }
+            }
+            if (audioBase64) break;
+          }
+
+          if (!audioBase64) {
+            return new Response(JSON.stringify({ error: 'No audio data received from TTS API', raw: ttsData }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const response: any = {
+            audioBase64,
+          };
+
+          if (convertedText) {
+            response.convertedText = convertedText;
+          }
+
+          return new Response(JSON.stringify(response), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
       if (url.pathname === '/api/multivoice-tts') {
         if (request.method !== 'POST') {
           return new Response('Method Not Allowed', { status: 405 });

@@ -876,6 +876,20 @@ const ICON_DEFS = {
     ),
     defaultClassName: 'w-4 h-4 text-gray-400',
     attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  dialectTts: { //tabler - volume + map-pin
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M15 8a5 5 0 0 1 0 8" />
+        <path d="M17.7 5a9 9 0 0 1 0 14" />
+        <path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a0.8 .8 0 0 1 1.5 .5v14a0.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" />
+        <path d="M19 9l-2 3h4l-2 3" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   }
 } satisfies Record<string, IconDefinition>;
 

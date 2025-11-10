@@ -193,6 +193,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void; apiHasGem
     { id: 'cronify', icon: 'cronify', label: 'Cronify' },
     { id: 'text-morph', icon: 'textMorph', label: 'Text Morph' },
     { id: 'deobfuscate-hangul', icon: 'deobfuscateHangul', label: 'Deobfuscate Hangul' },
+    { id: 'dialect-tts', icon: 'dialectTts', label: 'Dialect TTS' },
     { id: 'split-speaker', icon: 'splitSpeaker', label: 'Split Speaker' },
     { id: 'bird-generator', icon: 'bird', label: 'Bird Generator' },
     { id: 'multi-voice-reader', icon: 'multiVoiceReader', label: 'MultiVoice Reader' },
