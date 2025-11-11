@@ -32,7 +32,7 @@ export type MonitorWatcher = {
 export type MonitorItem = {
   id: string;
   name: string;
-  category: 'status' | 'incident' | 'news' | 'usage';
+  category: 'status' | 'incident' | 'news' | 'usage' | 'pagespeed';
   summary: string;
   updatedAt: string;
   statusLevel?: MonitorStatusLevel;
@@ -42,6 +42,7 @@ export type MonitorItem = {
   incidents?: MonitorIncident[];
   watchers?: MonitorWatcher[];
   notes?: string;
+  pageSpeedData?: any; // PageSpeed Insights raw data
 };
 
 export type MonitorGroup = {
@@ -266,6 +267,32 @@ export const MONITOR_GROUPS: MonitorGroup[] = [
           { label: 'RSS 파이프라인 큐', value: '3 / 50', trend: 'up', helper: '대기 작업 / 큐 한도' },
         ],
         notes: '실패 건 재시도 오토메이션 배치 준비. 5분 주기로 로그 스트리밍 검토.',
+      },
+    ],
+  },
+  {
+    id: 'performance-insights',
+    name: 'Performance Insights',
+    description: 'Google PageSpeed Insights를 통한 웹 성능 분석 결과를 제공합니다.',
+    icon: 'monitorStatus',
+    items: [
+      {
+        id: 'pagespeed-hunydev',
+        name: 'huny.dev PageSpeed 분석',
+        category: 'pagespeed',
+        summary: 'Lighthouse를 통한 성능, 접근성, SEO 등의 지표를 측정합니다.',
+        updatedAt: '2025-11-11T11:37:58+09:00',
+        statusLevel: 'operational',
+        statusLabel: '우수',
+        statusIcon: 'monitorStatus',
+        metrics: [
+          { label: 'Performance Score', value: '98/100', trend: 'up', helper: 'Lighthouse 성능 점수' },
+          { label: 'First Contentful Paint', value: '0.6s', trend: 'up', helper: 'Score: 0.99' },
+          { label: 'Total Blocking Time', value: '30ms', trend: 'up', helper: 'Score: 1.0' },
+          { label: 'Server Response Time', value: '1ms', trend: 'up', helper: 'TTFB' },
+        ],
+        notes: 'Desktop 환경 기준 측정. 모바일 측정 추가 예정.',
+        pageSpeedData: null, // Will be populated with actual data
       },
     ],
   },
