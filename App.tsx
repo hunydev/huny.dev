@@ -18,6 +18,20 @@ const APP_VERSION = '2025.11.10.2';
 const TABS_STORAGE_KEY = 'app.openTabs.v1';
 const DEFAULT_TAB_IDS: readonly string[] = ['welcome', 'works', 'domain', 'about'];
 
+// Hash <-> ViewId 변환 helper 함수
+const viewIdToHash = (viewId: ViewId): string => {
+  return viewId.toLowerCase();
+};
+
+const hashToViewId = (hash: string): ViewId | null => {
+  const cleanHash = hash.replace(/^#/, '').toUpperCase();
+  const viewIdValues = Object.values(ViewId) as string[];
+  if (viewIdValues.includes(cleanHash)) {
+    return cleanHash as ViewId;
+  }
+  return null;
+};
+
 const App: React.FC = () => {
   const apiTaskContext = useApiTask();
   const [activeView, setActiveView] = useState<ViewId>(ViewId.Explorer);
@@ -390,12 +404,54 @@ const App: React.FC = () => {
     return () => clearTimeout(timer);
   }, [updateToastVisible, updateToastType, updateCountdown, handleReloadForUpdate]);
 
+  // 초기 로드 시 URL hash에서 activeView 설정
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const hash = window.location.hash;
+    if (hash) {
+      const viewId = hashToViewId(hash);
+      if (viewId) {
+        setActiveView(viewId);
+      }
+    }
+  }, []);
+
   // Keep left sidebar selection in sync with the active tab
   useEffect(() => {
     if (!activeTabId) return;
     const v = viewForTabId(activeTabId);
     setActiveView(v);
   }, [activeTabId]);
+
+  // activeView 변경 시 URL hash 업데이트
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const hash = `#${viewIdToHash(activeView)}`;
+    if (window.location.hash !== hash) {
+      window.history.pushState(null, '', hash);
+    }
+  }, [activeView]);
+
+  // 브라우저 뒤로가기/앞으로가기 처리
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash) {
+        const viewId = hashToViewId(hash);
+        if (viewId) {
+          setActiveView(viewId);
+        }
+      } else {
+        // hash가 없으면 Explorer로
+        setActiveView(ViewId.Explorer);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const handleLogoClick = useCallback(() => {
     if (refreshing) return;
