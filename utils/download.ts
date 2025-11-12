@@ -92,3 +92,21 @@ export const copyToClipboardWithFallback = async (
     return false;
   }
 };
+
+/**
+ * Canvas를 PNG 이미지로 다운로드
+ * @param canvas - 다운로드할 Canvas 요소
+ * @param filename - 저장할 파일명
+ */
+export const downloadCanvasAsImage = (canvas: HTMLCanvasElement, filename: string): void => {
+  try {
+    canvas.toBlob((blob) => {
+      if (blob) {
+        downloadBlob(blob, filename);
+      }
+    }, 'image/png');
+  } catch (error) {
+    console.error('Failed to download canvas:', error);
+    throw error;
+  }
+};

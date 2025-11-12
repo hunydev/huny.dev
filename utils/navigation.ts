@@ -13,6 +13,7 @@ const PLAYGROUND_BASE_IDS = new Set<string>([
   'restyler',
   'text-to-phoneme',
   'text-to-emoji',
+  'text-to-big-text',
   'web-worker',
   'text-cleaning',
   'ai-business-card',

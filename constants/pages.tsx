@@ -47,6 +47,7 @@ const TextMorphPage = React.lazy(() => import('../components/pages/TextMorphPage
 const DeobfuscateHangulPage = React.lazy(() => import('../components/pages/DeobfuscateHangulPage'));
 const DialectTTSPage = React.lazy(() => import('../components/pages/DialectTTSPage'));
 const ReStylerPage = React.lazy(() => import('../components/pages/ReStylerPage'));
+const TextToBigTextPage = React.lazy(() => import('../components/pages/TextToBigTextPage'));
 
 export type PageComponent =
   | React.ComponentType<PageProps>
@@ -129,6 +130,11 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     component: ReStylerPage,
     icon: <Icon name="reStyler" className="mr-2" />,
     apiRequirement: { provider: 'gemini', features: ['text'] },
+  },
+  'text-to-big-text': {
+    title: 'Text to Big Text',
+    component: TextToBigTextPage,
+    icon: <Icon name="textMorph" className="mr-2" />,
   },
   'text-to-phoneme': {
     title: 'Text to Phoneme',
