@@ -187,6 +187,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void; apiHasGem
     { id: 'text-to-phoneme', icon: 'textToPhoneme', label: 'Text to Phoneme' },
     { id: 'text-to-emoji', icon: 'textToEmoji', label: 'Text to Emoji' },
     { id: 'ui-clone', icon: 'uiClone', label: 'UI Clone' },
+    { id: 'restyler', icon: 'reStyler', label: 'ReStyler' },
     { id: 'web-worker', icon: 'webWorker', label: 'Web Worker' },
     { id: 'todo-generator', icon: 'todoGenerator', label: 'To-do Generator' },
     { id: 'ai-tier-list', icon: 'aiTierList', label: 'AI Tier List' },

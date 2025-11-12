@@ -10,6 +10,7 @@ const PLAYGROUND_BASE_IDS = new Set<string>([
   'text-morph',
   'deobfuscate-hangul',
   'dialect-tts',
+  'restyler',
   'text-to-phoneme',
   'text-to-emoji',
   'web-worker',

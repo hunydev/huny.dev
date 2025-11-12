@@ -2579,6 +2579,162 @@ ${extraPrompt}` : undefined,
           });
         }
       }
+      if (url.pathname === '/api/restyler') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+          const body = await request.json<any>().catch(() => ({} as any));
+          const content: string = typeof body?.content === 'string' ? body.content : '';
+          const stylePreset: string | undefined = typeof body?.stylePreset === 'string' ? body.stylePreset : undefined;
+          const customTheme: string | undefined = typeof body?.customTheme === 'string' ? body.customTheme : undefined;
+          const outputFormat: string = typeof body?.outputFormat === 'string' ? body.outputFormat : 'html';
+          
+          if (!content.trim()) {
+            return new Response(JSON.stringify({ error: 'Missing input content' }), { status: 400, headers: { 'content-type': 'application/json; charset=UTF-8' } });
+          }
+
+          // Build style instructions based on preset and custom theme
+          const presetInstructions: Record<string, string> = {
+            tailwind: 'Use Tailwind CSS utility classes for styling. Focus on modern, responsive design with utility-first approach. Use classes like flex, grid, gap, rounded, shadow, hover states, etc.',
+            material: 'Apply Google Material Design principles. Use elevation, card-based layouts, proper spacing (8dp grid), rounded corners (4dp), material colors, and interactive states (ripple effects).',
+            bootstrap: 'Use Bootstrap 5 classes and components. Apply responsive grid system, utility classes, component classes like btn, card, navbar, etc.',
+            minimalist: 'Create a clean, minimal design with lots of whitespace, simple typography, limited color palette (2-3 colors), subtle shadows, and focus on content hierarchy.',
+            glassmorphism: 'Apply glassmorphism effect with semi-transparent backgrounds, backdrop blur, subtle borders, layered depth, and modern aesthetic. Use rgba colors with blur effects.',
+          };
+
+          const styleInstruction = stylePreset ? presetInstructions[stylePreset] || '' : '';
+          const themeInstruction = customTheme ? `Additional style direction: ${customTheme}` : '';
+
+          const instructions = [
+            'You are an expert front-end developer and UI/UX designer. Your task is to transform plain or minimally-styled HTML/text into beautifully styled, modern web content.',
+            '',
+            '## Core Objectives:',
+            '1. **Analyze Input**: Determine if input is HTML, HTML with JS, or plain text',
+            '2. **Apply Modern Styling**: Transform into a visually appealing, modern design',
+            '3. **Maintain Functionality**: Preserve any existing JavaScript functionality',
+            '4. **Ensure Responsiveness**: Make design work on all screen sizes',
+            '',
+            '## Style Requirements:',
+            styleInstruction ? `### Primary Style: ${styleInstruction}` : '',
+            themeInstruction ? `### Custom Theme: ${themeInstruction}` : '',
+            '',
+            '## Transformation Guidelines:',
+            '',
+            '### For HTML Input:',
+            '- Preserve semantic HTML structure',
+            '- Add modern CSS styling (inline styles or <style> tag)',
+            '- Enhance typography with proper fonts, sizes, weights',
+            '- Add proper spacing, padding, margins',
+            '- Include hover effects and transitions where appropriate',
+            '- Make layout responsive using flexbox/grid',
+            '- Add subtle shadows, borders, border-radius for depth',
+            '- Use a cohesive color scheme',
+            '',
+            '### For Plain Text Input:',
+            outputFormat === 'markdown' 
+              ? '- Convert to well-formatted Markdown with proper headings, lists, emphasis'
+              : '- Wrap in semantic HTML tags (h1, h2, p, ul, etc.)',
+            outputFormat === 'markdown'
+              ? '- Use Markdown formatting: # headings, **bold**, *italic*, lists, etc.'
+              : '- Apply inline styles or add <style> section',
+            '- Structure content logically with clear hierarchy',
+            '',
+            '### Design Principles:',
+            '- **Typography**: Choose readable fonts, proper line-height, letter-spacing',
+            '- **Color**: Use harmonious color palette with good contrast',
+            '- **Spacing**: Apply consistent spacing system (multiples of 4 or 8)',
+            '- **Hierarchy**: Clear visual hierarchy through size, weight, color',
+            '- **Interactivity**: Add hover effects, focus states, transitions',
+            '- **Accessibility**: Ensure good contrast ratios and readable text sizes',
+            '',
+            `## Output Format (${outputFormat.toUpperCase()}):`,
+            outputFormat === 'html' 
+              ? 'Output complete HTML with inline styles or <style> tag. Include <!DOCTYPE html> if appropriate. Ensure it\'s ready to render.'
+              : 'Output well-formatted Markdown. Use proper Markdown syntax for all elements.',
+            '',
+            '## JSON Response Format:',
+            '{',
+            '  "styledContent": "The complete styled HTML or Markdown content",',
+            '  "originalFormat": "html|text",',
+            '  "outputFormat": "html|markdown",',
+            '  "appliedPreset": "' + (stylePreset || 'none') + '",',
+            '  "customTheme": "' + (customTheme || '') + '"',
+            '}',
+            '',
+            '## Important Notes:',
+            '- Output MUST be valid JSON only, no markdown fences',
+            '- styledContent should be complete and ready to use',
+            '- Preserve any existing JavaScript functionality',
+            '- Make design modern, professional, and visually appealing',
+            '- Ensure cross-browser compatibility',
+            '',
+            `## Input Content to Style:`,
+            '```',
+            content,
+            '```',
+          ].filter(line => line !== '').join('\n');
+
+          const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
+          const aiRes = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': geminiKey!,
+            },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: instructions }] }],
+              generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 8192,
+              },
+            } satisfies Record<string, any>),
+          } as RequestInit<RequestInitCfProperties>);
+
+          if (!aiRes.ok) {
+            const errText = await aiRes.text().catch(() => 'Unknown error');
+            return new Response(JSON.stringify({ error: 'Gemini API error', detail: errText }), {
+              status: aiRes.status,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const aiData = await aiRes.json<any>();
+          const rawText = aiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          if (!rawText.trim()) {
+            return new Response(JSON.stringify({ error: 'Empty response from AI' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          // Parse JSON response
+          let parsed: any;
+          try {
+            const cleaned = rawText.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
+            parsed = JSON.parse(cleaned);
+          } catch (parseErr) {
+            return new Response(JSON.stringify({ error: 'Failed to parse AI response', detail: String(parseErr) }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          return new Response(JSON.stringify(parsed), {
+            headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+          });
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
       if (url.pathname === '/api/dialect-tts') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
         try {

@@ -890,6 +890,83 @@ const ICON_DEFS = {
     ),
     defaultClassName: 'w-4 h-4 text-gray-400',
     attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  reStyler: { //tabler - palette
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828c-.844 .75 -1.989 1.172 -3.182 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25" />
+        <path d="M8.5 10.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+        <path d="M12.5 7.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+        <path d="M16.5 10.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  apps: { //tabler
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+        <path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+        <path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+        <path d="M14 7l0 .01" />
+        <path d="M17 7l0 .01" />
+        <path d="M20 7l0 .01" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  check: { //tabler
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M5 12l5 5l10 -10" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  copy: { //tabler
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z" />
+        <path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  search: { //tabler
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+        <path d="M21 21l-6 -6" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  history: { //tabler
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M12 8l0 4l2 2" />
+        <path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   }
 } satisfies Record<string, IconDefinition>;
 
