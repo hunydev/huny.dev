@@ -52,6 +52,7 @@ const App: React.FC = () => {
   const restoringRef = useRef<boolean>(false);
   const shortcutHandledRef = useRef<boolean>(false);
   const initialShortcutIdsRef = useRef<string[]>([]);
+  const initialHashViewRef = useRef<ViewId | null>(null);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const swRegistrationRef = useRef<ServiceWorkerRegistration | null>(null);
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -411,6 +412,7 @@ const App: React.FC = () => {
     if (hash) {
       const viewId = hashToViewId(hash);
       if (viewId) {
+        initialHashViewRef.current = viewId; // 초기 hash view 저장
         setActiveView(viewId);
       }
     }
@@ -419,6 +421,18 @@ const App: React.FC = () => {
   // Keep left sidebar selection in sync with the active tab
   useEffect(() => {
     if (!activeTabId) return;
+    
+    // 초기 hash view가 설정되어 있고 아직 탭 복원 전이라면 view 변경 무시
+    if (initialHashViewRef.current && !restoredRef.current) {
+      return;
+    }
+    
+    // 탭 복원이 완료되었고 초기 hash view가 있다면, 한 번만 클리어하고 이번에는 view 변경하지 않음
+    if (initialHashViewRef.current && restoredRef.current) {
+      initialHashViewRef.current = null;
+      return;
+    }
+    
     const v = viewForTabId(activeTabId);
     setActiveView(v);
   }, [activeTabId]);
