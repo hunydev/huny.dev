@@ -79,6 +79,24 @@ huny.dev/
 
 ## 새로운 Playground 추가하기
 
+### ⚠️ 주의사항 - 자주 놓치는 단계들
+
+새로운 Playground를 추가할 때 다음 단계들을 **반드시** 수행해야 합니다:
+
+1. **Sidebar 메뉴 등록** (`components/Sidebar.tsx`)
+   - `playgroundItems` 배열에 추가하지 않으면 메뉴에 아이템이 표시되지 않습니다
+
+2. **Navigation 시스템 등록** (`utils/navigation.ts`)
+   - `PLAYGROUND_BASE_IDS`에 추가하지 않으면 아이템 선택 시 Explorer 메뉴로 강제 이동됩니다
+
+3. **ID 일관성 유지**
+   - `constants/pages.tsx`의 PAGES 키
+   - `components/Sidebar.tsx`의 playgroundItems id
+   - `utils/navigation.ts`의 PLAYGROUND_BASE_IDS
+   - 모두 동일한 ID를 사용해야 합니다
+
+---
+
 ### 단계별 프로세스
 
 #### Step 1: 아이콘 추가 (선택)
@@ -398,7 +416,57 @@ if (url.pathname === '/api/image-process' && request.method === 'POST') {
 
 ---
 
-#### Step 5: 가이드 이미지 추가 (선택)
+#### Step 5: Sidebar 메뉴에 추가 ⚠️ **필수**
+Playground 아이템을 좌측 사이드바 메뉴에 추가합니다. **이 단계를 빠뜨리면 메뉴에 아이템이 표시되지 않습니다.**
+
+**파일**: `components/Sidebar.tsx`
+
+```tsx
+// PlaygroundView 컴포넌트 내의 playgroundItems 배열에 추가
+const playgroundItems = [
+  { id: 'sticker-generator', icon: 'stickerGenerator', label: 'Sticker Generator' },
+  { id: 'comic-restyler', icon: 'comicRestyler', label: 'Comic Restyler' },
+  // ... 기존 아이템들
+  
+  { id: 'my-new-playground', icon: 'myNewPlayground', label: 'My New Playground' }, // 추가
+  
+  // ... 나머지 아이템들
+];
+```
+
+**주의사항**:
+- `id`는 `constants/pages.tsx`의 PAGES 키와 정확히 일치해야 합니다
+- `icon`은 `constants/icons.tsx`에 정의된 아이콘 이름이어야 합니다
+- `label`은 사이드바에 표시될 이름입니다
+
+---
+
+#### Step 6: Navigation 시스템에 등록 ⚠️ **필수**
+View 자동 전환을 위해 Navigation 시스템에 등록합니다. **이 단계를 빠뜨리면 아이템 선택 시 Explorer 메뉴로 강제 이동됩니다.**
+
+**파일**: `utils/navigation.ts`
+
+```typescript
+const PLAYGROUND_BASE_IDS = new Set<string>([
+  'split-speaker',
+  'bird-generator',
+  'multi-voice-reader',
+  // ... 기존 아이템들
+  
+  'my-new-playground', // 추가
+  
+  // ... 나머지 아이템들
+]);
+```
+
+**주의사항**:
+- `PLAYGROUND_BASE_IDS`에 추가된 ID는 `constants/pages.tsx`의 PAGES 키와 정확히 일치해야 합니다
+- 이 Set은 탭 ID로부터 어떤 View(Explorer, Playground 등)를 활성화할지 결정합니다
+- 등록하지 않으면 아이템 선택 시 Playground view가 아닌 Explorer view로 전환됩니다
+
+---
+
+#### Step 7: 가이드 이미지 추가 (선택)
 사용 가이드 스크린샷을 추가합니다.
 
 **위치**: `public/extra/playground/capture/my-new-playground.png`
@@ -411,7 +479,7 @@ if (url.pathname === '/api/image-process' && request.method === 'POST') {
 
 ---
 
-#### Step 6: Activity Bar에 추가 (선택)
+#### Step 8: Activity Bar에 추가 (선택)
 좌측 Activity Bar에 바로가기를 추가하려면:
 
 **파일**: `constants/activityBar.tsx`
@@ -939,6 +1007,8 @@ if (!env.GEMINI_API_KEY) {
 - [ ] 페이지 컴포넌트 생성 (`components/pages/MyPlaygroundPage.tsx`)
 - [ ] `constants/pages.tsx`에 페이지 등록
 - [ ] `server/worker.ts`에 API 엔드포인트 추가
+- [ ] ⚠️ **`components/Sidebar.tsx`의 `playgroundItems` 배열에 추가** (누락 시 메뉴에 표시 안 됨)
+- [ ] ⚠️ **`utils/navigation.ts`의 `PLAYGROUND_BASE_IDS`에 추가** (누락 시 Explorer로 강제 이동)
 - [ ] `usePlaygroundGuide` 훅 사용하여 가이드 모달 추가 (isActiveTab 전달)
 - [ ] `useApiCall` 훅 사용하여 API 호출 관리
 - [ ] `ApiProviderBadge` 컴포넌트로 API 제공자 표시
@@ -953,11 +1023,14 @@ if (!env.GEMINI_API_KEY) {
 
 ### 테스트
 - [ ] 페이지 로드 확인
+- [ ] ⚠️ **Sidebar에 아이템 표시 확인** (메뉴에서 찾을 수 있는지)
+- [ ] ⚠️ **아이템 선택 시 Playground view 유지 확인** (Explorer로 가지 않는지)
 - [ ] API 호출 성공 케이스 테스트
 - [ ] 에러 케이스 테스트
 - [ ] 탭 전환 중 API 작업 상태 유지 확인
 - [ ] 가이드 모달 동작 확인
 - [ ] 반응형 디자인 확인 (모바일/데스크톱)
+- [ ] URL hash로 직접 접근 확인 (`/#playground`)
 
 ---
 
