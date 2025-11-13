@@ -194,3 +194,45 @@ input::placeholder, textarea::placeholder { color: currentColor; opacity: 0.7; }
   font-size: 0.9em;
   font-family: ui-monospace, monospace;
 }
+
+/* Mascot hero section for concept image */
+.mascot-hero {
+  position: relative;
+  height: 42vh;
+  min-height: 420px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: #0b0d12;
+  border-radius: 16px;
+}
+
+.mascot-hero::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background:
+    radial-gradient(60% 40% at 50% 45%, rgba(255, 80, 80, 0.22), rgba(255, 80, 80, 0) 60%),
+    radial-gradient(80% 60% at 50% 60%, rgba(120, 170, 255, 0.18), rgba(120, 170, 255, 0) 70%),
+    radial-gradient(90% 70% at 50% 80%, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 75%);
+  filter: blur(30px) saturate(105%);
+  transform: translateZ(0);
+}
+
+.mascot-hero__glow {
+  position: absolute;
+  width: 56vmin;
+  height: 56vmin;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 140, 140, 0.35), rgba(255, 140, 140, 0) 60%);
+  filter: blur(40px);
+  z-index: 0;
+}
+
+.mascot-hero__image {
+  position: relative;
+  z-index: 1;
+  width: min(34vmin, 420px);
+  height: auto;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.35));
+}

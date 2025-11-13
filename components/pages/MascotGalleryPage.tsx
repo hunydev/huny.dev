@@ -59,9 +59,13 @@ const MascotGalleryPage: React.FC<PageProps> = () => {
       <div className="mt-6 max-w-7xl mx-auto grid gap-6">
         {/* Concept */}
         <SectionCard title="Concept" subtitle="최초 콘셉트 이미지">
-          <div className="flex justify-center py-4">
-            <ImgTile src={conceptImg} label="concept.png" h={400} />
-          </div>
+          <figure className="flex flex-col items-center gap-3 py-4">
+            <section className="mascot-hero">
+              <div className="mascot-hero__glow" aria-hidden />
+              <img className="mascot-hero__image" src={conceptImg} alt="mascot concept" />
+            </section>
+            <figcaption className="text-xs text-gray-400">concept.png</figcaption>
+          </figure>
         </SectionCard>
 
         {/* Base images */}
