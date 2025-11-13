@@ -111,7 +111,7 @@ const WelcomePage: React.FC<PageProps> = ({ onOpenFile, setActiveView, onActivit
         },
         {
             title: 'AI Tools',
-            items: ['ChatGPT', 'Copilot', 'Gemini', 'Windsurf'],
+            items: ['ChatGPT', 'Copilot', 'Gemini', 'Windsurf', 'Claude', 'Cursor'],
             tile: 'bg-fuchsia-500/10 border-fuchsia-500/20',
             heading: 'text-fuchsia-300',
             chip: 'bg-fuchsia-500/10 border-fuchsia-500/20',

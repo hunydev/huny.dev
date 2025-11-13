@@ -120,7 +120,7 @@ const AboutPage: React.FC<PageProps> = () => {
         <JsonArray field="ci_cd" items={["GitHub Actions", "Jenkins"]} level={2} />
         <JsonArray field="infra" items={["AWS", "Cloudflare", "Docker"]} level={2} />
         <JsonArray field="platform" items={["Cloudflare Worker", "Netlify", "PikaPods", "YouWare", "Google AI Studio"]} level={2} />
-        <JsonArray field="ai_tools" items={["ChatGPT", "Copilot", "Gemini", "Windsurf"]} level={2} />
+        <JsonArray field="ai_tools" items={["ChatGPT", "Copilot", "Gemini", "Windsurf", "Claude", "Cursor"]} level={2} />
         <JsonArray field="docs" items={["MS365", "Notion", "Confluence", "MkDocs"]} level={2} />
         <JsonArray field="project" items={["Teams", "JIRA"]} level={2} />
         <JsonArray field="work" items={["Windows 11", "WSL2 (Ubuntu)", "Podman Desktop", "Hyper-V", "Windows Sandbox", "GitHub Codespaces"]} level={2} />
