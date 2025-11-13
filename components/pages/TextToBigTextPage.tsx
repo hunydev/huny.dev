@@ -75,6 +75,7 @@ const TextToBigTextPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
         return;
       }
       
+      // 검은색 픽셀 총 개수 계산
       const blackPixelCount = pixelMap.filter(p => p.isBlack).length;
       if (blackPixelCount === 0) {
         setError(`Big Text "${bigText}"에 검은색 픽셀이 없습니다. 다른 텍스트를 시도해보세요.`);
@@ -82,9 +83,68 @@ const TextToBigTextPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
         return;
       }
       
-      // 소스 텍스트를 검은색 픽셀에 매핑
-      let result = '';
-      let sourceIndex = 0;
+      // 필요한 패딩 개수 계산
+      const paddingNeeded = blackPixelCount - normalizedSource.length;
+      
+      // 소스 텍스트를 원본 줄바꿈 기준으로 분리
+      let fullText = normalizedSource;
+      
+      if (paddingNeeded > 0) {
+        // 패딩 텍스트가 없으면 기본 문자 사용
+        const paddingChars = normalizedPadding || '.';
+        // 원본 소스 텍스트에서 줄바꿈 위치 찾기 (normalizedSource의 인덱스 기준)
+        const lineBreakPositions: number[] = [];
+        let normalizedIdx = 0;
+        
+        for (let i = 0; i < sourceText.length; i++) {
+          if (sourceText[i] === '\n' || sourceText[i] === '\r') {
+            // \r\n 처리
+            if (sourceText[i] === '\r' && sourceText[i + 1] === '\n') {
+              i++;
+            }
+            lineBreakPositions.push(normalizedIdx);
+          } else {
+            normalizedIdx++;
+          }
+        }
+        
+        // normalizedSource를 줄바꿈 위치 기준으로 분리
+        const sourceLines: string[] = [];
+        let lastPos = 0;
+        
+        for (const pos of lineBreakPositions) {
+          sourceLines.push(normalizedSource.substring(lastPos, pos));
+          lastPos = pos;
+        }
+        // 마지막 줄 추가
+        sourceLines.push(normalizedSource.substring(lastPos));
+        
+        // 패딩을 분산할 구간 수 (시작 + 줄바꿈들 + 끝)
+        const sections = lineBreakPositions.length + 2;
+        
+        // 각 구간에 분배할 패딩 개수
+        const basePadding = Math.floor(paddingNeeded / sections);
+        const extraPadding = paddingNeeded % sections;
+        
+        // 패딩 + 소스 각 줄을 합쳐서 최종 텍스트 생성
+        fullText = '';
+        let paddingCharIndex = 0;
+        
+        // 각 구간(시작, 줄바꿈들, 끝)에 패딩 분산
+        for (let i = 0; i < sections; i++) {
+          // 이 구간에 할당된 패딩 추가
+          const paddingCount = basePadding + (i < extraPadding ? 1 : 0);
+          for (let j = 0; j < paddingCount; j++) {
+            fullText += paddingChars[paddingCharIndex % paddingChars.length];
+            paddingCharIndex++;
+          }
+          
+          // 소스 줄 추가 (마지막 구간 제외)
+          if (i < sourceLines.length) {
+            fullText += sourceLines[i];
+          }
+        }
+      }
       
       // 픽셀 맵을 행별로 정렬
       pixelMap.sort((a, b) => {
@@ -93,7 +153,10 @@ const TextToBigTextPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
       });
       
       // 소스 텍스트를 순차적으로 삽입
+      let result = '';
+      let textIndex = 0;
       let currentY = -1;
+      
       for (let i = 0; i < pixelMap.length; i++) {
         const pixel = pixelMap[i];
         
@@ -105,21 +168,13 @@ const TextToBigTextPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
           currentY = pixel.y;
         }
         
-        // 검은색 픽셀에는 소스 텍스트/패딩 텍스트 삽입
+        // 검은색 픽셀에는 텍스트 삽입, 흰색은 공백
         if (pixel.isBlack) {
-          // 소스 텍스트가 남아있으면 삽입
-          if (sourceIndex < normalizedSource.length) {
-            result += normalizedSource[sourceIndex];
-            sourceIndex++;
+          if (textIndex < fullText.length) {
+            result += fullText[textIndex];
+            textIndex++;
           } else {
-            // 패딩 텍스트로 채우기
-            if (normalizedPadding) {
-              const paddingIndex = (sourceIndex - normalizedSource.length) % normalizedPadding.length;
-              result += normalizedPadding[paddingIndex];
-              sourceIndex++;
-            } else {
-              result += '.';
-            }
+            result += '.'; // fallback
           }
         } else {
           // 흰색 영역은 공백으로
@@ -256,10 +311,18 @@ const TextToBigTextPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
     ctx.fillStyle = 'black';
     ctx.font = `${monoFontSize}px "Courier New", Consolas, monospace`;
     ctx.textBaseline = 'top';
+    ctx.textAlign = 'center';
     
-    // 각 줄 렌더링
-    lines.forEach((line, i) => {
-      ctx.fillText(line, 10, i * lineHeight + 10);
+    // 각 줄의 각 문자를 고정 너비로 렌더링
+    lines.forEach((line, lineIndex) => {
+      const y = lineIndex * lineHeight + 10;
+      
+      for (let charIndex = 0; charIndex < line.length; charIndex++) {
+        const char = line[charIndex];
+        // 각 문자를 고정 너비 위치에 중앙 정렬로 그리기
+        const x = 10 + charIndex * charWidth + charWidth / 2;
+        ctx.fillText(char, x, y);
+      }
     });
   };
 
@@ -474,17 +537,31 @@ const TextToBigTextPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
           
           {/* 텍스트 결과 */}
           <div className="mt-3 p-3 rounded bg-black/40 border border-white/10 overflow-x-auto">
-            <pre 
-              className="text-[6px] md:text-[8px] leading-[1] whitespace-pre" 
+            <div 
+              className="text-[6px] md:text-[8px] leading-[1]" 
               style={{ 
-                fontFamily: '"Courier New", Consolas, "맑은 고딕", monospace',
-                letterSpacing: '0',
-                wordSpacing: '0',
-                fontFeatureSettings: '"halt"'
+                fontFamily: '"Courier New", Consolas, monospace',
+                display: 'inline-block'
               }}
             >
-{resultText}
-            </pre>
+              {resultText.split('\n').map((line, lineIndex) => (
+                <div key={lineIndex} style={{ whiteSpace: 'nowrap', height: '1em' }}>
+                  {line.split('').map((char, charIndex) => (
+                    <span 
+                      key={charIndex}
+                      style={{
+                        display: 'inline-block',
+                        width: '0.6em',
+                        textAlign: 'center',
+                        fontFamily: '"Courier New", Consolas, monospace'
+                      }}
+                    >
+                      {char}
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* 캔버스 결과 (이미지 다운로드용) */}
