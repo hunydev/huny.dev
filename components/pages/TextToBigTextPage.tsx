@@ -10,6 +10,8 @@ const TextToBigTextPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [sourceText, setSourceText] = React.useState<string>('');
   const [paddingText, setPaddingText] = React.useState<string>('');
   const [bigText, setBigText] = React.useState<string>('');
+  const [backgroundChar, setBackgroundChar] = React.useState<string>(' ');
+  const [noSourceText, setNoSourceText] = React.useState<boolean>(false);
   const [fontFamily, setFontFamily] = React.useState<string>('Arial');
   const [initialFontSize, setInitialFontSize] = React.useState<number>(100);
   const [resultText, setResultText] = React.useState<string>('');
@@ -30,7 +32,8 @@ const TextToBigTextPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
 
   // Canvas에 Big Text 렌더링 및 픽셀 데이터 추출
   const generateBigText = async () => {
-    if (!sourceText.trim()) {
+    // 소스 텍스트 없음이 체크되지 않았을 때만 소스 텍스트 검증
+    if (!noSourceText && !sourceText.trim()) {
       setError('소스 텍스트를 입력해주세요.');
       return;
     }
@@ -44,7 +47,9 @@ const TextToBigTextPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
     setProcessing(true);
     
     try {
-      const normalizedSource = normalizeText(sourceText);
+      // 소스 텍스트 없음 옵션이 체크되면 빈 문자열 사용
+      const actualSourceText = noSourceText ? '' : sourceText;
+      const normalizedSource = normalizeText(actualSourceText);
       const normalizedPadding = normalizeText(paddingText);
       
       // 폰트 크기를 조정하면서 충분한 검은 픽셀을 확보
@@ -87,16 +92,16 @@ const TextToBigTextPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
       const sourceLines: string[] = [];
       let currentLine = '';
       
-      for (let i = 0; i < sourceText.length; i++) {
-        if (sourceText[i] === '\n' || sourceText[i] === '\r') {
+      for (let i = 0; i < actualSourceText.length; i++) {
+        if (actualSourceText[i] === '\n' || actualSourceText[i] === '\r') {
           // \r\n 처리
-          if (sourceText[i] === '\r' && sourceText[i + 1] === '\n') {
+          if (actualSourceText[i] === '\r' && actualSourceText[i + 1] === '\n') {
             i++;
           }
           sourceLines.push(currentLine);
           currentLine = '';
         } else {
-          currentLine += sourceText[i];
+          currentLine += actualSourceText[i];
         }
       }
       // 마지막 줄 추가
@@ -160,6 +165,9 @@ const TextToBigTextPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
         return a.x - b.x;
       });
       
+      // 배경 문자 (흰색 영역에 사용할 문자)
+      const bgChar = backgroundChar || ' ';
+      
       // 소스 텍스트를 순차적으로 삽입
       let result = '';
       let textIndex = 0;
@@ -176,7 +184,7 @@ const TextToBigTextPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
           currentY = pixel.y;
         }
         
-        // 검은색 픽셀에는 텍스트 삽입, 흰색은 공백
+        // 검은색 픽셀에는 텍스트 삽입, 흰색은 배경 문자
         if (pixel.isBlack) {
           if (textIndex < fullText.length) {
             result += fullText[textIndex];
@@ -185,8 +193,8 @@ const TextToBigTextPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
             result += '.'; // fallback
           }
         } else {
-          // 흰색 영역은 공백으로
-          result += ' ';
+          // 흰색 영역은 배경 문자로
+          result += bgChar;
         }
       }
       
@@ -366,6 +374,8 @@ const TextToBigTextPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
     setSourceText('');
     setPaddingText('');
     setBigText('');
+    setBackgroundChar(' ');
+    setNoSourceText(false);
     setInitialFontSize(100);
     setResultText('');
     setError(null);
@@ -414,29 +424,57 @@ const TextToBigTextPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
       {/* 입력 섹션 */}
       <section className="rounded-md border border-white/10 bg-white/[0.03] p-3 md:p-4 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-white mb-2">
-            소스 텍스트 (Big Text를 채울 텍스트)
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium text-white">
+              소스 텍스트 (Big Text를 채울 텍스트)
+            </label>
+            <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={noSourceText}
+                onChange={(e) => setNoSourceText(e.target.checked)}
+                className="rounded border-white/20 bg-black/40 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
+              />
+              <span>소스 텍스트 없음</span>
+            </label>
+          </div>
           <textarea
             rows={4}
             value={sourceText}
             onChange={(e) => setSourceText(e.target.value)}
             placeholder="Big Text 형태로 표현할 텍스트를 입력하세요..."
-            className="w-full px-3 py-2 rounded bg-black/40 border border-white/10 text-sm resize-y"
+            disabled={noSourceText}
+            className="w-full px-3 py-2 rounded bg-black/40 border border-white/10 text-sm resize-y disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-white mb-2">
-            패딩 텍스트 (부족한 영역을 채울 텍스트, 선택사항)
-          </label>
-          <input
-            type="text"
-            value={paddingText}
-            onChange={(e) => setPaddingText(e.target.value)}
-            placeholder="예: . , - 등"
-            className="w-full px-3 py-2 rounded bg-black/40 border border-white/10 text-sm"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">
+              패딩 텍스트 (부족한 영역을 채울 텍스트, 선택사항)
+            </label>
+            <input
+              type="text"
+              value={paddingText}
+              onChange={(e) => setPaddingText(e.target.value)}
+              placeholder="예: . , - 등"
+              className="w-full px-3 py-2 rounded bg-black/40 border border-white/10 text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">
+              배경 문자 (Big Text 외부 영역에 사용할 문자)
+            </label>
+            <input
+              type="text"
+              value={backgroundChar}
+              onChange={(e) => setBackgroundChar(e.target.value)}
+              placeholder="공백 또는 원하는 문자 (예: ․, ·, ∘)"
+              maxLength={1}
+              className="w-full px-3 py-2 rounded bg-black/40 border border-white/10 text-sm"
+            />
+          </div>
         </div>
 
         <div>
@@ -492,7 +530,7 @@ const TextToBigTextPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
         <div className="flex items-center gap-2 pt-2">
           <LoadingButton
             loading={processing}
-            disabled={!sourceText.trim() || !bigText.trim()}
+            disabled={(!noSourceText && !sourceText.trim()) || !bigText.trim()}
             onClick={generateBigText}
             loadingText="생성 중..."
             idleText="생성"
