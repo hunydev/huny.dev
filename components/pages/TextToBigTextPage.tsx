@@ -83,54 +83,54 @@ const TextToBigTextPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
         return;
       }
       
-      // 필요한 패딩 개수 계산
-      const paddingNeeded = blackPixelCount - normalizedSource.length;
+      // 원본 소스 텍스트를 줄 단위로 분리 (줄바꿈 보존)
+      const sourceLines: string[] = [];
+      let currentLine = '';
       
-      // 소스 텍스트를 원본 줄바꿈 기준으로 분리
-      let fullText = normalizedSource;
+      for (let i = 0; i < sourceText.length; i++) {
+        if (sourceText[i] === '\n' || sourceText[i] === '\r') {
+          // \r\n 처리
+          if (sourceText[i] === '\r' && sourceText[i + 1] === '\n') {
+            i++;
+          }
+          sourceLines.push(currentLine);
+          currentLine = '';
+        } else {
+          currentLine += sourceText[i];
+        }
+      }
+      // 마지막 줄 추가
+      if (currentLine || sourceLines.length === 0) {
+        sourceLines.push(currentLine);
+      }
+      
+      // 필요한 총 문자 수
+      const totalNeeded = blackPixelCount;
+      
+      // 소스 텍스트 총 길이 (줄바꿈 제외)
+      const sourceTotalLength = sourceLines.reduce((sum, line) => sum + line.length, 0);
+      
+      // 필요한 패딩 개수
+      const paddingNeeded = totalNeeded - sourceTotalLength;
+      
+      // 최종 텍스트 생성
+      let fullText = '';
       
       if (paddingNeeded > 0) {
         // 패딩 텍스트가 없으면 기본 문자 사용
         const paddingChars = normalizedPadding || '.';
-        // 원본 소스 텍스트에서 줄바꿈 위치 찾기 (normalizedSource의 인덱스 기준)
-        const lineBreakPositions: number[] = [];
-        let normalizedIdx = 0;
         
-        for (let i = 0; i < sourceText.length; i++) {
-          if (sourceText[i] === '\n' || sourceText[i] === '\r') {
-            // \r\n 처리
-            if (sourceText[i] === '\r' && sourceText[i + 1] === '\n') {
-              i++;
-            }
-            lineBreakPositions.push(normalizedIdx);
-          } else {
-            normalizedIdx++;
-          }
-        }
-        
-        // normalizedSource를 줄바꿈 위치 기준으로 분리
-        const sourceLines: string[] = [];
-        let lastPos = 0;
-        
-        for (const pos of lineBreakPositions) {
-          sourceLines.push(normalizedSource.substring(lastPos, pos));
-          lastPos = pos;
-        }
-        // 마지막 줄 추가
-        sourceLines.push(normalizedSource.substring(lastPos));
-        
-        // 패딩을 분산할 구간 수 (시작 + 줄바꿈들 + 끝)
-        const sections = lineBreakPositions.length + 2;
+        // 패딩을 분산할 구간 수 (시작 + 각 줄 사이 + 끝)
+        // 줄이 N개면 구간은 N+1개 (시작, 줄1, 사이1, 줄2, 사이2, ..., 줄N, 끝)
+        const sections = sourceLines.length + 1;
         
         // 각 구간에 분배할 패딩 개수
         const basePadding = Math.floor(paddingNeeded / sections);
         const extraPadding = paddingNeeded % sections;
         
-        // 패딩 + 소스 각 줄을 합쳐서 최종 텍스트 생성
-        fullText = '';
         let paddingCharIndex = 0;
         
-        // 각 구간(시작, 줄바꿈들, 끝)에 패딩 분산
+        // 각 구간에 패딩 삽입
         for (let i = 0; i < sections; i++) {
           // 이 구간에 할당된 패딩 추가
           const paddingCount = basePadding + (i < extraPadding ? 1 : 0);
@@ -144,6 +144,14 @@ const TextToBigTextPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
             fullText += sourceLines[i];
           }
         }
+      } else {
+        // 패딩이 필요 없으면 소스만 사용
+        fullText = sourceLines.join('');
+      }
+      
+      // 필요한 길이만큼만 잘라내기
+      if (fullText.length > totalNeeded) {
+        fullText = fullText.substring(0, totalNeeded);
       }
       
       // 픽셀 맵을 행별로 정렬
