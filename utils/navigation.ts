@@ -3,6 +3,7 @@ import { ViewId } from '../types';
 const PLAYGROUND_BASE_IDS = new Set<string>([
   'split-speaker',
   'bird-generator',
+  'geo-vision',
   'multi-voice-reader',
   'todo-generator',
   'ai-tier-list',

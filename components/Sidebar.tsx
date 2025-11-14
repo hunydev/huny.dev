@@ -198,6 +198,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void; apiHasGem
     { id: 'dialect-tts', icon: 'dialectTts', label: 'Dialect TTS' },
     { id: 'split-speaker', icon: 'splitSpeaker', label: 'Split Speaker' },
     { id: 'bird-generator', icon: 'bird', label: 'Bird Generator' },
+    { id: 'geo-vision', icon: 'geoVision', label: 'Geo Vision' },
     { id: 'multi-voice-reader', icon: 'multiVoiceReader', label: 'MultiVoice Reader' },
     { id: 'image-to-speech', icon: 'imageToSpeech', label: 'Image to Speech' },
     { id: 'non-native-korean-tts', icon: 'nonNativeKoreanTts', label: 'Non-Native Korean TTS' },
