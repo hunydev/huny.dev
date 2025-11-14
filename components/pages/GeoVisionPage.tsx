@@ -2,21 +2,11 @@ import React from 'react';
 import type { PageProps } from '../../types';
 import { Icon } from '../../constants';
 import { ErrorMessage, LoadingButton, FileDropZone, ApiProviderBadge, PlaygroundGuideModal } from '../ui';
-import { MapContainer, TileLayer, Marker } from 'react-leaflet';
-import * as L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useFileUpload } from '../../hooks/useFileUpload';
 import { usePlaygroundGuide } from '../../hooks/usePlaygroundGuide';
 
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
+const GeoVisionMap = React.lazy(() => import('./GeoVisionMap'));
 
 export type GeoVisionResult = {
   latitude: number;
@@ -176,22 +166,13 @@ const GeoVisionPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] items-start">
               <div>
                 {hasResult ? (
-                  <div className="rounded border border-white/10 overflow-hidden bg-black/60">
-                    <MapContainer
-                      center={[result!.latitude, result!.longitude]}
+                  <React.Suspense fallback={<div className="rounded border border-white/10 bg-black/60 w-full h-80 md:h-96 flex items-center justify-center text-gray-400 text-sm">지도 로딩 중...</div>}>
+                    <GeoVisionMap
+                      latitude={result!.latitude}
+                      longitude={result!.longitude}
                       zoom={result!.zoom}
-                      minZoom={1}
-                      maxZoom={18}
-                      scrollWheelZoom
-                      className="w-full h-80 md:h-96"
-                    >
-                      <TileLayer
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        attribution="&copy; OpenStreetMap contributors"
-                      />
-                      <Marker position={[result!.latitude, result!.longitude]} />
-                    </MapContainer>
-                  </div>
+                    />
+                  </React.Suspense>
                 ) : (
                   <div className="text-sm text-gray-500">지도를 표시할 수 없습니다. 다시 시도해 주세요.</div>
                 )}

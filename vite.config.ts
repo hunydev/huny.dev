@@ -38,6 +38,7 @@ export default defineConfig(({ mode, isSsrBuild }) => {
               manualChunks(id) {
                 if (id.includes('node_modules')) {
                   if (id.includes('highlight.js')) return 'hljs';
+                  if (id.includes('leaflet')) return 'leaflet';
                   if (id.includes('react') || id.includes('scheduler')) return 'react-vendor';
                   return 'vendor';
                 }
