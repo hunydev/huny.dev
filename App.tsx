@@ -175,17 +175,27 @@ const App: React.FC = () => {
       window.location.reload();
       return;
     }
-    if (registration.waiting) {
-      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-      registration.waiting.addEventListener('statechange', (event) => {
+    const waitingWorker = registration.waiting;
+    if (waitingWorker) {
+      const onStateChange = (event: Event) => {
         const target = event.target as ServiceWorker;
         if (target.state === 'activated') {
+          waitingWorker.removeEventListener('statechange', onStateChange);
           window.location.reload();
         }
-      });
-    } else {
-      window.location.reload();
+      };
+
+      if (waitingWorker.state === 'activated') {
+        window.location.reload();
+        return;
+      }
+
+      waitingWorker.addEventListener('statechange', onStateChange, { once: false });
+      waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+      return;
     }
+
+    window.location.reload();
   }, []);
 
   const handleOpenFile = useCallback((fileId: string) => {
