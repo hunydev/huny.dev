@@ -2,9 +2,21 @@ import React from 'react';
 import type { PageProps } from '../../types';
 import { Icon } from '../../constants';
 import { ErrorMessage, LoadingButton, FileDropZone, ApiProviderBadge, PlaygroundGuideModal } from '../ui';
+import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import * as L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { useApiCall } from '../../hooks/useApiCall';
 import { useFileUpload } from '../../hooks/useFileUpload';
 import { usePlaygroundGuide } from '../../hooks/usePlaygroundGuide';
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 export type GeoVisionResult = {
   latitude: number;
@@ -63,13 +75,6 @@ const GeoVisionPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   };
 
   const hasResult = !!result;
-  const mapUrl = hasResult
-    ? `https://www.openstreetmap.org/?mlat=${encodeURIComponent(String(result!.latitude))}&mlon=${encodeURIComponent(
-        String(result!.longitude),
-      )}#map=${encodeURIComponent(String(result!.zoom))}/${encodeURIComponent(String(result!.latitude))}/${encodeURIComponent(
-        String(result!.longitude),
-      )}`
-    : '';
 
   return (
     <div className="text-gray-300 max-w-6xl mx-auto font-sans leading-relaxed">
@@ -170,21 +175,28 @@ const GeoVisionPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
           <div className="space-y-4">
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] items-start">
               <div>
-                {mapUrl ? (
+                {hasResult ? (
                   <div className="rounded border border-white/10 overflow-hidden bg-black/60">
-                    <iframe
-                      title="Geo Vision Map"
-                      src={mapUrl}
+                    <MapContainer
+                      center={[result!.latitude, result!.longitude]}
+                      zoom={result!.zoom}
+                      minZoom={1}
+                      maxZoom={18}
+                      scrollWheelZoom
                       className="w-full h-80 md:h-96"
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                    />
+                    >
+                      <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution="&copy; OpenStreetMap contributors"
+                      />
+                      <Marker position={[result!.latitude, result!.longitude]} />
+                    </MapContainer>
                   </div>
                 ) : (
                   <div className="text-sm text-gray-500">지도를 표시할 수 없습니다. 다시 시도해 주세요.</div>
                 )}
                 <p className="mt-2 text-[11px] text-gray-500">
-                  지도 데이터: OpenStreetMap. 확대/축소는 AI가 반환한 zoom 값에 따라 자동으로 설정됩니다.
+                  지도 타일 데이터: OpenStreetMap. 확대/축소는 AI가 반환한 zoom 값에 따라 자동으로 설정됩니다.
                 </p>
               </div>
               <div className="space-y-3">
@@ -230,7 +242,7 @@ const GeoVisionPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
           </div>
         ) : (
           <div className="text-sm text-gray-500">
-            아직 결과가 없습니다. 거리뷰 이미지를 업로드하고 위치 분석 버튼을 눌러보세요.
+            아직 결과가 없습니다. 거리뷰 이미지를 업로드하고 '위치 분석' 버튼을 눌러보세요.
           </div>
         )}
       </section>
