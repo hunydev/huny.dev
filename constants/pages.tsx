@@ -48,6 +48,7 @@ const DeobfuscateHangulPage = React.lazy(() => import('../components/pages/Deobf
 const DialectTTSPage = React.lazy(() => import('../components/pages/DialectTTSPage'));
 const ReStylerPage = React.lazy(() => import('../components/pages/ReStylerPage'));
 const TextToBigTextPage = React.lazy(() => import('../components/pages/TextToBigTextPage'));
+const GeoVisionPage = React.lazy(() => import('../components/pages/GeoVisionPage'));
 
 export type PageComponent =
   | React.ComponentType<PageProps>
@@ -241,6 +242,12 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     title: 'Bird Generator',
     component: BirdGeneratorPage,
     icon: <Icon name="bird" className="mr-2" />,
+    apiRequirement: { provider: 'openai', features: ['image'] },
+  },
+  'geo-vision': {
+    title: 'Geo Vision',
+    component: GeoVisionPage,
+    icon: <Icon name="geoVision" className="mr-2" />,
     apiRequirement: { provider: 'openai', features: ['image'] },
   },
   mascot: {

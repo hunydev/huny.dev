@@ -846,6 +846,179 @@ export default {
         }
       }
 
+      if (url.pathname === '/api/geo-vision') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        try {
+          const openaiKey = await getOpenAIKeyFromRequest(request, env);
+          if (!openaiKey) {
+            return errorJson(500, 'OpenAI Vision 기능은 사용자 API 키가 필요합니다. 설정에서 OPENAI_API_KEY를 등록해 주세요.');
+          }
+
+          const form = await request.formData();
+          const imageFile = form.get('image');
+          if (!(imageFile instanceof File)) {
+            return errorJson(400, '이미지 파일을 전달해 주세요.');
+          }
+
+          const validationError = validateImageFile(imageFile);
+          if (validationError) {
+            return errorJson(400, validationError);
+          }
+
+          const mime = imageFile.type && imageFile.type.startsWith('image/') ? imageFile.type : 'image/png';
+          const bytes = new Uint8Array(await imageFile.arrayBuffer());
+          const b64 = u8ToB64(bytes);
+          const dataUrl = `data:${mime};base64,${b64}`;
+
+          const systemPrompt = [
+            'You are an expert at geolocating street-level photos, similar to top GeoGuessr players.',
+            'Given a single street-view style image, infer the most likely real-world location.',
+            'Return a strict JSON object describing your best guess, zoom level, and reasoning.',
+            'Fields:',
+            '- latitude: number in range [-90, 90].',
+            '- longitude: number in range [-180, 180].',
+            '- zoom: integer between 3 (continent) and 18 (street/landmark).',
+            '- precision: one of "continent", "country", "region", "city", "landmark", "street", "unknown".',
+            '- location_name: short human-readable name (city / region / landmark).',
+            '- reasoning: Korean explanation describing clues you used (roads, signs, language, vegetation, architecture, etc.).',
+            'Zoom / precision rules:',
+            '- If you are confident about a specific landmark or street, use precision "landmark" or "street" and zoom 16–18.',
+            '- If you only know the city, use precision "city" and zoom around 12–14.',
+            '- If you only know the broader region or country, use precision "region" or "country" and zoom around 6–10.',
+            '- If you are very uncertain, pick your best guess for latitude/longitude, set precision "unknown", and zoom 3–5.',
+            'Respond with JSON only. Do not include explanations outside the JSON. If you include JSON in markdown, it must be a single fenced code block.'
+          ].join('\n');
+
+          const userText = '다음 거리뷰 이미지를 보고 실제 세계에서의 위치를 추정하고, 한국어로 이유를 설명해 주세요.';
+
+          const body = {
+            model: 'gpt-5',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              {
+                role: 'user',
+                content: [
+                  { type: 'text', text: userText },
+                  { type: 'image_url', image_url: { url: dataUrl } },
+                ],
+              },
+            ],
+          } as any;
+
+          const aiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${openaiKey}`,
+            },
+            body: JSON.stringify(body),
+          });
+
+          const aiText = await aiRes.text();
+          if (!aiRes.ok) {
+            return errorJson(502, `OpenAI Geo Vision error: ${aiRes.status} ${aiRes.statusText}`, aiText);
+          }
+
+          let aiJson: any = {};
+          try { aiJson = aiText ? JSON.parse(aiText) : {}; } catch { aiJson = {}; }
+
+          let raw = '';
+          try {
+            const choices: any[] = Array.isArray(aiJson?.choices) ? aiJson.choices : [];
+            const first = choices[0];
+            const msg = first?.message;
+            if (msg) {
+              if (typeof msg.content === 'string') {
+                raw = msg.content;
+              } else if (Array.isArray(msg.content)) {
+                raw = msg.content.map((part: any) => part?.text || '').join('\n');
+              }
+            }
+          } catch {
+            raw = '';
+          }
+
+          const jsonStr = extractJsonString(raw || '');
+          let parsed: any;
+          try {
+            parsed = jsonStr ? JSON.parse(jsonStr) : undefined;
+          } catch (e: any) {
+            return errorJson(502, 'Failed to parse JSON from OpenAI response.', { raw, json: jsonStr, error: String(e?.message || e) });
+          }
+
+          if (!parsed || typeof parsed !== 'object') {
+            return errorJson(502, 'OpenAI response did not contain a JSON object.', { raw, json: jsonStr });
+          }
+
+          const latRaw = (parsed as any).latitude ?? (parsed as any).lat;
+          const lonRaw = (parsed as any).longitude ?? (parsed as any).lon ?? (parsed as any).lng;
+          const precisionRaw = typeof (parsed as any).precision === 'string' ? (parsed as any).precision : '';
+          const zoomRaw = (parsed as any).zoom;
+
+          let latitude = Number(latRaw);
+          let longitude = Number(lonRaw);
+          if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+            return errorJson(502, 'OpenAI 응답에서 좌표를 읽을 수 없습니다.', { parsed });
+          }
+
+          if (latitude < -90) latitude = -90;
+          if (latitude > 90) latitude = 90;
+          if (longitude < -180) longitude = -180;
+          if (longitude > 180) longitude = 180;
+
+          const allowedPrecisions = new Set(['continent', 'country', 'region', 'city', 'landmark', 'street', 'unknown']);
+          let precision = precisionRaw.toLowerCase();
+          if (!allowedPrecisions.has(precision)) precision = 'unknown';
+
+          let zoom = Number(zoomRaw);
+          if (!Number.isFinite(zoom)) {
+            switch (precision) {
+              case 'street':
+              case 'landmark':
+                zoom = 17;
+                break;
+              case 'city':
+                zoom = 13;
+                break;
+              case 'region':
+                zoom = 8;
+                break;
+              case 'country':
+                zoom = 6;
+                break;
+              case 'continent':
+              case 'unknown':
+              default:
+                zoom = 4;
+                break;
+            }
+          }
+          zoom = Math.max(3, Math.min(18, Math.floor(zoom)));
+
+          const locationName = typeof (parsed as any).location_name === 'string'
+            ? (parsed as any).location_name
+            : (typeof (parsed as any).locationName === 'string' ? (parsed as any).locationName : '');
+
+          const reasoning = typeof (parsed as any).reasoning === 'string'
+            ? (parsed as any).reasoning
+            : (typeof (parsed as any).explanation === 'string' ? (parsed as any).explanation : '');
+
+          const payload = {
+            latitude,
+            longitude,
+            zoom,
+            precision,
+            locationName,
+            reasoning,
+          };
+
+          return jsonResponse(200, payload, { cacheControl: NO_STORE_CACHE_CONTROL });
+        } catch (e: any) {
+          console.error('geo-vision error', e);
+          return errorJson(500, 'Internal error', String(e?.message || e));
+        }
+      }
+
       if (url.pathname === '/api/scene-to-script') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
         try {
