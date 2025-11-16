@@ -49,6 +49,7 @@ const DialectTTSPage = React.lazy(() => import('../components/pages/DialectTTSPa
 const ReStylerPage = React.lazy(() => import('../components/pages/ReStylerPage'));
 const TextToBigTextPage = React.lazy(() => import('../components/pages/TextToBigTextPage'));
 const GeoVisionPage = React.lazy(() => import('../components/pages/GeoVisionPage'));
+const BusinessCardPage = React.lazy(() => import('../components/pages/BusinessCardPage'));
 
 export type PageComponent =
   | React.ComponentType<PageProps>
@@ -308,6 +309,11 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
   'youtube-channels': {
     title: 'youtube-channels.json',
     component: YouTubeChannelsPage,
+    icon: <Icon name="file" className="mr-2" />,
+  },
+  'business-card': {
+    title: 'business.card',
+    component: BusinessCardPage,
     icon: <Icon name="file" className="mr-2" />,
   },
 };
