@@ -4229,6 +4229,216 @@ ${extraPrompt}` : undefined,
             break;
           }
         }
+        if (url.pathname === '/api/image-to-json') {
+          if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+          try {
+            const geminiKey = await getGeminiKeyFromRequest(request, env, true);
+            if (!geminiKey) {
+              return errorJson(500, '이미지 구조화 기능은 사용자 API 키가 필요합니다. 설정에서 GEMINI_API_KEY를 등록해 주세요.');
+            }
+
+            const form = await request.formData();
+            const imageFile = form.get('image');
+            if (!(imageFile instanceof File)) {
+              return errorJson(400, '이미지 파일을 업로드해 주세요.');
+            }
+
+            const validationError = validateImageFile(imageFile);
+            if (validationError) {
+              return errorJson(400, validationError);
+            }
+
+            const rawDocType = typeof form.get('documentType') === 'string'
+              ? String(form.get('documentType')).trim().toLowerCase()
+              : 'auto';
+            const docTypePrompts: Record<string, string> = {
+              receipt: '문서가 영수증일 가능성이 높습니다. 상호, 주소, 거래 시간, 결제수단, 품목, 단가, 수량, 세금, 총액을 구조화하세요.',
+              'meal-plan': '문서가 식단표/메뉴판일 수 있습니다. 날짜(또는 요일), 끼니, 메뉴, 영양정보, 알레르기 태그를 정리하세요.',
+              poster: '문서가 포스터/공지일 수 있습니다. 제목, 부제, 일정, 장소, 콜투액션, 연락처, 해시태그, 강조 포인트를 추출하세요.',
+              invoice: '문서가 인보이스/명세서일 수 있습니다. 판매자/구매자 정보, 청구번호, 라인아이템, 세금, 총액, 잔액을 정리하세요.',
+              auto: '문서 유형을 스스로 감지하고, 사람이와 시스템이 모두 이해할 수 있도록 필드/라인아이템/합계를 구성하세요.',
+            };
+            const normalizedDocType: keyof typeof docTypePrompts =
+              (docTypePrompts[rawDocType] ? rawDocType : 'auto') as keyof typeof docTypePrompts;
+
+            const schemaHint = typeof form.get('schemaHint') === 'string' ? String(form.get('schemaHint')).trim() : '';
+            const rawLanguage = typeof form.get('language') === 'string'
+              ? String(form.get('language')).trim().toLowerCase()
+              : 'ko';
+            const language = rawLanguage === 'en' ? 'en' : 'ko';
+
+            const sourceMime = imageFile.type && imageFile.type.startsWith('image/') ? imageFile.type : 'image/png';
+            const imageBytes = new Uint8Array(await imageFile.arrayBuffer());
+            const base64Image = u8ToB64(imageBytes);
+
+            const languageInstruction = language === 'ko'
+              ? '모든 섹션 제목과 필드명, summary 문장은 자연스러운 한국어로 작성하세요.'
+              : 'Write section titles, field labels, and summary sentences in natural English. Keep extracted text values as-is.';
+            const customSchemaInstruction = schemaHint
+              ? `사용자 정의 스키마 요구사항:\n${schemaHint}\n위 구조를 가능한 한 정확히 반영하세요.`
+              : '추가 스키마 제약은 없습니다. 발견되지 않는 정보는 null 또는 빈 배열로 남겨두고 추측하지 마세요.';
+
+            const responseShape = [
+              'JSON 구조 예시:',
+              '{',
+              '  "documentType": "receipt | poster | ...",',
+              '  "detectedLanguage": "ko",',
+              '  "confidence": 0.0 ~ 1.0,',
+              '  "summary": "짧은 자연어 요약",',
+              '  "sections": [',
+              '    {',
+              '      "title": "기본 정보",',
+              '      "fields": [ { "key": "merchant.name", "value": "스타벅스 강남점", "confidence": 0.97, "unit": null } ]',
+              '    }',
+              '  ],',
+              '  "lineItems": [',
+              '    {',
+              '      "name": "아메리카노",',
+              '      "quantity": 1,',
+              '      "unit": "cup",',
+              '      "unitPrice": { "amount": 4500, "currency": "KRW" },',
+              '      "totalPrice": { "amount": 4500, "currency": "KRW" },',
+              '      "meta": { "category": "beverage" }',
+              '    }',
+              '  ],',
+              '  "totals": {',
+              '    "subtotal": { "amount": 4091, "currency": "KRW" },',
+              '    "tax": { "amount": 409, "currency": "KRW" },',
+              '    "discount": { "amount": 0, "currency": "KRW" },',
+              '    "grandTotal": { "amount": 4500, "currency": "KRW" }',
+              '  },',
+              '  "dates": { "issuedAt": "2024-05-20T12:32:00+09:00", "dueAt": null },',
+              '  "contacts": { "seller": {...}, "customer": {...} },',
+              '  "rawText": "이미지에서 추출한 전체 텍스트" }',
+              '}',
+              'JSON 이외의 설명이나 마크다운은 포함하지 마세요.',
+            ].join('\n');
+
+            const promptText = [
+              'You are a meticulous vision-to-JSON converter for enterprise automation.',
+              docTypePrompts[normalizedDocType],
+              languageInstruction,
+              '규칙:',
+              '- 통화 금액은 { amount: number, currency: ISO4217 } 객체로 표현',
+              '- 날짜/시간은 ISO 8601 문자열을 사용 (가능하면 timezone 포함)',
+              '- 측정값은 value + unit 조합을 유지',
+              '- confidence 값은 0~1 범위의 소수',
+              '- 추측하지 말고 확인된 데이터만 채우기, 알 수 없으면 null/빈 배열',
+              customSchemaInstruction,
+              responseShape,
+            ].filter(Boolean).join('\n\n');
+
+            const visionModel = 'gemini-2.0-flash-exp';
+            const aiRes = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(visionModel)}:generateContent`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-goog-api-key': geminiKey,
+                },
+                body: JSON.stringify({
+                  contents: [
+                    {
+                      role: 'user',
+                      parts: [
+                        { text: promptText },
+                        { inline_data: { mime_type: sourceMime, data: base64Image } },
+                      ],
+                    },
+                  ],
+                  generationConfig: {
+                    temperature: 0.2,
+                    topP: 0.8,
+                    maxOutputTokens: 2048,
+                    responseMimeType: 'application/json',
+                  },
+                }),
+              },
+            );
+
+            const aiText = await aiRes.text();
+            if (!aiRes.ok) {
+              return errorJson(502, `Gemini Vision 오류: ${aiRes.status}`, aiText);
+            }
+
+            let aiJson: any = {};
+            try {
+              aiJson = aiText ? JSON.parse(aiText) : {};
+            } catch {
+              aiJson = {};
+            }
+
+            let rawResponse = '';
+            const candidates: any[] = Array.isArray(aiJson?.candidates) ? aiJson.candidates : [];
+            for (const cand of candidates) {
+              const parts = cand?.content?.parts || [];
+              for (const part of parts) {
+                if (typeof part?.text === 'string' && part.text.trim()) {
+                  rawResponse += part.text.trim();
+                }
+              }
+              if (rawResponse) {
+                break;
+              }
+            }
+            if (!rawResponse) {
+              rawResponse = extractJsonString(aiText).trim();
+            } else {
+              rawResponse = extractJsonString(rawResponse).trim();
+            }
+
+            if (!rawResponse) {
+              return errorJson(502, 'Gemini 응답에서 JSON을 찾지 못했습니다.', aiJson);
+            }
+
+            let parsed: any;
+            try {
+              parsed = JSON.parse(rawResponse);
+            } catch (err) {
+              return errorJson(502, 'Gemini 응답을 JSON으로 파싱할 수 없습니다.', rawResponse.slice(0, 2000));
+            }
+
+            const extractedFields: string[] = [];
+            if (Array.isArray(parsed?.sections)) {
+              outer: for (const section of parsed.sections) {
+                if (Array.isArray(section?.fields)) {
+                  for (const field of section.fields) {
+                    if (typeof field?.key === 'string' && field.key) {
+                      extractedFields.push(field.key);
+                      if (extractedFields.length >= 20) {
+                        break outer;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
+            const prettyJson = JSON.stringify(parsed, null, 2);
+            const metadata = {
+              documentType: normalizedDocType,
+              detectedDocumentType: typeof parsed?.documentType === 'string' ? parsed.documentType : undefined,
+              model: visionModel,
+              language,
+              schemaHintIncluded: Boolean(schemaHint),
+              confidence: typeof parsed?.confidence === 'number' ? parsed.confidence : undefined,
+              extractedFields,
+            };
+
+            return jsonResponse(
+              200,
+              {
+                json: parsed,
+                jsonText: prettyJson,
+                metadata,
+              },
+              { cacheControl: NO_STORE_CACHE_CONTROL },
+            );
+          } catch (e: any) {
+            return errorJson(500, '이미지 JSON 변환 중 오류가 발생했습니다.', e?.message || String(e));
+          }
+        }
         const html = await render(request.url, manifestData);
         return new Response(html, {
           headers: {

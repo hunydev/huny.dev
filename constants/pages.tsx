@@ -35,6 +35,7 @@ const FaviconDistillerPage = React.lazy(() => import('../components/pages/Favico
 const CoverCrafterPage = React.lazy(() => import('../components/pages/CoverCrafterPage'));
 const AvatarDistillerPage = React.lazy(() => import('../components/pages/AvatarDistillerPage'));
 const ImageToSpeechPage = React.lazy(() => import('../components/pages/ImageToSpeechPage'));
+const ImageToJsonPage = React.lazy(() => import('../components/pages/ImageToJsonPage'));
 const NonNativeKoreanTTSPage = React.lazy(() => import('../components/pages/NonNativeKoreanTTSPage'));
 const SceneToScriptPage = React.lazy(() => import('../components/pages/SceneToScriptPage'));
 const GearPage = React.lazy(() => import('../components/pages/GearPage'));
@@ -223,6 +224,12 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     component: MultiVoiceReaderPage,
     icon: <Icon name="multiVoiceReader" className="mr-2" />,
     apiRequirement: { provider: 'gemini', features: ['text', 'tts'] },
+  },
+  'image-to-json': {
+    title: 'Image to Json',
+    component: ImageToJsonPage,
+    icon: <Icon name="imageToJson" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['image'] },
   },
   'image-to-speech': {
     title: 'Image to Speech',

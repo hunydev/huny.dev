@@ -654,33 +654,49 @@ const ICON_DEFS = {
     defaultClassName: 'w-4 h-4 text-gray-400',
     attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   },
-  sceneToScript: { //tabler
-    viewBox: '0 0 24 24',
-    nodes: (
-      <>
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-        <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
-        <path d="M10 4l4 16" />
-        <path d="M12 12l-8 2" />
-      </>
-    ),
-    defaultClassName: 'w-4 h-4 text-gray-400',
-    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
-  },
-  imageToSpeech: { //tabler
-    viewBox: '0 0 24 24',
-    nodes: (
-      <>
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-        <path d="M18 4a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-5l-5 3v-3h-2a3 3 0 0 1 -3 -3v-8a3 3 0 0 1 3 -3h12z" />
-        <path d="M9.5 9h.01" />
-        <path d="M14.5 9h.01" />
-        <path d="M9.5 13a3.5 3.5 0 0 0 5 0" />
-      </>
-    ),
-    defaultClassName: 'w-4 h-4 text-gray-400',
-    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
-  },
+    sceneToScript: { //tabler
+      viewBox: '0 0 24 24',
+      nodes: (
+        <>
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+          <path d="M10 4l4 16" />
+          <path d="M12 12l-8 2" />
+        </>
+      ),
+      defaultClassName: 'w-4 h-4 text-gray-400',
+      attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+    },
+    imageToSpeech: { //tabler
+      viewBox: '0 0 24 24',
+      nodes: (
+        <>
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <path d="M18 4a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-5l-5 3v-3h-2a3 3 0 0 1 -3 -3v-8a3 3 0 0 1 3 -3h12z" />
+          <path d="M9.5 9h.01" />
+          <path d="M14.5 9h.01" />
+          <path d="M9.5 13a3.5 3.5 0 0 0 5 0" />
+        </>
+      ),
+      defaultClassName: 'w-4 h-4 text-gray-400',
+      attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+    },
+    imageToJson: { // custom
+      viewBox: '0 0 24 24',
+      nodes: (
+        <>
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+          <rect x="3" y="5" width="12" height="14" rx="2" />
+          <path d="M5 16l3.2 -4l2.3 3l2.2 -2l2.3 3" />
+          <path d="M18 8h1a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-1" />
+          <path d="M18 16h1a2 2 0 0 0 2 -2v0a2 2 0 0 0 -2 -2h-1" />
+          <path d="M16 8h-1a2 2 0 0 0 -2 2v0a2 2 0 0 0 2 2h1" />
+          <path d="M16 16h-1a2 2 0 0 1 -2 -2v0a2 2 0 0 1 2 -2h1" />
+        </>
+      ),
+      defaultClassName: 'w-4 h-4 text-gray-400',
+      attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+    },
   monitor: {
     viewBox: '0 0 24 24',
     nodes: <path d="M20 3H4c-1.103 0-2 .897-2 2v11c0 1.103.897 2 2 2h7v2H8v2h8v-2h-3v-2h7c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2M4 14V5h16l.002 9z" />,

@@ -202,6 +202,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void; apiHasGem
     { id: 'bird-generator', icon: 'bird', label: 'Bird Generator' },
     { id: 'geo-vision', icon: 'geoVision', label: 'Geo Vision' },
     { id: 'multi-voice-reader', icon: 'multiVoiceReader', label: 'MultiVoice Reader' },
+    { id: 'image-to-json', icon: 'imageToJson', label: 'Image to Json' },
     { id: 'image-to-speech', icon: 'imageToSpeech', label: 'Image to Speech' },
     { id: 'non-native-korean-tts', icon: 'nonNativeKoreanTts', label: 'Non-Native Korean TTS' },
     { id: 'scene-to-script', icon: 'sceneToScript', label: 'Scene to Script' },

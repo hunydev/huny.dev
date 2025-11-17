@@ -26,6 +26,7 @@ const PLAYGROUND_BASE_IDS = new Set<string>([
   'favicon-distiller',
   'avatar-distiller',
   'cover-crafter',
+  'image-to-json',
   'image-to-speech',
   'non-native-korean-tts',
   'scene-to-script',
