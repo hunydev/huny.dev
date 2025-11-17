@@ -1,4 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import DOMMatrixPolyfill from 'dommatrix';
 
 export type SuspiciousStyleFlags = {
   too_small_font?: boolean;
@@ -34,6 +35,40 @@ export type ExtractedPdf = {
 
 const DEFAULT_MAX_BLOCKS = 1500;
 
+const ensureDomMatrixForPdfjs = () => {
+  if (typeof (globalThis as any).DOMMatrix === 'undefined') {
+    (globalThis as any).DOMMatrix = DOMMatrixPolyfill as unknown;
+  }
+  if (typeof (globalThis as any).DOMMatrixReadOnly === 'undefined') {
+    (globalThis as any).DOMMatrixReadOnly = (globalThis as any).DOMMatrix;
+  }
+  if (typeof (globalThis as any).DOMPoint === 'undefined') {
+    class SimpleDOMPoint {
+      x: number;
+      y: number;
+      z: number;
+      w: number;
+      constructor(x = 0, y = 0, z = 0, w = 1) {
+        this.x = Number(x) || 0;
+        this.y = Number(y) || 0;
+        this.z = Number(z) || 0;
+        this.w = Number(w) || 1;
+      }
+      matrixTransform(matrix: any) {
+        if (matrix && typeof matrix.transformPoint === 'function') {
+          return matrix.transformPoint(this);
+        }
+        return new SimpleDOMPoint(this.x, this.y, this.z, this.w);
+      }
+      static fromPoint(other?: Partial<SimpleDOMPoint>) {
+        if (!other) return new SimpleDOMPoint();
+        return new SimpleDOMPoint(other.x, other.y, other.z, other.w);
+      }
+    }
+    (globalThis as any).DOMPoint = SimpleDOMPoint;
+  }
+};
+
 const ensureProcessForPdfjs = () => {
   if (typeof (globalThis as any).process === 'undefined') {
     const processShim: any = {
@@ -50,6 +85,7 @@ let pdfjsLibPromise: Promise<typeof import('pdfjs-dist/legacy/build/pdf.mjs')> |
 const getPdfjs = async () => {
   if (!pdfjsLibPromise) {
     ensureProcessForPdfjs();
+    ensureDomMatrixForPdfjs();
     pdfjsLibPromise = import('pdfjs-dist/legacy/build/pdf.mjs');
   }
   return pdfjsLibPromise;
