@@ -996,6 +996,67 @@ const ICON_DEFS = {
     ),
     defaultClassName: 'w-4 h-4',
     attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  categoryDev: { //tabler - brackets-angle
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M8 4l-5 8l5 8" />
+        <path d="M16 4l5 8l-5 8" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  categoryAi: { //tabler - robot
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M6 4m0 2a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2z" />
+        <path d="M12 2v2" />
+        <path d="M9 12v9" />
+        <path d="M15 12v9" />
+        <path d="M5 16l4 -2" />
+        <path d="M15 14l4 2" />
+        <path d="M9 18h6" />
+        <path d="M10 8v.01" />
+        <path d="M14 8v.01" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  categoryTools: { //tabler - tools
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M3 21h4l13 -13a1.5 1.5 0 0 0 -4 -4l-13 13v4" />
+        <path d="M14.5 5.5l4 4" />
+        <path d="M12 8l-5 -5l-4 4l5 5" />
+        <path d="M7 8l-1.5 1.5" />
+        <path d="M16 12l5 5l-4 4l-5 -5" />
+        <path d="M16 17l-1.5 1.5" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  categoryDesign: { //tabler - photo-square-rounded
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M15 8h.01" />
+        <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z" />
+        <path d="M3.5 15.5l4.5 -4.5c.928 -.893 2.072 -.893 3 0l5 5" />
+        <path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l2.5 2.5" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   }
 } satisfies Record<string, IconDefinition>;
 

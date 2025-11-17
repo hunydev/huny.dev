@@ -260,6 +260,8 @@ const AppsView: React.FC<{ onOpenFile: (fileId: string) => void }> = ({ onOpenFi
           >
             {cat.iconUrl ? (
               <img src={cat.iconUrl} alt="" className="w-4 h-4 mr-2 rounded-sm" loading="lazy" decoding="async" />
+            ) : cat.iconName ? (
+              <Icon name={cat.iconName as any} className="w-4 h-4 mr-2" />
             ) : cat.emoji ? (
               <span className="w-4 h-4 mr-2 text-base leading-4" aria-hidden>{cat.emoji}</span>
             ) : (

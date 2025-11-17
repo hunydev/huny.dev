@@ -5,16 +5,17 @@ export type AppCategoryId = 'huny' | 'dev' | 'ai' | 'tools' | 'design';
 export type AppCategory = {
   id: AppCategoryId;
   name: string;
-  emoji?: string; // mutually exclusive with iconUrl
+  emoji?: string; // deprecated, use iconName instead
   iconUrl?: string; // used only for huny.dev category icon
+  iconName?: string; // icon name from constants/icons.tsx
 };
 
 export const CATEGORIES: AppCategory[] = [
   { id: 'huny', name: 'huny.dev', iconUrl: icon32 },
-  { id: 'dev', name: 'Dev', emoji: '💻' },
-  { id: 'ai', name: 'AI', emoji: '🤖' },
-  { id: 'tools', name: 'Tools', emoji: '🧰' },
-  { id: 'design', name: 'Design', emoji: '🎨' },
+  { id: 'dev', name: 'Dev', iconName: 'categoryDev' },
+  { id: 'ai', name: 'AI', iconName: 'categoryAi' },
+  { id: 'tools', name: 'Tools', iconName: 'categoryTools' },
+  { id: 'design', name: 'Design', iconName: 'categoryDesign' },
 ];
 
 export function getAppCategoryById(id?: string): AppCategory | undefined {

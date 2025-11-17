@@ -255,6 +255,8 @@ const App: React.FC = () => {
       tabTitle = `apps – ${catName}`;
       if (category?.iconUrl) {
         tabIcon = <img src={category.iconUrl} alt="" className="w-4 h-4 mr-2 rounded-sm" />;
+      } else if (category?.iconName) {
+        tabIcon = <Icon name={category.iconName as any} className="w-4 h-4 mr-2" />;
       } else if (category?.emoji) {
         tabIcon = <span className="mr-2 text-sm" aria-hidden>{category.emoji}</span>;
       }
