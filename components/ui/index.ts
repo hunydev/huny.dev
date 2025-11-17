@@ -17,3 +17,7 @@ export type { ApiProviderBadgeProps, ApiProvider } from './ApiProviderBadge';
 
 export { PlaygroundGuideModal } from './PlaygroundGuideModal';
 export type { PlaygroundGuideModalProps } from './PlaygroundGuideModal';
+
+export { PageHero } from './PageHero';
+export { PageSection } from './PageSection';
+export { PageContainer } from './PageContainer';
