@@ -9,6 +9,7 @@ const PLAYGROUND_BASE_IDS = new Set<string>([
   'ai-tier-list',
   'cronify',
   'text-morph',
+  'prompt-engineering',
   'deobfuscate-hangul',
   'dialect-tts',
   'restyler',

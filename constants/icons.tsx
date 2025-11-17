@@ -873,6 +873,23 @@ const ICON_DEFS = {
     defaultClassName: 'w-4 h-4 text-gray-400',
     attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   },
+  promptEngineering: { //tabler-inspired - list + spark
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        {/* List lines */}
+        <path d="M5 6h8" />
+        <path d="M5 10h6" />
+        <path d="M5 14h8" />
+        <path d="M5 18h5" />
+        {/* Spark/star for engineering */}
+        <path d="M17 5l1 2l2 1l-2 1l-1 2l-1-2l-2-1l2-1z" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
   deobfuscateHangul: { //tabler - lock-open + language
     viewBox: '0 0 24 24',
     nodes: (

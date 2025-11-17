@@ -194,6 +194,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void; apiHasGem
     { id: 'ai-tier-list', icon: 'aiTierList', label: 'AI Tier List' },
     { id: 'cronify', icon: 'cronify', label: 'Cronify' },
     { id: 'text-morph', icon: 'textMorph', label: 'Text Morph' },
+    { id: 'prompt-engineering', icon: 'promptEngineering', label: 'Prompt Engineering' },
     { id: 'deobfuscate-hangul', icon: 'deobfuscateHangul', label: 'Deobfuscate Hangul' },
     { id: 'dialect-tts', icon: 'dialectTts', label: 'Dialect TTS' },
     { id: 'split-speaker', icon: 'splitSpeaker', label: 'Split Speaker' },

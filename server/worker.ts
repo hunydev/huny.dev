@@ -2607,6 +2607,140 @@ ${extraPrompt}` : undefined,
           });
         }
       }
+      if (url.pathname === '/api/prompt-engineering') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        try {
+          const geminiKey = await getGeminiKeyFromRequest(request, env);
+          if (!geminiKey) {
+            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured on the server.' }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const body = await request.json<any>().catch(() => ({} as any));
+          const textRaw: string = typeof body?.text === 'string' ? body.text : '';
+          const purposeRaw: string = typeof body?.purpose === 'string' ? body.purpose : 'general';
+          const volumeRaw: string = typeof body?.volume === 'string' ? body.volume : 'concise';
+
+          const text = textRaw.trim();
+          if (!text) {
+            return new Response(JSON.stringify({ error: 'Missing input text' }), {
+              status: 400,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const allowedPurposes = new Set(['general', 'image', 'video', 'code']);
+          const allowedVolumes = new Set(['concise', 'detailed']);
+          const purpose = allowedPurposes.has(purposeRaw) ? purposeRaw : 'general';
+          const volume = allowedVolumes.has(volumeRaw) ? volumeRaw : 'concise';
+
+          const purposeHintMap: Record<string, string> = {
+            general: '일반적인 대화, 글쓰기, 요약, 분석 등 범용 작업에 최적화된 프롬프트를 설계합니다.',
+            image: '이미지 생성 모델을 위한 프롬프트를 설계합니다. 피사체, 스타일, 구도, 조명, 카메라/렌즈, 상세 묘사, 네거티브 프롬프트 등을 구조화합니다.',
+            video: '영상 생성/편집 모델을 위한 프롬프트를 설계합니다. 전체 콘셉트, 장면 구성, 카메라 무빙, 컷 길이, 비율, 톤&무드를 구조화합니다.',
+            code: '코드 생성/리팩터링/리뷰를 위한 프롬프트를 설계합니다. 언어, 런타임/프레임워크, 요구사항, 제약조건, 테스트/예시 입력을 명시합니다.',
+          };
+
+          const volumeHintMap: Record<string, string> = {
+            concise: '프롬프트를 과도하게 길게 만들지 말고, 핵심 맥락과 제약조건, 출력 형식만 간결하게 담으세요.',
+            detailed: '맥락, 정의, 제약조건, 단계별 사고, 출력 형식, 예시까지 포함해 최대한 자세하고 구조화된 프롬프트를 설계하세요.',
+          };
+
+          const instructions = [
+            'You are an expert prompt engineer. Your job is to transform a raw user request into a high-quality prompt that makes an AI model respond more accurately and reliably.',
+            '',
+            '## Goals',
+            '- Preserve the original user intent and language.',
+            '- Clarify missing constraints or ambiguous parts when necessary.',
+            '- Expose important context, requirements, and output formatting clearly.',
+            '',
+            '## Current Task',
+            `- Purpose: ${purpose}`,
+            `- Purpose detail: ${purposeHintMap[purpose] ?? purposeHintMap.general}`,
+            `- Volume: ${volume}`,
+            `- Volume detail: ${volumeHintMap[volume] ?? volumeHintMap.concise}`,
+            '',
+            '## Output Format (MUST be valid JSON, no markdown fences, no comments)',
+            '{',
+            '  "optimizedPrompt": string,            // 최종적으로 AI에게 바로 붙여넣어 사용할 프롬프트',
+            '  "rationale": string,                  // 왜 이렇게 설계했는지에 대한 짧은 설명 (한국어)',
+            '  "checklist": string[]                 // 사용자가 프롬프트를 재사용/수정할 때 확인하면 좋은 체크 항목 목록 (한국어)',
+            '}',
+            '',
+            '## Design Guidelines',
+            '- Keep the optimizedPrompt in the SAME LANGUAGE as the original input (if the user writes Korean, answer in Korean).',
+            '- Clearly separate sections inside the prompt (e.g., "Context", "Task", "Constraints", "Output format", "Examples").',
+            '- For image/video/code purposes, include fields that are typically important for that modality (e.g., style, resolution, language, environment).',
+            '- Avoid over-specifying things that the user never implied. When unsure, keep it neutral rather than inventing details.',
+            '- The optimizedPrompt should be ready to paste into an AI chat as-is, without additional explanation.',
+            '',
+            'Now read the user input below and produce the JSON response only.',
+            '---',
+            'USER_INPUT_START',
+            text,
+            'USER_INPUT_END',
+          ].join('\n');
+
+          const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+          const aiRes = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-goog-api-key': geminiKey!,
+            },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: instructions }] }],
+              generationConfig: {
+                responseMimeType: 'application/json',
+                temperature: volume === 'detailed' ? 0.6 : 0.3,
+              },
+            }),
+          });
+
+          if (!aiRes.ok) {
+            const errText = await aiRes.text().catch(() => 'Unknown error');
+            return new Response(JSON.stringify({ error: 'Gemini API error', detail: errText }), {
+              status: aiRes.status,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
+
+          const aiData: any = await aiRes.json().catch(() => ({} as any));
+          const raw: string = ((aiData && aiData.candidates && aiData.candidates[0] && aiData.candidates[0].content && aiData.candidates[0].content.parts) || [])
+            .map((p: any) => p?.text || '')
+            .join('');
+          const jsonStr = extractJsonString(raw || '');
+
+          let parsed: any = {};
+          try {
+            parsed = jsonStr ? JSON.parse(jsonStr) : {};
+          } catch {
+            parsed = {};
+          }
+
+          const optimizedPrompt = typeof parsed?.optimizedPrompt === 'string' ? parsed.optimizedPrompt.trim() : '';
+          const rationale = typeof parsed?.rationale === 'string' ? parsed.rationale.trim() : '';
+          const checklistRaw: any[] = Array.isArray(parsed?.checklist) ? parsed.checklist : [];
+          const checklist = checklistRaw
+            .map((v) => (typeof v === 'string' ? v.trim() : ''))
+            .filter((v) => v.length > 0)
+            .slice(0, 20);
+
+          return new Response(
+            JSON.stringify({ optimizedPrompt, rationale, checklist }),
+            {
+              headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
+            },
+          );
+        } catch (e: any) {
+          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+            status: 500,
+            headers: { 'content-type': 'application/json; charset=UTF-8' },
+          });
+        }
+      }
       if (url.pathname === '/api/deobfuscate-hangul') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
         try {
