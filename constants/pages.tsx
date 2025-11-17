@@ -27,6 +27,7 @@ const WebWorkerPage = React.lazy(() => import('../components/pages/WebWorkerPage
 const UIClonePage = React.lazy(() => import('../components/pages/UIClonePage'));
 const ExtensionsPage = React.lazy(() => import('../components/pages/ExtensionsPage'));
 const TextCleaningPage = React.lazy(() => import('../components/pages/TextCleaningPage'));
+const HiddenPromptPage = React.lazy(() => import('../components/pages/HiddenPromptPage'));
 const AIBusinessCardPage = React.lazy(() => import('../components/pages/AIBusinessCardPage'));
 const StickerGeneratorPage = React.lazy(() => import('../components/pages/StickerGeneratorPage'));
 const ComicRestylerPage = React.lazy(() => import('../components/pages/ComicRestylerPage'));
@@ -160,6 +161,12 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     title: 'Text Cleaning',
     component: TextCleaningPage,
     icon: <Icon name="textCleaning" className="mr-2" />,
+    apiRequirement: { provider: 'gemini', features: ['text'] },
+  },
+  'hidden-prompt': {
+    title: 'Hidden Prompt',
+    component: HiddenPromptPage,
+    icon: <Icon name="hiddenPrompt" className="mr-2" />,
     apiRequirement: { provider: 'gemini', features: ['text'] },
   },
   'ai-business-card': {

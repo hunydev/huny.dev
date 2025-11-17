@@ -17,6 +17,7 @@ const PLAYGROUND_BASE_IDS = new Set<string>([
   'text-to-big-text',
   'web-worker',
   'text-cleaning',
+  'hidden-prompt',
   'ai-business-card',
   'sticker-generator',
   'comic-restyler',

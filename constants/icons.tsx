@@ -480,19 +480,33 @@ const ICON_DEFS = {
     defaultClassName: 'w-4 h-4 text-gray-400',
     attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   },
-  textCleaning: { //tabler
-    viewBox: '0 0 24 24',
-    nodes: (
-      <>
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-        <path d="M5 15v-7.5a3.5 3.5 0 0 1 7 0v7.5" />
-        <path d="M5 10h7" />
-        <path d="M10 18l3 3l7 -7" />
-      </>
-    ),
-    defaultClassName: 'w-4 h-4 text-gray-400',
-    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
-  },
+    textCleaning: { //tabler
+      viewBox: '0 0 24 24',
+      nodes: (
+        <>
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <path d="M5 15v-7.5a3.5 3.5 0 0 1 7 0v7.5" />
+          <path d="M5 10h7" />
+          <path d="M10 18l3 3l7 -7" />
+        </>
+      ),
+      defaultClassName: 'w-4 h-4 text-gray-400',
+      attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+    },
+    hiddenPrompt: { // custom eye-off
+      viewBox: '0 0 24 24',
+      nodes: (
+        <>
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <path d="M4.458 12c2.055 -3.467 4.6 -5.5 7.542 -5.5c1.27 0 2.478 .33 3.626 .961" />
+          <path d="M19.542 12c-2.055 3.467 -4.6 5.5 -7.542 5.5c-1.58 0 -3.083 -.548 -4.506 -1.641" />
+          <path d="M12 9a3 3 0 1 1 0 6a3 3 0 0 1 0 -6z" />
+          <path d="M3 3l18 18" />
+        </>
+      ),
+      defaultClassName: 'w-4 h-4 text-gray-400',
+      attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+    },
   aiBusinessCard: { //tabler
     viewBox: '0 0 24 24',
     nodes: (
