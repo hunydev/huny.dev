@@ -1727,11 +1727,12 @@ ${extraPrompt}` : undefined,
           return new Response(JSON.stringify({ cleaned }), {
             headers: { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'no-store' },
           });
-        } catch (e: any) {
-          return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
-            status: 500,
-            headers: { 'content-type': 'application/json; charset=UTF-8' },
-          });
+          } catch (e: any) {
+            return new Response(JSON.stringify({ error: 'Internal error', detail: String(e?.message || e) }), {
+              status: 500,
+              headers: { 'content-type': 'application/json; charset=UTF-8' },
+            });
+          }
         }
         if (url.pathname === '/api/hidden-prompt') {
           if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
@@ -1846,7 +1847,7 @@ ${extraPrompt}` : undefined,
               has_hidden_prompt_attack: !!parsed?.has_hidden_prompt_attack,
               summary: typeof parsed?.summary === 'string' ? parsed.summary : '',
               suspicious_block_ids: suspiciousBlockIds,
-              block_classification,
+              block_classification: blockClassification,
             };
 
             const suspiciousSet = new Set(suspiciousBlockIds);
