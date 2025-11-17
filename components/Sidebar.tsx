@@ -184,6 +184,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void; apiHasGem
     { id: 'comic-restyler', icon: 'comicRestyler', label: 'Comic Restyler' },
     { id: 'ai-business-card', icon: 'aiBusinessCard', label: 'AI Business Card' },
     { id: 'text-cleaning', icon: 'textCleaning', label: 'Text Cleaning' },
+    { id: 'hidden-prompt', icon: 'hiddenPrompt', label: 'Hidden Prompt' },
     { id: 'text-to-phoneme', icon: 'textToPhoneme', label: 'Text to Phoneme' },
     { id: 'text-to-emoji', icon: 'textToEmoji', label: 'Text to Emoji' },
     { id: 'text-to-big-text', icon: 'textMorph', label: 'Text to Big Text' },

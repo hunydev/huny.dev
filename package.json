@@ -19,9 +19,12 @@
     "cron-parser": "^5.4.0",
     "cronstrue": "^3.9.0",
     "dom-to-image-more": "^3.7.2",
+    "dommatrix": "^0.1.1",
     "highlight.js": "^11.9.0",
     "jspdf": "^2.5.2",
     "leaflet": "^1.9.4",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^5.4.394",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-leaflet": "^5.0.0"
