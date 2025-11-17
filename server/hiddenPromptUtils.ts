@@ -74,18 +74,72 @@ const ensureProcessForPdfjs = () => {
     const processShim: any = {
       env: {},
       versions: { node: '18.0.0' },
+      getBuiltinModule: () => undefined,
     };
     Object.defineProperty(processShim, Symbol.toStringTag, { value: 'process' });
     (globalThis as any).process = processShim;
+  } else if (typeof (globalThis as any).process.getBuiltinModule !== 'function') {
+    (globalThis as any).process.getBuiltinModule = () => undefined;
   }
 };
 
 let pdfjsLibPromise: Promise<typeof import('pdfjs-dist/legacy/build/pdf.mjs')> | null = null;
+let pdfjsWorkerModulePromise: Promise<any> | null = null;
+
+const ensurePdfjsWorkerModule = async () => {
+  if ((globalThis as any).pdfjsWorker) return;
+  if (!pdfjsWorkerModulePromise) {
+    pdfjsWorkerModulePromise = import('pdfjs-dist/legacy/build/pdf.worker.mjs')
+      .then((workerModule) => {
+        (globalThis as any).pdfjsWorker = workerModule;
+        return workerModule;
+      })
+      .catch((err) => {
+        console.warn('Failed to preload pdf.worker.mjs', err);
+        return null;
+      });
+  }
+  await pdfjsWorkerModulePromise;
+};
+
+const ensureCanvasForPdfjs = () => {
+  if (typeof (globalThis as any).ImageData === 'undefined') {
+    class MinimalImageData {
+      data: Uint8ClampedArray;
+      width: number;
+      height: number;
+      constructor(width: number, height: number, data?: Uint8ClampedArray) {
+        this.width = width;
+        this.height = height;
+        this.data = data ?? new Uint8ClampedArray(width * height * 4);
+      }
+    }
+    (globalThis as any).ImageData = MinimalImageData;
+  }
+  if (typeof (globalThis as any).Path2D === 'undefined') {
+    class MinimalPath2D {
+      constructor(_path?: string | MinimalPath2D) {}
+      addPath() {}
+      closePath() {}
+      moveTo() {}
+      lineTo() {}
+      bezierCurveTo() {}
+      quadraticCurveTo() {}
+      arc() {}
+      arcTo() {}
+      ellipse() {}
+      rect() {}
+    }
+    (globalThis as any).Path2D = MinimalPath2D;
+  }
+};
 
 const getPdfjs = async () => {
   if (!pdfjsLibPromise) {
     ensureProcessForPdfjs();
     ensureDomMatrixForPdfjs();
+    ensureCanvasForPdfjs();
+    await ensurePdfjsWorkerModule();
     pdfjsLibPromise = import('pdfjs-dist/legacy/build/pdf.mjs');
   }
   return pdfjsLibPromise;
