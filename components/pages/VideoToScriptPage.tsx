@@ -59,6 +59,8 @@ const VideoToScriptPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [selectedSegmentId, setSelectedSegmentId] = React.useState<string | null>(null);
   const ffmpeg = useFfmpeg();
   const [shouldUseAudioOnly, setShouldUseAudioOnly] = React.useState(true);
+  const segmentRefs = React.useRef<Map<string, HTMLButtonElement>>(new Map());
+  const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
 
   const api = useApiCall<VideoToScriptResponse>({
     url: '/api/video-to-script',
@@ -189,6 +191,37 @@ const VideoToScriptPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
     }
   };
 
+  const scrollToSegment = (segmentId: string) => {
+    const element = segmentRefs.current.get(segmentId);
+    if (element && scrollContainerRef.current) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  };
+
+  const handleVideoTimeUpdate = React.useCallback(() => {
+    if (!videoRef.current || segments.length === 0) return;
+    const currentTime = videoRef.current.currentTime;
+    const currentSegment = segments.find(
+      seg => currentTime >= seg.start && currentTime <= seg.end
+    );
+    if (currentSegment && currentSegment.id !== selectedSegmentId) {
+      setSelectedSegmentId(currentSegment.id);
+      scrollToSegment(currentSegment.id);
+    }
+  }, [segments, selectedSegmentId]);
+
+  React.useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.addEventListener('timeupdate', handleVideoTimeUpdate);
+    return () => {
+      video.removeEventListener('timeupdate', handleVideoTimeUpdate);
+    };
+  }, [handleVideoTimeUpdate]);
+
   const hasResult = segments.length > 0;
 
   return (
@@ -283,7 +316,7 @@ const VideoToScriptPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
       </section>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <section className="rounded-md border border-white/10 bg-white/[0.03] p-4 space-y-4">
+        <section className="rounded-md border border-white/10 bg-white/[0.03] p-4 space-y-4 flex flex-col max-h-[700px]">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-white">비디오 미리보기</h2>
             {detectedLanguage && (
@@ -327,7 +360,7 @@ const VideoToScriptPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
           )}
         </section>
 
-        <section className="rounded-md border border-white/10 bg-white/[0.03] p-4 flex flex-col">
+        <section className="rounded-md border border-white/10 bg-white/[0.03] p-4 flex flex-col max-h-[700px]">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <h2 className="text-sm font-semibold text-white">스크립트 & 타임라인</h2>
@@ -351,13 +384,20 @@ const VideoToScriptPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
 
           <div className="mt-4 flex-1 overflow-hidden">
             {hasResult ? (
-              <div className="h-full overflow-y-auto pr-1 space-y-3">
+              <div ref={scrollContainerRef} className="h-full overflow-y-auto pr-1 space-y-3">
                 {filteredSegments.length === 0 ? (
                   <p className="text-sm text-gray-500">검색 결과가 없습니다.</p>
                 ) : (
                   filteredSegments.map(segment => (
                     <button
                       key={segment.id}
+                      ref={el => {
+                        if (el) {
+                          segmentRefs.current.set(segment.id, el);
+                        } else {
+                          segmentRefs.current.delete(segment.id);
+                        }
+                      }}
                       type="button"
                       onClick={() => handleSegmentJump(segment)}
                       className={`w-full text-left rounded border px-3 py-3 transition focus:outline-none focus:ring-2 focus:ring-blue-400/50 ${
