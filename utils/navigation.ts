@@ -30,6 +30,7 @@ const PLAYGROUND_BASE_IDS = new Set<string>([
   'image-to-speech',
   'non-native-korean-tts',
   'scene-to-script',
+  'video-to-script',
 ]);
 
 export const isPlaygroundBaseId = (baseId: string) => PLAYGROUND_BASE_IDS.has(baseId);

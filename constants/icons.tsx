@@ -425,6 +425,22 @@ const ICON_DEFS = {
     ),
     defaultClassName: 'w-4 h-4 text-gray-400',
   },
+  videoToScript: {
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M4 7h16v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+        <path d="M10 7l-2 -4" />
+        <path d="M14 7l2 -4" />
+        <path d="M8 13h5" />
+        <path d="M8 17h4" />
+        <path d="M17 11l3 2.5l-3 2.5z" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' },
+  },
   video: {
     viewBox: '0 0 24 24',
     nodes: (

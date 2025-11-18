@@ -38,6 +38,7 @@ const ImageToSpeechPage = React.lazy(() => import('../components/pages/ImageToSp
 const ImageToJsonPage = React.lazy(() => import('../components/pages/ImageToJsonPage'));
 const NonNativeKoreanTTSPage = React.lazy(() => import('../components/pages/NonNativeKoreanTTSPage'));
 const SceneToScriptPage = React.lazy(() => import('../components/pages/SceneToScriptPage'));
+const VideoToScriptPage = React.lazy(() => import('../components/pages/VideoToScriptPage'));
 const GearPage = React.lazy(() => import('../components/pages/GearPage'));
 const InspirationGalleryPage = React.lazy(() => import('../components/pages/InspirationGalleryPage'));
 const YouTubeChannelsPage = React.lazy(() => import('../components/pages/YouTubeChannelsPage'));
@@ -248,6 +249,12 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     component: SceneToScriptPage,
     icon: <Icon name="sceneToScript" className="mr-2" />,
     apiRequirement: { provider: 'gemini', features: ['text', 'tts'] },
+  },
+  'video-to-script': {
+    title: 'Video to Script',
+    component: VideoToScriptPage,
+    icon: <Icon name="videoToScript" className="mr-2" />,
+    apiRequirement: { provider: 'openai', features: ['text'] },
   },
   monitor: {
     title: 'monitor',

@@ -206,6 +206,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void; apiHasGem
     { id: 'image-to-speech', icon: 'imageToSpeech', label: 'Image to Speech' },
     { id: 'non-native-korean-tts', icon: 'nonNativeKoreanTts', label: 'Non-Native Korean TTS' },
     { id: 'scene-to-script', icon: 'sceneToScript', label: 'Scene to Script' },
+    { id: 'video-to-script', icon: 'videoToScript', label: 'Video to Script' },
     { id: 'favicon-distiller', icon: 'favicon', label: 'Favicon Distiller' },
     { id: 'avatar-distiller', icon: 'avatar', label: 'Avatar Distiller' },
     { id: 'cover-crafter', icon: 'coverCrafter', label: 'Cover Crafter' },

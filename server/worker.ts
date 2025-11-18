@@ -18,16 +18,52 @@ export interface Env {
   ENC_SECRET?: string;
 }
 
+function validateAvFile(
+  file: File,
+  { maxBytes = MAX_VIDEO_BYTES, allowedMimeTypes = ALLOWED_AV_MIME_TYPES }: { maxBytes?: number; allowedMimeTypes?: Set<string> } = {},
+): string | undefined {
+  if (!file || typeof file.size !== 'number') {
+    return '업로드된 미디어 파일을 찾을 수 없습니다.';
+  }
+  if (file.size === 0) {
+    return '미디어 파일이 비어 있습니다.';
+  }
+  if (file.size > maxBytes) {
+    return `파일 크기가 ${toMiB(maxBytes)}MB 제한을 초과했습니다.`;
+  }
+  const mime = (file.type || '').toLowerCase();
+  if (mime && !allowedMimeTypes.has(mime)) {
+    return `지원하지 않는 미디어 형식입니다: ${mime}`;
+  }
+  return undefined;
+}
+
 const JSON_CONTENT_HEADER = { 'content-type': 'application/json; charset=UTF-8' } as const;
 const NO_STORE_CACHE_CONTROL = 'no-store';
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // 8 MiB
 const MAX_PDF_BYTES = 12 * 1024 * 1024; // 12 MiB
+const MAX_VIDEO_BYTES = 60 * 1024 * 1024; // 60 MiB
+const MAX_TRANSCRIPT_SEGMENTS = 500;
 const ALLOWED_IMAGE_MIME_TYPES = new Set<string>([
   'image/png',
   'image/jpeg',
   'image/webp',
   'image/gif',
   'image/svg+xml',
+]);
+const ALLOWED_AV_MIME_TYPES = new Set<string>([
+  'video/mp4',
+  'video/quicktime',
+  'video/webm',
+  'video/x-matroska',
+  'video/mpeg',
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/wav',
+  'audio/x-wav',
+  'audio/webm',
+  'audio/ogg',
+  'audio/flac',
 ]);
 
 const FEMALE_VOICES = [
@@ -225,6 +261,51 @@ async function safeJson<T = any>(request: Request, fallback: T): Promise<T> {
   } catch {
     return fallback;
   }
+}
+
+const truncateForSummary = (text: string, maxBytes: number = 6000): string => {
+  if (!text) return '';
+  if (text.length <= maxBytes) return text;
+  return text.slice(0, maxBytes);
+};
+
+async function summarizeTranscriptWithOpenAI(openaiKey: string, transcript: string): Promise<string> {
+  const trimmed = transcript.trim();
+  if (!trimmed) return '';
+  const payload = {
+    model: 'gpt-4o-mini',
+    messages: [
+      {
+        role: 'system',
+        content: '당신은 영상 전사 내용을 간결하게 정리하는 한국어 비서입니다. 핵심 내용을 2~3문장으로 요약하고, 실행 정보가 있다면 포함하세요.'
+      },
+      {
+        role: 'user',
+        content: `전사:
+${truncateForSummary(trimmed)}`,
+      },
+    ],
+    temperature: 0.4,
+    max_tokens: 280,
+  };
+
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${openaiKey}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    throw new Error(`OpenAI summary error: ${res.status} ${res.statusText} ${detail}`);
+  }
+
+  const data: any = await res.json().catch(() => ({}));
+  const summary = data?.choices?.[0]?.message?.content;
+  return typeof summary === 'string' ? summary.trim() : '';
 }
 
 type SceneCharacter = {
@@ -621,6 +702,143 @@ export default {
           }
         } catch (e: any) {
           console.error('favicon-distiller error', e);
+          return errorJson(500, 'Internal error', String(e?.message || e));
+        }
+      }
+
+      if (url.pathname === '/api/video-to-script') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        try {
+          const openaiKey = await getOpenAIKeyFromRequest(request, env);
+          if (!openaiKey) {
+            return errorJson(401, 'OpenAI 기능은 사용자 API 키가 필요합니다. 설정에서 OPENAI_API_KEY를 등록해 주세요.');
+          }
+
+          const form = await request.formData();
+          const media = form.get('video');
+          if (!(media instanceof File)) {
+            return errorJson(400, '비디오 파일을 전달해 주세요.');
+          }
+
+          const validationError = validateAvFile(media);
+          if (validationError) {
+            return errorJson(400, validationError);
+          }
+
+          const languageRaw = typeof form.get('language') === 'string' ? String(form.get('language')) : '';
+          const language = /^[a-z]{2}$/i.test(languageRaw.trim()) ? languageRaw.trim().toLowerCase() : '';
+
+          const transcriptionPayload = new FormData();
+          transcriptionPayload.append('file', media, media.name || 'video-upload');
+          transcriptionPayload.append('model', 'whisper-1');
+          transcriptionPayload.append('response_format', 'verbose_json');
+          transcriptionPayload.append('temperature', '0');
+          transcriptionPayload.append('timestamp_granularities[]', 'segment');
+          if (language) {
+            transcriptionPayload.append('language', language);
+          }
+
+          const transcriptionRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${openaiKey}`,
+            },
+            body: transcriptionPayload,
+          });
+
+          const transcriptionText = await transcriptionRes.text();
+          if (!transcriptionRes.ok) {
+            let detail: unknown = transcriptionText;
+            try {
+              detail = transcriptionText ? JSON.parse(transcriptionText) : undefined;
+            } catch {
+              // ignore
+            }
+            const errMessage = (detail as any)?.error?.message || 'OpenAI 전사 요청이 실패했습니다.';
+            return errorJson(transcriptionRes.status, errMessage, detail);
+          }
+
+          let transcriptionJson: any = {};
+          try {
+            transcriptionJson = transcriptionText ? JSON.parse(transcriptionText) : {};
+          } catch (err) {
+            return errorJson(502, 'OpenAI 전사 응답을 파싱하지 못했습니다.', String(err));
+          }
+
+          const rawSegments: any[] = Array.isArray(transcriptionJson?.segments) ? transcriptionJson.segments : [];
+          const toSeconds = (value: unknown): number => {
+            const num = typeof value === 'number' ? value : Number(value);
+            if (!Number.isFinite(num)) return 0;
+            return Math.max(0, Number(num.toFixed(3)));
+          };
+          const toConfidence = (value: unknown): number | undefined => {
+            const num = typeof value === 'number' ? value : Number(value);
+            if (!Number.isFinite(num)) return undefined;
+            if (num >= 0 && num <= 1) {
+              return Math.round(num * 1000) / 1000;
+            }
+            const normalized = Math.exp(num);
+            return Math.round(Math.max(0, Math.min(1, normalized)) * 1000) / 1000;
+          };
+
+          let segments = rawSegments
+            .map((segment, idx) => {
+              const text = typeof segment?.text === 'string' ? segment.text.trim() : '';
+              if (!text) return null;
+              const start = toSeconds(segment?.start);
+              const endRaw = toSeconds(segment?.end);
+              const end = endRaw >= start ? endRaw : start;
+              return {
+                id: String(segment?.id ?? `segment-${idx}`),
+                text,
+                start,
+                end,
+                confidence: toConfidence(segment?.confidence ?? segment?.avg_logprob),
+              };
+            })
+            .filter(Boolean) as Array<{ id: string; text: string; start: number; end: number; confidence?: number }>;
+
+          if (segments.length > MAX_TRANSCRIPT_SEGMENTS) {
+            segments = segments.slice(0, MAX_TRANSCRIPT_SEGMENTS);
+          }
+
+          const fallbackText = typeof transcriptionJson?.text === 'string' ? transcriptionJson.text.trim() : '';
+          if (segments.length === 0 && fallbackText) {
+            segments = [
+              {
+                id: 'segment-0',
+                text: fallbackText,
+                start: 0,
+                end: toSeconds(transcriptionJson?.duration) || 0,
+              },
+            ];
+          }
+
+          const fallbackDuration = segments.length ? segments[segments.length - 1].end : 0;
+          const durationRaw = typeof transcriptionJson?.duration === 'number' ? transcriptionJson.duration : Number(transcriptionJson?.duration);
+          const duration = Number.isFinite(durationRaw) && durationRaw! > 0 ? Number(durationRaw) : fallbackDuration;
+          const detectedLanguage = typeof transcriptionJson?.language === 'string' ? transcriptionJson.language : language;
+
+          const transcriptPlain = (segments.length ? segments.map(seg => seg.text).join(' ') : fallbackText).trim();
+          let summary = '';
+          try {
+            summary = await summarizeTranscriptWithOpenAI(openaiKey, transcriptPlain);
+          } catch (err) {
+            console.warn('video-to-script summary error', err);
+          }
+
+          return jsonResponse(
+            200,
+            {
+              summary,
+              duration,
+              language: detectedLanguage,
+              segments,
+            },
+            { cacheControl: NO_STORE_CACHE_CONTROL },
+          );
+        } catch (e: any) {
+          console.error('video-to-script error', e);
           return errorJson(500, 'Internal error', String(e?.message || e));
         }
       }
