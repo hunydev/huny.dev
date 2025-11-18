@@ -4,6 +4,7 @@ import { Icon } from '../../constants';
 import { ApiProviderBadge, ErrorMessage, LoadingButton, PlaygroundGuideModal } from '../ui';
 import { useApiCall } from '../../hooks/useApiCall';
 import { usePlaygroundGuide } from '../../hooks/usePlaygroundGuide';
+import { useFfmpeg } from '../../hooks/useFfmpeg';
 
 const LANG_HINTS = [
   { value: 'auto', label: '자동 감지' },
@@ -56,6 +57,8 @@ const VideoToScriptPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [detectedLanguage, setDetectedLanguage] = React.useState('');
   const [search, setSearch] = React.useState('');
   const [selectedSegmentId, setSelectedSegmentId] = React.useState<string | null>(null);
+  const ffmpeg = useFfmpeg();
+  const [shouldUseAudioOnly, setShouldUseAudioOnly] = React.useState(true);
 
   const api = useApiCall<VideoToScriptResponse>({
     url: '/api/video-to-script',
@@ -121,7 +124,19 @@ const VideoToScriptPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
       return;
     }
     const fd = new FormData();
-    fd.append('video', file);
+    try {
+      let payloadFile: File = file;
+      if (shouldUseAudioOnly) {
+        const extracted = await ffmpeg.convertVideoToAudio(file).catch(err => {
+          console.warn('FFmpeg 변환 실패, 원본 비디오 전송으로 대체', err);
+          setShouldUseAudioOnly(false);
+          return null;
+        });
+        if (extracted) {
+          payloadFile = extracted;
+        }
+      }
+    fd.append('video', payloadFile);
     if (languageHint !== 'auto') {
       fd.append('language', languageHint);
     }
@@ -131,6 +146,10 @@ const VideoToScriptPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
     setDuration(0);
     setSelectedSegmentId(null);
     await api.execute({ body: fd });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      api.setError(message || '오디오 추출에 실패했습니다.');
+    }
   };
 
   const normalizedSearch = search.trim().toLowerCase();

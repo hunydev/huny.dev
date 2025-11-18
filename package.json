@@ -16,6 +16,8 @@
     "gen:extensions": "node scripts/generate-vscode-extensions.mjs"
   },
   "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "cron-parser": "^5.4.0",
     "cronstrue": "^3.9.0",
     "dom-to-image-more": "^3.7.2",
