@@ -16,6 +16,7 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
   const [sceneThreshold, setSceneThreshold] = React.useState(0.15);
   const [thumbnails, setThumbnails] = React.useState<Thumbnail[]>([]);
   const [extracting, setExtracting] = React.useState(false);
+  const [progress, setProgress] = React.useState(0);
   const [error, setError] = React.useState('');
   const [selectedThumb, setSelectedThumb] = React.useState<Thumbnail | null>(null);
   const [showModal, setShowModal] = React.useState(false);
@@ -39,10 +40,16 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
     setError('');
   };
 
-  // 프레임 캡처 함수
+  // 프레임 캡처 함수 (고속 처리)
   const captureFrameAt = async (video: HTMLVideoElement, canvas: HTMLCanvasElement, time: number): Promise<Blob> => {
     return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        video.removeEventListener('seeked', onSeeked);
+        reject(new Error('Seek timeout'));
+      }, 5000);
+
       const onSeeked = () => {
+        clearTimeout(timeout);
         video.removeEventListener('seeked', onSeeked);
         const ctx = canvas.getContext('2d');
         if (!ctx) return reject(new Error('Canvas context 없음'));
@@ -54,29 +61,31 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
         canvas.toBlob((blob) => {
           if (!blob) return reject(new Error('toBlob 실패'));
           resolve(blob);
-        }, 'image/jpeg', 0.8);
+        }, 'image/jpeg', 0.7);  // 품질 0.8 → 0.7 (속도 향상)
       };
       
       video.addEventListener('seeked', onSeeked);
-      video.currentTime = time;
+      video.pause();              // 반드시 멈춰두고
+      video.currentTime = time;   // 원하는 시점으로 점프
     });
   };
 
-  // 두 프레임 간 픽셀 차이 계산 (장면 전환 감지용)
+  // 두 프레임 간 픽셀 차이 계산 (장면 전환 감지용) - 최적화 버전
   const calculateFrameDifference = (imageData1: ImageData, imageData2: ImageData): number => {
     const data1 = imageData1.data;
     const data2 = imageData2.data;
     let diff = 0;
     
-    // RGB 값만 비교 (alpha 제외)
-    for (let i = 0; i < data1.length; i += 4) {
+    // 샘플링: 4픽셀마다 1개씩만 비교 (속도 4배 향상, 정확도는 충분)
+    for (let i = 0; i < data1.length; i += 16) {  // 4픽셀 * 4채널 = 16
       diff += Math.abs(data1[i] - data2[i]);       // R
       diff += Math.abs(data1[i+1] - data2[i+1]);   // G
       diff += Math.abs(data1[i+2] - data2[i+2]);   // B
     }
     
-    // 0~1 범위로 정규화
-    return diff / (imageData1.width * imageData1.height * 3 * 255);
+    // 샘플링 비율 반영하여 정규화
+    const sampledPixels = Math.floor(data1.length / 16);
+    return diff / (sampledPixels * 3 * 255);
   };
 
   const handleExtract = async () => {
@@ -96,6 +105,7 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
     setExtracting(true);
     setError('');
     setThumbnails([]);
+    setProgress(0);
 
     try {
       // 비디오 로드 대기
@@ -113,39 +123,48 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
       console.log(`🎬 비디오 길이: ${duration.toFixed(2)}초`);
 
       if (enableScene) {
-        // 장면 전환 감지 모드: 1초 간격으로 스캔
-        const scanInterval = 1;
+        // 장면 전환 감지 모드: 적응형 스캔
         let prevImageData: ImageData | null = null;
         let lastCaptureTime = -intervalSec;
+        let t = 0;
 
-        for (let t = 0; t < duration; t += scanInterval) {
-          // 분석용 작은 캔버스 (64x36)
-          canvas.width = 64;
-          canvas.height = 36;
+        console.log(`🎬 장면 전환 감지 모드 시작 (간격: ${intervalSec}초, 민감도: ${sceneThreshold})`);
+
+        while (t < duration) {
+          // 분석용 매우 작은 캔버스 (32x18) - 속도 최적화
+          canvas.width = 32;
+          canvas.height = 18;
           
           await new Promise<void>((resolve) => {
+            let timeout: NodeJS.Timeout;
             const onSeeked = () => {
+              clearTimeout(timeout);
               video.removeEventListener('seeked', onSeeked);
-              ctx.drawImage(video, 0, 0, 64, 36);
+              ctx.drawImage(video, 0, 0, 32, 18);
               resolve();
             };
+            
+            timeout = setTimeout(() => {
+              video.removeEventListener('seeked', onSeeked);
+              resolve(); // 타임아웃 시에도 계속 진행
+            }, 2000);
+
             video.addEventListener('seeked', onSeeked);
+            video.pause();
             video.currentTime = t;
           });
 
-          const currentImageData = ctx.getImageData(0, 0, 64, 36);
+          const currentImageData = ctx.getImageData(0, 0, 32, 18);
           
           // 간격 기반 캡처 체크
-          const shouldCaptureByInterval = (t - lastCaptureTime) >= intervalSec;
+          const timeSinceLastCapture = t - lastCaptureTime;
+          const shouldCaptureByInterval = timeSinceLastCapture >= intervalSec;
           
           // 장면 전환 체크
           let shouldCaptureByScene = false;
-          if (prevImageData) {
+          if (prevImageData && !shouldCaptureByInterval) {
             const diff = calculateFrameDifference(prevImageData, currentImageData);
             shouldCaptureByScene = diff > sceneThreshold;
-            if (shouldCaptureByScene) {
-              console.log(`🎞️  장면 전환 감지: ${t.toFixed(2)}초 (차이: ${diff.toFixed(3)})`);
-            }
           }
 
           if (shouldCaptureByInterval || shouldCaptureByScene) {
@@ -156,14 +175,29 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
               timestamp: t,
               filename: `thumb_${thumbs.length + 1}.jpg`,
             });
-            console.log(`✅ 썸네일 추출: ${t.toFixed(2)}초`);
             lastCaptureTime = t;
+            
+            // 캡처 직후에는 빠르게 다음 구간으로 이동 (간격의 80% 점프)
+            if (shouldCaptureByInterval) {
+              t += intervalSec * 0.8;
+            } else {
+              t += 1; // 장면 전환 시 1초씩 스캔
+            }
+          } else {
+            // 캡처하지 않으면 빠르게 스캔 (1.5초 점프)
+            t += 1.5;
           }
 
           prevImageData = currentImageData;
+          
+          // 진행률 업데이트
+          setProgress(Math.min(95, Math.floor((t / duration) * 100)));
         }
       } else {
-        // 간격 기반 캡처만
+        // 간격 기반 캡처만 (고속 모드)
+        console.log(`⚡ 고속 모드 시작 (간격: ${intervalSec}초)`);
+        const startTime = Date.now();
+        
         for (let t = 0; t < duration; t += intervalSec) {
           const blob = await captureFrameAt(video, canvas, t);
           const url = URL.createObjectURL(blob);
@@ -172,18 +206,29 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
             timestamp: t,
             filename: `thumb_${thumbs.length + 1}.jpg`,
           });
-          console.log(`✅ 썸네일 추출: ${t.toFixed(2)}초`);
+          
+          // 진행률 업데이트
+          setProgress(Math.min(95, Math.floor((t / duration) * 100)));
         }
+        
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        console.log(`⚡ 고속 모드 완료: ${elapsed}초 소요`);
       }
 
       console.log(`🎉 총 ${thumbs.length}개의 썸네일 추출 완료`);
+      setProgress(100);
       setThumbnails(thumbs);
+      
+      // 메모리 정리
+      video.src = '';
+      video.load();
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       setError(message || '썸네일 추출에 실패했습니다.');
       console.error('썸네일 추출 오류:', err);
     } finally {
       setExtracting(false);
+      setProgress(0);
     }
   };
 
@@ -366,12 +411,22 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
                 {extracting ? (
                   <>
                     <Icon name="loader" className="animate-spin" />
-                    추출 중...
+                    추출 중... {progress > 0 && `${progress}%`}
                   </>
                 ) : (
                   '썸네일 추출'
                 )}
               </button>
+
+              {/* 진행률 바 */}
+              {extracting && progress > 0 && (
+                <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-blue-500 h-full transition-all duration-300"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              )}
 
               {error && (
                 <div className="p-4 bg-red-900/30 border border-red-700 rounded-lg text-red-300 text-sm">
