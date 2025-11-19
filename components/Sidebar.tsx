@@ -208,6 +208,7 @@ const PlaygroundView: React.FC<{ onOpenFile: (fileId: string) => void; apiHasGem
     { id: 'scene-to-script', icon: 'sceneToScript', label: 'Scene to Script' },
     { id: 'video-to-script', icon: 'videoToScript', label: 'Video to Script' },
     { id: 'dialogue-to-script', icon: 'dialogueToScript', label: 'Dialogue to Script' },
+    { id: 'video-to-grid', icon: 'videoToGrid', label: 'Video to Grid' },
     { id: 'favicon-distiller', icon: 'favicon', label: 'Favicon Distiller' },
     { id: 'avatar-distiller', icon: 'avatar', label: 'Avatar Distiller' },
     { id: 'cover-crafter', icon: 'coverCrafter', label: 'Cover Crafter' },

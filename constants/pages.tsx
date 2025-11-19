@@ -40,6 +40,7 @@ const NonNativeKoreanTTSPage = React.lazy(() => import('../components/pages/NonN
 const SceneToScriptPage = React.lazy(() => import('../components/pages/SceneToScriptPage'));
 const VideoToScriptPage = React.lazy(() => import('../components/pages/VideoToScriptPage'));
 const DialogueToScriptPage = React.lazy(() => import('../components/pages/DialogueToScriptPage'));
+const VideoToGridPage = React.lazy(() => import('../components/pages/VideoToGridPage'));
 const GearPage = React.lazy(() => import('../components/pages/GearPage'));
 const InspirationGalleryPage = React.lazy(() => import('../components/pages/InspirationGalleryPage'));
 const YouTubeChannelsPage = React.lazy(() => import('../components/pages/YouTubeChannelsPage'));
@@ -262,6 +263,11 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     component: DialogueToScriptPage,
     icon: <Icon name="dialogueToScript" className="mr-2" />,
     apiRequirement: { provider: 'openai', features: ['text'] },
+  },
+  'video-to-grid': {
+    title: 'Video to Grid',
+    component: VideoToGridPage,
+    icon: <Icon name="videoToGrid" className="mr-2" />,
   },
   monitor: {
     title: 'monitor',
