@@ -58,7 +58,6 @@ const VideoToScriptPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
   const [search, setSearch] = React.useState('');
   const [selectedSegmentId, setSelectedSegmentId] = React.useState<string | null>(null);
   const ffmpeg = useFfmpeg();
-  const [shouldUseAudioOnly, setShouldUseAudioOnly] = React.useState(true);
   const segmentRefs = React.useRef<Map<string, HTMLButtonElement>>(new Map());
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -128,13 +127,14 @@ const VideoToScriptPage: React.FC<PageProps> = ({ apiTask, isActiveTab }) => {
     const fd = new FormData();
     try {
       let payloadFile: File = file;
-      if (shouldUseAudioOnly) {
+      // FFmpeg가 준비되면 모든 파일을 표준 mp3로 변환 (m4a, aac 등 호환성 보장)
+      if (ffmpeg.ready) {
         const extracted = await ffmpeg.convertVideoToAudio(file).catch(err => {
-          console.warn('FFmpeg 변환 실패, 원본 비디오 전송으로 대체', err);
-          setShouldUseAudioOnly(false);
+          console.warn('FFmpeg 변환 실패, 원본 파일 전송으로 대체:', err);
           return null;
         });
         if (extracted) {
+          console.log(`✅ 파일 변환 완료: ${file.name} (${file.size}B) → ${extracted.name} (${extracted.size}B)`);
           payloadFile = extracted;
         }
       }

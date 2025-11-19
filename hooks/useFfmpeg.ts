@@ -62,10 +62,8 @@ export function useFfmpeg() {
       if (!file) {
         throw new Error('변환할 파일이 없습니다.');
       }
-      if (file.type?.startsWith('audio/')) {
-        return file;
-      }
 
+      // 모든 파일을 표준 mp3로 변환 (m4a, aac 등 호환성 문제 방지)
       const ffmpeg = await ensureFfmpeg();
       const inputName = `input-${Date.now()}`;
       const outputExt = 'mp3';
