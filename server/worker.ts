@@ -64,6 +64,11 @@ const ALLOWED_AV_MIME_TYPES = new Set<string>([
   'audio/webm',
   'audio/ogg',
   'audio/flac',
+  'audio/m4a',
+  'audio/x-m4a',
+  'audio/mp4',
+  'audio/aac',
+  'audio/x-aac',
 ]);
 
 const FEMALE_VOICES = [
