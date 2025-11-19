@@ -25,6 +25,7 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
   const modalVideoRef = React.useRef<HTMLVideoElement | null>(null);
   const hiddenVideoRef = React.useRef<HTMLVideoElement | null>(null);
   const hiddenCanvasRef = React.useRef<HTMLCanvasElement | null>(null);
+  const abortRef = React.useRef<boolean>(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -88,6 +89,11 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
     return diff / (sampledPixels * 3 * 255);
   };
 
+  const handleAbort = () => {
+    abortRef.current = true;
+    console.log('⏹️  사용자가 추출을 중단했습니다');
+  };
+
   const handleExtract = async () => {
     if (!file) {
       setError('비디오 파일을 선택해 주세요.');
@@ -102,6 +108,7 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
       return;
     }
 
+    abortRef.current = false;
     setExtracting(true);
     setError('');
     setThumbnails([]);
@@ -116,7 +123,6 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
       });
 
       const duration = video.duration;
-      const thumbs: Thumbnail[] = [];
       const ctx = canvas.getContext('2d');
       if (!ctx) throw new Error('Canvas context 없음');
 
@@ -130,7 +136,7 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
 
         console.log(`🎬 장면 전환 감지 모드 시작 (간격: ${intervalSec}초, 민감도: ${sceneThreshold})`);
 
-        while (t < duration) {
+        while (t < duration && !abortRef.current) {
           // 분석용 매우 작은 캔버스 (32x18) - 속도 최적화
           canvas.width = 32;
           canvas.height = 18;
@@ -170,11 +176,14 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
           if (shouldCaptureByInterval || shouldCaptureByScene) {
             const blob = await captureFrameAt(video, canvas, t);
             const url = URL.createObjectURL(blob);
-            thumbs.push({
+            const newThumb: Thumbnail = {
               url,
               timestamp: t,
-              filename: `thumb_${thumbs.length + 1}.jpg`,
-            });
+              filename: `thumb_${Date.now()}.jpg`,
+            };
+            
+            // 실시간으로 그리드에 추가
+            setThumbnails(prev => [...prev, newThumb]);
             lastCaptureTime = t;
             
             // 캡처 직후에는 빠르게 다음 구간으로 이동 (간격의 80% 점프)
@@ -198,14 +207,17 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
         console.log(`⚡ 고속 모드 시작 (간격: ${intervalSec}초)`);
         const startTime = Date.now();
         
-        for (let t = 0; t < duration; t += intervalSec) {
+        for (let t = 0; t < duration && !abortRef.current; t += intervalSec) {
           const blob = await captureFrameAt(video, canvas, t);
           const url = URL.createObjectURL(blob);
-          thumbs.push({
+          const newThumb: Thumbnail = {
             url,
             timestamp: t,
-            filename: `thumb_${thumbs.length + 1}.jpg`,
-          });
+            filename: `thumb_${Date.now()}.jpg`,
+          };
+          
+          // 실시간으로 그리드에 추가
+          setThumbnails(prev => [...prev, newThumb]);
           
           // 진행률 업데이트
           setProgress(Math.min(95, Math.floor((t / duration) * 100)));
@@ -215,9 +227,13 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
         console.log(`⚡ 고속 모드 완료: ${elapsed}초 소요`);
       }
 
-      console.log(`🎉 총 ${thumbs.length}개의 썸네일 추출 완료`);
+      if (abortRef.current) {
+        console.log('⏹️  추출이 중단되었습니다');
+      } else {
+        console.log(`🎉 추출 완료`);
+      }
+      
       setProgress(100);
-      setThumbnails(thumbs);
       
       // 메모리 정리
       video.src = '';
@@ -290,12 +306,26 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
         </div>
       </header>
 
-      <main className="space-y-6">
+      <main className="space-y-6 relative">
+        {/* Sticky 중단 버튼 - 그리드 스크롤 중에도 항상 보임 */}
+        {extracting && (
+          <div className="sticky top-20 z-20 flex justify-center pointer-events-none">
+            <button
+              onClick={handleAbort}
+              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-2xl transition-all flex items-center gap-2 pointer-events-auto animate-pulse"
+            >
+              <Icon name="close" className="w-5 h-5" />
+              추출 중단
+            </button>
+          </div>
+        )}
+
         {file && (
           <div className="flex justify-end">
             <button
               onClick={handleReset}
-              className="px-4 py-2 text-sm bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white rounded-lg transition-colors"
+              disabled={extracting}
+              className="px-4 py-2 text-sm bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               초기화
             </button>
@@ -348,7 +378,8 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
                     step="1"
                     value={intervalSec}
                     onChange={(e) => setIntervalSec(Number(e.target.value))}
-                    className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                    disabled={extracting}
+                    className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                   <input
                     type="number"
@@ -357,7 +388,8 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
                     step="1"
                     value={intervalSec}
                     onChange={(e) => setIntervalSec(Math.min(10, Math.max(1, Number(e.target.value))))}
-                    className="w-20 px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                    disabled={extracting}
+                    className="w-20 px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -369,7 +401,8 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
                     type="checkbox"
                     checked={enableScene}
                     onChange={(e) => setEnableScene(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+                    disabled={extracting}
+                    className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                   장면 전환 감지
                 </label>
@@ -386,7 +419,8 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
                         step="0.01"
                         value={sceneThreshold}
                         onChange={(e) => setSceneThreshold(Number(e.target.value))}
-                        className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                        disabled={extracting}
+                        className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       />
                       <input
                         type="number"
@@ -395,7 +429,8 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
                         step="0.01"
                         value={sceneThreshold}
                         onChange={(e) => setSceneThreshold(Math.min(maxSceneThreshold, Math.max(0.01, Number(e.target.value))))}
-                        className="w-20 px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                        disabled={extracting}
+                        className="w-20 px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                       />
                     </div>
                   </div>
@@ -436,12 +471,15 @@ const VideoToGridPage: React.FC<PageProps> = ({ isActiveTab }) => {
           </section>
         )}
 
-        {/* 그리드 결과 */}
+        {/* 그리드 결과 - 실시간 업데이트 */}
         {thumbnails.length > 0 && (
           <section className="bg-white/5 rounded-xl p-6 border border-white/10">
-              <h2 className="text-lg font-semibold text-white mb-4">
-                추출된 썸네일 ({thumbnails.length}개)
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-white">
+                  추출된 썸네일 ({thumbnails.length}개)
+                  {extracting && <span className="ml-2 text-sm text-blue-400 animate-pulse">실시간 업데이트 중...</span>}
+                </h2>
+              </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                 {thumbnails.map((thumb) => (
                   <button
