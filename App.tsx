@@ -16,7 +16,7 @@ import { ApiTaskProvider, useApiTask } from './contexts/ApiTaskContext';
 const APP_VERSION = '2025.11.19.4';
 
 const TABS_STORAGE_KEY = 'app.openTabs.v1';
-const DEFAULT_TAB_IDS: readonly string[] = ['welcome', 'works', 'domain', 'about'];
+const DEFAULT_TAB_IDS: readonly string[] = ['welcome', 'works', 'about'];
 
 // Hash <-> ViewId 변환 helper 함수
 const viewIdToHash = (viewId: ViewId): string => {
@@ -344,6 +344,22 @@ const App: React.FC = () => {
     if (restoredRef.current) return;
     restoredRef.current = true;
     try {
+      // Check if hash is #hello for special handling
+      const hash = typeof window !== 'undefined' ? window.location.hash : '';
+      const isHelloRoute = hash === '#hello';
+      
+      if (isHelloRoute) {
+        // #hello: Open default tabs and redirect to #explorer
+        DEFAULT_TAB_IDS.forEach(id => handleOpenFile(id));
+        setActiveTabId(DEFAULT_TAB_IDS[0]);
+        // Redirect to #explorer
+        if (typeof window !== 'undefined' && window.history) {
+          window.history.replaceState(null, '', '#explorer');
+          setActiveView(ViewId.Explorer);
+        }
+        return;
+      }
+      
       if (shortcutHandledRef.current) {
         const ids = initialShortcutIdsRef.current ?? [];
         if (ids.length > 0) {
