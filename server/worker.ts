@@ -843,6 +843,138 @@ export default {
         }
       }
 
+      if (url.pathname === '/api/dialogue-to-script') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        try {
+          const openaiKey = await getOpenAIKeyFromRequest(request, env);
+          if (!openaiKey) {
+            return errorJson(401, 'OpenAI 기능은 사용자 API 키가 필요합니다. 설정에서 OPENAI_API_KEY를 등록해 주세요.');
+          }
+
+          const form = await request.formData();
+          const media = form.get('video');
+          if (!(media instanceof File)) {
+            return errorJson(400, '비디오 파일을 전달해 주세요.');
+          }
+
+          const validationError = validateAvFile(media);
+          if (validationError) {
+            return errorJson(400, validationError);
+          }
+
+          const languageRaw = typeof form.get('language') === 'string' ? String(form.get('language')) : '';
+          const language = /^[a-z]{2}$/i.test(languageRaw.trim()) ? languageRaw.trim().toLowerCase() : '';
+
+          const transcriptionPayload = new FormData();
+          transcriptionPayload.append('file', media, media.name || 'video-upload');
+          transcriptionPayload.append('model', 'gpt-4o-transcribe-diarize');
+          transcriptionPayload.append('response_format', 'diarized_json');
+          transcriptionPayload.append('chunking_strategy', 'auto');
+          if (language) {
+            transcriptionPayload.append('language', language);
+          }
+
+          const transcriptionRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${openaiKey}`,
+            },
+            body: transcriptionPayload,
+          });
+
+          const transcriptionText = await transcriptionRes.text();
+          if (!transcriptionRes.ok) {
+            let detail: unknown = transcriptionText;
+            try {
+              detail = transcriptionText ? JSON.parse(transcriptionText) : undefined;
+            } catch {
+              // ignore
+            }
+            const errMessage = (detail as any)?.error?.message || 'OpenAI 전사 요청이 실패했습니다.';
+            return errorJson(transcriptionRes.status, errMessage, detail);
+          }
+
+          let transcriptionJson: any = {};
+          try {
+            transcriptionJson = transcriptionText ? JSON.parse(transcriptionText) : {};
+          } catch (err) {
+            return errorJson(502, 'OpenAI 전사 응답을 파싱하지 못했습니다.', String(err));
+          }
+
+          const rawSegments: any[] = Array.isArray(transcriptionJson?.segments) ? transcriptionJson.segments : [];
+          const toSeconds = (value: unknown): number => {
+            const num = typeof value === 'number' ? value : Number(value);
+            if (!Number.isFinite(num)) return 0;
+            return Math.max(0, Number(num.toFixed(3)));
+          };
+
+          let segments = rawSegments
+            .map((segment, idx) => {
+              const text = typeof segment?.text === 'string' ? segment.text.trim() : '';
+              if (!text) return null;
+              const start = toSeconds(segment?.start);
+              const endRaw = toSeconds(segment?.end);
+              const end = endRaw >= start ? endRaw : start;
+              const speaker = typeof segment?.speaker === 'string' ? segment.speaker.trim() : '';
+              return {
+                id: String(segment?.id ?? `seg_${String(idx).padStart(3, '0')}`),
+                text,
+                start,
+                end,
+                speaker: speaker || undefined,
+              };
+            })
+            .filter(Boolean) as Array<{ id: string; text: string; start: number; end: number; speaker?: string }>;
+
+          if (segments.length > MAX_TRANSCRIPT_SEGMENTS) {
+            segments = segments.slice(0, MAX_TRANSCRIPT_SEGMENTS);
+          }
+
+          const fallbackText = typeof transcriptionJson?.text === 'string' ? transcriptionJson.text.trim() : '';
+          if (segments.length === 0 && fallbackText) {
+            segments = [
+              {
+                id: 'seg_000',
+                text: fallbackText,
+                start: 0,
+                end: toSeconds(transcriptionJson?.duration) || 0,
+              },
+            ];
+          }
+
+          const fallbackDuration = segments.length ? segments[segments.length - 1].end : 0;
+          const durationRaw = typeof transcriptionJson?.duration === 'number' ? transcriptionJson.duration : Number(transcriptionJson?.duration);
+          const duration = Number.isFinite(durationRaw) && durationRaw! > 0 ? Number(durationRaw) : fallbackDuration;
+          const detectedLanguage = typeof transcriptionJson?.language === 'string' ? transcriptionJson.language : language;
+
+          const transcriptPlain = (segments.length ? segments.map(seg => seg.text).join(' ') : fallbackText).trim();
+          let summary = '';
+          try {
+            summary = await summarizeTranscriptWithOpenAI(openaiKey, transcriptPlain);
+          } catch (err) {
+            console.warn('dialogue-to-script summary error', err);
+          }
+
+          // Extract unique speakers for frontend
+          const speakers = Array.from(new Set(segments.map(s => s.speaker).filter(Boolean))) as string[];
+
+          return jsonResponse(
+            200,
+            {
+              summary,
+              duration,
+              language: detectedLanguage,
+              segments,
+              speakers,
+            },
+            { cacheControl: NO_STORE_CACHE_CONTROL },
+          );
+        } catch (e: any) {
+          console.error('dialogue-to-script error', e);
+          return errorJson(500, 'Internal error', String(e?.message || e));
+        }
+      }
+
       if (url.pathname === '/api/cover-crafter') {
         if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
         try {
