@@ -107,7 +107,7 @@ export const EXTERNAL_LINKS: Partial<Record<ViewId, { title: string; url: string
   [ViewId.Apps]: { title: 'Apps', url: 'https://apps.huny.dev' },
   [ViewId.Sites]: { title: 'Sites', url: 'https://sites.huny.dev' },
   [ViewId.GitHub]: { title: 'GitHub', url: 'https://github.com/hunydev' },
-  [ViewId.Discord]: { title: 'Discord', url: 'https://discord.gg/2NWa39bU' },
+  [ViewId.Discord]: { title: 'Discord', url: 'https://discord.huny.dev' },
   [ViewId.X]: { title: 'X / Twitter', url: 'https://x.com/janghun2722' },
   [ViewId.Email]: { title: 'Email', url: 'mailto:jang@huny.dev' },
 };

@@ -78,7 +78,7 @@ export async function render(url: string, manifest?: ViteManifest) {
       sameAs: [
         'https://github.com/hunydev',
         'https://x.com/janghun2722',
-        'https://discord.gg/2NWa39bU',
+        'https://discord.huny.dev',
         'https://blog.huny.dev',
         'https://apps.huny.dev',
         'https://sites.huny.dev',
