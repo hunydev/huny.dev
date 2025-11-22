@@ -1145,6 +1145,25 @@ const ICON_DEFS = {
     ),
     defaultClassName: 'w-4 h-4 text-gray-400',
     attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  },
+  readMatch: { //tabler - text-scan-2 (text with scan lines)
+    viewBox: '0 0 24 24',
+    nodes: (
+      <>
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M5 7v-2a2 2 0 0 1 2 -2h2" />
+        <path d="M15 3h2a2 2 0 0 1 2 2v2" />
+        <path d="M19 15v2a2 2 0 0 1 -2 2h-2" />
+        <path d="M9 21h-2a2 2 0 0 1 -2 -2v-2" />
+        <path d="M7 8h1" />
+        <path d="M10 8h1" />
+        <path d="M7 12h6" />
+        <path d="M7 16h1" />
+        <path d="M10 16h1" />
+      </>
+    ),
+    defaultClassName: 'w-4 h-4 text-gray-400',
+    attrs: { fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
   }
 } satisfies Record<string, IconDefinition>;
 

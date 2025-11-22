@@ -33,6 +33,7 @@ const PLAYGROUND_BASE_IDS = new Set<string>([
   'video-to-script',
   'dialogue-to-script',
   'video-to-grid',
+  'read-match',
 ]);
 
 export const isPlaygroundBaseId = (baseId: string) => PLAYGROUND_BASE_IDS.has(baseId);

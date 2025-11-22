@@ -41,6 +41,7 @@ const SceneToScriptPage = React.lazy(() => import('../components/pages/SceneToSc
 const VideoToScriptPage = React.lazy(() => import('../components/pages/VideoToScriptPage'));
 const DialogueToScriptPage = React.lazy(() => import('../components/pages/DialogueToScriptPage'));
 const VideoToGridPage = React.lazy(() => import('../components/pages/VideoToGridPage'));
+const ReadMatchPage = React.lazy(() => import('../components/pages/ReadMatchPage'));
 const GearPage = React.lazy(() => import('../components/pages/GearPage'));
 const InspirationGalleryPage = React.lazy(() => import('../components/pages/InspirationGalleryPage'));
 const YouTubeChannelsPage = React.lazy(() => import('../components/pages/YouTubeChannelsPage'));
@@ -268,6 +269,12 @@ export const PAGES: Record<string, { title: string; component: PageComponent; ic
     title: 'Video to Grid',
     component: VideoToGridPage,
     icon: <Icon name="videoToGrid" className="mr-2" />,
+  },
+  'read-match': {
+    title: 'Read Match',
+    component: ReadMatchPage,
+    icon: <Icon name="readMatch" className="mr-2" />,
+    apiRequirement: { provider: 'openai', features: ['text'] },
   },
   monitor: {
     title: 'monitor',

@@ -424,6 +424,226 @@ const buildConversationPrompt = (dialogue: Array<SceneDialogueLine>): string => 
   return `${intro}\n${body}`;
 };
 
+// 텍스트 정규화: 소문자 변환만
+const normalizeForComparison = (text: string): string => {
+  return text
+    .toLowerCase()
+    .replace(/\s+/g, ' ') // 연속된 공백을 하나로
+    .trim();
+};
+
+// Levenshtein Distance 계산
+const levenshteinDistance = (str1: string, str2: string): number => {
+  const m = str1.length;
+  const n = str2.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (str1[i - 1] === str2[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1];
+      } else {
+        dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]) + 1;
+      }
+    }
+  }
+
+  return dp[m][n];
+};
+
+// 단어 단위 Diff 생성 (WER 기반)
+const generateWordDiff = (str1: string, str2: string): Array<{ type: 'equal' | 'insert' | 'delete' | 'replace'; oldText?: string; newText?: string }> => {
+  const words1 = str1.trim().split(/\s+/).filter(Boolean);
+  const words2 = str2.trim().split(/\s+/).filter(Boolean);
+
+  const m = words1.length;
+  const n = words2.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (words1[i - 1] === words2[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1];
+      } else {
+        dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]) + 1;
+      }
+    }
+  }
+
+  // 역추적하여 operations 생성
+  const operations: Array<{ type: 'equal' | 'insert' | 'delete' | 'replace'; oldText?: string; newText?: string }> = [];
+  let i = m;
+  let j = n;
+
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && words1[i - 1] === words2[j - 1]) {
+      operations.unshift({ type: 'equal', oldText: words1[i - 1] });
+      i--;
+      j--;
+    } else if (i > 0 && j > 0 && dp[i][j] === dp[i - 1][j - 1] + 1) {
+      operations.unshift({ type: 'replace', oldText: words1[i - 1], newText: words2[j - 1] });
+      i--;
+      j--;
+    } else if (j > 0 && (i === 0 || dp[i][j] === dp[i][j - 1] + 1)) {
+      operations.unshift({ type: 'insert', newText: words2[j - 1] });
+      j--;
+    } else {
+      operations.unshift({ type: 'delete', oldText: words1[i - 1] });
+      i--;
+    }
+  }
+
+  return operations;
+};
+
+// CER (Character Error Rate) 계산
+const calculateCER = (reference: string, hypothesis: string): { substitutions: number; deletions: number; insertions: number; rate: number; matchRate: number } => {
+  // 공백 제거하고 문자 배열로 변환
+  const refChars = reference.replace(/\s+/g, '').split('');
+  const hypChars = hypothesis.replace(/\s+/g, '').split('');
+
+  const m = refChars.length;
+  const n = hypChars.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+  const ops: string[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(''));
+
+  for (let i = 0; i <= m; i++) {
+    dp[i][0] = i;
+    ops[i][0] = 'D';
+  }
+  for (let j = 0; j <= n; j++) {
+    dp[0][j] = j;
+    ops[0][j] = 'I';
+  }
+  ops[0][0] = '';
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (refChars[i - 1] === hypChars[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1];
+        ops[i][j] = 'E';
+      } else {
+        const sub = dp[i - 1][j - 1] + 1;
+        const del = dp[i - 1][j] + 1;
+        const ins = dp[i][j - 1] + 1;
+        const min = Math.min(sub, del, ins);
+
+        dp[i][j] = min;
+        if (min === sub) ops[i][j] = 'S';
+        else if (min === del) ops[i][j] = 'D';
+        else ops[i][j] = 'I';
+      }
+    }
+  }
+
+  // 역추적하여 S, D, I 카운트
+  let substitutions = 0;
+  let deletions = 0;
+  let insertions = 0;
+  let i = m;
+  let j = n;
+
+  while (i > 0 || j > 0) {
+    const op = ops[i][j];
+    if (op === 'E') {
+      i--;
+      j--;
+    } else if (op === 'S') {
+      substitutions++;
+      i--;
+      j--;
+    } else if (op === 'D') {
+      deletions++;
+      i--;
+    } else {
+      insertions++;
+      j--;
+    }
+  }
+
+  const rate = m > 0 ? (substitutions + deletions + insertions) / m : 0;
+  const matchRate = 1 - rate;
+
+  return { substitutions, deletions, insertions, rate, matchRate };
+};
+
+// WER (Word Error Rate) 계산
+const calculateWER = (reference: string, hypothesis: string): { substitutions: number; deletions: number; insertions: number; rate: number; matchRate: number } => {
+  // 단어 단위로 tokenize
+  const refWords = reference.trim().split(/\s+/).filter(Boolean);
+  const hypWords = hypothesis.trim().split(/\s+/).filter(Boolean);
+
+  const m = refWords.length;
+  const n = hypWords.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+  const ops: string[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(''));
+
+  for (let i = 0; i <= m; i++) {
+    dp[i][0] = i;
+    ops[i][0] = 'D';
+  }
+  for (let j = 0; j <= n; j++) {
+    dp[0][j] = j;
+    ops[0][j] = 'I';
+  }
+  ops[0][0] = '';
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (refWords[i - 1] === hypWords[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1];
+        ops[i][j] = 'E';
+      } else {
+        const sub = dp[i - 1][j - 1] + 1;
+        const del = dp[i - 1][j] + 1;
+        const ins = dp[i][j - 1] + 1;
+        const min = Math.min(sub, del, ins);
+
+        dp[i][j] = min;
+        if (min === sub) ops[i][j] = 'S';
+        else if (min === del) ops[i][j] = 'D';
+        else ops[i][j] = 'I';
+      }
+    }
+  }
+
+  // 역추적하여 S, D, I 카운트
+  let substitutions = 0;
+  let deletions = 0;
+  let insertions = 0;
+  let i = m;
+  let j = n;
+
+  while (i > 0 || j > 0) {
+    const op = ops[i][j];
+    if (op === 'E') {
+      i--;
+      j--;
+    } else if (op === 'S') {
+      substitutions++;
+      i--;
+      j--;
+    } else if (op === 'D') {
+      deletions++;
+      i--;
+    } else {
+      insertions++;
+      j--;
+    }
+  }
+
+  const rate = m > 0 ? (substitutions + deletions + insertions) / m : 0;
+  const matchRate = 1 - rate;
+
+  return { substitutions, deletions, insertions, rate, matchRate };
+};
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
@@ -976,6 +1196,137 @@ export default {
           );
         } catch (e: any) {
           console.error('dialogue-to-script error', e);
+          return errorJson(500, 'Internal error', String(e?.message || e));
+        }
+      }
+
+      if (url.pathname === '/api/read-match') {
+        if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+        try {
+          const openaiKey = await getOpenAIKeyFromRequest(request, env);
+          if (!openaiKey) {
+            return errorJson(401, 'OpenAI 기능은 사용자 API 키가 필요합니다. 설정에서 OPENAI_API_KEY를 등록해 주세요.');
+          }
+
+          const form = await request.formData();
+          const audio = form.get('audio');
+          if (!(audio instanceof File)) {
+            return errorJson(400, '음원 파일을 전달해 주세요.');
+          }
+
+          const validationError = validateAvFile(audio);
+          if (validationError) {
+            return errorJson(400, validationError);
+          }
+
+          const referenceText = typeof form.get('referenceText') === 'string' ? String(form.get('referenceText')).trim() : '';
+          if (!referenceText) {
+            return errorJson(400, '원형 텍스트를 전달해 주세요.');
+          }
+
+          // Whisper로 음성 인식 (단어별 타임스탬프 포함)
+          const transcriptionPayload = new FormData();
+          transcriptionPayload.append('file', audio, audio.name || 'audio-upload');
+          transcriptionPayload.append('model', 'whisper-1');
+          transcriptionPayload.append('response_format', 'verbose_json');
+          transcriptionPayload.append('temperature', '0');
+          transcriptionPayload.append('timestamp_granularities[]', 'word');
+
+          const transcriptionRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${openaiKey}`,
+            },
+            body: transcriptionPayload,
+          });
+
+          const transcriptionText = await transcriptionRes.text();
+          if (!transcriptionRes.ok) {
+            let detail: unknown = transcriptionText;
+            try {
+              detail = transcriptionText ? JSON.parse(transcriptionText) : undefined;
+            } catch {
+              // ignore
+            }
+            const errMessage = (detail as any)?.error?.message || 'OpenAI 전사 요청이 실패했습니다.';
+            return errorJson(transcriptionRes.status, errMessage, detail);
+          }
+
+          let transcriptionJson: any = {};
+          try {
+            transcriptionJson = transcriptionText ? JSON.parse(transcriptionText) : {};
+          } catch (err) {
+            return errorJson(502, 'OpenAI 전사 응답을 파싱하지 못했습니다.', String(err));
+          }
+
+          const recognizedText = typeof transcriptionJson?.text === 'string' ? transcriptionJson.text.trim() : '';
+          if (!recognizedText) {
+            return errorJson(400, '음성 인식 결과가 비어 있습니다.');
+          }
+
+          // 단어별 타임스탬프 추출
+          const words: Array<{ word: string; start: number; end: number }> = [];
+          if (Array.isArray(transcriptionJson?.words)) {
+            transcriptionJson.words.forEach((w: any) => {
+              const word = typeof w?.word === 'string' ? w.word.trim() : '';
+              const start = typeof w?.start === 'number' ? w.start : 0;
+              const end = typeof w?.end === 'number' ? w.end : start;
+              if (word) {
+                words.push({ word, start, end });
+              }
+            });
+          }
+
+          const hypothesis = recognizedText;
+          const reference = referenceText;
+
+          // 텍스트 정규화 (심볼 제거, 소문자 변환)
+          const normalizedReference = normalizeForComparison(reference);
+          const normalizedHypothesis = normalizeForComparison(hypothesis);
+
+          // Levenshtein Distance 계산 (정규화된 텍스트)
+          const distance = levenshteinDistance(normalizedReference, normalizedHypothesis);
+          const maxLen = Math.max(normalizedReference.length, normalizedHypothesis.length);
+          const levenshteinSimilarity = maxLen > 0 ? 1 - distance / maxLen : 1;
+
+          // CER 계산 (정규화된 텍스트)
+          const cer = calculateCER(normalizedReference, normalizedHypothesis);
+
+          // WER 계산 (정규화된 텍스트)
+          const wer = calculateWER(normalizedReference, normalizedHypothesis);
+
+          // Diff 생성 (단어 단위, 정규화된 텍스트)
+          const diff = generateWordDiff(normalizedReference, normalizedHypothesis);
+
+          return jsonResponse(
+            200,
+            {
+              recognizedText: hypothesis,
+              words,
+              levenshtein: {
+                distance,
+                similarity: levenshteinSimilarity,
+              },
+              cer: {
+                substitutions: cer.substitutions,
+                deletions: cer.deletions,
+                insertions: cer.insertions,
+                rate: cer.rate,
+                matchRate: cer.matchRate,
+              },
+              wer: {
+                substitutions: wer.substitutions,
+                deletions: wer.deletions,
+                insertions: wer.insertions,
+                rate: wer.rate,
+                matchRate: wer.matchRate,
+              },
+              diff: diff,
+            },
+            { cacheControl: NO_STORE_CACHE_CONTROL },
+          );
+        } catch (e: any) {
+          console.error('read-match error', e);
           return errorJson(500, 'Internal error', String(e?.message || e));
         }
       }
