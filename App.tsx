@@ -1374,9 +1374,37 @@ const App: React.FC = () => {
               </section>
 
               <section>
+                <h3 className="text-sm font-semibold text-white mb-2">Media & Document Processing</h3>
+                <ul className="space-y-1 text-gray-300">
+                  <li><span className="font-medium text-white">@ffmpeg/ffmpeg 0.12.15 / @ffmpeg/util 0.12.2</span> — LGPL-3.0-or-later License</li>
+                  <li><span className="font-medium text-white">jspdf 2.5.2</span> — MIT License</li>
+                  <li><span className="font-medium text-white">pdf-lib 1.17.1</span> — MIT License</li>
+                  <li><span className="font-medium text-white">pdfjs-dist 5.4.394</span> — Apache-2.0 License</li>
+                  <li><span className="font-medium text-white">dom-to-image-more 3.7.2</span> — MIT License</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="text-sm font-semibold text-white mb-2">Maps & Visualization</h3>
+                <ul className="space-y-1 text-gray-300">
+                  <li><span className="font-medium text-white">Leaflet 1.9.4</span> — BSD 2-Clause License</li>
+                  <li><span className="font-medium text-white">react-leaflet 5.0.0</span> — Hippocratic-2.1 License</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="text-sm font-semibold text-white mb-2">Utilities</h3>
+                <ul className="space-y-1 text-gray-300">
+                  <li><span className="font-medium text-white">cron-parser 5.4.0 / cronstrue 3.9.0</span> — MIT License</li>
+                  <li><span className="font-medium text-white">dommatrix 0.1.1</span> — MIT License</li>
+                </ul>
+              </section>
+
+              <section>
                 <h3 className="text-sm font-semibold text-white mb-2">Build & Tooling</h3>
                 <ul className="space-y-1 text-gray-300">
                   <li><span className="font-medium text-white">Vite 6.2.0</span> — MIT License</li>
+                  <li><span className="font-medium text-white">@vitejs/plugin-react 4.3.4</span> — MIT License</li>
                   <li><span className="font-medium text-white">TypeScript ~5.8.2</span> — Apache-2.0 License</li>
                   <li><span className="font-medium text-white">Tailwind CSS 3.4.17</span> — MIT License</li>
                   <li><span className="font-medium text-white">PostCSS 8.4.40 / Autoprefixer 10.4.20</span> — MIT License</li>
@@ -1389,6 +1417,7 @@ const App: React.FC = () => {
                 <ul className="space-y-1 text-gray-300">
                   <li><span className="font-medium text-white">Cloudflare Workers</span> — Terms of Service</li>
                   <li><span className="font-medium text-white">@cloudflare/workers-types 4.20250204.0</span> — Apache-2.0 License</li>
+                  <li><span className="font-medium text-white">@types/node 22.14.0</span> — MIT License</li>
                 </ul>
               </section>
 
