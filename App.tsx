@@ -13,7 +13,7 @@ import { MONITOR_GROUPS, getMonitorItemById } from './components/pages/monitorDa
 import { extractBaseId, viewForTabId } from './utils/navigation';
 import { ApiTaskProvider, useApiTask } from './contexts/ApiTaskContext';
 
-const APP_VERSION = '2025.12.12.1';
+const APP_VERSION = '2025.12.13.1';
 
 const TABS_STORAGE_KEY = 'app.openTabs.v1';
 const DEFAULT_TAB_IDS: readonly string[] = ['welcome', 'works', 'about'];
