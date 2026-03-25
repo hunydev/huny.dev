@@ -6,12 +6,23 @@ interface Project {
     description: string;
     tags: string[];
     link: string;
+    linkLabel?: string;
     liveUrl?: string;
+    liveLabel?: string;
     status: string;
     icon: string;
 }
 
-const ProjectCard: React.FC<Project> = ({ title, description, tags, link, liveUrl, status, icon }) => (
+const isGitHubLink = (url: string): boolean => {
+    try {
+        const { hostname } = new URL(url);
+        return hostname === 'github.com' || hostname.endsWith('.github.com');
+    } catch {
+        return false;
+    }
+};
+
+const ProjectCard: React.FC<Project> = ({ title, description, tags, link, linkLabel = 'GitHub', liveUrl, liveLabel = 'Live Demo', status, icon }) => (
     <div className="group relative bg-gradient-to-br from-[#2a2d2e] to-[#1f2223] p-6 rounded-xl border border-gray-700/50 hover:border-blue-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1">
         {/* 아이콘과 상태 배지 */}
         <div className="flex items-start justify-between mb-4">
@@ -51,10 +62,16 @@ const ProjectCard: React.FC<Project> = ({ title, description, tags, link, liveUr
                 rel="noopener noreferrer" 
                 className="flex items-center gap-2 text-gray-300 hover:text-blue-400 transition-colors text-sm font-medium group/link"
             >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                </svg>
-                <span className="group-hover/link:underline">GitHub</span>
+                {isGitHubLink(link) ? (
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                ) : (
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M14 3H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h4v-2H5V5h9v4h2V5a2 2 0 0 0-2-2zm2.293 7.293-5 5 1.414 1.414 3.293-3.293V21h2v-7.586l3.293 3.293 1.414-1.414-5-5a1 1 0 0 0-1.414 0z"/>
+                    </svg>
+                )}
+                <span className="group-hover/link:underline">{linkLabel}</span>
             </a>
             {liveUrl && (
                 <>
@@ -68,7 +85,7 @@ const ProjectCard: React.FC<Project> = ({ title, description, tags, link, liveUr
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
-                        <span className="group-hover/link:underline">Live Demo</span>
+                        <span className="group-hover/link:underline">{liveLabel}</span>
                     </a>
                 </>
             )}
@@ -78,6 +95,37 @@ const ProjectCard: React.FC<Project> = ({ title, description, tags, link, liveUr
 
 const ProjectPage: React.FC<PageProps> = () => {
     const projects: Project[] = [
+        {
+            title: "Riano",
+            description: "수학·과학 이론을 인터랙티브하게 탐구할 수 있는 학습 플랫폼입니다. 블로그 이론 글과 연동되어 개념을 읽고 바로 시뮬레이션으로 실험할 수 있습니다.",
+            tags: ["Interactive Learning", "Math", "Science", "Simulation", "Web App"],
+            link: "https://blog.riano.app",
+            linkLabel: "Blog",
+            liveUrl: "https://riano.app",
+            liveLabel: "Site",
+            status: "Production",
+            icon: "🧠"
+        },
+        {
+            title: "rc",
+            description: "간결한 구조로 빠르게 사용할 수 있도록 만든 개인 프로젝트 웹앱입니다. 실제 배포 환경(rc.huny.dev)과 GitHub 저장소를 함께 운영합니다.",
+            tags: ["TypeScript", "Web App", "Personal Project", "Frontend"],
+            link: "https://github.com/hunydev/rc",
+            liveUrl: "https://rc.huny.dev",
+            liveLabel: "Site",
+            status: "Production",
+            icon: "⚙️"
+        },
+        {
+            title: "AutoPad",
+            description: "Windows 생산성 향상을 위한 클립보드 유틸리티 프로젝트입니다. 반복 입력을 자동화하고 텍스트 작업 흐름을 빠르게 정리할 수 있도록 설계되었습니다.",
+            tags: ["Windows", "Clipboard Utility", "Automation", "Productivity"],
+            link: "https://github.com/hunydev/autopad",
+            liveUrl: "https://autopad.huny.dev",
+            liveLabel: "Site",
+            status: "Production",
+            icon: "📋"
+        },
         {
             title: "Prompt Keeper",
             description: "자주 사용하는 AI 프롬프트를 저장하고 관리하는 북마크형 웹앱. Netlify Functions와 Blobs를 활용한 서버리스 아키텍처로 구현되었습니다.",
@@ -138,7 +186,9 @@ const ProjectPage: React.FC<PageProps> = () => {
                         description={project.description}
                         tags={project.tags}
                         link={project.link}
+                        linkLabel={project.linkLabel}
                         liveUrl={project.liveUrl}
+                        liveLabel={project.liveLabel}
                         status={project.status}
                         icon={project.icon}
                     />
