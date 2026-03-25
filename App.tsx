@@ -16,7 +16,7 @@ import { ApiTaskProvider, useApiTask } from './contexts/ApiTaskContext';
 const APP_VERSION = '2026.03.25.1';
 
 const TABS_STORAGE_KEY = 'app.openTabs.v1';
-const DEFAULT_TAB_IDS: readonly string[] = ['welcome', 'project', 'works', 'about'];
+const DEFAULT_TAB_IDS: readonly (keyof typeof PAGES)[] = ['welcome', 'project', 'works', 'about'];
 
 // Hash <-> ViewId 변환 helper 함수
 const viewIdToHash = (viewId: ViewId): string => {
