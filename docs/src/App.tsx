@@ -1,6 +1,7 @@
+import type { ReactNode } from 'react';
 import { cvData } from './data';
 
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+const Section = ({ title, children }: { title: string; children: ReactNode }) => (
   <section className="section-card">
     <h2>{title}</h2>
     {children}
