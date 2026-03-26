@@ -40,6 +40,15 @@ body {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
   gap: 24px;
+  position: relative;
+}
+
+.hero-intro {
+  position: relative;
+}
+
+.print-photo-slot {
+  display: none;
 }
 
 .kicker {
@@ -272,6 +281,10 @@ ul {
     display: none;
   }
 
+  .photo-upload {
+    display: none;
+  }
+
   a {
     color: #111;
     text-decoration: none;
@@ -280,6 +293,11 @@ ul {
   .hero {
     padding: 14px;
     gap: 10px;
+    grid-template-columns: 1fr;
+  }
+
+  .hero-intro {
+    padding-right: 126px;
   }
 
   .hero h1 {
@@ -294,26 +312,18 @@ ul {
     padding: 8px;
   }
 
-  .photo-upload {
-    margin-top: 8px;
-    border: 1px solid #d1d5db;
-    background: #fff;
-    padding: 8px;
+  .print-photo-slot {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
   }
 
-  .photo-placeholder {
-    display: none;
-  }
-
-  .photo-upload.has-photo {
-    display: flex;
-    justify-content: center;
-  }
-
-  .profile-photo {
+  .print-profile-photo {
     width: 106px;
     height: 132px;
     max-width: none;
+    border-radius: 6px;
     border-color: #d1d5db;
   }
 
