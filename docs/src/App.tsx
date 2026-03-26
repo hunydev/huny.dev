@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
 import { cvData } from './data';
 
 const Section = ({
@@ -17,6 +17,46 @@ const Section = ({
 );
 
 function App() {
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (photoPreviewUrl) {
+        URL.revokeObjectURL(photoPreviewUrl);
+      }
+    };
+  }, [photoPreviewUrl]);
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    if (photoPreviewUrl) {
+      URL.revokeObjectURL(photoPreviewUrl);
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    setPhotoPreviewUrl(objectUrl);
+  };
+
+  const handlePhotoClear = () => {
+    if (photoPreviewUrl) {
+      URL.revokeObjectURL(photoPreviewUrl);
+      setPhotoPreviewUrl(null);
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handlePrint = () => window.print();
 
   return (
@@ -54,6 +94,30 @@ function App() {
           <button onClick={handlePrint} className="print-btn" type="button">
             PDF Export
           </button>
+          <input
+            ref={fileInputRef}
+            className="photo-input"
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoChange}
+          />
+          <div className={`photo-upload ${photoPreviewUrl ? 'has-photo' : ''}`}>
+            {photoPreviewUrl ? (
+              <img src={photoPreviewUrl} alt="Profile preview" className="profile-photo" />
+            ) : (
+              <p className="photo-placeholder">PDF 내보내기 전에 증명사진을 업로드하세요.</p>
+            )}
+            <div className="photo-actions">
+              <button onClick={handleUploadClick} className="upload-btn" type="button">
+                {photoPreviewUrl ? '사진 변경' : '사진 업로드'}
+              </button>
+              {photoPreviewUrl && (
+                <button onClick={handlePhotoClear} className="clear-btn" type="button">
+                  사진 제거
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </header>
 

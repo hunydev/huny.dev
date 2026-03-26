@@ -110,6 +110,58 @@ a:hover {
   cursor: pointer;
 }
 
+.photo-input {
+  display: none;
+}
+
+.photo-upload {
+  margin-top: 10px;
+  border: 1px dashed #7dd3fc4f;
+  border-radius: 10px;
+  padding: 10px;
+  background: #7dd3fc0a;
+}
+
+.photo-placeholder {
+  margin: 0 0 8px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.profile-photo {
+  width: 100%;
+  max-width: 140px;
+  height: 176px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  object-fit: cover;
+  display: block;
+}
+
+.photo-actions {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.upload-btn,
+.clear-btn {
+  border: 1px solid #7dd3fc4f;
+  border-radius: 8px;
+  background: #7dd3fc1a;
+  color: #d9f3ff;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.clear-btn {
+  border-color: #fca5a54f;
+  background: #fca5a51a;
+  color: #ffe2e2;
+}
+
 .section-card {
   margin-top: 16px;
   padding: 20px;
@@ -216,27 +268,62 @@ ul {
     display: none;
   }
 
+  .photo-actions {
+    display: none;
+  }
+
   a {
     color: #111;
     text-decoration: none;
   }
 
   .hero {
-    padding: 18px;
-    gap: 14px;
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .hero h1 {
+    font-size: 1.7rem;
+  }
+
+  .hero .summary {
+    font-size: 0.92rem;
   }
 
   .hero-meta {
-    padding: 10px;
+    padding: 8px;
+  }
+
+  .photo-upload {
+    margin-top: 8px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    padding: 8px;
+  }
+
+  .photo-placeholder {
+    display: none;
+  }
+
+  .photo-upload.has-photo {
+    display: flex;
+    justify-content: center;
+  }
+
+  .profile-photo {
+    width: 106px;
+    height: 132px;
+    max-width: none;
+    border-color: #d1d5db;
   }
 
   .section-card {
-    margin-top: 10px;
-    padding: 14px;
+    margin-top: 8px;
+    padding: 12px;
   }
 
   .section-card h2 {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
 
   .current-company-section {
@@ -247,4 +334,3 @@ ul {
     break-before: page;
   }
 }
-
