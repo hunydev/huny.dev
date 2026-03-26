@@ -40,6 +40,15 @@ body {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
   gap: 24px;
+  position: relative;
+}
+
+.hero-intro {
+  position: relative;
+}
+
+.print-photo-slot {
+  display: none;
 }
 
 .kicker {
@@ -242,6 +251,12 @@ ul {
     margin: 10mm;
   }
 
+  :root {
+    --cv-photo-w: 106px;
+    --cv-photo-h: 132px;
+    --cv-photo-gap: 20px;
+  }
+
   body {
     background: #fff;
     color: #222;
@@ -272,6 +287,10 @@ ul {
     display: none;
   }
 
+  .photo-upload {
+    display: none;
+  }
+
   a {
     color: #111;
     text-decoration: none;
@@ -280,6 +299,12 @@ ul {
   .hero {
     padding: 14px;
     gap: 10px;
+    grid-template-columns: 1fr;
+  }
+
+  .hero:has(.print-photo-slot) .hero-intro {
+    padding-right: calc(var(--cv-photo-w) + var(--cv-photo-gap));
+    min-height: var(--cv-photo-h);
   }
 
   .hero h1 {
@@ -294,26 +319,18 @@ ul {
     padding: 8px;
   }
 
-  .photo-upload {
-    margin-top: 8px;
-    border: 1px solid #d1d5db;
-    background: #fff;
-    padding: 8px;
+  .print-photo-slot {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
   }
 
-  .photo-placeholder {
-    display: none;
-  }
-
-  .photo-upload.has-photo {
-    display: flex;
-    justify-content: center;
-  }
-
-  .profile-photo {
-    width: 106px;
-    height: 132px;
+  .print-profile-photo {
+    width: var(--cv-photo-w);
+    height: var(--cv-photo-h);
     max-width: none;
+    border-radius: 6px;
     border-color: #d1d5db;
   }
 

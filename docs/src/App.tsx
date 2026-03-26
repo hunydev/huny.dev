@@ -62,13 +62,18 @@ function App() {
   return (
     <div className="page">
       <header className="hero">
-        <div>
+        <div className="hero-intro">
           <p className="kicker">Curriculum Vitae</p>
           <h1>
             {cvData.profile.name} <span>({cvData.profile.alias})</span>
           </h1>
           <p className="role">{cvData.profile.role}</p>
           <p className="summary">{cvData.profile.summary}</p>
+          {photoPreviewUrl && (
+            <div className="print-photo-slot" aria-hidden="true">
+              <img src={photoPreviewUrl} alt="" className="profile-photo print-profile-photo" />
+            </div>
+          )}
         </div>
         <div className="hero-meta">
           <p>{cvData.profile.location}</p>
@@ -101,7 +106,7 @@ function App() {
             accept="image/*"
             onChange={handlePhotoChange}
           />
-          <div className={`photo-upload ${photoPreviewUrl ? 'has-photo' : ''}`}>
+          <div className="photo-upload">
             {photoPreviewUrl ? (
               <img src={photoPreviewUrl} alt="Profile preview" className="profile-photo" />
             ) : (
