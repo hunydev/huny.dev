@@ -1,3 +1,5 @@
+const currentYear = new Date().getFullYear();
+
 export const cvData = {
   profile: {
     name: 'Hun Jang',
@@ -12,11 +14,31 @@ export const cvData = {
       { label: 'GitHub', href: 'https://github.com/hunydev' },
       { label: 'Email', href: 'mailto:contact@huny.dev' },
     ],
+    currentCompany: {
+      name: 'SELVAS AI',
+      website: 'https://selvasai.com',
+      role: 'TTS 솔루션 개발자',
+      period: `2015 - ${currentYear}`,
+      focus: [
+        'TTS 엔진 개발 및 서버 솔루션 개발',
+        'TTS 솔루션 유지보수 및 업체 기술지원',
+        'TTS 사업/서비스 운영 및 프로젝트 수행',
+      ],
+      highlights: [
+        'AICC 중심의 TTS 지원 프로젝트 다수 수행',
+        '방송, BIS/BIT, 이북 등 다양한 도메인에 TTS 공급',
+        '여러 기업과의 협업 프로젝트에서 기술 검토/연동 지원',
+      ],
+    },
   },
   competencies: [
     {
       title: 'TTS Engineering',
-      items: ['TTS 모델 추론 엔진 개발', 'TTS API/SDK 설계 및 유지보수', '고객사 연동 기술지원'],
+      items: [
+        '학습 기반 TTS 추론 엔진 개발 및 고도화',
+        'TTS API/SDK 설계 및 유지보수',
+        '고객사 연동 기술지원 및 장애 대응',
+      ],
     },
     {
       title: 'Backend & Platform',
@@ -59,8 +81,27 @@ export const cvData = {
       ],
       stacks: ['Go', 'Java', 'Python', 'Docker', 'GitHub Actions', 'Jenkins'],
     },
+    {
+      title: '고객 지원 개발',
+      bullets: [
+        'TTS 웹 데모/품질 비교 도구 개발로 고객 PoC 지원',
+        '합성음 평가 및 오디오 품질 분석 툴 개발',
+        '구매 고객 대상 이슈 대응, 점검, 기술 커뮤니케이션 수행',
+      ],
+      stacks: ['Go', 'IIS', 'Web', 'Troubleshooting', 'On-site', 'Remote'],
+    },
   ],
   projects: [
+    {
+      name: 'Riano',
+      desc: '수학·과학 개념을 인터랙티브 시뮬레이션으로 탐구하는 학습 플랫폼. 이론 콘텐츠와 실험형 UI를 결합해 학습 경험을 강화.',
+      links: ['https://riano.app', 'https://blog.riano.app'],
+    },
+    {
+      name: 'rc',
+      desc: '간결한 구조로 빠르게 사용할 수 있는 개인 웹앱. 경량한 사용자 경험과 빠른 반복 배포를 중심으로 운영.',
+      links: ['https://rc.huny.dev', 'https://github.com/hunydev/rc'],
+    },
     {
       name: 'huny.dev',
       desc: 'VSCode 테마 기반 포트폴리오/실험실 웹앱. 프로젝트, 기술 스택, 실험 기능을 통합 운영.',
@@ -76,10 +117,15 @@ export const cvData = {
       desc: 'Windows 생산성 향상을 위한 클립보드 자동화 도구.',
       links: ['https://autopad.huny.dev', 'https://github.com/hunydev/autopad'],
     },
+    {
+      name: 'JWT Encoder/Decoder',
+      desc: '실시간 JWT 인코딩/디코딩과 서명 검증을 지원하는 유틸리티 웹앱.',
+      links: ['https://jwt.huny.dev', 'https://github.com/hunydev/jwt-huny-dev'],
+    },
   ],
   skills: {
-    languages: ['Go', 'C', 'Python', 'Java', 'JavaScript', 'C#'],
-    infra: ['AWS', 'Cloudflare', 'Docker', 'GitHub Actions', 'Jenkins'],
+    languages: ['Go', 'C', 'C++', 'Python', 'Java', 'TypeScript', 'JavaScript', 'C#'],
+    infra: ['AWS', 'Cloudflare', 'Netlify', 'Docker', 'GitHub Actions', 'Jenkins'],
     tools: ['VS Code', 'Visual Studio', 'STS', 'Notion', 'JIRA', 'Confluence'],
     data: ['MySQL', 'SQLite', 'MongoDB', 'Redis', 'Cassandra'],
   },

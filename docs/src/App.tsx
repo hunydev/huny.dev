@@ -25,6 +25,18 @@ function App() {
         <div className="hero-meta">
           <p>{cvData.profile.location}</p>
           <p>{cvData.profile.domain}</p>
+          <div className="mini-card">
+            <h3>Current Position</h3>
+            <p>
+              <strong>{cvData.profile.currentCompany.role}</strong>
+            </p>
+            <p>
+              <a href={cvData.profile.currentCompany.website} target="_blank" rel="noreferrer">
+                {cvData.profile.currentCompany.name}
+              </a>
+            </p>
+            <p>{cvData.profile.currentCompany.period}</p>
+          </div>
           <div className="links">
             {cvData.profile.links.map((item) => (
               <a key={item.href} href={item.href} target="_blank" rel="noreferrer">
@@ -37,6 +49,25 @@ function App() {
           </button>
         </div>
       </header>
+
+      <Section title="Current Company & Role">
+        <article className="mini-card">
+          <h3>
+            {cvData.profile.currentCompany.name} · {cvData.profile.currentCompany.role}
+          </h3>
+          <p>{cvData.profile.currentCompany.period}</p>
+          <ul>
+            {cvData.profile.currentCompany.focus.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+          <ul>
+            {cvData.profile.currentCompany.highlights.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </article>
+      </Section>
 
       <Section title="Core Competencies">
         <div className="grid-2">
