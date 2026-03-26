@@ -106,7 +106,7 @@ function App() {
             accept="image/*"
             onChange={handlePhotoChange}
           />
-          <div className={`photo-upload ${photoPreviewUrl ? 'has-photo' : ''}`}>
+          <div className="photo-upload">
             {photoPreviewUrl ? (
               <img src={photoPreviewUrl} alt="Profile preview" className="profile-photo" />
             ) : (

@@ -251,6 +251,12 @@ ul {
     margin: 10mm;
   }
 
+  :root {
+    --cv-photo-w: 106px;
+    --cv-photo-h: 132px;
+    --cv-photo-gap: 20px;
+  }
+
   body {
     background: #fff;
     color: #222;
@@ -296,8 +302,9 @@ ul {
     grid-template-columns: 1fr;
   }
 
-  .hero-intro {
-    padding-right: 126px;
+  .hero:has(.print-photo-slot) .hero-intro {
+    padding-right: calc(var(--cv-photo-w) + var(--cv-photo-gap));
+    min-height: var(--cv-photo-h);
   }
 
   .hero h1 {
@@ -320,8 +327,8 @@ ul {
   }
 
   .print-profile-photo {
-    width: 106px;
-    height: 132px;
+    width: var(--cv-photo-w);
+    height: var(--cv-photo-h);
     max-width: none;
     border-radius: 6px;
     border-color: #d1d5db;
