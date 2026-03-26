@@ -220,4 +220,31 @@ ul {
     color: #111;
     text-decoration: none;
   }
+
+  .hero {
+    padding: 18px;
+    gap: 14px;
+  }
+
+  .hero-meta {
+    padding: 10px;
+  }
+
+  .section-card {
+    margin-top: 10px;
+    padding: 14px;
+  }
+
+  .section-card h2 {
+    margin-bottom: 10px;
+  }
+
+  .current-company-section {
+    break-inside: avoid;
+  }
+
+  .post-hero-break {
+    break-before: page;
+  }
 }
+

@@ -1,8 +1,16 @@
 import type { ReactNode } from 'react';
 import { cvData } from './data';
 
-const Section = ({ title, children }: { title: string; children: ReactNode }) => (
-  <section className="section-card">
+const Section = ({
+  title,
+  children,
+  className,
+}: {
+  title: string;
+  children: ReactNode;
+  className?: string;
+}) => (
+  <section className={`section-card ${className ?? ''}`.trim()}>
     <h2>{title}</h2>
     {children}
   </section>
@@ -24,7 +32,6 @@ function App() {
         </div>
         <div className="hero-meta">
           <p>{cvData.profile.location}</p>
-          <p>{cvData.profile.domain}</p>
           <div className="mini-card">
             <h3>Current Position</h3>
             <p>
@@ -40,7 +47,7 @@ function App() {
           <div className="links">
             {cvData.profile.links.map((item) => (
               <a key={item.href} href={item.href} target="_blank" rel="noreferrer">
-                {item.label}
+                {item.text ?? item.label}
               </a>
             ))}
           </div>
@@ -50,7 +57,7 @@ function App() {
         </div>
       </header>
 
-      <Section title="Current Company & Role">
+      <Section title="Current Company & Role" className="current-company-section">
         <article className="mini-card">
           <h3>
             {cvData.profile.currentCompany.name} · {cvData.profile.currentCompany.role}
@@ -69,7 +76,7 @@ function App() {
         </article>
       </Section>
 
-      <Section title="Core Competencies">
+      <Section title="Core Competencies" className="post-hero-break">
         <div className="grid-2">
           {cvData.competencies.map((group) => (
             <article key={group.title} className="mini-card">
@@ -141,6 +148,10 @@ function App() {
           <article>
             <h3>Data</h3>
             <p>{cvData.skills.data.join(' · ')}</p>
+          </article>
+          <article>
+            <h3>AI</h3>
+            <p>{cvData.skills.ai.join(' · ')}</p>
           </article>
         </div>
       </Section>
