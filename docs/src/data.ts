@@ -5,14 +5,14 @@ export const cvData = {
     name: 'Hun Jang',
     alias: 'HunyDev',
     role: 'AI 음성합성(TTS) 개발자 · Software Engineer',
-    location: 'Seoul, South Korea',
-    domain: 'huny.dev',
+    location: 'Sejong, South Korea',
     summary:
       'TTS 추론 엔진, API/SDK, 클라우드 서비스 개발·운영 경험을 중심으로 백엔드/플랫폼 개발을 수행합니다. 업무 자동화와 AI 기반 서비스 실험을 병행하며, 아이디어-개발-배포까지 빠르게 연결하는 실행력을 강점으로 합니다.',
     links: [
-      { label: 'Portfolio', href: 'https://huny.dev' },
-      { label: 'GitHub', href: 'https://github.com/hunydev' },
-      { label: 'Email', href: 'mailto:contact@huny.dev' },
+      { label: 'Portfolio', href: 'https://huny.dev', text: 'Portfolio: https://huny.dev' },
+      { label: 'GitHub', href: 'https://github.com/hunydev', text: 'GitHub: https://github.com/hunydev' },
+      { label: 'Blog', href: 'https://blog.huny.dev', text: 'Blog: https://blog.huny.dev' },
+      { label: 'Email', href: 'mailto:jang@huny.dev', text: 'Email: jang@huny.dev' },
     ],
     currentCompany: {
       name: 'SELVAS AI',
@@ -108,25 +108,16 @@ export const cvData = {
       links: ['https://huny.dev', 'https://github.com/hunydev/huny.dev'],
     },
     {
-      name: 'Prompt Keeper',
-      desc: 'AI 프롬프트 저장/관리용 웹앱. 서버리스 구조로 운영.',
-      links: ['https://prompts.huny.dev', 'https://github.com/hunydev/prompt-keeper'],
-    },
-    {
       name: 'AutoPad',
       desc: 'Windows 생산성 향상을 위한 클립보드 자동화 도구.',
-      links: ['https://autopad.huny.dev', 'https://github.com/hunydev/autopad'],
-    },
-    {
-      name: 'JWT Encoder/Decoder',
-      desc: '실시간 JWT 인코딩/디코딩과 서명 검증을 지원하는 유틸리티 웹앱.',
-      links: ['https://jwt.huny.dev', 'https://github.com/hunydev/jwt-huny-dev'],
+      links: ['https://autopad.huny.dev', 'https://github.com/hunydev/autopad', 'https://apps.microsoft.com/detail/9p63pjdml1x0'],
     },
   ],
   skills: {
-    languages: ['Go', 'C', 'C++', 'Python', 'Java', 'TypeScript', 'JavaScript', 'C#'],
+    languages: ['Go', 'C', 'Python', 'Java', 'JavaScript', 'C#'],
     infra: ['AWS', 'Cloudflare', 'Netlify', 'Docker', 'GitHub Actions', 'Jenkins'],
     tools: ['VS Code', 'Visual Studio', 'STS', 'Notion', 'JIRA', 'Confluence'],
     data: ['MySQL', 'SQLite', 'MongoDB', 'Redis', 'Cassandra'],
+    ai: ['GitHub Copilot', 'Claude', 'Gemini', 'Codex', 'ChatGPT'],
   },
 };
