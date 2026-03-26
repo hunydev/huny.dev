@@ -5,7 +5,7 @@
 ## 실행
 
 ```bash
-cd cv
+cd docs
 npm install
 npm run dev
 ```
@@ -29,4 +29,6 @@ npm run build
 CV_BASE_PATH=/<repo-name>/ npm run build
 ```
 
-생성된 `cv/dist` 폴더를 Pages artifact로 배포하면 됩니다.
+생성된 `docs/dist` 폴더를 Pages artifact로 배포하면 됩니다.
+
+GitHub Actions(`.github/workflows/pages.yml`)를 통해 `main` 브랜치 푸시 시 자동 배포됩니다.
